@@ -167,7 +167,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
       <p class="kicker">Exoskelett · Use Case 1</p>
       <h1>Christbaum aufladen</h1>
     </div>
-    <p class="lede">Ein aktives Exoskelett greift den geschnittenen Christbaum am Schnittende, hebt ihn bis in die Waagrechte und lädt ihn auf ein Plateau zwischen 0 und 1,75&nbsp;m Höhe. Stimmt der Ablauf so?</p>
+    <p class="lede">Ein aktives Exoskelett greift den geschnittenen Christbaum am Schnittende, richtet ihn fast senkrecht auf und trägt ihn zurückgelehnt zum Plateau. Dort kippt es ihn auf die Kante und schiebt ihn hinauf, bei 0 bis 1,75&nbsp;m Höhe.</p>
   </header>
 
   <main class="work">
@@ -201,11 +201,11 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         <h3>Ablauf</h3>
         <ol class="steps" id="steps">
           <li><button type="button" data-step="1"><span class="no">1</span><span><b>Greifen</b><span class="d">In die Hocke, Stammgreifer am astfreien Stammende schließen.</span></span></button></li>
-          <li><button type="button" data-step="2"><span class="no">2</span><span><b>Anheben bis waagrecht</b><span class="d">Schnittende hoch, die Spitze schleift. Dann waagrecht stellen, die Spitze hebt ab.</span></span></button></li>
-          <li><button type="button" data-step="3"><span class="no">3</span><span><b>Tragen</b><span class="d">Waagrecht vor dem Körper zum Plateau tragen.</span></span></button></li>
-          <li><button type="button" data-step="4"><span class="no">4</span><span><b>Hochheben</b><span class="d">Stamm knapp über die Plateaukante bringen.</span></span></button></li>
-          <li><button type="button" data-step="5"><span class="no">5</span><span><b>Aufschieben</b><span class="d">Mit der Spitze voran aufs Plateau schieben.</span></span></button></li>
-          <li><button type="button" data-step="6"><span class="no">6</span><span><b>Ablegen &amp; loslassen</b><span class="d">Absenken, Greifer öffnen, zurücktreten.</span></span></button></li>
+          <li><button type="button" data-step="2"><span class="no">2</span><span><b>Aufrichten bis fast senkrecht</b><span class="d">Hochkommen, Baum hochschwenken, zurücklehnen.</span></span></button></li>
+          <li><button type="button" data-step="3"><span class="no">3</span><span><b>Tragen</b><span class="d">Fast senkrecht zum Plateau tragen, kaum Hebel.</span></span></button></li>
+          <li><button type="button" data-step="4"><span class="no">4</span><span><b>Ankippen</b><span class="d">Nach vorne kippen, bis der Baum auf dem Plateau aufliegt.</span></span></button></li>
+          <li><button type="button" data-step="5"><span class="no">5</span><span><b>Aufschieben</b><span class="d">Schnittende anheben, Baum aufs Plateau schieben.</span></span></button></li>
+          <li><button type="button" data-step="6"><span class="no">6</span><span><b>Loslassen</b><span class="d">Greifer öffnen, zurücktreten.</span></span></button></li>
         </ol>
       </section>
 
@@ -214,7 +214,8 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         <ul class="assume">
           <li>Der Christbaum liegt nach dem Schneiden am Boden, die Spitze zeigt Richtung Plateau.</li>
           <li>Gegriffen wird nur am astfreien Stammende, mit einem Stammgreifer, der fest zum Exo gehört.</li>
-          <li>Der Baum wird frei gehalten. Nur das Exo trägt ihn, an der Spitze stützt nichts.</li>
+          <li>Getragen wird der Baum fast senkrecht (78°), damit der Hebel klein bleibt. Die Person lehnt sich dabei zurück.</li>
+          <li>Beim Ankippen und Aufschieben liegt der Baum auf dem Plateau auf und das Plateau trägt mit.</li>
           <li>Das Plateau ist eine Ladefläche, zum Beispiel Anhänger oder LKW, zwischen 0 und 1,75&nbsp;m hoch.</li>
           <li>Das Gewicht ist aus der Länge geschätzt (Nordmanntanne, 2&nbsp;m ≈ 15&nbsp;kg).</li>
           <li>Das Exo ist aktiv: Motoren an Hüfte, Knie, Schulter und Ellbogen, Rahmen aus Metall, Akku und Steuerung am Rücken.</li>
@@ -251,6 +252,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <span>Hüfte / Rücken</span><span class="v" id="nowHip">–</span><span class="v max" id="maxHip">–</span><span class="bar"><i id="barHip"></i></span>
           <span>Knie</span><span class="v" id="nowKnee">–</span><span class="v max" id="maxKnee">–</span><span class="bar"><i id="barKnee"></i></span>
         </div>
+        <p class="note" id="momentNote"></p>
         <p class="note">Grobe statische Schätzung: nur die Last, die der Baum zusätzlich erzeugt, ohne Körpergewicht und ohne Schwung. Die orangen Motoren im 3D-Modell leuchten mit der Last.</p>
       </section>
     </aside>
@@ -317,28 +319,33 @@ function derive(st) {
   const thLie = -Math.asin(clamp((rRest - yTip) / (L - bare), 0, 0.9));
   const yCutLie = rRest - bare * Math.sin(thLie);
   const G0 = { x: xg * Math.cos(thLie), y: yCutLie + xg * Math.sin(thLie) };
-  const yCarry = Math.max(0.92 * s, rRest + 0.12);
-  const ySlide = Math.max(yCarry, hp + rRest + 0.06);
-  const xe = L * Math.cos(thLie) + 1.5;                    // Vorderkante des Plateaus
+  // Tragen fast senkrecht: Greifer auf Hüfthöhe vor dem Körper, die Person lehnt sich gegen das Baumgewicht zurück
+  const thUp = deg(78), yUp = 0.95 * s, offUp = 0.36 * s;
+  const leanUp = Math.min(deg(10), Math.atan2(mass * (offUp + (xcg - xg) * Math.cos(thUp)), 0.6 * 75 * s * s * 0.3 * H));
+  const xe = L * Math.cos(thLie) + 1.0;                    // Vorderkante des Plateaus
   const Lp = Math.max(3, L + 0.7), Wp = 2;
-  const off = (y) => s * lerp(0.445, 0.26, smooth(1.1 * s, 2.0 * s, y));
-  const xSt0 = G0.x - off(yCarry);
-  const xSt1 = xe - 0.25 - (L - xg) - off(yCarry);
-  const Gxf = xe - 0.06 + xg;
-  const xSt2 = Math.min(Gxf - off(ySlide), xe - 0.235 * s);
+  const xSt0 = G0.x - offUp;
+  const Gt = { x: xe - 0.5 * s, y: yUp };                  // Greifer beim Ankippen
+  const xSt1 = Gt.x - offUp;
+  // Auflagepunkt auf der Kante (Stamm plus zusammengedrückte Äste)
+  const E = { x: xe, y: hp + rt0 + 0.5 * rRest };
+  // Ankippen, bis der Stamm auf der Kante liegt (hohes Plateau) oder die Spitze aufliegt (niedriges Plateau)
+  const thTilt = Math.max(Math.atan2(E.y - Gt.y, E.x - Gt.x), Math.asin(clamp((hp + yTip - Gt.y) / (L - xg), -1, 1)));
+  const Gxf = xe - 0.06 + xg, yRestG = hp + G0.y;
+  const xSt2 = Math.min(Gxf - 0.3 * s, xe - 0.235 * s);
   const xSt3 = xSt2 - 0.6 * s;
   return { H, s, B, yStand, yMin, L, hp, net, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
-    yTip, rRest, thLie, yCutLie, G0, yCarry, ySlide, xe, Lp, Wp, off, xSt0, xSt1, Gxf, xSt2, xSt3, yRestG: hp + G0.y };
+    yTip, rRest, thLie, yCutLie, G0, thUp, yUp, offUp, leanUp, xe, Lp, Wp, xSt0, Gt, xSt1, E, thTilt, Gxf, yRestG, xSt2, xSt3 };
 }
 
 const STEPS = [
-  { n: 0, ids: ['start'] }, { n: 1, ids: ['grip'] }, { n: 2, ids: ['lift'] }, { n: 3, ids: ['carry'] },
-  { n: 4, ids: ['raise'] }, { n: 5, ids: ['push'] }, { n: 6, ids: ['place', 'release'] }, { n: 7, ids: ['hold'] },
+  { n: 0, ids: ['start'] }, { n: 1, ids: ['grip'] }, { n: 2, ids: ['raise'] }, { n: 3, ids: ['carry'] },
+  { n: 4, ids: ['tilt'] }, { n: 5, ids: ['push'] }, { n: 6, ids: ['release'] }, { n: 7, ids: ['hold'] },
 ];
 function buildTimeline(P) {
-  const d = [['start', 1.0], ['grip', 2.4], ['lift', 3.4], ['carry', 1.0 + (P.xSt1 - P.xSt0) / 0.5],
-    ['raise', 1.0 + Math.abs(P.ySlide - P.yCarry) / 0.45], ['push', 1.2 + (P.xSt2 - P.xSt1) / 0.55],
-    ['place', 1.3 + Math.abs(P.ySlide - P.yRestG) / 0.8], ['release', 3.0], ['hold', 1.6]];
+  const d = [['start', 1.0], ['grip', 2.4], ['raise', 2.8], ['carry', 1.0 + (P.xSt1 - P.xSt0) / 0.55],
+    ['tilt', 1.8], ['push', 1.6 + (P.xSt2 - P.xSt1) / 0.4 + Math.abs(P.yRestG - P.yUp) / 0.6],
+    ['release', 3.0], ['hold', 1.6]];
   let t = 0;
   const ph = d.map(([id, dur]) => { const p = { id, t0: t, t1: t + dur }; t += dur; return p; });
   const byId = Object.fromEntries(ph.map((p) => [p.id, p]));
@@ -361,41 +368,37 @@ function choreo(P, TL, t) {
   const ph = TL.ph.find((p) => t < p.t1) || TL.ph[TL.ph.length - 1];
   const u = clamp((t - ph.t0) / (ph.t1 - ph.t0), 0, 1);
   const s = P.s, fz = 0.12 * s;
-  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, level: 1, thPlace: 0, G: { x: P.G0.x, y: P.G0.y } };
+  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, lean: 0, th: P.thLie, G: { x: P.G0.x, y: P.G0.y } };
   let x = P.xSt0, feet = null;
   const walk = (xa, xb, k, step) => { const g = gait(xa, xb, k, step); x = g.x; feet = g.feet; };
   switch (ph.id) {
     case 'grip':
       o.gb = ease(u / 0.8); o.jaw = smooth(0.72, 1, u);
       break;
-    case 'lift':
+    case 'raise':
+      // aus der Hocke hochkommen und den Baum hochschwenken: zügig durch die flache Lage, dann sanft bis fast senkrecht
       o.gb = 1; o.jaw = 1; o.carried = true;
-      o.G = { x: P.G0.x, y: lerp(P.G0.y, P.yCarry, ease(u / 0.6)) };
-      o.level = smooth(0.5, 1, u);
+      o.G = { x: P.G0.x, y: lerp(P.G0.y, P.yUp, ease(u)) };
+      o.th = lerp(P.thLie, P.thUp, smooth(0, 0.15, u) * (1 - Math.pow(1 - u, 2.4)));
+      o.lean = -P.leanUp * smooth(0.25, 1, u);
       break;
     case 'carry':
-      o.gb = 1; o.jaw = 1; o.carried = true;
-      walk(P.xSt0, P.xSt1, ease(u), 0.62 * s);
-      o.G = { x: x + P.off(P.yCarry), y: P.yCarry };
+      o.gb = 1; o.jaw = 1; o.carried = true; o.th = P.thUp; o.lean = -P.leanUp;
+      walk(P.xSt0, P.xSt1, ease(u), 0.55 * s);
+      o.G = { x: x + P.offUp, y: P.yUp };
       break;
-    case 'raise': {
+    case 'tilt':
       o.gb = 1; o.jaw = 1; o.carried = true; x = P.xSt1;
-      const y = lerp(P.yCarry, P.ySlide, ease(u));
-      o.G = { x: x + P.off(y), y };
+      o.G = { ...P.Gt };
+      o.th = lerp(P.thUp, P.thTilt, ease(u));
+      o.lean = -P.leanUp * (1 - ease(u));
       break;
-    }
     case 'push': {
+      // Schnittende anheben (Baum liegt auf der Kante), dann nach vorne schieben
       o.gb = 1; o.jaw = 1; o.carried = true;
-      const k = ease(u);
-      walk(P.xSt1, P.xSt2, k, 0.46 * s);
-      o.G = { x: x + lerp(P.off(P.ySlide), P.Gxf - P.xSt2, k), y: P.ySlide };
-      break;
-    }
-    case 'place': {
-      o.gb = 1; o.jaw = 1; o.carried = true; x = P.xSt2;
-      const k = ease(u);
-      o.G = { x: P.Gxf, y: lerp(P.ySlide, P.yRestG, k) };
-      o.thPlace = P.thLie * k;
+      const k = ease(smooth(0.2, 1, u));
+      walk(P.xSt1, P.xSt2, k, 0.45 * s);
+      o.G = { x: lerp(P.Gt.x, P.Gxf, k), y: lerp(P.Gt.y, P.yRestG, ease(smooth(0, 0.65, u))) };
       break;
     }
     case 'release':
@@ -441,7 +444,7 @@ function solve(P, ch) {
     const dx = G.x - (xp + T * Math.sin(a));
     return G.y + Math.sqrt(Math.max(0, eR * eR - dx * dx - dz * dz)) - T * Math.cos(a);
   };
-  let aFull = aGrip, yP = P.yStand, xP = ch.xSt;
+  let aFull = aGrip + ch.lean, yP = P.yStand, xP = ch.xSt;      // lean < 0: gegen das Baumgewicht zurücklehnen
   for (let i = 0; i < 3; i++) {
     while (yLow(aFull, xP) < P.yMin && aFull < deg(66)) aFull += deg(1);   // tiefe Hocke reicht nicht: weiter vorbeugen
     const want = clamp(Math.min(P.yStand, yLow(aFull, xP)), P.yMin, P.yStand);
@@ -492,49 +495,72 @@ function solve(P, ch) {
 
 // Auflagehöhe unter dem Baum: Boden oder Plateau (an der Kante weich, dort drücken sich die Äste zusammen)
 function floorAt(P, x) { return x > P.xe + P.Lp + 0.3 ? 0 : P.hp * smooth(P.xe - 0.3, P.xe + 0.05, x); }
-// Neigung, solange die Spitze am Boden schleift; steiler als 35° hält der Greifer den Baum nicht hängen
-const MAX_TILT = deg(35);
-const groundPitch = (P, gy) => Math.asin(clamp((P.yTip - gy) / (P.L - P.xg), -1, 1));
+// Neigung, wenn der Baum auf der Plateaukante liegt bzw. mit der Spitze auf Plateau oder Boden aufliegt
+function restPitch(P, g) {
+  const tipRest = Math.asin(clamp((P.hp + P.yTip - g.y) / (P.L - P.xg), -1, 1));
+  const edge = g.y < P.E.y || g.x < P.E.x - 0.02 ? Math.atan2(P.E.y - g.y, Math.max(0.05, P.E.x - g.x)) : -Math.PI;
+  return { th: Math.max(edge, tipRest), onEdge: edge >= tipRest };
+}
 
 // Lage des Baums: gx/gy = Greifpunkt, th = Neigung (negativ = Spitze tiefer)
 function treePose(P, ch, pose) {
   if (ch.id === 'start' || ch.id === 'grip') return { gx: P.G0.x, gy: P.G0.y, th: P.thLie };
-  if (ch.id === 'release' || ch.id === 'hold') return P.final.tree;
+  if (ch.id === 'hold') return P.final.tree;
+  if (ch.id === 'release') {                                   // losgelassen: Baum legt sich ganz aufs Plateau
+    const a = P.final.pushEnd, b = P.final.tree, k = smooth(0.08, 0.4, ch.u);
+    return { gx: lerp(a.gx, b.gx, k), gy: lerp(a.gy, b.gy, k), th: lerp(a.th, b.th, k) };
+  }
   const g = pose.Gact;
-  let th = 0;
-  if (ch.id === 'lift') th = Math.max(groundPitch(P, g.y), -MAX_TILT) * (1 - ch.level);
-  else if (ch.id === 'place') th = Math.max(ch.thPlace, Math.asin(clamp((P.hp + P.yTip - g.y) / (P.L - P.xg), -1, 1)));
+  const th = ch.id === 'push' ? restPitch(P, g).th
+    : Math.max(ch.th, Math.asin(clamp((P.yTip - g.y) / (P.L - P.xg), -1, 1)));   // Spitze nie unter den Boden
   return { gx: g.x, gy: g.y, th };
 }
 
-// Zusatzlast durch den Baum (statisch). Solange die Spitze schleift, trägt der Boden mit und der Greifer kein Moment.
+// Zusatzlast durch den Baum (statisch). Kippmoment = Gewicht × waagrechter Abstand des Schwerpunkts vom Greifer:
+// groß, solange der Baum flach in der Luft ist, klein, wenn er fast senkrecht steht.
+// Liegt er auf Kante oder Plateau auf, trägt der Greifer nur noch den Rest und kein Moment.
 function loads(P, ch, pose, tr) {
   if (!ch.carried) return { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0 };
-  const W = P.mass * GRAV, tip = ch.id === 'lift' && ch.level < 0.002 && groundPitch(P, pose.Gact.y) > -MAX_TILT;
-  const F = tip ? W * (P.L - P.xcg) / (P.L - P.xg) : W;
-  const M = tip ? 0 : W * (P.xcg - P.xg) * Math.cos(tr.th);
-  const gx = pose.Gact.x, m = (jx) => Math.abs(F * (gx - jx) + M);
+  const W = P.mass * GRAV, g = pose.Gact;
+  let F = W, M = W * (P.xcg - P.xg) * Math.cos(tr.th);
+  if (ch.id === 'push') {
+    // Auflage dort, wo Stamm bzw. Äste die Plateaukante kreuzen; liegt der Schwerpunkt dahinter, trägt das Plateau alles
+    const c = Math.cos(tr.th), cutX = g.x - c * P.xg;
+    const xs = clamp((P.E.x - cutX) / Math.max(0.2, c), P.xg + 0.05, 0.85 * P.L);
+    F = W * clamp((xs - P.xcg) / (xs - P.xg), 0, 1) * (1 - smooth(0.85, 1, ch.u));
+    M = 0;
+  }
+  const gx = g.x, m = (jx) => Math.abs(F * (gx - jx) + M);
   return { F, M, sh: m(pose.S.x), hip: m(pose.P.x),
     knee: m((pose.knees[0].x + pose.knees[1].x) / 2), elb: m((pose.elbows[0].x + pose.elbows[1].x) / 2) };
 }
 
 function finalize(P, TL) {
-  const ch = choreo(P, TL, TL.byId.place.t1 - 1e-6);
+  const ch = choreo(P, TL, TL.byId.push.t1 - 1e-6);
   const pose = solve(P, ch);
   const tr = treePose(P, ch, pose);
-  P.final = { G: { x: pose.Gact.x, y: pose.Gact.y }, tree: tr };
+  // Liegt der Schwerpunkt hinter der Kante, legt sich der Baum nach dem Loslassen aufs Plateau (Schnittende darf überstehen)
+  const c = Math.cos(tr.th), loaded = tr.gx - c * P.xg + c * P.xcg > P.xe + 0.05;
+  P.final = { G: { x: pose.Gact.x, y: pose.Gact.y }, pushEnd: tr, loaded,
+    tree: loaded ? { gx: tr.gx, gy: P.yRestG, th: P.thLie } : tr };
 }
 
 function analyse(P, TL) {
-  const pk = { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, over: false };
+  const pk = { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, gapPush: 0, overLoad: false, overLight: false, Mcarry: 0, loaded: P.final.loaded };
   const N = 360;
   for (let i = 0; i <= N; i++) {
     const ch = choreo(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loads(P, ch, pose, treePose(P, ch, pose));
     for (const k of ['F', 'M', 'sh', 'hip', 'knee', 'elb']) pk[k] = Math.max(pk[k], ld[k]);
     if (ch.carried) {
       pk.gy = Math.max(pk.gy, pose.Gact.y);
-      if (ch.gb > 0.99) pk.gap = Math.max(pk.gap, pose.gripGap);
-      if (pose.Gact.y > pose.S.y + 0.12 * P.s) pk.over = true;
+      if (ch.gb > 0.99) {
+        if (ch.id === 'push') pk.gapPush = Math.max(pk.gapPush, pose.gripGap);
+        else pk.gap = Math.max(pk.gap, pose.gripGap);
+      }
+      if (pose.Gact.y > pose.S.y + 0.12 * P.s) {
+        if (ld.F > 0.25 * P.mass * GRAV) pk.overLoad = true; else pk.overLight = true;
+      }
+      if (ch.id === 'carry') pk.Mcarry = Math.max(pk.Mcarry, ld.M);
     }
   }
   return pk;
@@ -710,10 +736,11 @@ function buildTree(P) {
       geo.translate(x0 + h / 2, 0, 0);
       return shadowed(new THREE.Mesh(geo, mat));
     };
-    const low = new THREE.Group();
+    const low = new THREE.Group(), up = new THREE.Group();
     low.add(half(0));
-    g.add(low, half(Math.PI));
-    tiers.push({ x: x0 + h * 0.3, r, low });
+    up.add(half(Math.PI));
+    g.add(low, up);
+    tiers.push({ x: x0 + h * 0.3, r, low, up });
   }
   if (P.net) {
     const pts = [new THREE.Vector2(P.rt0 + 0.012, Math.max(0.02, P.bare - 0.1))];
@@ -726,12 +753,12 @@ function buildTree(P) {
   const cgDot = new THREE.Mesh(new THREE.SphereGeometry(0.035, 16, 12), MAT.cgDot);
   cgDot.position.set(P.xcg, 0, 0);
   cgDot.renderOrder = 10;
-  const cgLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(P.xcg, 0, 0), new THREE.Vector3(P.xcg, P.R + 0.1, 0)]), MAT.inkTop);
+  const cgLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(P.xcg, 0, 0), new THREE.Vector3(P.xcg, 0, P.R + 0.12)]), MAT.inkTop);
   cgLine.renderOrder = 10;
   g.add(cgDot, cgLine);
   const lblCut = label('Schnittende'); lblCut.position.set(0, P.rt0 + 0.14, 0);
   const lblTip = label('Spitze'); lblTip.position.set(P.L + 0.04, 0.12, 0);
-  const lblCg = label('Schwerpunkt'); lblCg.position.set(P.xcg, P.R + 0.12, 0);
+  const lblCg = label('Schwerpunkt'); lblCg.position.set(P.xcg, 0, P.R + 0.14);
   g.add(lblCut, lblTip, lblCg);
   return { group: g, tiers, lblCut, lblTip, lblCg, cgDot, cgLine };
 }
@@ -933,14 +960,22 @@ function posePerson(pose, ch, tr, ld) {
   }
 }
 
-function poseTree(tr) {
+function poseTree(tr, pose) {
   const c = Math.cos(tr.th), sn = Math.sin(tr.th);
   const ox = tr.gx - c * P.xg, oy = tr.gy - sn * P.xg;
   tree.group.position.set(ox, oy, 0);
   tree.group.rotation.set(0, 0, tr.th);
+  // steht der Baum steil vor der Person, drücken sich die Äste an der Körperseite zusammen
+  const front = pose.P.x + 0.13 * P.s, yLo = 0.42 * P.H, yHi = 1.05 * P.H + pose.heel, wBody = smooth(0.35, 0.85, sn);
   for (const tier of tree.tiers) {
     const wx = ox + c * tier.x, wy = oy + sn * tier.x;
     tier.low.scale.y = clamp((wy - floorAt(P, wx)) / tier.r, P.cLow, 1);
+    let up = 1;
+    if (wBody > 0) {
+      const t = (wx - front) / sn, yh = wy + t * c;
+      if (t < tier.r && yh > yLo && yh < yHi) up = lerp(1, clamp(t / tier.r, 0.25, 1), wBody);
+    }
+    tier.up.scale.y = up;
   }
 }
 
@@ -976,8 +1011,9 @@ function fitDistance(dir, tgt, box) {
   return d * 1.03;
 }
 function viewPose(kind) {
-  const box = { x0: P.xSt0 - 0.5, x1: P.xe + Math.max(P.L + 0.1, P.Lp * 0.7), y0: 0, y1: 2.3, z0: -0.9, z1: 1.3 };
-  const tgt = new THREE.Vector3((box.x0 + box.x1) / 2, 0.95, 0.1);
+  const top = Math.max(2.3, P.yUp + (P.L - P.xg) * Math.sin(P.thUp) + 0.15);
+  const box = { x0: P.xSt0 - 0.5, x1: P.xe + Math.max(P.L + 0.1, P.Lp * 0.7), y0: 0, y1: top, z0: -0.9, z1: 1.3 };
+  const tgt = new THREE.Vector3((box.x0 + box.x1) / 2, 0.42 * top, 0.1);
   if (kind === 'follow') {
     const k = camera.aspect < 1 ? 1.45 : 1;
     return { pos: new THREE.Vector3(curPelvisX - 3.1 * k, 2.1 * k, 3.3 * k), tgt: new THREE.Vector3(curPelvisX + 1.3, 1.0, 0) };
@@ -1003,7 +1039,7 @@ const $ = (id) => document.getElementById(id);
 const ui = {
   play: $('play'), scrub: $('scrub'), segs: $('segs'), capStep: $('capStep'), capTitle: $('capTitle'), capText: $('capText'),
   hp: $('hp'), len: $('len'), height: $('height'), net: $('net'), labels: $('labels'),
-  hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), reach: $('reach'), reachText: $('reachText'),
+  hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), reach: $('reach'), reachText: $('reachText'), momentNote: $('momentNote'),
   steps: [...document.querySelectorAll('#steps button')],
 };
 const ROWS = [['F', 'F', 'N'], ['M', 'M', 'Nm'], ['sh', 'Sh', 'Nm'], ['hip', 'Hip', 'Nm'], ['knee', 'Knee', 'Nm']]
@@ -1013,20 +1049,21 @@ let segEls = [];
 function captionFor(id) {
   const hp = `${fmt(P.hp)}${NB}m`;
   switch (id) {
-    case 'start': return ['Ausgangslage', 'Ausgangslage', `Der geschnittene Christbaum liegt am Boden, die Spitze zeigt zum Plateau (${hp} hoch).`];
+    case 'start': return ['Ausgangslage', 'Ausgangslage', `Der geschnittene Christbaum liegt am Boden, das Plateau ist ${hp} hoch.`];
     case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen und den Stammgreifer am astfreien Stammende schließen.'];
-    case 'lift': return ['Schritt 2 von 6', 'Anheben bis waagrecht', 'Das Schnittende geht hoch, die Spitze schleift noch am Boden. Dann stellt das Exo den Baum waagrecht und die Spitze hebt ab.'];
-    case 'carry': return ['Schritt 3 von 6', 'Tragen', 'Den Baum waagrecht vor dem Körper zum Plateau tragen.'];
-    case 'raise': return ['Schritt 4 von 6', 'Hochheben', P.ySlide > P.yCarry + 0.01
-      ? `Auf Ladehöhe bringen: Stamm auf ${fmt(P.ySlide)}${NB}m, damit der Baum über die Plateaukante (${hp}) passt.`
-      : `Die Tragehöhe reicht schon, der Baum passt über die Plateaukante (${hp}).`];
-    case 'push': return ['Schritt 5 von 6', 'Aufschieben', 'Mit der Spitze voran aufs Plateau schieben, bis der Baum ganz oben liegt.'];
-    case 'place': return ['Schritt 6 von 6', 'Ablegen', 'Den Baum aufs Plateau absenken.'];
+    case 'raise': return ['Schritt 2 von 6', 'Aufrichten bis fast senkrecht', 'Aus der Hocke hochkommen, den Baum hochschwenken und sich zurücklehnen. Nur am Anfang, solange der Baum noch flach ist, wirkt kurz der volle Hebel.'];
+    case 'carry': return ['Schritt 3 von 6', 'Tragen', 'Fast senkrecht und leicht zurückgelehnt zum Plateau gehen. Der Hebel am Greifer ist jetzt klein.'];
+    case 'tilt': return ['Schritt 4 von 6', 'Ankippen', restPitch(P, P.Gt).onEdge
+      ? `Den Baum nach vorne kippen, bis er auf der Plateaukante (${hp}) aufliegt. Ab jetzt trägt das Plateau mit.`
+      : `Den Baum nach vorne kippen, bis die Spitze ${P.hp < 0.03 ? 'auf dem Boden' : 'auf dem Plateau'} aufliegt.`];
+    case 'push': return ['Schritt 5 von 6', 'Aufschieben', restPitch(P, P.Gt).onEdge
+      ? 'Das Schnittende anheben und den Baum über die Kante schieben. Das Plateau trägt dabei den größten Teil.'
+      : 'Das Schnittende nachführen und den Baum ganz aufs Plateau schieben.'];
     case 'release': return ['Schritt 6 von 6', 'Loslassen', 'Greifer öffnen und zurücktreten. Bereit für den nächsten Baum.'];
     default: return ['Fertig', 'Baum geladen', `Der Christbaum liegt auf dem Plateau (${hp}).`];
   }
 }
-function stepOf(id) { return { grip: 1, lift: 2, carry: 3, raise: 4, push: 5, place: 6, release: 6 }[id] || 0; }
+function stepOf(id) { return { grip: 1, raise: 2, carry: 3, tilt: 4, push: 5, release: 6 }[id] || 0; }
 
 function buildSegs() {
   ui.segs.textContent = '';
@@ -1071,11 +1108,15 @@ function updateStatic() {
   for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k])}${NB}${r.unit}`;
   const gy = `${fmt(PK.gy)}${NB}m`;
   let level = 'ok', icon = '✓', text = `Stamm höchstens auf ${gy}, unter Kopfhöhe`;
-  if (PK.gap > 0.02) { level = 'bad'; icon = '✕'; text = `Zu hoch für die Arme: Stamm kommt nur auf ${gy}, es fehlen ${Math.round(PK.gap * 100)}${NB}cm`; }
-  else if (PK.over) { level = 'warn'; icon = '▲'; text = `Arbeit über Kopf: Stamm bis ${gy}`; }
+  if (!PK.loaded) { level = 'bad'; icon = '✕'; text = `Zu hoch für die Arme: der Baum kommt nicht über die Kante, es fehlen ${Math.round(PK.gapPush * 100)}${NB}cm`; }
+  else if (PK.gap > 0.02) { level = 'bad'; icon = '✕'; text = `Zu hoch für die Arme: es fehlen ${Math.round(PK.gap * 100)}${NB}cm`; }
+  else if (PK.gapPush > 0.02) { level = 'warn'; icon = '▲'; text = `Das Schnittende kommt nur auf ${gy} und steht über die Kante, der Baum liegt aber sicher oben`; }
+  else if (PK.overLoad) { level = 'warn'; icon = '▲'; text = `Arbeit über Kopf mit Last: Stamm bis ${gy}`; }
+  else if (PK.overLight) { level = 'warn'; icon = '▲'; text = `Nur beim Aufschieben kurz über Kopf (bis ${gy}), das Plateau trägt dann fast alles`; }
   ui.reach.dataset.level = level;
   ui.reach.querySelector('.ic').textContent = icon;
   ui.reachText.textContent = text;
+  ui.momentNote.textContent = `Das Kippmoment am Greifer ist nur kurz beim Aufrichten hoch (${Math.round(PK.M)}${NB}Nm, solange der Baum noch flach ist). Beim Tragen fast senkrecht sind es ${Math.round(PK.Mcarry)}${NB}Nm.`;
 }
 
 function rebuild(parts) {
@@ -1097,7 +1138,7 @@ let lastId = null, frameNo = 0;
 function update() {
   const ch = choreo(P, TL, state.t), pose = solve(P, ch), tr = treePose(P, ch, pose), ld = loads(P, ch, pose, tr);
   posePerson(pose, ch, tr, ld);
-  poseTree(tr);
+  poseTree(tr, pose);
   poseLabels(ch, pose);
   curPelvisX = pose.P.x;
   if (ch.id !== lastId) { lastId = ch.id; updateCaption(ch); }
@@ -1181,7 +1222,7 @@ function boot(data) {
   ui.net.checked = state.netted; ui.labels.checked = state.labels;
   applyTheme();
   rebuild({ tree: true, platform: true, person: true });
-  if (reduced && state.t === 0) state.t = (TL.byId.push.t0 + TL.byId.push.t1) / 2;
+  if (reduced && state.t === 0) state.t = (TL.byId.carry.t0 + TL.byId.carry.t1) / 2;
   setPlaying(state.playing && !reduced);
   resize();
   update();
