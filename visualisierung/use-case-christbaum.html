@@ -1,0 +1,1199 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>Christbaum-Exo Use Case</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  /* Layout: Werkbank auf einem Bildschirm – links die 3D-Bühne mit Schritt-Overlay und Zeitleiste,
+     rechts das Datenblatt (Ablauf, Einstellungen, Last, Annahmen); am Handy untereinander. */
+  --bg:#EAF0EC;
+  --surface:#F7FAF8;
+  --surface-2:#DEE6E1;
+  --fg:#15211C;
+  --muted:#55665E;
+  --line:#C9D4CE;
+  --accent:#C24A0C;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#F4D8C7;
+  --ok:#22704A;
+  --warn:#8F5D00;
+  --bad:#B42318;
+  --scene-sky:#E2EAE5;
+  --scene-ground:#CBD6CF;
+  --scene-grid:#A9B8AF;
+  --scene-ink:#15211C;
+  --font-display:"Barlow Semi Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1411; --surface:#131C18; --surface-2:#1D2924; --fg:#E3EBE6; --muted:#97A89F; --line:#2A3832;
+    --accent:#FF7D3B; --accent-ink:#1C0E05; --accent-soft:#45291A;
+    --ok:#5CC08A; --warn:#E6AA40; --bad:#FF6B5B;
+    --scene-sky:#0F1814; --scene-ground:#1A2520; --scene-grid:#2E3F37; --scene-ink:#E3EBE6;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1411; --surface:#131C18; --surface-2:#1D2924; --fg:#E3EBE6; --muted:#97A89F; --line:#2A3832;
+  --accent:#FF7D3B; --accent-ink:#1C0E05; --accent-soft:#45291A;
+  --ok:#5CC08A; --warn:#E6AA40; --bad:#FF6B5B;
+  --scene-sky:#0F1814; --scene-ground:#1A2520; --scene-grid:#2E3F37; --scene-ink:#E3EBE6;
+  color-scheme:dark;
+}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:400 15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+.app{box-sizing:border-box;min-height:100%;display:flex;flex-direction:column;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 16px}
+
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 32px}
+.kicker{margin:0;font:500 11px/1.3 var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+h1{margin:2px 0 0;font:700 32px/1.02 var(--font-display);letter-spacing:.005em;text-wrap:balance}
+.lede{margin:0;max-width:64ch;font-size:14px;line-height:1.5;color:var(--muted);text-wrap:pretty}
+
+.work{display:flex;flex-direction:column;gap:14px;min-width:0}
+.stagebox{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0}
+.stage{position:relative;height:min(66vh,580px);min-height:360px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--scene-sky)}
+.viewport{position:absolute;inset:0}
+.viewport canvas{display:block;outline:none}
+.labels{position:absolute;left:0;top:0;pointer-events:none}
+
+.overlay{background:color-mix(in srgb,var(--surface) 90%,transparent);border:1px solid var(--line);border-radius:8px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.caption{position:absolute;left:12px;top:12px;max-width:min(410px,calc(100% - 230px));padding:10px 13px}
+.cap-step{margin:0;font:500 11px/1.3 var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.cap-title{margin:2px 0 3px;font:700 21px/1.12 var(--font-display);text-wrap:balance}
+.cap-text{margin:0;font-size:13px;line-height:1.45}
+
+.views{position:absolute;top:12px;right:12px;display:flex;gap:2px;padding:3px}
+.views button{border:0;background:transparent;color:var(--muted);font:500 13px/1 var(--font-body);padding:8px 10px;border-radius:6px;cursor:pointer}
+.views button:hover{color:var(--fg)}
+.views button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+
+.transport{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:10px;padding:7px 10px 7px 7px}
+.play{flex:none;width:38px;height:38px;border:0;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer}
+.play .i-play{display:none}
+.play.paused .i-play{display:inline}
+.play.paused .i-pause{display:none}
+.track{position:relative;flex:1;min-width:0;height:30px;border-radius:5px}
+.track:focus-within{outline:2px solid var(--accent);outline-offset:3px}
+.segs{position:absolute;inset:5px 0;display:flex;gap:3px}
+.seg{position:relative;flex:1 1 0;min-width:0;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.seg i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent-soft)}
+.seg.on i{background:var(--accent)}
+.seg b{position:relative;display:block;text-align:center;font:500 11px/20px var(--font-mono);color:var(--muted)}
+.seg.on b{color:var(--accent-ink)}
+#scrub{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+
+.views button:focus-visible,.play:focus-visible,.steps button:focus-visible,.panel input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
+.block{padding:14px 16px 16px}
+.block + .block{border-top:1px solid var(--line)}
+h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.steps{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.steps button{box-sizing:border-box;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start;width:100%;padding:7px 8px;margin:0;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.steps button:hover{background:var(--surface-2)}
+.steps .no{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;box-sizing:border-box;border:1.5px solid var(--line);font:500 12px/1 var(--font-mono);color:var(--muted)}
+.steps b{display:block;font:600 17px/1.2 var(--font-display)}
+.steps .d{display:block;font-size:13px;line-height:1.4;color:var(--muted)}
+.steps button[aria-current="step"]{background:var(--surface-2)}
+.steps button[aria-current="step"] .no{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.ctl{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:2px 10px;margin-top:12px}
+.ctl label{font-size:14px;font-weight:500}
+.ctl output{font:500 13px/1.2 var(--font-mono);font-variant-numeric:tabular-nums}
+.ctl input[type=range]{grid-column:1/-1;width:100%;margin:6px 0 0;accent-color:var(--accent)}
+.ctl .scale{grid-column:1/-1;display:flex;justify-content:space-between;font:500 11px/1.2 var(--font-mono);color:var(--muted)}
+.switch{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;cursor:pointer}
+.switch input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
+
+.status{display:inline-flex;align-items:center;gap:7px;margin:10px 0 2px;padding:5px 11px;border-radius:999px;background:var(--surface-2);font-size:13px;font-weight:500;line-height:1.3}
+.status[data-level="ok"]{color:var(--ok)}
+.status[data-level="warn"]{color:var(--warn)}
+.status[data-level="bad"]{color:var(--bad)}
+.status .ic{font-size:12px}
+.loads{display:grid;grid-template-columns:minmax(0,1fr) auto auto;column-gap:16px;margin-top:10px;font-size:14px}
+.loads .h{font:500 11px/1.4 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right}
+.loads .h:first-child{text-align:left}
+.loads .v{font:500 13px/1.6 var(--font-mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.loads .v.max{color:var(--muted)}
+.loads .bar{grid-column:1/-1;height:4px;margin:2px 0 9px;border-radius:2px;background:var(--accent-soft);overflow:hidden}
+.loads .bar i{display:block;height:100%;width:0;border-radius:2px;background:var(--accent)}
+.note{margin:4px 0 0;font-size:12.5px;line-height:1.45;color:var(--muted)}
+
+.assume{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:14px;line-height:1.45}
+.assume li::marker{color:var(--accent)}
+
+.lbl{font:500 11px/1.25 var(--font-mono);color:var(--fg);background:color-mix(in srgb,var(--surface) 88%,transparent);border:1px solid var(--line);border-radius:4px;padding:2px 6px;white-space:nowrap}
+.lbl.key{border-color:var(--accent)}
+
+@media (min-width:960px){
+  .app{height:100%}
+  .work{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 384px;gap:16px}
+  .stagebox{min-height:0}
+  .stage{flex:1;height:auto;min-height:0}
+  .panel{overflow:auto;min-height:0}
+}
+@media (max-width:639px){
+  h1{font-size:27px}
+  .stage{height:min(62vh,520px);min-height:380px}
+  .caption{position:static;max-width:none;padding:10px 12px}
+  .cap-title{font-size:19px}
+  .views{top:8px;right:8px}
+  .transport{left:8px;right:8px;bottom:8px}
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <p class="kicker">Exoskelett · Use Case 1</p>
+      <h1>Christbaum aufladen</h1>
+    </div>
+    <p class="lede">Ein aktives Exoskelett greift den geschnittenen Christbaum am Schnittende, hebt ihn bis in die Waagrechte und lädt ihn auf ein Plateau zwischen 0 und 1,75&nbsp;m Höhe. Stimmt der Ablauf so?</p>
+  </header>
+
+  <main class="work">
+    <section class="stagebox" aria-label="3D-Ansicht des Ablaufs">
+     <div class="stage">
+      <div class="viewport" id="viewport"></div>
+      <div class="views overlay" role="group" aria-label="Kamera">
+        <button type="button" id="viewOblique" data-view="oblique" aria-pressed="true">Schräg</button>
+        <button type="button" id="viewSide" data-view="side" aria-pressed="false">Seite</button>
+        <button type="button" id="viewFollow" data-view="follow" aria-pressed="false">Folgen</button>
+      </div>
+      <div class="transport overlay">
+        <button type="button" class="play" id="play" aria-label="Pause">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="i-pause" fill="currentColor" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/><path class="i-play" fill="currentColor" d="M8 5.2v13.6L19 12z"/></svg>
+        </button>
+        <div class="track">
+          <div class="segs" id="segs" aria-hidden="true"></div>
+          <input type="range" id="scrub" min="0" max="20" step="0.01" value="0" aria-label="Zeitpunkt im Ablauf">
+        </div>
+      </div>
+     </div>
+      <div class="caption overlay" aria-live="polite">
+        <p class="cap-step" id="capStep">Ausgangslage</p>
+        <h2 class="cap-title" id="capTitle">Ausgangslage</h2>
+        <p class="cap-text" id="capText">Der geschnittene Christbaum liegt am Boden.</p>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Ablauf, Einstellungen und Last">
+      <section class="block">
+        <h3>Ablauf</h3>
+        <ol class="steps" id="steps">
+          <li><button type="button" data-step="1"><span class="no">1</span><span><b>Greifen</b><span class="d">In die Hocke, Stammgreifer am astfreien Stammende schließen.</span></span></button></li>
+          <li><button type="button" data-step="2"><span class="no">2</span><span><b>Anheben bis waagrecht</b><span class="d">Schnittende hoch, die Spitze schleift. Dann waagrecht stellen, die Spitze hebt ab.</span></span></button></li>
+          <li><button type="button" data-step="3"><span class="no">3</span><span><b>Tragen</b><span class="d">Waagrecht vor dem Körper zum Plateau tragen.</span></span></button></li>
+          <li><button type="button" data-step="4"><span class="no">4</span><span><b>Hochheben</b><span class="d">Stamm knapp über die Plateaukante bringen.</span></span></button></li>
+          <li><button type="button" data-step="5"><span class="no">5</span><span><b>Aufschieben</b><span class="d">Mit der Spitze voran aufs Plateau schieben.</span></span></button></li>
+          <li><button type="button" data-step="6"><span class="no">6</span><span><b>Ablegen &amp; loslassen</b><span class="d">Absenken, Greifer öffnen, zurücktreten.</span></span></button></li>
+        </ol>
+      </section>
+
+      <section class="block">
+        <h3>So habe ich dich verstanden</h3>
+        <ul class="assume">
+          <li>Der Christbaum liegt nach dem Schneiden am Boden, die Spitze zeigt Richtung Plateau.</li>
+          <li>Gegriffen wird nur am astfreien Stammende, mit einem Stammgreifer, der fest zum Exo gehört.</li>
+          <li>Der Baum wird frei gehalten. Nur das Exo trägt ihn, an der Spitze stützt nichts.</li>
+          <li>Das Plateau ist eine Ladefläche, zum Beispiel Anhänger oder LKW, zwischen 0 und 1,75&nbsp;m hoch.</li>
+          <li>Das Gewicht ist aus der Länge geschätzt (Nordmanntanne, 2&nbsp;m ≈ 15&nbsp;kg).</li>
+          <li>Das Exo ist aktiv: Motoren an Hüfte, Knie, Schulter und Ellbogen, Rahmen aus Metall, Akku und Steuerung am Rücken.</li>
+        </ul>
+      </section>
+
+      <section class="block">
+        <h3>Einstellungen</h3>
+        <div class="ctl">
+          <label for="hp">Plateau-Höhe</label><output id="hpOut" for="hp">1,75 m</output>
+          <input type="range" id="hp" min="0" max="1.75" step="0.05" value="1.75">
+          <div class="scale" aria-hidden="true"><span>0 m</span><span>1,75 m</span></div>
+        </div>
+        <div class="ctl">
+          <label for="len">Baumlänge</label><output id="lenOut" for="len">2,0 m · ≈ 15 kg</output>
+          <input type="range" id="len" min="1" max="3" step="0.1" value="2">
+        </div>
+        <div class="ctl">
+          <label for="height">Deine Körpergröße</label><output id="heightOut" for="height">1,80 m</output>
+          <input type="range" id="height" min="1.5" max="2" step="0.01" value="1.8">
+        </div>
+        <label class="switch" for="net"><input type="checkbox" id="net"><span>Baum ist schon eingenetzt</span></label>
+        <label class="switch" for="labels"><input type="checkbox" id="labels" checked><span>Beschriftungen in 3D</span></label>
+      </section>
+
+      <section class="block">
+        <h3>Last durch den Baum</h3>
+        <p class="status" id="reach" data-level="ok"><span class="ic" aria-hidden="true">✓</span><span id="reachText">–</span></p>
+        <div class="loads">
+          <span class="h">Stelle</span><span class="h">jetzt</span><span class="h">max</span>
+          <span>Greifer · Kraft</span><span class="v" id="nowF">–</span><span class="v max" id="maxF">–</span><span class="bar"><i id="barF"></i></span>
+          <span>Greifer · Kippmoment</span><span class="v" id="nowM">–</span><span class="v max" id="maxM">–</span><span class="bar"><i id="barM"></i></span>
+          <span>Schultern</span><span class="v" id="nowSh">–</span><span class="v max" id="maxSh">–</span><span class="bar"><i id="barSh"></i></span>
+          <span>Hüfte / Rücken</span><span class="v" id="nowHip">–</span><span class="v max" id="maxHip">–</span><span class="bar"><i id="barHip"></i></span>
+          <span>Knie</span><span class="v" id="nowKnee">–</span><span class="v max" id="maxKnee">–</span><span class="bar"><i id="barKnee"></i></span>
+        </div>
+        <p class="note">Grobe statische Schätzung: nur die Last, die der Baum zusätzlich erzeugt, ohne Körpergewicht und ohne Schwung. Die orangen Motoren im 3D-Modell leuchten mit der Last.</p>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+document.documentElement.lang = 'de';
+
+/* ================= Hilfsfunktionen ================= */
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const ease = (t) => { t = clamp(t, 0, 1); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+const deg = (d) => d * Math.PI / 180;
+const NB = ' ';
+const fmt = (x, d = 2) => x.toFixed(d).replace('.', ',');
+const GRAV = 9.81;
+
+const v3 = (x = 0, y = 0, z = 0) => ({ x, y, z });
+const add = (a, b) => v3(a.x + b.x, a.y + b.y, a.z + b.z);
+const sub = (a, b) => v3(a.x - b.x, a.y - b.y, a.z - b.z);
+const mul = (a, k) => v3(a.x * k, a.y * k, a.z * k);
+const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
+const cross = (a, b) => v3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+const len = (a) => Math.hypot(a.x, a.y, a.z);
+const norm = (a) => { const l = len(a) || 1; return v3(a.x / l, a.y / l, a.z / l); };
+const mix = (a, b, t) => v3(lerp(a.x, b.x, t), lerp(a.y, b.y, t), lerp(a.z, b.z, t));
+
+/* ================= Modell: Maße, Ablauf, Kinematik, Last =================
+   Koordinaten: x = Laufrichtung (Baumspitze/Plateau), y = oben, z = seitlich (rechts = +z).
+   Der Baum liegt mit dem Schnittende bei x = 0. */
+function derive(st) {
+  const H = st.H, s = H / 1.8, L = st.L, hp = st.hp, net = st.netted;
+  // Körpermaße als Anteile der Körpergröße (anthropometrische Mittelwerte)
+  const B = { ankle: 0.039 * H, thigh: 0.245 * H, shank: 0.246 * H, torso: 0.288 * H,
+    upper: 0.186 * H, lower: 0.196 * H, hipHalf: 0.05 * H, shHalf: 0.1 * H, neck: 0.11 * H, headR: 0.058 * H };
+  B.leg = B.thigh + B.shank;
+  B.arm = B.upper + B.lower;
+  const yStand = B.ankle + 0.996 * B.leg, yMin = 0.235 * H;
+  // Baum
+  const bare = clamp(0.12 * L + 0.04, 0.16, 0.32);        // astfreies Stammende
+  const R = net ? 0.075 * L + 0.04 : 0.28 * L;             // Radius der untersten Äste
+  const cLow = net ? 0.92 : 0.45;                          // so weit lassen sich die unteren Äste flachdrücken
+  const rt0 = 0.018 * L + 0.012;                           // Stammradius am Schnitt
+  const jawHalf = Math.min(0.09, (bare - 0.05) / 2);
+  const xg = 0.03 + jawHalf;                               // Greifpunkt, gemessen ab Schnittende
+  const rtG = rt0 * (1 - xg / L) + 0.006 * (xg / L);
+  const handHalf = rtG + 0.055;
+  const mass = 15 * Math.pow(L / 2, 2.5);
+  const xcg = 0.55 * (bare + (L - bare) / 4) + 0.45 * (L / 4);
+  const yTip = 0.03, rRest = cLow * R;
+  const thLie = -Math.asin(clamp((rRest - yTip) / (L - bare), 0, 0.9));
+  const yCutLie = rRest - bare * Math.sin(thLie);
+  const G0 = { x: xg * Math.cos(thLie), y: yCutLie + xg * Math.sin(thLie) };
+  const yCarry = Math.max(0.92 * s, rRest + 0.12);
+  const ySlide = Math.max(yCarry, hp + rRest + 0.06);
+  const xe = L * Math.cos(thLie) + 1.5;                    // Vorderkante des Plateaus
+  const Lp = Math.max(3, L + 0.7), Wp = 2;
+  const off = (y) => s * lerp(0.445, 0.26, smooth(1.1 * s, 2.0 * s, y));
+  const xSt0 = G0.x - off(yCarry);
+  const xSt1 = xe - 0.25 - (L - xg) - off(yCarry);
+  const Gxf = xe - 0.06 + xg;
+  const xSt2 = Math.min(Gxf - off(ySlide), xe - 0.235 * s);
+  const xSt3 = xSt2 - 0.6 * s;
+  return { H, s, B, yStand, yMin, L, hp, net, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
+    yTip, rRest, thLie, yCutLie, G0, yCarry, ySlide, xe, Lp, Wp, off, xSt0, xSt1, Gxf, xSt2, xSt3, yRestG: hp + G0.y };
+}
+
+const STEPS = [
+  { n: 0, ids: ['start'] }, { n: 1, ids: ['grip'] }, { n: 2, ids: ['lift'] }, { n: 3, ids: ['carry'] },
+  { n: 4, ids: ['raise'] }, { n: 5, ids: ['push'] }, { n: 6, ids: ['place', 'release'] }, { n: 7, ids: ['hold'] },
+];
+function buildTimeline(P) {
+  const d = [['start', 1.0], ['grip', 2.4], ['lift', 3.4], ['carry', 1.0 + (P.xSt1 - P.xSt0) / 0.5],
+    ['raise', 1.0 + Math.abs(P.ySlide - P.yCarry) / 0.45], ['push', 1.2 + (P.xSt2 - P.xSt1) / 0.55],
+    ['place', 1.3 + Math.abs(P.ySlide - P.yRestG) / 0.8], ['release', 3.0], ['hold', 1.6]];
+  let t = 0;
+  const ph = d.map(([id, dur]) => { const p = { id, t0: t, t1: t + dur }; t += dur; return p; });
+  const byId = Object.fromEntries(ph.map((p) => [p.id, p]));
+  const steps = STEPS.map((s) => ({ n: s.n, t0: byId[s.ids[0]].t0, t1: byId[s.ids[s.ids.length - 1]].t1 }));
+  return { ph, byId, steps, T: t };
+}
+
+// Schrittfolge: k = zurückgelegter Anteil (0..1). Bei ganzzahliger Schrittzahl stehen die Füße am Ende nebeneinander.
+function gait(xa, xb, k, step) {
+  const dist = xb - xa, n = Math.max(1, Math.round(Math.abs(dist) / step)), stride = dist / n, c = k * n;
+  const foot = (off) => {
+    const p = c + off, i = Math.floor(p), f = p - i, q = f >= 0.6 ? (f - 0.6) / 0.4 : 0;
+    return { x: xa + stride * (i + smooth(0, 1, q)), lift: f >= 0.6 ? Math.sin(Math.PI * q) : 0 };
+  };
+  return { x: xa + dist * k, feet: [foot(0), foot(0.5)] };
+}
+
+// Choreografie: wo stehen die Füße, wohin greifen die Hände, ist der Greifer zu?
+function choreo(P, TL, t) {
+  const ph = TL.ph.find((p) => t < p.t1) || TL.ph[TL.ph.length - 1];
+  const u = clamp((t - ph.t0) / (ph.t1 - ph.t0), 0, 1);
+  const s = P.s, fz = 0.12 * s;
+  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, level: 1, thPlace: 0, G: { x: P.G0.x, y: P.G0.y } };
+  let x = P.xSt0, feet = null;
+  const walk = (xa, xb, k, step) => { const g = gait(xa, xb, k, step); x = g.x; feet = g.feet; };
+  switch (ph.id) {
+    case 'grip':
+      o.gb = ease(u / 0.8); o.jaw = smooth(0.72, 1, u);
+      break;
+    case 'lift':
+      o.gb = 1; o.jaw = 1; o.carried = true;
+      o.G = { x: P.G0.x, y: lerp(P.G0.y, P.yCarry, ease(u / 0.6)) };
+      o.level = smooth(0.5, 1, u);
+      break;
+    case 'carry':
+      o.gb = 1; o.jaw = 1; o.carried = true;
+      walk(P.xSt0, P.xSt1, ease(u), 0.62 * s);
+      o.G = { x: x + P.off(P.yCarry), y: P.yCarry };
+      break;
+    case 'raise': {
+      o.gb = 1; o.jaw = 1; o.carried = true; x = P.xSt1;
+      const y = lerp(P.yCarry, P.ySlide, ease(u));
+      o.G = { x: x + P.off(y), y };
+      break;
+    }
+    case 'push': {
+      o.gb = 1; o.jaw = 1; o.carried = true;
+      const k = ease(u);
+      walk(P.xSt1, P.xSt2, k, 0.46 * s);
+      o.G = { x: x + lerp(P.off(P.ySlide), P.Gxf - P.xSt2, k), y: P.ySlide };
+      break;
+    }
+    case 'place': {
+      o.gb = 1; o.jaw = 1; o.carried = true; x = P.xSt2;
+      const k = ease(u);
+      o.G = { x: P.Gxf, y: lerp(P.ySlide, P.yRestG, k) };
+      o.thPlace = P.thLie * k;
+      break;
+    }
+    case 'release':
+      o.jaw = 1 - smooth(0, 0.25, u);
+      o.gb = 1 - ease((u - 0.1) / 0.6);
+      o.G = { ...P.final.G };
+      walk(P.xSt2, P.xSt3, smooth(0.35, 1, u), 0.6 * s);
+      break;
+    case 'hold':
+      o.G = { ...P.final.G }; x = P.xSt3;
+      break;
+    default: break;
+  }
+  const ft = feet || [{ x, lift: 0 }, { x, lift: 0 }];
+  o.xSt = x;
+  o.feet = [{ x: ft[0].x, lift: 0.06 * s * ft[0].lift, z: -fz }, { x: ft[1].x, lift: 0.06 * s * ft[1].lift, z: fz }];
+  return o;
+}
+
+// Zwei-Gelenk-IK (Oberarm/Unterarm bzw. Ober-/Unterschenkel), Ellbogen/Knie zeigt Richtung pole
+function ik2(A, T, l1, l2, pole) {
+  const d = sub(T, A), dist = len(d);
+  const r = clamp(dist, Math.abs(l1 - l2) + 1e-4, (l1 + l2) * 0.9995);
+  const u = dist > 1e-9 ? mul(d, 1 / dist) : v3(0, -1, 0);
+  const a = (l1 * l1 - l2 * l2 + r * r) / (2 * r);
+  const h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+  let w = sub(pole, mul(u, dot(pole, u)));
+  w = len(w) < 1e-6 ? v3(0, 0, 1) : norm(w);
+  return { mid: add(add(A, mul(u, a)), mul(w, h)), end: add(A, mul(u, r)), gap: Math.max(0, dist - r) };
+}
+
+// Körperhaltung: Becken, Oberkörperneigung, Arme und Beine
+function solve(P, ch) {
+  const B = P.B, s = P.s, gb = ch.gb, G = ch.G, T = B.torso;
+  const gy = G.y / s;
+  let aGrip;
+  if (gy < 1.0) aGrip = lerp(deg(44), deg(4), smooth(0.22, 1.0, gy));
+  else if (gy < 1.45) aGrip = lerp(deg(4), 0, smooth(1.0, 1.45, gy));
+  else aGrip = lerp(0, deg(-6), smooth(1.45, 2.1, gy));
+  const dz = B.shHalf - P.handHalf, eR = 0.93 * B.arm;
+  // höchste Beckenhöhe, aus der die Hände bei Neigung a noch bis G hinunterreichen
+  const yLow = (a, xp) => {
+    const dx = G.x - (xp + T * Math.sin(a));
+    return G.y + Math.sqrt(Math.max(0, eR * eR - dx * dx - dz * dz)) - T * Math.cos(a);
+  };
+  let aFull = aGrip, yP = P.yStand, xP = ch.xSt;
+  for (let i = 0; i < 3; i++) {
+    while (yLow(aFull, xP) < P.yMin && aFull < deg(66)) aFull += deg(1);   // tiefe Hocke reicht nicht: weiter vorbeugen
+    const want = clamp(Math.min(P.yStand, yLow(aFull, xP)), P.yMin, P.yStand);
+    yP = lerp(P.yStand, want, gb);
+    xP = ch.xSt - 0.17 * s * clamp((P.yStand - yP) / (P.yStand - P.yMin), 0, 1);
+  }
+  const alpha = aFull * gb, sa = Math.sin(alpha), ca = Math.cos(alpha);
+  for (const f of ch.feet) {                                    // Schrittstellung senkt das Becken
+    const dx = xP - f.x, dzz = B.hipHalf - Math.abs(f.z);
+    yP = Math.min(yP, B.ankle + f.lift + Math.sqrt(Math.max(0, (0.996 * B.leg) ** 2 - dx * dx - dzz * dzz)));
+  }
+  let heel = 0;                                                 // Zehenspitzen, wenn es über Kopf knapp wird
+  if (gb > 0.5) {
+    const dx = G.x - (xP + T * sa), eR = 0.975 * B.arm;
+    const v = Math.sqrt(Math.max(0, eR * eR - dx * dx - dz * dz));
+    const need = G.y - v - (yP + T * ca);
+    if (need > 0) heel = Math.min(0.075 * s, need) * smooth(0.5, 1, gb);
+  }
+  yP += heel;
+  const Pv = v3(xP, yP, 0), dir = v3(sa, ca, 0), back = v3(-ca, sa, 0), S = add(Pv, mul(dir, T));
+  const out = { P: Pv, alpha, heel, dir, back, S, hips: [], knees: [], ankles: [], shoulders: [], elbows: [], wrists: [], hands: [], hinge: [] };
+  const open = 0.07 * (1 - ch.jaw);
+  for (let k = 0; k < 2; k++) {
+    const side = k ? 1 : -1, f = ch.feet[k];
+    const hip = v3(xP, yP, side * B.hipHalf);
+    const leg = ik2(hip, v3(f.x, B.ankle + f.lift + heel, f.z), B.thigh, B.shank, v3(1, 0, side * 0.3));
+    out.hips.push(hip); out.knees.push(leg.mid); out.ankles.push(leg.end);
+    const sh = v3(S.x, S.y, side * B.shHalf);
+    const rest = v3(sh.x + 0.03 * s, sh.y - 0.955 * B.arm, side * (B.shHalf + 0.035 * s));
+    const grip = v3(G.x, G.y, side * (P.handHalf + open));
+    const tgt = mix(rest, grip, gb);
+    const up = smooth(-0.15, 0.6, clamp((tgt.y - sh.y) / B.arm, -1, 1));
+    const pole = norm(mix(v3(-0.65, -0.55, side * 0.35), v3(-0.15, -0.25, side * 0.95), up));
+    const arm = ik2(sh, tgt, B.upper, B.lower, pole);
+    const fd = norm(sub(arm.end, arm.mid));
+    let hg = cross(norm(sub(arm.mid, sh)), fd);
+    hg = len(hg) < 1e-3 ? v3(0, 0, side) : norm(hg);
+    if (hg.z * side < 0) hg = mul(hg, -1);
+    out.shoulders.push(sh); out.elbows.push(arm.mid); out.hands.push(arm.end);
+    out.wrists.push(sub(arm.end, mul(fd, 0.05 * P.H))); out.hinge.push(hg);
+  }
+  out.Gact = v3((out.hands[0].x + out.hands[1].x) / 2, (out.hands[0].y + out.hands[1].y) / 2, 0);
+  out.gripGap = Math.hypot(out.Gact.x - G.x, out.Gact.y - G.y);
+  out.beta = alpha * 0.5 - deg(14) * smooth(0, 0.5, (G.y - S.y) / B.arm) * gb;
+  out.head = add(S, mul(v3(Math.sin(out.beta), Math.cos(out.beta), 0), B.neck));
+  return out;
+}
+
+// Auflagehöhe unter dem Baum: Boden oder Plateau (an der Kante weich, dort drücken sich die Äste zusammen)
+function floorAt(P, x) { return x > P.xe + P.Lp + 0.3 ? 0 : P.hp * smooth(P.xe - 0.3, P.xe + 0.05, x); }
+// Neigung, solange die Spitze am Boden schleift; steiler als 35° hält der Greifer den Baum nicht hängen
+const MAX_TILT = deg(35);
+const groundPitch = (P, gy) => Math.asin(clamp((P.yTip - gy) / (P.L - P.xg), -1, 1));
+
+// Lage des Baums: gx/gy = Greifpunkt, th = Neigung (negativ = Spitze tiefer)
+function treePose(P, ch, pose) {
+  if (ch.id === 'start' || ch.id === 'grip') return { gx: P.G0.x, gy: P.G0.y, th: P.thLie };
+  if (ch.id === 'release' || ch.id === 'hold') return P.final.tree;
+  const g = pose.Gact;
+  let th = 0;
+  if (ch.id === 'lift') th = Math.max(groundPitch(P, g.y), -MAX_TILT) * (1 - ch.level);
+  else if (ch.id === 'place') th = Math.max(ch.thPlace, Math.asin(clamp((P.hp + P.yTip - g.y) / (P.L - P.xg), -1, 1)));
+  return { gx: g.x, gy: g.y, th };
+}
+
+// Zusatzlast durch den Baum (statisch). Solange die Spitze schleift, trägt der Boden mit und der Greifer kein Moment.
+function loads(P, ch, pose, tr) {
+  if (!ch.carried) return { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0 };
+  const W = P.mass * GRAV, tip = ch.id === 'lift' && ch.level < 0.002 && groundPitch(P, pose.Gact.y) > -MAX_TILT;
+  const F = tip ? W * (P.L - P.xcg) / (P.L - P.xg) : W;
+  const M = tip ? 0 : W * (P.xcg - P.xg) * Math.cos(tr.th);
+  const gx = pose.Gact.x, m = (jx) => Math.abs(F * (gx - jx) + M);
+  return { F, M, sh: m(pose.S.x), hip: m(pose.P.x),
+    knee: m((pose.knees[0].x + pose.knees[1].x) / 2), elb: m((pose.elbows[0].x + pose.elbows[1].x) / 2) };
+}
+
+function finalize(P, TL) {
+  const ch = choreo(P, TL, TL.byId.place.t1 - 1e-6);
+  const pose = solve(P, ch);
+  const tr = treePose(P, ch, pose);
+  P.final = { G: { x: pose.Gact.x, y: pose.Gact.y }, tree: tr };
+}
+
+function analyse(P, TL) {
+  const pk = { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, over: false };
+  const N = 360;
+  for (let i = 0; i <= N; i++) {
+    const ch = choreo(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loads(P, ch, pose, treePose(P, ch, pose));
+    for (const k of ['F', 'M', 'sh', 'hip', 'knee', 'elb']) pk[k] = Math.max(pk[k], ld[k]);
+    if (ch.carried) {
+      pk.gy = Math.max(pk.gy, pose.Gact.y);
+      if (ch.gb > 0.99) pk.gap = Math.max(pk.gap, pose.gripGap);
+      if (pose.Gact.y > pose.S.y + 0.12 * P.s) pk.over = true;
+    }
+  }
+  return pk;
+}
+
+/* ================= Zustand ================= */
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const state = { H: 1.8, L: 2.0, hp: 1.75, netted: false, labels: true, t: 0, playing: !reduced, view: 'oblique' };
+let P, TL, PK;
+
+/* ================= Szene ================= */
+const host = document.getElementById('viewport');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.domElement.setAttribute('role', 'img');
+renderer.domElement.setAttribute('aria-label', 'Person mit Exoskelett hebt einen Christbaum am Schnittende an und lädt ihn auf ein Plateau. Zum Drehen ziehen, zum Zoomen scrollen oder zwei Finger nutzen.');
+host.appendChild(renderer.domElement);
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.domElement.className = 'labels';
+host.appendChild(labelRenderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xE2EAE5, 13, 38);
+const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 160);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.maxPolarAngle = deg(87);
+controls.minDistance = 2;
+controls.maxDistance = 34;
+
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.4;
+scene.add(new THREE.HemisphereLight(0xF1F6F3, 0x56614F, 0.85));
+const sun = new THREE.DirectionalLight(0xFFF3E4, 2.6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 40 });
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.02;
+sun.position.set(-1, 10, 7);
+sun.target.position.set(2.5, 0, 0);
+scene.add(sun, sun.target);
+
+const std = (color, roughness, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, ...extra });
+function canvasTex(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+const cutTex = canvasTex(128, 128, (x) => {
+  x.fillStyle = '#5A3D26'; x.beginPath(); x.arc(64, 64, 64, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#E4CBA0'; x.beginPath(); x.arc(64, 64, 56, 0, Math.PI * 2); x.fill();
+  x.strokeStyle = 'rgba(150,104,58,.55)'; x.lineWidth = 2;
+  for (let r = 7; r < 54; r += 6 + (r % 4)) { x.beginPath(); x.arc(65, 63, r, 0, Math.PI * 2); x.stroke(); }
+  x.fillStyle = '#9A6B3E'; x.beginPath(); x.arc(65, 63, 3, 0, Math.PI * 2); x.fill();
+});
+const deckTex = canvasTex(256, 256, (x, w, h) => {
+  const tones = ['#A9804F', '#9E7546', '#B08857', '#A27A4A'];
+  for (let i = 0; i < 4; i++) { x.fillStyle = tones[i]; x.fillRect(0, i * 64, w, 64); x.fillStyle = 'rgba(60,40,20,.55)'; x.fillRect(0, i * 64, w, 3); }
+  x.strokeStyle = 'rgba(80,52,28,.18)'; x.lineWidth = 1;
+  for (let k = 0; k < 40; k++) { const y = (k * 37) % h; x.beginPath(); x.moveTo(0, y + 0.5); x.bezierCurveTo(w * 0.3, y + 3, w * 0.6, y - 3, w, y + 1); x.stroke(); }
+});
+deckTex.wrapS = deckTex.wrapT = THREE.RepeatWrapping;
+const hazardTex = canvasTex(64, 64, (x, w) => {
+  x.fillStyle = '#E8B400'; x.fillRect(0, 0, w, w); x.fillStyle = '#1D1D1B';
+  x.beginPath(); x.moveTo(0, 0); x.lineTo(w / 2, 0); x.lineTo(0, w / 2); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(w, 0); x.lineTo(w, w / 2); x.lineTo(w / 2, w); x.lineTo(0, w); x.closePath(); x.fill();
+});
+hazardTex.wrapS = hazardTex.wrapT = THREE.RepeatWrapping;
+
+const MAT = {
+  jacket: std(0x6A8092, 0.85), pants: std(0x4C5865, 0.9), boot: std(0x24292C, 0.8), glove: std(0x6B6F5E, 0.9),
+  face: std(0xC4B6AA, 0.75), helmet: std(0xE9ECEA, 0.4),
+  steel: std(0xB4BCC2, 0.3, { metalness: 0.9 }), graphite: std(0x2A2F34, 0.45, { metalness: 0.5 }),
+  strap: std(0x1C2023, 0.95, { side: THREE.DoubleSide }),
+  motor: std(0xD4520E, 0.45, { emissive: 0xFF5A10, emissiveIntensity: 0 }),
+  jaw: std(0xD4520E, 0.5, { metalness: 0.2 }),
+  led: std(0xFF7A33, 0.4, { emissive: 0xFF6A1A, emissiveIntensity: 1.3 }),
+  fir1: std(0x2E5C43, 0.92, { flatShading: true }), fir2: std(0x376B4F, 0.92, { flatShading: true }),
+  trunk: std(0x6A4A30, 0.95), cut: std(0xFFFFFF, 0.9, { map: cutTex }),
+  net: new THREE.MeshBasicMaterial({ color: 0xEDE7D6, wireframe: true, transparent: true, opacity: 0.75 }),
+  deck: std(0xFFFFFF, 0.85, { map: deckTex }), frame: std(0x4A535A, 0.5, { metalness: 0.6 }),
+  hazard: std(0xFFFFFF, 0.6, { map: hazardTex }),
+  bgFir: std(0x5A8069, 1, { flatShading: true }), bgTrunk: std(0x6B5640, 1),
+  ground: std(0xCBD6CF, 1),
+  ink: new THREE.LineBasicMaterial({ color: 0x15211C }),
+  inkDash: new THREE.LineDashedMaterial({ color: 0x15211C, dashSize: 0.12, gapSize: 0.08, transparent: true, opacity: 0.5 }),
+  inkTop: new THREE.LineBasicMaterial({ color: 0x15211C, depthTest: false, transparent: true, opacity: 0.6 }),
+  cgDot: new THREE.MeshBasicMaterial({ color: 0xD4520E, depthTest: false }),
+};
+const INK = [MAT.ink, MAT.inkDash, MAT.inkTop];
+
+function label(text, key = false) {
+  const el = document.createElement('div');
+  el.className = key ? 'lbl key' : 'lbl';
+  el.textContent = text;
+  const obj = new CSS2DObject(el);
+  obj.center.set(0.5, 1);
+  return obj;
+}
+const shadowed = (m, receive = false) => { m.castShadow = true; m.receiveShadow = receive; return m; };
+function disposeGroup(g) {
+  g.traverse((o) => {
+    if (o.isCSS2DObject) o.element.remove();
+    if (o.geometry) o.geometry.dispose();
+    if (o.userData.cap) o.userData.cap.dispose();
+  });
+  g.removeFromParent();
+}
+
+// Boden, Raster, Christbaumkultur im Hintergrund
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), MAT.ground);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+let grid = null;
+function buildGrid(color) {
+  if (grid) { grid.geometry.dispose(); grid.material.dispose(); grid.removeFromParent(); }
+  grid = new THREE.GridHelper(26, 26, color, color);
+  grid.position.set(2.5, 0.003, 0);
+  grid.material.transparent = true;
+  grid.material.opacity = 0.55;
+  grid.material.depthWrite = false;
+  scene.add(grid);
+}
+(function buildPlantation() {
+  let seed = 7;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const spots = [];
+  for (const z of [-6.2, -7.8, -9.4, -11.0, -12.6, -14.2, -15.8]) {
+    for (let x = -10; x <= 16; x += 1.55) spots.push({ x: x + (rnd() - 0.5) * 0.5, z: z + (rnd() - 0.5) * 0.4, h: 1.0 + rnd() * 1.6 });
+  }
+  const cone = new THREE.ConeGeometry(1, 1, 7); cone.translate(0, 0.5, 0);
+  const stem = new THREE.CylinderGeometry(0.04, 0.05, 1, 6); stem.translate(0, 0.5, 0);
+  const cones = new THREE.InstancedMesh(cone, MAT.bgFir, spots.length * 3);
+  const stems = new THREE.InstancedMesh(stem, MAT.bgTrunk, spots.length);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3();
+  spots.forEach((sp, i) => {
+    stems.setMatrixAt(i, m.compose(p.set(sp.x, 0, sp.z), q, sc.set(1, sp.h * 0.2, 1)));
+    for (let j = 0; j < 3; j++) {
+      const r = sp.h * 0.3 * (1 - j * 0.27);
+      cones.setMatrixAt(i * 3 + j, m.compose(p.set(sp.x, sp.h * (0.12 + j * 0.25), sp.z), q, sc.set(r, sp.h * (0.48 - j * 0.06), r)));
+    }
+  });
+  scene.add(cones, stems);
+})();
+
+/* ---------- Christbaum ---------- */
+let tree = null;
+function buildTree(P) {
+  const g = new THREE.Group();
+  const trunkGeo = new THREE.CylinderGeometry(0.006, P.rt0, P.L, 10);
+  trunkGeo.rotateZ(-Math.PI / 2);
+  trunkGeo.translate(P.L / 2, 0, 0);
+  g.add(shadowed(new THREE.Mesh(trunkGeo, MAT.trunk)));
+  const cut = new THREE.Mesh(new THREE.CircleGeometry(P.rt0 * 0.97, 28), MAT.cut);
+  cut.rotation.y = -Math.PI / 2;
+  cut.position.x = -0.002;
+  g.add(cut);
+  // Astetagen als zwei halbe Kegel: die untere Hälfte lässt sich flachdrücken, wenn der Baum aufliegt
+  const span = P.L - P.bare, n = Math.round(3 + 2.6 * P.L), tiers = [];
+  for (let i = 0; i < n; i++) {
+    const f = i / n, x0 = P.bare + span * f;
+    const h = Math.min(span * 1.9 / n, P.L - x0 + 0.02);
+    const r = P.R * Math.pow(1 - f, 0.92) + 0.03;
+    const mat = i % 2 ? MAT.fir2 : MAT.fir1;
+    const half = (start) => {
+      const geo = new THREE.ConeGeometry(r, h, 5, 1, false, start, Math.PI);
+      geo.rotateZ(-Math.PI / 2);
+      geo.translate(x0 + h / 2, 0, 0);
+      return shadowed(new THREE.Mesh(geo, mat));
+    };
+    const low = new THREE.Group();
+    low.add(half(0));
+    g.add(low, half(Math.PI));
+    tiers.push({ x: x0 + h * 0.3, r, low });
+  }
+  if (P.net) {
+    const pts = [new THREE.Vector2(P.rt0 + 0.012, Math.max(0.02, P.bare - 0.1))];
+    for (let k = 0; k <= 12; k++) { const f = k / 12; pts.push(new THREE.Vector2(P.R * 1.05 * Math.pow(1 - f, 0.92) + 0.02, P.bare + span * f)); }
+    const ng = new THREE.LatheGeometry(pts, 16);
+    ng.rotateZ(-Math.PI / 2);
+    g.add(new THREE.Mesh(ng, MAT.net));
+  }
+  // Schwerpunkt mit Hilfslinie
+  const cgDot = new THREE.Mesh(new THREE.SphereGeometry(0.035, 16, 12), MAT.cgDot);
+  cgDot.position.set(P.xcg, 0, 0);
+  cgDot.renderOrder = 10;
+  const cgLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(P.xcg, 0, 0), new THREE.Vector3(P.xcg, P.R + 0.1, 0)]), MAT.inkTop);
+  cgLine.renderOrder = 10;
+  g.add(cgDot, cgLine);
+  const lblCut = label('Schnittende'); lblCut.position.set(0, P.rt0 + 0.14, 0);
+  const lblTip = label('Spitze'); lblTip.position.set(P.L + 0.04, 0.12, 0);
+  const lblCg = label('Schwerpunkt'); lblCg.position.set(P.xcg, P.R + 0.12, 0);
+  g.add(lblCut, lblTip, lblCg);
+  return { group: g, tiers, lblCut, lblTip, lblCg, cgDot, cgLine };
+}
+
+/* ---------- Plateau ---------- */
+let plat = null;
+function buildPlatform(P) {
+  const g = new THREE.Group(), h = P.hp, Lp = P.Lp, W = P.Wp, x0 = P.xe;
+  const deckT = clamp(h, 0.02, 0.06);
+  const top = Math.max(h, deckT);
+  const deckTx = deckTex.clone(); deckTx.needsUpdate = true; deckTx.repeat.set(Lp, W);
+  const deckMat = MAT.deck.clone(); deckMat.map = deckTx;
+  const deck = shadowed(new THREE.Mesh(new THREE.BoxGeometry(Lp, deckT, W), deckMat), true);
+  deck.position.set(x0 + Lp / 2, top - deckT / 2, 0);
+  deck.userData.cap = deckMat;
+  g.add(deck);
+  const hzTex = hazardTex.clone(); hzTex.needsUpdate = true;
+  const hzMat = MAT.hazard.clone(); hzMat.map = hzTex;
+  let hzH;
+  if (h > 0.3) {
+    const beamH = 0.12, beamY = top - deckT - beamH / 2;
+    for (const z of [-W / 2 + 0.06, W / 2 - 0.06]) {
+      const b = shadowed(new THREE.Mesh(new THREE.BoxGeometry(Lp, beamH, 0.08), MAT.frame)); b.position.set(x0 + Lp / 2, beamY, z); g.add(b);
+    }
+    for (const x of [x0 + 0.04, x0 + Lp - 0.04]) {
+      const b = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.08, beamH, W - 0.04), MAT.frame)); b.position.set(x, beamY, 0); g.add(b);
+    }
+    const legH = top - deckT - beamH, nx = Lp > 3.3 ? 3 : 2;
+    for (let i = 0; i < nx; i++) {
+      for (const z of [-W / 2 + 0.06, W / 2 - 0.06]) {
+        const leg = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.08, legH, 0.08), MAT.frame));
+        leg.position.set(x0 + 0.08 + (Lp - 0.16) * i / (nx - 1), legH / 2, z); g.add(leg);
+      }
+    }
+    hzH = deckT + beamH;
+  } else if (h > 0.03) {
+    const base = shadowed(new THREE.Mesh(new THREE.BoxGeometry(Lp, top - deckT, W), MAT.frame), true);
+    base.position.set(x0 + Lp / 2, (top - deckT) / 2, 0); g.add(base);
+    hzH = top;
+  }
+  if (hzH) {
+    hzTex.repeat.set(W / 0.2, hzH / 0.2);
+    const hz = new THREE.Mesh(new THREE.PlaneGeometry(W, hzH), hzMat);
+    hz.rotation.y = -Math.PI / 2; hz.position.set(x0 - 0.003, top - hzH / 2, 0); g.add(hz);
+  } else {
+    hzTex.repeat.set(W / 0.2, 0.5);                                // Ablagefläche am Boden: Markierung vorne
+    const hz = new THREE.Mesh(new THREE.PlaneGeometry(0.1, W), hzMat);
+    hz.rotation.x = -Math.PI / 2; hz.position.set(x0 + 0.05, top + 0.002, 0); g.add(hz);
+  }
+  hzMat.userData.tex = hzTex;
+  g.userData.mats = [deckMat, hzMat];
+  // Maßlinie für die Plateauhöhe
+  const zd = W / 2 + 0.35, V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const dim = [V(x0, 0, zd), V(x0, top, zd), V(x0 - 0.07, 0, zd), V(x0 + 0.07, 0, zd), V(x0 - 0.07, top, zd), V(x0 + 0.07, top, zd), V(x0, top, W / 2), V(x0, top, zd + 0.05)];
+  g.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(dim), MAT.ink));
+  const lblH = label(h < 0.03 ? `Plateau 0${NB}m (Boden)` : `Plateau ${fmt(h)}${NB}m`, true);
+  lblH.center.set(0, 0.5);
+  lblH.position.set(x0 + 0.08, Math.max(top / 2, 0.12), zd);
+  g.add(lblH);
+  let lblMax = null;
+  if (h < 1.74) {
+    const y = 1.75;
+    const ghost = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(x0, y, -W / 2), V(x0 + Lp, y, -W / 2), V(x0 + Lp, y, W / 2), V(x0, y, W / 2), V(x0, y, -W / 2)]), MAT.inkDash);
+    ghost.computeLineDistances();
+    const riser = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(x0, top, zd), V(x0, y, zd)]), MAT.inkDash);
+    riser.computeLineDistances();
+    g.add(ghost, riser);
+    lblMax = label(`max. 1,75${NB}m`);
+    lblMax.center.set(0, 0.5);
+    lblMax.position.set(x0 + 0.08, y, zd);
+    g.add(lblMax);
+  }
+  return { group: g, lblH, lblMax };
+}
+function disposePlatform() {
+  if (!plat) return;
+  for (const m of plat.group.userData.mats) { if (m.map) m.map.dispose(); if (m.userData.tex) m.userData.tex.dispose(); m.dispose(); }
+  disposeGroup(plat.group);
+}
+
+/* ---------- Person mit Exoskelett ---------- */
+function jawGeometry(rIn, thick, length, side) {
+  const sh = new THREE.Shape();
+  sh.absarc(0, 0, rIn + thick, -Math.PI / 2, Math.PI / 2, false);
+  sh.absarc(0, 0, rIn, Math.PI / 2, -Math.PI / 2, true);
+  sh.closePath();
+  const g = new THREE.ExtrudeGeometry(sh, { depth: length, bevelEnabled: false, curveSegments: 10 });
+  g.translate(0, 0, -length / 2);
+  g.rotateY(side > 0 ? -Math.PI / 2 : Math.PI / 2);
+  return g;
+}
+let person = null;
+function buildPerson(P) {
+  const s = P.s, B = P.B, g = new THREE.Group();
+  const mk = (geo, mat, cast = true) => { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; g.add(m); return m; };
+  const limb = (rTop, rBot, mat) => mk(new THREE.CylinderGeometry(rTop, rBot, 1, 14), mat);
+  const ball = (r, mat) => mk(new THREE.SphereGeometry(r, 18, 12), mat);
+  const bar = (w, d) => mk(new THREE.BoxGeometry(w, 1, d), MAT.steel);
+  const cuff = (r) => mk(new THREE.CylinderGeometry(r, r, 0.055 * s, 18, 1, true), MAT.strap);
+  const motor = (r, w) => {
+    const grp = new THREE.Group(), cap = MAT.motor.clone();
+    const a = new THREE.Mesh(new THREE.CylinderGeometry(r, r, w, 22), MAT.graphite);
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.66, r * 0.66, w * 1.14, 22), cap);
+    a.castShadow = b.castShadow = true;
+    grp.add(a, b); grp.userData.cap = cap; g.add(grp);
+    return grp;
+  };
+  const o = { group: g, sides: [] };
+  const pelvisGeo = new THREE.CapsuleGeometry(0.1 * s, 0.17 * s, 6, 14); pelvisGeo.rotateX(Math.PI / 2);
+  o.pelvis = mk(pelvisGeo, MAT.pants); o.pelvis.scale.set(1.05, 1, 1);
+  o.torso = mk(new THREE.CapsuleGeometry(0.125 * s, B.torso - 0.12 * s, 6, 16), MAT.jacket); o.torso.scale.set(0.84, 1, 1.24);
+  o.neck = limb(0.042 * s, 0.046 * s, MAT.face);
+  o.head = ball(B.headR, MAT.face);
+  o.helmet = new THREE.Group();
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(B.headR * 1.13, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), MAT.helmet);
+  const brim = new THREE.Mesh(new THREE.CylinderGeometry(B.headR * 1.32, B.headR * 1.32, 0.012 * s, 24), MAT.helmet);
+  shell.position.y = B.headR * 0.12; brim.position.set(0.012 * s, B.headR * 0.14, 0);
+  shell.castShadow = brim.castShadow = true;
+  o.helmet.add(shell, brim); g.add(o.helmet);
+  o.backPlate = mk(new THREE.BoxGeometry(0.03 * s, B.torso * 0.96, 0.13 * s), MAT.steel);
+  o.pack = mk(new THREE.BoxGeometry(0.11 * s, 0.34 * s, 0.27 * s), MAT.graphite);
+  o.led = mk(new THREE.BoxGeometry(0.006, 0.2 * s, 0.03 * s), MAT.led, false);
+  const beltGeo = new THREE.TorusGeometry(0.16 * s, 0.02 * s, 8, 36); beltGeo.rotateX(Math.PI / 2);
+  o.belt = mk(beltGeo, MAT.steel); o.belt.scale.set(0.8, 1, 1.18);
+  for (const side of [-1, 1]) {
+    const q = { side };
+    q.hip = ball(0.074 * s, MAT.pants); q.thigh = limb(0.054 * s, 0.07 * s, MAT.pants);
+    q.knee = ball(0.056 * s, MAT.pants); q.shank = limb(0.041 * s, 0.052 * s, MAT.pants);
+    q.foot = new THREE.Group();
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.27 * s, 0.085 * s, 0.105 * s), MAT.boot);
+    boot.position.set(0.075 * s, -0.028 * s, 0); boot.castShadow = true;
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(0.29 * s, 0.012 * s, 0.12 * s), MAT.steel);
+    plate.position.set(0.075 * s, -0.074 * s, 0); plate.castShadow = true;
+    q.foot.add(boot, plate); g.add(q.foot);
+    q.shoulder = ball(0.058 * s, MAT.jacket); q.upper = limb(0.043 * s, 0.05 * s, MAT.jacket);
+    q.elbow = ball(0.045 * s, MAT.jacket); q.fore = limb(0.035 * s, 0.043 * s, MAT.jacket); q.hand = ball(0.047 * s, MAT.glove);
+    q.mHip = motor(0.058 * s, 0.05 * s); q.mKnee = motor(0.046 * s, 0.045 * s);
+    q.mSh = motor(0.05 * s, 0.048 * s); q.mEl = motor(0.038 * s, 0.04 * s);
+    q.sThigh = bar(0.028 * s, 0.012 * s); q.sShank = bar(0.026 * s, 0.012 * s);
+    q.sUpper = bar(0.024 * s, 0.011 * s); q.sFore = bar(0.022 * s, 0.011 * s);
+    q.yoke = limb(0.016 * s, 0.016 * s, MAT.steel);
+    q.ankleHinge = mk(new THREE.CylinderGeometry(0.024 * s, 0.024 * s, 0.03 * s, 14), MAT.graphite);
+    q.cThigh = cuff(0.077 * s); q.cShank = cuff(0.058 * s); q.cUpper = cuff(0.054 * s); q.cFore = cuff(0.046 * s);
+    q.jaw = mk(jawGeometry(P.rtG + 0.004, 0.016, 2 * P.jawHalf, side), MAT.jaw);
+    o.sides.push(q);
+  }
+  return o;
+}
+
+const Y_AXIS = new THREE.Vector3(0, 1, 0), _a = new THREE.Vector3(), _d = new THREE.Vector3();
+const ZDIR = v3(0, 0, 1);
+function seg(m, a, b) {
+  _a.set(a.x, a.y, a.z);
+  _d.set(b.x - a.x, b.y - a.y, b.z - a.z);
+  const l = _d.length() || 1e-4;
+  m.position.copy(_a).addScaledVector(_d, 0.5);
+  m.quaternion.setFromUnitVectors(Y_AXIS, _d.divideScalar(l));
+  m.scale.y = l;
+}
+const at = (m, p) => m.position.set(p.x, p.y, p.z);
+function axis(m, p, dir) { at(m, p); m.quaternion.setFromUnitVectors(Y_AXIS, _d.set(dir.x, dir.y, dir.z).normalize()); }
+
+function posePerson(pose, ch, tr, ld) {
+  const o = person, s = P.s, B = P.B, pa = -pose.alpha;
+  at(o.pelvis, add(pose.P, v3(-0.015 * s, 0.03 * s, 0))); o.pelvis.rotation.set(0, 0, pa * 0.5);
+  at(o.torso, add(pose.P, mul(pose.dir, B.torso * 0.53))); o.torso.rotation.set(0, 0, pa);
+  seg(o.neck, add(pose.S, mul(pose.dir, -0.02 * s)), add(pose.S, mul(sub(pose.head, pose.S), 0.6)));
+  at(o.head, pose.head); at(o.helmet, pose.head); o.helmet.rotation.set(0, 0, -pose.beta);
+  const onBack = (k, b) => add(add(pose.P, mul(pose.dir, B.torso * k)), mul(pose.back, b * s));
+  at(o.backPlate, onBack(0.5, 0.13)); o.backPlate.rotation.set(0, 0, pa);
+  at(o.pack, onBack(0.6, 0.205)); o.pack.rotation.set(0, 0, pa);
+  at(o.led, onBack(0.6, 0.262)); o.led.rotation.set(0, 0, pa);
+  at(o.belt, add(pose.P, v3(0, 0.05 * s, 0))); o.belt.rotation.set(0, 0, pa * 0.5);
+  const yokeTop = onBack(0.93, 0.13);
+  const glow = (v, p) => (p > 1 ? clamp(v / p, 0, 1) * smooth(5, 40, p) * 1.8 : 0);
+  const gH = glow(ld.hip, PK.hip), gK = glow(ld.knee, PK.knee), gS = glow(ld.sh, PK.sh), gE = glow(ld.elb, PK.elb);
+  const grip = smooth(0, 1, ch.gb);
+  for (let k = 0; k < 2; k++) {
+    const q = o.sides[k], side = q.side;
+    const hip = pose.hips[k], knee = pose.knees[k], ank = pose.ankles[k];
+    at(q.hip, hip); seg(q.thigh, hip, knee); at(q.knee, knee); seg(q.shank, knee, ank);
+    at(q.foot, ank); q.foot.rotation.set(0, 0, -Math.asin(clamp(pose.heel / (0.2 * s), 0, 0.9)));
+    const sh = pose.shoulders[k], el = pose.elbows[k], wr = pose.wrists[k], hd = pose.hands[k], hg = pose.hinge[k];
+    at(q.shoulder, sh); seg(q.upper, sh, el); at(q.elbow, el); seg(q.fore, el, wr); at(q.hand, hd);
+    const mh = add(hip, v3(0, 0, side * 0.115 * s)), mk = add(knee, v3(0, 0, side * 0.078 * s)), ma = add(ank, v3(0, 0, side * 0.07 * s));
+    axis(q.mHip, mh, ZDIR); axis(q.mKnee, mk, ZDIR); axis(q.ankleHinge, ma, ZDIR);
+    seg(q.sThigh, mh, mk); seg(q.sShank, mk, ma);
+    axis(q.cThigh, mix(hip, knee, 0.55), sub(knee, hip)); axis(q.cShank, mix(knee, ank, 0.42), sub(ank, knee));
+    const ms = add(add(sh, mul(pose.back, 0.02 * s)), v3(0, 0, side * 0.072 * s));
+    const me = add(el, mul(hg, 0.052 * s)), mw = add(wr, mul(hg, 0.04 * s));
+    axis(q.mSh, ms, ZDIR); axis(q.mEl, me, hg);
+    seg(q.sUpper, ms, me); seg(q.sFore, me, mw);
+    axis(q.cUpper, mix(sh, el, 0.5), sub(el, sh)); axis(q.cFore, mix(el, wr, 0.55), sub(wr, el));
+    seg(q.yoke, add(yokeTop, v3(0, 0, side * 0.05 * s)), ms);
+    q.jaw.position.set(hd.x, hd.y, hd.z - side * P.handHalf * grip);
+    q.jaw.rotation.set(0, 0, tr.th * grip);
+    q.mHip.userData.cap.emissiveIntensity = gH; q.mKnee.userData.cap.emissiveIntensity = gK;
+    q.mSh.userData.cap.emissiveIntensity = gS; q.mEl.userData.cap.emissiveIntensity = gE;
+  }
+}
+
+function poseTree(tr) {
+  const c = Math.cos(tr.th), sn = Math.sin(tr.th);
+  const ox = tr.gx - c * P.xg, oy = tr.gy - sn * P.xg;
+  tree.group.position.set(ox, oy, 0);
+  tree.group.rotation.set(0, 0, tr.th);
+  for (const tier of tree.tiers) {
+    const wx = ox + c * tier.x, wy = oy + sn * tier.x;
+    tier.low.scale.y = clamp((wy - floorAt(P, wx)) / tier.r, P.cLow, 1);
+  }
+}
+
+const lblGrip = label('Stammgreifer', true);
+scene.add(lblGrip);
+function poseLabels(ch, pose) {
+  const on = state.labels;
+  tree.lblCut.visible = on && !ch.carried;
+  tree.lblTip.visible = on;
+  tree.lblCg.visible = tree.cgDot.visible = tree.cgLine.visible = on;
+  plat.lblH.visible = on;
+  if (plat.lblMax) plat.lblMax.visible = on;
+  lblGrip.visible = on && ch.carried;
+  if (ch.carried) {
+    lblGrip.position.set(pose.Gact.x, pose.Gact.y + 0.2, 0);
+    const txt = `Stammgreifer · ${fmt(pose.Gact.y)}${NB}m`;
+    if (lblGrip.element.textContent !== txt) lblGrip.element.textContent = txt;
+  }
+}
+
+/* ================= Kamera ================= */
+let tween = null, lastPelvisX = null, curPelvisX = 0;
+function fitDistance(dir, tgt, box) {
+  const fwd = new THREE.Vector3().copy(dir).normalize();
+  const right = new THREE.Vector3().crossVectors(Y_AXIS, fwd).normalize();
+  const up = new THREE.Vector3().crossVectors(fwd, right).normalize();
+  const tv = Math.tan(deg(camera.fov) / 2), th = tv * camera.aspect;
+  let d = 0;
+  for (const x of [box.x0, box.x1]) for (const y of [box.y0, box.y1]) for (const z of [box.z0, box.z1]) {
+    const c = new THREE.Vector3(x - tgt.x, y - tgt.y, z - tgt.z);
+    d = Math.max(d, c.dot(fwd) + Math.max(Math.abs(c.dot(right)) / th, Math.abs(c.dot(up)) / tv));
+  }
+  return d * 1.03;
+}
+function viewPose(kind) {
+  const box = { x0: P.xSt0 - 0.5, x1: P.xe + Math.max(P.L + 0.1, P.Lp * 0.7), y0: 0, y1: 2.3, z0: -0.9, z1: 1.3 };
+  const tgt = new THREE.Vector3((box.x0 + box.x1) / 2, 0.95, 0.1);
+  if (kind === 'follow') {
+    const k = camera.aspect < 1 ? 1.45 : 1;
+    return { pos: new THREE.Vector3(curPelvisX - 3.1 * k, 2.1 * k, 3.3 * k), tgt: new THREE.Vector3(curPelvisX + 1.3, 1.0, 0) };
+  }
+  const dir = kind === 'side'
+    ? new THREE.Vector3(0, 0.12, 1)
+    : new THREE.Vector3().lerpVectors(new THREE.Vector3(-0.82, 0.4, 0.36), new THREE.Vector3(-0.5, 0.3, 0.8), smooth(0.7, 1.4, camera.aspect));
+  dir.normalize();
+  return { pos: tgt.clone().addScaledVector(dir, fitDistance(dir, tgt, box)), tgt };
+}
+function setView(kind, instant = false) {
+  state.view = kind;
+  for (const b of document.querySelectorAll('.views button')) b.setAttribute('aria-pressed', String(b.dataset.view === kind));
+  const v = viewPose(kind);
+  lastPelvisX = curPelvisX;
+  if (instant || reduced) { tween = null; camera.position.copy(v.pos); controls.target.copy(v.tgt); controls.update(); return; }
+  tween = { p0: camera.position.clone(), q0: controls.target.clone(), p1: v.pos, q1: v.tgt, start: performance.now(), dur: 700 };
+}
+controls.addEventListener('start', () => { tween = null; });
+
+/* ================= Oberfläche ================= */
+const $ = (id) => document.getElementById(id);
+const ui = {
+  play: $('play'), scrub: $('scrub'), segs: $('segs'), capStep: $('capStep'), capTitle: $('capTitle'), capText: $('capText'),
+  hp: $('hp'), len: $('len'), height: $('height'), net: $('net'), labels: $('labels'),
+  hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), reach: $('reach'), reachText: $('reachText'),
+  steps: [...document.querySelectorAll('#steps button')],
+};
+const ROWS = [['F', 'F', 'N'], ['M', 'M', 'Nm'], ['sh', 'Sh', 'Nm'], ['hip', 'Hip', 'Nm'], ['knee', 'Knee', 'Nm']]
+  .map(([k, id, unit]) => ({ k, unit, now: $('now' + id), max: $('max' + id), bar: $('bar' + id) }));
+let segEls = [];
+
+function captionFor(id) {
+  const hp = `${fmt(P.hp)}${NB}m`;
+  switch (id) {
+    case 'start': return ['Ausgangslage', 'Ausgangslage', `Der geschnittene Christbaum liegt am Boden, die Spitze zeigt zum Plateau (${hp} hoch).`];
+    case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen und den Stammgreifer am astfreien Stammende schließen.'];
+    case 'lift': return ['Schritt 2 von 6', 'Anheben bis waagrecht', 'Das Schnittende geht hoch, die Spitze schleift noch am Boden. Dann stellt das Exo den Baum waagrecht und die Spitze hebt ab.'];
+    case 'carry': return ['Schritt 3 von 6', 'Tragen', 'Den Baum waagrecht vor dem Körper zum Plateau tragen.'];
+    case 'raise': return ['Schritt 4 von 6', 'Hochheben', P.ySlide > P.yCarry + 0.01
+      ? `Auf Ladehöhe bringen: Stamm auf ${fmt(P.ySlide)}${NB}m, damit der Baum über die Plateaukante (${hp}) passt.`
+      : `Die Tragehöhe reicht schon, der Baum passt über die Plateaukante (${hp}).`];
+    case 'push': return ['Schritt 5 von 6', 'Aufschieben', 'Mit der Spitze voran aufs Plateau schieben, bis der Baum ganz oben liegt.'];
+    case 'place': return ['Schritt 6 von 6', 'Ablegen', 'Den Baum aufs Plateau absenken.'];
+    case 'release': return ['Schritt 6 von 6', 'Loslassen', 'Greifer öffnen und zurücktreten. Bereit für den nächsten Baum.'];
+    default: return ['Fertig', 'Baum geladen', `Der Christbaum liegt auf dem Plateau (${hp}).`];
+  }
+}
+function stepOf(id) { return { grip: 1, lift: 2, carry: 3, raise: 4, push: 5, place: 6, release: 6 }[id] || 0; }
+
+function buildSegs() {
+  ui.segs.textContent = '';
+  segEls = TL.steps.map((st) => {
+    const d = document.createElement('div');
+    d.className = 'seg';
+    d.style.flexGrow = (st.t1 - st.t0).toFixed(3);
+    const fill = document.createElement('i');
+    d.append(fill);
+    if (st.n >= 1 && st.n <= 6) { const b = document.createElement('b'); b.textContent = st.n; d.append(b); }
+    ui.segs.append(d);
+    return { el: d, fill, st };
+  });
+}
+function updateTimeline() {
+  const t = state.t;
+  for (const s of segEls) {
+    s.fill.style.width = (clamp((t - s.st.t0) / (s.st.t1 - s.st.t0), 0, 1) * 100).toFixed(1) + '%';
+    s.el.classList.toggle('on', t >= s.st.t0 && t < s.st.t1);
+  }
+  ui.scrub.value = t.toFixed(2);
+}
+function updateCaption(ch) {
+  const [step, title, text] = captionFor(ch.id);
+  ui.capStep.textContent = step; ui.capTitle.textContent = title; ui.capText.textContent = text;
+  const n = stepOf(ch.id);
+  ui.steps.forEach((b) => { if (Number(b.dataset.step) === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  ui.scrub.setAttribute('aria-valuetext', `${step}: ${title}`);
+}
+function updateLoads(ld) {
+  for (const r of ROWS) {
+    const v = ld[r.k], pk = PK[r.k];
+    const txt = `${Math.round(v)}${NB}${r.unit}`;
+    if (r.now.textContent !== txt) r.now.textContent = txt;
+    r.bar.style.width = (pk > 0 ? clamp(v / pk, 0, 1) * 100 : 0).toFixed(1) + '%';
+  }
+}
+function updateStatic() {
+  ui.hpOut.textContent = `${fmt(state.hp)}${NB}m`;
+  ui.lenOut.textContent = `${fmt(state.L, 1)}${NB}m · ≈${NB}${Math.round(P.mass)}${NB}kg`;
+  ui.heightOut.textContent = `${fmt(state.H)}${NB}m`;
+  for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k])}${NB}${r.unit}`;
+  const gy = `${fmt(PK.gy)}${NB}m`;
+  let level = 'ok', icon = '✓', text = `Stamm höchstens auf ${gy}, unter Kopfhöhe`;
+  if (PK.gap > 0.02) { level = 'bad'; icon = '✕'; text = `Zu hoch für die Arme: Stamm kommt nur auf ${gy}, es fehlen ${Math.round(PK.gap * 100)}${NB}cm`; }
+  else if (PK.over) { level = 'warn'; icon = '▲'; text = `Arbeit über Kopf: Stamm bis ${gy}`; }
+  ui.reach.dataset.level = level;
+  ui.reach.querySelector('.ic').textContent = icon;
+  ui.reachText.textContent = text;
+}
+
+function rebuild(parts) {
+  P = derive(state);
+  TL = buildTimeline(P);
+  finalize(P, TL);
+  PK = analyse(P, TL);
+  if (parts.tree) { if (tree) disposeGroup(tree.group); tree = buildTree(P); scene.add(tree.group); }
+  if (parts.platform) { disposePlatform(); plat = buildPlatform(P); scene.add(plat.group); }
+  if (parts.person) { if (person) disposeGroup(person.group); person = buildPerson(P); scene.add(person.group); }
+  ui.scrub.max = TL.T.toFixed(2);
+  state.t = clamp(state.t, 0, TL.T);
+  buildSegs();
+  updateStatic();
+  lastId = null;
+}
+
+let lastId = null, frameNo = 0;
+function update() {
+  const ch = choreo(P, TL, state.t), pose = solve(P, ch), tr = treePose(P, ch, pose), ld = loads(P, ch, pose, tr);
+  posePerson(pose, ch, tr, ld);
+  poseTree(tr);
+  poseLabels(ch, pose);
+  curPelvisX = pose.P.x;
+  if (ch.id !== lastId) { lastId = ch.id; updateCaption(ch); }
+  if ((frameNo++ & 1) === 0) updateLoads(ld);
+  updateTimeline();
+}
+
+function setPlaying(on) {
+  state.playing = on;
+  ui.play.classList.toggle('paused', !on);
+  ui.play.setAttribute('aria-label', on ? 'Pause' : 'Abspielen');
+}
+ui.play.addEventListener('click', () => { if (!state.playing && state.t >= TL.T - 0.05) state.t = 0; setPlaying(!state.playing); });
+ui.scrub.addEventListener('input', () => { state.t = Number(ui.scrub.value); setPlaying(false); });
+ui.steps.forEach((b) => b.addEventListener('click', () => {
+  const st = TL.steps.find((x) => x.n === Number(b.dataset.step));
+  state.t = st.t0 + 0.001;
+  setPlaying(!reduced);
+}));
+for (const b of document.querySelectorAll('.views button')) b.addEventListener('click', () => setView(b.dataset.view));
+ui.hp.addEventListener('input', () => { state.hp = Number(ui.hp.value); rebuild({ platform: true }); });
+ui.len.addEventListener('input', () => { state.L = Number(ui.len.value); rebuild({ tree: true, platform: true }); });
+ui.height.addEventListener('input', () => { state.H = Number(ui.height.value); rebuild({ person: true }); });
+ui.net.addEventListener('change', () => { state.netted = ui.net.checked; rebuild({ tree: true }); });
+ui.labels.addEventListener('change', () => { state.labels = ui.labels.checked; });
+
+/* ================= Farbschema ================= */
+function token(name, fallback) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback; }
+function applyTheme() {
+  const sky = new THREE.Color(token('--scene-sky', '#E2EAE5'));
+  scene.background = sky;
+  scene.fog.color.copy(sky);
+  MAT.ground.color.set(token('--scene-ground', '#CBD6CF'));
+  buildGrid(new THREE.Color(token('--scene-grid', '#A9B8AF')));
+  const ink = token('--scene-ink', '#15211C');
+  for (const m of INK) m.color.set(ink);
+  MAT.cgDot.color.set(token('--accent', '#C24A0C'));
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+
+/* ================= Größe & Schleife ================= */
+function resize() {
+  const w = host.clientWidth, h = host.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h);
+  labelRenderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(host);
+
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (state.playing) { state.t += dt; if (state.t > TL.T) state.t = 0; }
+  update();
+  if (tween) {
+    const k = ease((now - tween.start) / tween.dur);
+    camera.position.lerpVectors(tween.p0, tween.p1, k);
+    controls.target.lerpVectors(tween.q0, tween.q1, k);
+    if (k >= 1) tween = null;
+  } else if (state.view === 'follow' && lastPelvisX !== null) {
+    const dx = curPelvisX - lastPelvisX;
+    camera.position.x += dx;
+    controls.target.x += dx;
+  }
+  lastPelvisX = curPelvisX;
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+
+function boot(data) {
+  if (data && typeof data === 'object') {
+    for (const k of ['H', 'L', 'hp', 'netted', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
+  }
+  ui.hp.value = state.hp; ui.len.value = state.L; ui.height.value = state.H;
+  ui.net.checked = state.netted; ui.labels.checked = state.labels;
+  applyTheme();
+  rebuild({ tree: true, platform: true, person: true });
+  if (reduced && state.t === 0) state.t = (TL.byId.push.t0 + TL.byId.push.t1) / 2;
+  setPlaying(state.playing && !reduced);
+  resize();
+  update();
+  setView(state.view, true);
+  requestAnimationFrame(loop);
+}
+window.claude?.hot?.snapshot?.(() => ({ ...state }));
+if (window.claude?.hot?.ready) window.claude.hot.ready(boot);
+else boot(window.claude?.hot?.data ?? {});
+
+// Testzugang für automatische Prüfungen der Kinematik (wird von der Seite selbst nicht benutzt)
+window.__exo = { derive, buildTimeline, choreo, solve, treePose, loads, finalize, analyse, state, get P() { return P; }, get TL() { return TL; }, get PK() { return PK; } };
+</script>
+</body>
+</html>
