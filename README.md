@@ -12,9 +12,9 @@ Der Use Case ist der Grundstein des Projekts. Gelenke, Motoren, Greifer und Akku
 1. **Greifen:** In die Hocke gehen und den Stammgreifer am astfreien Stammende (Schnittende) schließen.
 2. **Aufrichten bis fast senkrecht:** Aus der Hocke hochkommen, den Baum hochschwenken und sich zurücklehnen.
 3. **Tragen:** Fast senkrecht (78°) und leicht zurückgelehnt zum Plateau gehen.
-4. **Ankippen:** Den Baum nach vorne kippen, bis er auf der Plateaukante bzw. mit der Spitze auf dem Plateau aufliegt.
-5. **Aufschieben:** Das Schnittende anheben und den Baum aufs Plateau schieben. Das Plateau trägt dabei den größten Teil.
-6. **Loslassen:** Greifer öffnen, zurücktreten.
+4. **Hochheben:** Den Baum fast lotrecht (84°) balancieren und anheben, bis das Schnittende auf Plateauhöhe ist. Dann das Schnittende über die Kante führen und knapp dahinter auf der Ladefläche absetzen.
+5. **Umkippen lassen:** Der Greifer hält das Schnittende wie ein Scharnier, der Baum kippt 90° nach vorne aufs Plateau. Sobald die untersten Äste aufliegen, öffnet der Greifer. Nichts wird geschoben, das schont den Baum.
+6. **Zurücktreten:** Arme runter, zurücktreten.
 
 Das Plateau ist eine Ladefläche (z. B. Anhänger oder LKW) mit einer Höhe zwischen **0 und 1,75 m**.
 
@@ -39,7 +39,8 @@ Die Seite braucht Internet für die 3D-Bibliothek [three.js](https://threejs.org
 | Ausgangslage | Der Baum liegt nach dem Schneiden am Boden, die Spitze zeigt Richtung Plateau. |
 | Greifen | Nur am astfreien Stammende, mit einem Stammgreifer, der fest zum Exo gehört. |
 | Tragen | Fast senkrecht (78°), Greifer auf Hüfthöhe vor dem Körper, die Person lehnt sich bis etwa 10° zurück. |
-| Aufladen | Beim Ankippen und Aufschieben liegt der Baum auf Kante bzw. Plateau auf, das Plateau trägt mit. |
+| Aufladen | Baum fast lotrecht anheben, bis das Schnittende auf Plateauhöhe ist, absetzen und 90° aufs Plateau kippen lassen. Kein Schieben. |
+| Greifer | Kann beim Umkippen frei drehen (Scharnier), damit das Schnittende nicht über die Kante rutscht und das Exo kein Moment abbekommt. |
 | Plateau | Ladefläche, 0 bis 1,75 m hoch. |
 | Baum | Nordmanntanne. Gewicht aus der Länge geschätzt (2 m ≈ 15 kg), Schwerpunkt bei etwa 31 % der Länge ab Schnittende. |
 | Person | Körpergröße 1,80 m (in der Darstellung einstellbar). |
@@ -55,36 +56,39 @@ Statisch gerechnet, nur die Zusatzlast durch den Baum (ohne Körpergewicht, ohne
 |---|---|---|---|---|
 | Aufrichten (nur kurz, solange der Baum noch flach ist) | 147 N | 73 Nm | 94 Nm | 147 Nm |
 | Tragen, fast senkrecht | 147 N | 15 Nm | 78 Nm | 70 Nm |
-| Ankippen auf die Kante | 147 N | 33 Nm | 80 Nm | 86 Nm |
-| Aufschieben, Plateau trägt mit | höchstens 81 N, fällt auf 0 | 0 Nm | 26 Nm | 29 Nm |
+| Hochheben und an der Kante absetzen (Greifer bis 1,92 m, über Kopf) | 147 N | 8 bis 15 Nm | 78 Nm | 70 Nm |
+| Umkippen lassen (Schnittende steht auf, Greifer dreht als Scharnier) | 0 N | 0 Nm | 0 Nm | 0 Nm |
 | *Zum Vergleich: waagrecht tragen (erste Version)* | *147 N* | *73 Nm* | *135 Nm* | *142 Nm* |
 
-**Kippmoment am Greifer nach Baumgröße**, Plateau 1,75 m:
+**Nach Baumgröße**, Plateau 1,75 m, Baum nicht eingenetzt:
 
-| Baum | Aufrichten (kurze Spitze) | Tragen | Ankippen |
-|---|---|---|---|
-| 1,5 m (≈ 7 kg) | 25 Nm | 5 Nm | 12 Nm |
-| 2,0 m (≈ 15 kg) | 73 Nm | 15 Nm | 33 Nm |
-| 2,5 m (≈ 26 kg) | 164 Nm | 34 Nm | 72 Nm |
-| 3,0 m (≈ 41 kg) | 309 Nm | 64 Nm | 132 Nm |
+| Baum | Kippmoment beim Aufrichten (kurz) | Kippmoment beim Tragen | Gewicht über Kopf | Abstand zur Kante beim Hochheben |
+|---|---|---|---|---|
+| 1,5 m (≈ 7 kg) | 25 Nm | 5 Nm | 7 kg | 0,68 m |
+| 2,0 m (≈ 15 kg) | 73 Nm | 15 Nm | 15 kg | 0,83 m (eingenetzt 0,46 m) |
+| 2,5 m (≈ 26 kg) | 164 Nm | 34 Nm | 26 kg | 0,97 m |
+| 3,0 m (≈ 41 kg) | 309 Nm | 64 Nm | 41 kg | 1,11 m |
 
 Was daraus folgt:
 
 - **Fast senkrecht tragen nimmt den Hebel raus.** Das Kippmoment beim Tragen sinkt auf etwa ein Fünftel (2 m Baum: 15 statt 73 Nm), Schultern und Hüfte werden etwa halb so stark belastet wie beim waagrechten Tragen.
-- **Ganz ohne Hebel geht das Aufrichten nicht.** Wer nur am Schnittende greift, schwenkt den Baum kurz durch die flache Lage. Dort wirkt für etwa eine Sekunde das volle Moment (2 m: 73 Nm, 3 m: 309 Nm). Das Exo muss diese Spitze aus der Hocke, nah am Körper abfangen. Bei niedrigen Plateaus (unter etwa 1 m) gilt das auch beim Ankippen, weil der Baum fast flach wird, bevor er aufliegt.
-- **Hohe Plateaus sind beim Aufladen sogar leichter.** Die Kante fängt den Baum früh ab (bei 1,75 m schon bei etwa 63°), danach trägt das Plateau.
-- **Über Kopf nur am Schluss und fast ohne Last.** Beim Aufschieben auf 1,75 m geht das Schnittende auf etwa 2 m, dann liegt der Baum aber schon zum größten Teil oben. Bei 2,5 bis 3 m Bäumen bleibt das Schnittende 5 bis 11 cm unter der Ladefläche und steht über, der Baum liegt trotzdem sicher oben.
+- **Ganz ohne Hebel geht das Aufrichten nicht.** Wer nur am Schnittende greift, schwenkt den Baum kurz durch die flache Lage. Dort wirkt für etwa eine Sekunde das volle Moment (2 m: 73 Nm, 3 m: 309 Nm). Das Exo muss diese Spitze aus der Hocke, nah am Körper abfangen.
+- **Kein Schieben, kein Moment beim Umkippen.** Sobald das Schnittende auf der Ladefläche steht, trägt das Plateau das Gewicht. Der Greifer dreht beim Umkippen als Scharnier mit und hält nur den Fuß an seinem Platz.
+- **Der Preis: bei hohem Plateau das volle Gewicht über Kopf.** Bei 1,75 m geht der Greifer auf gut 1,9 m, mit dem ganzen Baum (2 m: 15 kg, 3 m: 41 kg). Das Moment ist klein, weil der Baum fast lotrecht steht, aber die Arme sind über dem Kopf. Die Schultermotoren des Exos müssen das tragen und die Last über den Rahmen in den Boden leiten. Mit 1,80 m Körpergröße geht es, mit 1,65 m gerade noch, mit 1,50 m nicht mehr.
+- **Ungenetzt braucht beim Hochheben Abstand.** Sonst stoßen die unteren Äste an die Kante. Beim 2 m Baum etwa 0,8 m vor der Kante anheben und den letzten Schritt mit dem Baum über Kopf gehen. Eingenetzt reicht knapp ein halber Meter.
+- **Aufprall beim Umkippen.** Der 2 m Baum schlägt etwa so auf, als würde man ihn flach aus 40 cm Höhe fallen lassen, der 3 m Baum wie aus gut 60 cm. Die Äste federn das ab. Ist es zu hart, kann der Greifer das Umkippen bremsen.
 - **Fast senkrecht vor dem Körper nimmt ein ungenetzter Baum die Sicht.** Eingenetzt ist er schmal genug, sonst müsste er etwas seitlich getragen werden.
 
 ## Offene Fragen
 
-1. Stimmt der neue Ablauf (aufrichten, zurückgelehnt tragen, auf die Kante kippen, aufschieben)?
-2. Ist es in Ordnung, dass der Baum beim Aufrichten kurz durch die flache Lage geht? Ohne diese Spitze ginge es nur, wenn der Baum zuerst an der Spitze angehoben und wie eine Leiter aufgestellt wird. Danach würde man unten greifen.
-3. Wie lang und schwer sind die Bäume (kleinster, typischer, größter)? Sind sie beim Aufladen schon eingenetzt?
-4. Was genau ist das Plateau (Anhänger, LKW, Palette)? Wie weit ist der Weg vom Schnitt zum Plateau, und wie ist der Boden (Wiese, Hang, Schnee, Matsch)?
-5. Wie viele Bäume pro Stunde bzw. pro Tag?
-6. Wie groß bist du?
-7. Welcher 3D-Drucker steht zur Verfügung (Bauraum, Material)?
+1. Stimmt der Ablauf jetzt (aufrichten, zurückgelehnt tragen, fast lotrecht hochheben bis Plateauhöhe, absetzen, 90° umkippen lassen)?
+2. Darf der Baum beim Umkippen frei fallen, oder soll der Greifer das Umkippen bremsen?
+3. Ist es in Ordnung, dass der Baum beim Aufrichten kurz durch die flache Lage geht? Ohne diese Spitze ginge es nur, wenn der Baum zuerst an der Spitze angehoben und wie eine Leiter aufgestellt wird. Danach würde man unten greifen.
+4. Wie lang und schwer sind die Bäume (kleinster, typischer, größter)? Sind sie beim Aufladen schon eingenetzt?
+5. Was genau ist das Plateau (Anhänger, LKW, Palette)? Wie weit ist der Weg vom Schnitt zum Plateau, und wie ist der Boden (Wiese, Hang, Schnee, Matsch)?
+6. Wie viele Bäume pro Stunde bzw. pro Tag?
+7. Wie groß bist du?
+8. Welcher 3D-Drucker steht zur Verfügung (Bauraum, Material)?
 
 ## Sicherheit
 
