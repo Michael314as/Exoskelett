@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>Christbaum-Exo Schleifen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{
+  /* Skizzenhafte Szene: 3D links, Werte rechts; am Handy untereinander. */
+  --bg:#EAF0EC; --surface:#F7FAF8; --surface-2:#DEE6E1; --fg:#15211C; --muted:#55665E; --line:#C9D4CE;
+  --accent:#C24A0C; --accent-ink:#FFFFFF; --sky:#E2EAE5; --ground:#CBD6CF; --grid:#A9B8AF;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1411; --surface:#131C18; --surface-2:#1D2924; --fg:#E3EBE6; --muted:#97A89F; --line:#2A3832;
+  --accent:#FF7D3B; --accent-ink:#1C0E05; --sky:#0F1814; --ground:#1A2520; --grid:#2E3F37; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1411; --surface:#131C18; --surface-2:#1D2924; --fg:#E3EBE6; --muted:#97A89F; --line:#2A3832;
+  --accent:#FF7D3B; --accent-ink:#1C0E05; --sky:#0F1814; --ground:#1A2520; --grid:#2E3F37; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{box-sizing:border-box;min-height:100%;display:flex;flex-direction:column;gap:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 16px}
+h1{margin:0;font-size:24px;line-height:1.15}
+.sub{margin:0;color:var(--muted);font-size:14px}
+.work{display:flex;flex-direction:column;gap:12px;min-width:0}
+.stage{position:relative;height:min(60vh,520px);min-height:340px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--sky)}
+.stage canvas{display:block}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--surface-2);color:var(--fg);font:inherit;font-size:14px;padding:7px 11px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ctl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px}
+.ctl label{font-weight:600;font-size:14px}
+.ctl output{font-variant-numeric:tabular-nums;font-size:14px}
+.ctl input{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+h2{margin:0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.vals{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:14px}
+.vals b{font-variant-numeric:tabular-nums;text-align:right}
+.note{margin:0;font-size:13px;color:var(--muted)}
+.say{margin:0;padding:8px 10px;border-radius:8px;background:var(--surface-2);font-size:14px}
+@media (min-width:960px){
+  .app{height:100%}
+  .work{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
+  .stage{height:auto;min-height:0}
+  .panel{overflow:auto}
+}
+</style>
+
+<div class="app">
+  <h1>Use Case 2: Bäume schleifen</h1>
+  <p class="sub">Skizze: Ein bis vier Bäume am Stumpf fassen und über den Boden zum Plateau ziehen.</p>
+  <main class="work">
+    <section class="stage" id="stage" aria-label="3D-Skizze Schleifen"></section>
+    <aside class="panel">
+      <div class="seg" role="group" aria-label="Variante">
+        <button type="button" id="mExo" aria-pressed="true">Mit Exo, vorwärts</button>
+        <button type="button" id="mHand" aria-pressed="false">Ohne Exo, rückwärts</button>
+      </div>
+      <p class="say" id="say"></p>
+      <div class="ctl"><label for="n">Anzahl Bäume</label><output id="nOut">2</output><input type="range" id="n" min="1" max="4" step="1" value="2"></div>
+      <div class="ctl"><label for="len">Baumlänge</label><output id="lenOut">2,0 m</output><input type="range" id="len" min="1" max="4" step="0.1" value="2"></div>
+      <div class="ctl"><label for="kg">Gewicht je Baum</label><output id="kgOut">15 kg</output><input type="range" id="kg" min="1" max="120" step="1" value="15"></div>
+      <div class="seg" role="group" aria-label="Boden">
+        <button type="button" id="gGrass" aria-pressed="true">Gras</button>
+        <button type="button" id="gSnow" aria-pressed="false">Schnee</button>
+      </div>
+      <h2>Kräfte (grob)</h2>
+      <div class="vals">
+        <span>Gesamtgewicht</span><b id="vW">–</b>
+        <span id="vHoldL">Gewicht am Zuggreifer</span><b id="vHold">–</b>
+        <span>Zugkraft nach vorne</span><b id="vPull">–</b>
+        <span>Zum Vergleich: ganz am Boden schleifen</span><b id="vFlat">–</b>
+      </div>
+      <p class="note">Stümpfe auf Hüfthöhe angehoben, Äste gleiten am Boden (Reibung Gras etwa 0,6, Schnee etwa 0,3). Ziehen und drehen mit der Maus oder zwei Fingern.</p>
+    </aside>
+  </main>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const $ = (id) => document.getElementById(id);
+const fmt = (x, d = 1) => x.toFixed(d).replace('.', ',');
+const st = { exo: true, n: 2, L: 2, kg: 15, kgManual: false, mu: 0.6 };
+const typical = (L) => Math.round(15 * Math.pow(L / 2, 2.5));
+
+/* ---------- Szene ---------- */
+const stage = $('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI * 0.48;
+camera.position.set(-1, 2.6, 6.5);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x556655, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(-3, 8, 5); sun.castShadow = true;
+Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8 });
+scene.add(sun, sun.target);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const groundMat = new THREE.MeshStandardMaterial({ roughness: 1 });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), groundMat);
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+let grid;
+function theme() {
+  scene.background = new THREE.Color(css('--sky'));
+  groundMat.color.set(css('--ground'));
+  if (grid) grid.removeFromParent();
+  grid = new THREE.GridHelper(40, 40, css('--grid'), css('--grid')); grid.position.y = 0.003; scene.add(grid);
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', theme);
+new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+theme();
+
+const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.7, ...o });
+const M = { body: mat(0x6A8092), pants: mat(0x4C5865), head: mat(0xC4B6AA), steel: mat(0xB4BCC2, { metalness: 0.8, roughness: 0.3 }),
+  motor: mat(0xD4520E), clamp: mat(0xD4520E), fir: mat(0x2E5C43, { flatShading: true }), trunk: mat(0x6A4A30) };
+const UP = new THREE.Vector3(0, 1, 0), _d = new THREE.Vector3();
+function seg(m, a, b) {
+  _d.subVectors(b, a); const l = _d.length();
+  m.position.copy(a).addScaledVector(_d, 0.5); m.quaternion.setFromUnitVectors(UP, _d.normalize()); m.scale.set(1, l, 1);
+}
+const add = (geo, m) => { const x = new THREE.Mesh(geo, m); x.castShadow = true; scene.add(x); return x; };
+const cyl = (r, m) => add(new THREE.CylinderGeometry(r, r, 1, 10), m);
+
+// Person (stark vereinfacht)
+const P = { torso: add(new THREE.CapsuleGeometry(0.15, 0.35, 4, 10), M.body), head: add(new THREE.SphereGeometry(0.11, 14, 10), M.head),
+  legs: [0, 1].map(() => ({ th: cyl(0.065, M.pants), sh: cyl(0.05, M.pants), foot: add(new THREE.BoxGeometry(0.27, 0.07, 0.11), M.pants) })),
+  arms: [0, 1].map(() => ({ up: cyl(0.045, M.body), lo: cyl(0.038, M.body) })) };
+// Exo: Rückenplatte, Hüftgurt, Beinstreben, Motoren, Fußplatten, Zuggreifer
+const E = { back: add(new THREE.BoxGeometry(0.04, 0.5, 0.16), M.steel), belt: add(new THREE.TorusGeometry(0.19, 0.022, 6, 24), M.steel),
+  struts: [0, 1].map(() => ({ a: cyl(0.015, M.steel), b: cyl(0.015, M.steel), hip: add(new THREE.CylinderGeometry(0.06, 0.06, 0.05, 16), M.motor),
+    knee: add(new THREE.CylinderGeometry(0.05, 0.05, 0.05, 16), M.motor), plate: add(new THREE.BoxGeometry(0.34, 0.015, 0.13), M.steel) })),
+  arm: cyl(0.025, M.steel), bar: add(new THREE.BoxGeometry(0.08, 0.06, 0.6), M.clamp) };
+E.belt.geometry.rotateX(Math.PI / 2);
+
+// Bäume
+let trees = [];
+function buildTrees() {
+  trees.forEach((t) => t.g.removeFromParent());
+  trees = [];
+  for (let i = 0; i < st.n; i++) {
+    const g = new THREE.Group(), L = st.L, R = 0.28 * L;
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.018 * L + 0.012, L, 8), M.trunk);
+    trunk.geometry.rotateZ(Math.PI / 2); trunk.geometry.translate(-L / 2, 0, 0); g.add(trunk);  // Spitze nach -x
+    const tiers = Math.round(3 + 2 * L);
+    for (let k = 0; k < tiers; k++) {
+      const f = k / tiers, x0 = 0.25 + (L - 0.25) * f, r = R * (1 - f) * 0.75 + 0.03, h = (L - 0.25) * 1.8 / tiers;
+      const c = new THREE.Mesh(new THREE.ConeGeometry(r, h, 7), M.fir);
+      c.geometry.rotateZ(Math.PI / 2); c.geometry.translate(-(x0 + h / 2), 0, 0); c.scale.y = 0.6; c.castShadow = true; g.add(c);
+    }
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.02, 6, 16), M.clamp);
+    ring.rotation.y = Math.PI / 2; ring.position.x = -0.06; g.add(ring);
+    scene.add(g); trees.push({ g, ring });
+  }
+}
+
+/* ---------- Bewegung ---------- */
+const V = (x, y, z = 0) => new THREE.Vector3(x, y, z);
+function pose(t) {
+  const exo = st.exo, speed = exo ? 0.9 : 0.6;
+  const px = -2 + ((t * speed) % 7);                 // Person geht von links nach rechts (+x), Bäume hinterher
+  const face = exo ? 1 : -1;                          // mit Exo Blick nach vorne, ohne Exo Blick zu den Bäumen
+  const ph = t * speed * 2.6 * face;
+  const hipY = 0.9 + 0.015 * Math.cos(ph * 2) - (exo ? 0 : 0.06);
+  const lean = exo ? 0.17 : 0.3;                      // beides kippt in Laufrichtung: vorwärts gebeugt bzw. zurückgelehnt
+  const Pp = V(px, hipY), S = V(px + Math.sin(lean) * 0.52, hipY + Math.cos(lean) * 0.52);
+  seg(P.torso, Pp.clone().add(V(0, 0.05)), S); P.torso.scale.set(1, 1, 1);
+  P.torso.position.copy(Pp).lerp(S, 0.55); P.torso.quaternion.setFromUnitVectors(UP, _d.subVectors(S, Pp).normalize());
+  P.head.position.copy(S).add(V(Math.sin(lean * 0.6) * 0.22, 0.2));
+  // Beine
+  [0, 1].forEach((k) => {
+    const side = k ? 0.1 : -0.1, a = 0.38 * Math.sin(ph + k * Math.PI), b = 0.5 * Math.max(0, Math.sin(ph + k * Math.PI + 1.2));
+    const H = V(px, hipY, side), K = H.clone().add(V(face * Math.sin(a) * 0.44, -Math.cos(a) * 0.44));
+    const A = K.clone().add(V(face * Math.sin(a - b) * 0.44, -Math.cos(a - b) * 0.44));
+    A.y = Math.max(A.y, 0.07);
+    const l = P.legs[k]; seg(l.th, H, K); seg(l.sh, K, A); l.foot.position.copy(A).add(V(face * 0.08, -0.035)); l.foot.rotation.y = 0;
+    const s = E.struts[k], o = V(0, 0, side * 1.8);
+    seg(s.a, H.clone().add(o), K.clone().add(o)); seg(s.b, K.clone().add(o), A.clone().add(o));
+    s.hip.position.copy(H).add(o); s.hip.rotation.x = Math.PI / 2; s.knee.position.copy(K).add(o); s.knee.rotation.x = Math.PI / 2;
+    s.plate.position.copy(A).add(V(face * 0.08, -0.07));
+    [s.a, s.b, s.hip, s.knee, s.plate].forEach((m) => { m.visible = exo; });
+  });
+  // Greifpunkt der Stümpfe: mit Exo hinten an der Hüfte, ohne Exo in den Händen vor dem Körper
+  const grip = exo ? V(px - 0.36, 0.62) : V(px - 0.48, 0.72);
+  [0, 1].forEach((k) => {
+    const side = k ? 0.2 : -0.2, Sh = S.clone().add(V(0, -0.02, side));
+    const Hd = exo ? Sh.clone().add(V(0.12 * Math.sin(ph + k * Math.PI), -0.6, side * 0.1)) : grip.clone().add(V(0, 0, side * 0.4));
+    const El = Sh.clone().lerp(Hd, 0.5).add(V(exo ? -0.04 : 0.12, -0.08));
+    seg(P.arms[k].up, Sh, El); seg(P.arms[k].lo, El, Hd);
+  });
+  // Exo-Rücken und Zuggreifer
+  E.back.position.copy(Pp).lerp(S, 0.5).add(V(-Math.cos(lean) * 0.17, Math.sin(lean) * 0.17)); E.back.rotation.z = -lean;
+  E.belt.position.copy(Pp).add(V(0, 0.05)); E.belt.scale.set(0.85, 1, 1.15);
+  seg(E.arm, Pp.clone().add(V(-0.17, 0.02)), grip.clone().add(V(0.03, 0)));
+  E.bar.position.copy(grip);
+  [E.back, E.belt, E.arm, E.bar].forEach((m) => { m.visible = exo; });
+  // Bäume: Stumpf am Greifpunkt, Spitze schleift hinten am Boden
+  const L = st.L, th = Math.asin(Math.min(0.95, (grip.y - 0.12) / L));
+  trees.forEach((t, i) => {
+    const z = (i - (st.n - 1) / 2) * 0.16;
+    t.g.position.set(grip.x, grip.y, z); t.g.rotation.z = th;      // Spitze nach hinten unten
+  });
+  return px;
+}
+
+/* ---------- Kräfte ---------- */
+function forces() {
+  const L = st.L, bare = Math.min(Math.max(0.12 * L + 0.04, 0.16), 0.32);
+  const xcg = 0.55 * (bare + (L - bare) / 4) + 0.45 * (L / 4), xg = 0.12;
+  const W = st.n * st.kg, N = W * (xcg - xg) / (L - xg);
+  $('vW').textContent = `${W} kg`;
+  $('vHold').textContent = `${Math.round(W - N)} kg`;
+  $('vPull').textContent = `${Math.round(st.mu * N)} kg`;
+  $('vFlat').textContent = `${Math.round(st.mu * W)} kg`;
+  $('vHoldL').textContent = st.exo ? 'Gewicht am Zuggreifer' : 'Gewicht in den Händen';
+  $('say').textContent = st.exo
+    ? `Zuggreifer hinten an der Hüfte fasst ${st.n} ${st.n > 1 ? 'Stümpfe' : 'Stumpf'}. Das Gewicht geht über Rahmen und Beine in die Fußplatten, die Hände bleiben frei.`
+    : `So geht es heute: Blick zu den Bäumen, Stümpfe in den Händen, zurücklehnen und rückwärts gehen. Die Arme tragen ${Math.round(W - N)} kg vor dem Körper.`;
+  $('nOut').textContent = st.n; $('lenOut').textContent = `${fmt(st.L)} m`; $('kgOut').textContent = `${st.kg} kg`;
+}
+
+/* ---------- Bedienung ---------- */
+const press = (on, off) => { on.setAttribute('aria-pressed', 'true'); off.setAttribute('aria-pressed', 'false'); };
+$('mExo').onclick = () => { st.exo = true; press($('mExo'), $('mHand')); forces(); };
+$('mHand').onclick = () => { st.exo = false; press($('mHand'), $('mExo')); forces(); };
+$('gGrass').onclick = () => { st.mu = 0.6; press($('gGrass'), $('gSnow')); forces(); };
+$('gSnow').onclick = () => { st.mu = 0.3; press($('gSnow'), $('gGrass')); forces(); };
+$('n').oninput = () => { st.n = +$('n').value; buildTrees(); forces(); };
+$('len').oninput = () => { st.L = +$('len').value; if (!st.kgManual) { st.kg = typical(st.L); $('kg').value = st.kg; } buildTrees(); forces(); };
+$('kg').oninput = () => { st.kg = +$('kg').value; st.kgManual = true; forces(); };
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+buildTrees(); forces(); resize();
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lastX = null;
+renderer.setAnimationLoop((ms) => {
+  const px = pose(reduced ? 2.5 : ms / 1000);
+  if (lastX !== null && Math.abs(px - lastX) < 1) { camera.position.x += px - lastX; controls.target.x += px - lastX; }
+  else { controls.target.set(px - st.L / 2, 0.6, 0); camera.position.set(px - st.L / 2 - 1.5, 2.4, 6); }
+  lastX = px;
+  controls.update(); renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
