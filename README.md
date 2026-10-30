@@ -101,9 +101,36 @@ Für den schwersten angenommenen Fall: 4 m Baum, 120 kg, Plateau 1,75 m, mit Lei
 | A9 | Gewicht des Exos | so leicht wie möglich, schwere Teile hinten am Rücken |
 | A10 | Sicherheit | Not-Aus, Endanschläge, Drehmoment- und Geschwindigkeitsbegrenzung, zuerst Prüfstand ohne Person |
 
-## Use Case 2: Schwere Lasten ziehen (noch offen)
+## Use Case 2: Bäume schleifen
 
-Das Exo soll auch beim Ziehen helfen, z. B. Bäume über den Boden schleifen. Dafür zählen vor allem Beine und Hüfte (Schieben gegen den Boden) und eine gute Kraftübertragung zum Zugseil oder Griff. Details folgen, siehe offene Fragen.
+Ein bis vier Bäume (je nach Größe) über den Boden zum Plateau ziehen. Ohne Seil und Gurt: Etwas am Exo fasst die Stämme direkt.
+Am liebsten vorwärts gehen. Ohne Exo geht man in der Praxis rückwärts, je schwerer, desto eher.
+
+**Kräfte (grobe Schätzung, Reibung Äste auf Gras etwa 0,6, auf Schnee etwa 0,3):**
+
+| Last | Gesamt | Stumpf angehoben: Gewicht am Griff | Zug auf Gras | Zug auf Schnee | Ganz am Boden: Zug auf Gras |
+|---|---|---|---|---|---|
+| 4 × 1 m | 12 kg | 9 kg | 2 kg | 1 kg | 7 kg |
+| 4 × 2 m | 60 kg | 44 kg | 9 kg | 5 kg | 36 kg |
+| 2 × 3 m | 82 kg | 60 kg | 13 kg | 7 kg | 49 kg |
+| 1 × 4 m | 85 kg | 63 kg | 13 kg | 7 kg | 51 kg |
+| 1 × 4 m oder 4 × 2 m schwer | 120 kg | 89 kg | 19 kg | 9 kg | 72 kg |
+
+Was daraus folgt:
+
+- **Hebt man die Stümpfe an, ist der Zug klein, aber das Gewicht am Griff groß.** Die Äste gleiten dann nur noch, der Großteil des Gewichts hängt am Griff.
+- **Darum geht man ohne Exo rückwärts:** Die Hände sind vorne, man lehnt sich mit dem Körpergewicht zurück. Vorwärts müssten die Hände 40 bis 90 kg hinter dem Rücken halten, das können die Arme am schlechtesten.
+- **Vorschlag: Zuggreifer hinten an der Hüfte des Exos.** Eine Klemme auf Hüfthöhe hinter dem Körper fasst ein bis vier Stümpfe und hebt sie leicht an. Das Gewicht geht über den Hüftrahmen und die Beine des Exos in die Fußplatten, die Beine schieben vorwärts, die Hände bleiben frei. Man lehnt sich dabei leicht nach vorne, die Last hinten gleicht das aus.
+- **Gleicher Lastpfad wie beim Aufladen:** Rahmen, Hüfte und Beine werden für beide Use Cases gebraucht, der Zuggreifer ist ein zusätzliches Teil am Hüftrahmen.
+
+**Anforderungen (Entwurf):**
+
+| Nr. | Anforderung | Zielwert |
+|---|---|---|
+| Z1 | Zuggreifer fasst | 1 bis 4 Stämme, je etwa 5 bis 18 cm Durchmesser, schnell lösbar |
+| Z2 | Gewicht am Zuggreifer | bis etwa 90 kg, über Rahmen und Beine in die Fußplatten |
+| Z3 | Zugkraft | bis etwa 20 kg mit angehobenen Stümpfen, bis 70 kg wenn sie schleifen |
+| Z4 | Gehen | vorwärts, Hände frei |
 
 ## 3D-Druck (Bambu Lab A1 mini)
 
@@ -115,7 +142,7 @@ Das Exo soll auch beim Ziehen helfen, z. B. Bäume über den Boden schleifen. Da
 
 ## Offene Fragen
 
-1. Ziehen schwerer Lasten: Was ziehst du (einzelne Bäume, mehrere, Schlitten), wie (Seil, Gurt, am Stamm), wie weit, und gehst du dabei vorwärts oder rückwärts?
+1. Passt der Zuggreifer hinten an der Hüfte für Use Case 2? Wie weit schleifst du die Bäume ungefähr, und geht es bergauf?
 2. Wie hoch ist das Budget ungefähr? Davon hängt ab, welche Antriebe infrage kommen (z. B. Wellgetriebe gegen Spindelantriebe).
 3. Kannst du die schwersten Bäume wiegen (z. B. mit einer Kofferwaage oder Kranwaage)? Dann wird A1 aus einer Annahme ein Messwert.
 4. Was genau ist das Plateau (Anhänger, LKW, Palette)? Wie weit ist der Weg vom Schnitt zum Plateau, und wie ist der Boden (Wiese, Hang, Schnee, Matsch)?
