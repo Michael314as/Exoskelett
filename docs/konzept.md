@@ -121,8 +121,8 @@ Die Kraft geht über Hüftbügel und Beinschienen in die Fußplatten, die Beinmo
 - **Akku: Stihl AP-Akku** (36 V Akkusystem), den du schon hast. Er sitzt unten in der Antriebsbox in einer Halterung mit
   Kontakten (3D-gedruckter Adapter, solche Adapter gibt es als Bauvorlage und fertig zu kaufen). Die Motoren laufen in
   diesem Spannungsbereich. Vorher prüfen wir am Tisch, ob der Akku die nötigen Ströme ohne Abschalten liefert.
-- **Laufzeit, grob:** Ein AP 300 S hat etwa 280 Wh. Bei durchschnittlich 100 bis 150 W Unterstützung reicht das für
-  etwa 2 bis 3 Stunden, mit einem zweiten Akku zum Wechseln für den Tag.
+- **Laufzeit, grob:** Vorhanden ist ein **Stihl AP 500 S** mit etwa 337 Wh. Bei durchschnittlich 100 bis 150 W
+  Unterstützung reicht das für etwa 2 bis 3 Stunden. Ein zweiter Akku zum Wechseln deckt einen Arbeitstag ab.
 - **Kälte und Nässe:** Akku in der gedämmten Box, wasserdichte Rundstecker, Elektronik vergossen bzw. im dichten Gehäuse.
 
 ## 7. Gewicht und Gleichgewicht
