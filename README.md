@@ -166,6 +166,8 @@ und erste Tests auf einem Prüfstand ohne Person.
 ## Projektstruktur
 
 ```
+docs/
+  konzept.md                 Konzept: Aufbau, Antriebe, Greifer, Steuerung, Kosten
 visualisierung/
   use-case-christbaum.html   3D: Use Case 1, Christbaum aufladen
   use-case-schleifen.html    3D-Skizze: Use Case 2, Bäume schleifen
