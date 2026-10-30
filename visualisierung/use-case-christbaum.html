@@ -121,6 +121,8 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 .ctl output{font:500 13px/1.2 var(--font-mono);font-variant-numeric:tabular-nums}
 .ctl input[type=range]{grid-column:1/-1;width:100%;margin:6px 0 0;accent-color:var(--accent)}
 .ctl .scale{grid-column:1/-1;display:flex;justify-content:space-between;font:500 11px/1.2 var(--font-mono);color:var(--muted)}
+.ctl .link{border:0;background:none;padding:0;color:var(--accent);font:500 11px/1.2 var(--font-mono);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.ctl .link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .switch{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;cursor:pointer}
 .switch input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
 
@@ -218,27 +220,50 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <li>Getragen wird der Baum fast senkrecht (78°), damit der Hebel klein bleibt. Die Person lehnt sich dabei zurück.</li>
           <li>Zum Aufladen wird der Baum fast lotrecht hochgehoben, bis das Schnittende auf Plateauhöhe ist. Dann kippt er 90° aufs Plateau, ohne geschoben zu werden.</li>
           <li>Das Plateau ist eine Ladefläche, zum Beispiel Anhänger oder LKW, zwischen 0 und 1,75&nbsp;m hoch.</li>
-          <li>Bäume von 1 bis 4&nbsp;m, nicht eingenetzt. Das Gewicht ist aus der Länge geschätzt (Nordmanntanne, 2&nbsp;m ≈ 15&nbsp;kg).</li>
+          <li>Bäume von 1 bis 4&nbsp;m, nicht eingenetzt und unterschiedlich schwer. Das Gewicht ist frei einstellbar, als Anhaltspunkt dient eine Nordmanntanne (2&nbsp;m ≈ 15&nbsp;kg).</li>
           <li>Beim Umkippen darf der Baum frei fallen.</li>
           <li>Das Exo ist aktiv: Motoren an Hüfte, Knie, Schulter und Ellbogen, Rahmen aus Metall, Akku und Steuerung am Rücken.</li>
         </ul>
       </section>
 
       <section class="block">
-        <h3>Einstellungen</h3>
+        <h3>Baum und Plateau</h3>
         <div class="ctl">
           <label for="hp">Plateau-Höhe</label><output id="hpOut" for="hp">1,75 m</output>
           <input type="range" id="hp" min="0" max="1.75" step="0.05" value="1.75">
           <div class="scale" aria-hidden="true"><span>0 m</span><span>1,75 m</span></div>
         </div>
         <div class="ctl">
-          <label for="len">Baumlänge</label><output id="lenOut" for="len">2,0 m · ≈ 15 kg</output>
+          <label for="len">Baumlänge</label><output id="lenOut" for="len">2,0 m</output>
           <input type="range" id="len" min="1" max="4" step="0.1" value="2">
           <div class="scale" aria-hidden="true"><span>1 m</span><span>4 m</span></div>
         </div>
         <div class="ctl">
+          <label for="mass">Baumgewicht</label><output id="massOut" for="mass">15 kg</output>
+          <input type="range" id="mass" min="1" max="150" step="1" value="15">
+          <div class="scale"><span id="massHint">typisch für 2,0 m: 15 kg</span><button type="button" class="link" id="massTypical">auf typisch setzen</button></div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>Person und Exo</h3>
+        <div class="ctl">
           <label for="height">Körpergröße</label><output id="heightOut" for="height">1,75 m</output>
           <input type="range" id="height" min="1.5" max="2" step="0.01" value="1.75">
+        </div>
+        <div class="ctl">
+          <label for="body">Körpergewicht</label><output id="bodyOut" for="body">75 kg</output>
+          <input type="range" id="body" min="45" max="130" step="1" value="75">
+        </div>
+        <div class="ctl">
+          <label for="exoKg">Gewicht des Exos</label><output id="exoKgOut" for="exoKg">30 kg</output>
+          <input type="range" id="exoKg" min="0" max="60" step="1" value="30">
+          <div class="scale" aria-hidden="true"><span>Hälfte am Rücken, Hälfte an den Beinen</span></div>
+        </div>
+        <div class="ctl">
+          <label for="foot">Fußplatten nach vorne verlängert</label><output id="footOut" for="foot">0 cm</output>
+          <input type="range" id="foot" min="0" max="40" step="1" value="0">
+          <div class="scale" aria-hidden="true"><span>vergrößert die Standfläche</span></div>
         </div>
         <label class="switch" for="labels"><input type="checkbox" id="labels" checked><span>Beschriftungen in 3D</span></label>
       </section>
@@ -315,7 +340,7 @@ function derive(st) {
   const xg = 0.03 + jawHalf;                               // Greifpunkt, gemessen ab Schnittende
   const rtG = rt0 * (1 - xg / L) + 0.006 * (xg / L);
   const handHalf = rtG + 0.055;
-  const mass = 15 * Math.pow(L / 2, 2.5);
+  const mass = st.mass;                                    // eingestellt; Bäume sind unterschiedlich schwer
   const xcg = 0.55 * (bare + (L - bare) / 4) + 0.45 * (L / 4);
   const yTip = 0.03, rRest = cLow * R;
   const thLie = -Math.asin(clamp((rRest - yTip) / (L - bare), 0, 0.9));
@@ -323,7 +348,7 @@ function derive(st) {
   const G0 = { x: xg * Math.cos(thLie), y: yCutLie + xg * Math.sin(thLie) };
   // Tragen fast senkrecht: Greifer auf Hüfthöhe vor dem Körper, die Person lehnt sich gegen das Baumgewicht zurück
   const thUp = deg(78), yUp = 0.95 * s, offUp = 0.36 * s;
-  const leanUp = Math.min(deg(10), Math.atan2(mass * (offUp + (xcg - xg) * Math.cos(thUp)), 0.6 * 75 * s * s * 0.3 * H));
+  const leanUp = Math.min(deg(10), Math.atan2(mass * (offUp + (xcg - xg) * Math.cos(thUp)), 0.6 * st.body * 0.3 * H));
   const xe = L * Math.cos(thLie) + 1.0;                    // Vorderkante des Plateaus
   const Lp = Math.max(3, L + 0.7), Wp = 2;
   const xSt0 = G0.x - offUp;
@@ -349,8 +374,11 @@ function derive(st) {
   const thContact = Math.min(thLift, Math.asin(clamp(rRest / bare, 0, 1)));
   return { H, s, B, yStand, yMin, L, hp, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
     yTip, rRest, thLie, yCutLie, G0, thUp, yUp, offUp, leanUp, xe, Lp, Wp, xSt0, gripOf,
-    thLift, offLift, cutCarryY, clear, dOff, cutAt, cutSetX, cutSetY, cutLiftY, Gl, xSt1, xSt2, xSt3, thContact, yRestG: hp + G0.y };
+    thLift, offLift, cutCarryY, clear, dOff, cutAt, cutSetX, cutSetY, cutLiftY, Gl, xSt1, xSt2, xSt3, thContact, yRestG: hp + G0.y,
+    body: st.body, exoKg: st.exoKg, foot: st.foot / 100 };
 }
+// typisches Gewicht einer frisch geschnittenen Nordmanntanne (nur Anhaltspunkt, echte Bäume streuen stark)
+const massTypical = (L) => Math.round(15 * Math.pow(L / 2, 2.5));
 
 const STEPS = [
   { n: 0, ids: ['start'] }, { n: 1, ids: ['grip'] }, { n: 2, ids: ['raise'] }, { n: 3, ids: ['carry'] },
@@ -573,7 +601,7 @@ function finalize(P, TL) {
 
 function analyse(P, TL) {
   const pk = { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, overLoad: false, overLight: false, Mcarry: 0, Mlift: 0, tip: 0, loaded: P.final.loaded };
-  const N = 360, mp = 75 * P.s * P.s;                        // Körpermasse (Annahme: 75 kg bei 1,80 m)
+  const N = 360;
   for (let i = 0; i <= N; i++) {
     const ch = choreo(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loads(P, ch, pose, treePose(P, ch, pose));
     for (const k of ['F', 'M', 'sh', 'hip', 'knee', 'elb']) pk[k] = Math.max(pk[k], ld[k]);
@@ -581,8 +609,12 @@ function analyse(P, TL) {
       // Gleichgewicht: gemeinsamer Schwerpunkt aus Körper und Baumlast muss über dem Fuß bleiben (bis zum Fußballen)
       const xUpper = pose.P.x + pose.dir.x * 0.45 * P.B.torso;
       const xLegs = (pose.P.x + (pose.knees[0].x + pose.knees[1].x) / 2 + (pose.ankles[0].x + pose.ankles[1].x) / 2) / 3;
-      const W = mp * GRAV, xc = (W * (0.6 * xUpper + 0.4 * xLegs) + ld.F * pose.Gact.x + ld.M) / (W + ld.F);
-      const tip = xc - (Math.max(pose.ankles[0].x, pose.ankles[1].x) + 0.15 * P.s);
+      // Exo: Hälfte der Masse am Rücken (Akku, Steuerung), Hälfte an den Beinen
+      const xPack = pose.P.x + pose.dir.x * 0.6 * P.B.torso + pose.back.x * 0.205 * P.s;
+      const Wb = P.body * GRAV, We = P.exoKg * GRAV;
+      const xc = (Wb * (0.6 * xUpper + 0.4 * xLegs) + We * (0.5 * xPack + 0.5 * xLegs) + ld.F * pose.Gact.x + ld.M) / (Wb + We + ld.F);
+      // Standfläche bis zum Fußballen, mit verlängerten Fußplatten entsprechend weiter
+      const tip = xc - (Math.max(pose.ankles[0].x, pose.ankles[1].x) + 0.15 * P.s + P.foot);
       if (tip > pk.tip) { pk.tip = tip; pk.tipAt = ch.id; }
       pk.gy = Math.max(pk.gy, pose.Gact.y);
       if (ch.gb > 0.99) pk.gap = Math.max(pk.gap, pose.gripGap);
@@ -598,7 +630,8 @@ function analyse(P, TL) {
 
 /* ================= Zustand ================= */
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { H: 1.75, L: 2.0, hp: 1.75, labels: true, t: 0, playing: !reduced, view: 'oblique' };
+const state = { H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 30, foot: 0,
+  labels: true, t: 0, playing: !reduced, view: 'oblique' };
 let P, TL, PK;
 
 /* ================= Szene ================= */
@@ -912,8 +945,8 @@ function buildPerson(P) {
     q.foot = new THREE.Group();
     const boot = new THREE.Mesh(new THREE.BoxGeometry(0.27 * s, 0.085 * s, 0.105 * s), MAT.boot);
     boot.position.set(0.075 * s, -0.028 * s, 0); boot.castShadow = true;
-    const plate = new THREE.Mesh(new THREE.BoxGeometry(0.29 * s, 0.012 * s, 0.12 * s), MAT.steel);
-    plate.position.set(0.075 * s, -0.074 * s, 0); plate.castShadow = true;
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(0.29 * s + P.foot, 0.012 * s, 0.12 * s), MAT.steel);
+    plate.position.set(0.075 * s + P.foot / 2, -0.074 * s, 0); plate.castShadow = true;
     q.foot.add(boot, plate); g.add(q.foot);
     q.shoulder = ball(0.058 * s, MAT.jacket); q.upper = limb(0.043 * s, 0.05 * s, MAT.jacket);
     q.elbow = ball(0.045 * s, MAT.jacket); q.fore = limb(0.035 * s, 0.043 * s, MAT.jacket); q.hand = ball(0.047 * s, MAT.glove);
@@ -1061,6 +1094,8 @@ const $ = (id) => document.getElementById(id);
 const ui = {
   play: $('play'), scrub: $('scrub'), segs: $('segs'), capStep: $('capStep'), capTitle: $('capTitle'), capText: $('capText'),
   hp: $('hp'), len: $('len'), height: $('height'), labels: $('labels'),
+  mass: $('mass'), massOut: $('massOut'), massHint: $('massHint'), massTypical: $('massTypical'),
+  body: $('body'), bodyOut: $('bodyOut'), exoKg: $('exoKg'), exoKgOut: $('exoKgOut'), foot: $('foot'), footOut: $('footOut'),
   hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), statuses: $('statuses'), momentNote: $('momentNote'),
   steps: [...document.querySelectorAll('#steps button')],
 };
@@ -1127,16 +1162,24 @@ function updateLoads(ld) {
 }
 function updateStatic() {
   ui.hpOut.textContent = `${fmt(state.hp)}${NB}m`;
-  ui.lenOut.textContent = `${fmt(state.L, 1)}${NB}m · ≈${NB}${Math.round(P.mass)}${NB}kg`;
+  ui.lenOut.textContent = `${fmt(state.L, 1)}${NB}m`;
+  ui.massOut.textContent = `${state.mass}${NB}kg`;
+  ui.massHint.textContent = `typisch für ${fmt(state.L, 1)}${NB}m: ${massTypical(state.L)}${NB}kg`;
+  ui.massTypical.hidden = state.mass === massTypical(state.L);
   ui.heightOut.textContent = `${fmt(state.H)}${NB}m`;
+  ui.bodyOut.textContent = `${state.body}${NB}kg`;
+  ui.exoKgOut.textContent = `${state.exoKg}${NB}kg`;
+  ui.footOut.textContent = `${state.foot}${NB}cm`;
   for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k] / r.div)}${NB}${r.unit}`;
   const gy = `${fmt(PK.gy)}${NB}m`;
   const kg = `${Math.round(P.mass)}${NB}kg`, cm = `${Math.round(PK.tip * 100)}${NB}cm`;
   const where = { raise: 'beim Aufrichten', carry: 'beim Tragen', lift: 'beim Hochheben', approach: 'an der Kante' }[PK.tipAt] || '';
   const items = [];
   if (!PK.loaded) items.push(['bad', '✕', `Zu hoch für die Arme: das Schnittende kommt nicht auf die Ladefläche, es fehlen ${Math.round(Math.max(PK.gap, P.hp - P.final.pivot.y) * 100)}${NB}cm`]);
-  if (PK.tip > 0.08) items.push(['bad', '✕', `Kippgefahr ${where}: der Baum zieht nach vorne, der gemeinsame Schwerpunkt liegt ${cm} vor dem Fußballen`]);
-  else if (PK.tip > 0.02) items.push(['warn', '▲', `Gleichgewicht knapp ${where}: ${cm} vor dem Fußballen, ein Ausfallschritt nach vorne gleicht das aus`]);
+  if (PK.tip > 0.08) items.push(['bad', '✕', `Kippgefahr ${where}: der gemeinsame Schwerpunkt liegt ${cm} vor der Standfläche. ${PK.tipAt === 'raise'
+    ? 'Schwere Bäume besser wie eine Leiter von der Spitze her aufstellen oder die Fußplatten verlängern'
+    : 'Längere Fußplatten am Exo würden helfen'}`]);
+  else if (PK.tip > 0.02) items.push(['warn', '▲', `Gleichgewicht knapp ${where}: ${cm} vor der Standfläche, ein Ausfallschritt nach vorne gleicht das aus`]);
   if (PK.loaded && PK.gap > 0.02) items.push(['warn', '▲', `Gerade noch erreichbar: Greifer bis ${gy}`]);
   if (PK.overLoad) items.push(['warn', '▲', `Über Kopf mit vollem Gewicht: ${kg} bis ${gy}`]);
   else if (PK.overLight) items.push(['warn', '▲', `Kurz über Kopf (bis ${gy}), aber fast ohne Last`]);
@@ -1199,7 +1242,18 @@ ui.steps.forEach((b) => b.addEventListener('click', () => {
 }));
 for (const b of document.querySelectorAll('.views button')) b.addEventListener('click', () => setView(b.dataset.view));
 ui.hp.addEventListener('input', () => { state.hp = Number(ui.hp.value); rebuild({ platform: true }); });
-ui.len.addEventListener('input', () => { state.L = Number(ui.len.value); rebuild({ tree: true, platform: true }); });
+ui.len.addEventListener('input', () => {
+  state.L = Number(ui.len.value);
+  if (!state.massManual) { state.mass = massTypical(state.L); ui.mass.value = state.mass; }   // folgt der Länge, bis man es selbst einstellt
+  rebuild({ tree: true, platform: true });
+});
+ui.mass.addEventListener('input', () => { state.mass = Number(ui.mass.value); state.massManual = true; rebuild({}); });
+ui.massTypical.addEventListener('click', () => {
+  state.massManual = false; state.mass = massTypical(state.L); ui.mass.value = state.mass; rebuild({});
+});
+ui.body.addEventListener('input', () => { state.body = Number(ui.body.value); rebuild({}); });
+ui.exoKg.addEventListener('input', () => { state.exoKg = Number(ui.exoKg.value); rebuild({}); });
+ui.foot.addEventListener('input', () => { state.foot = Number(ui.foot.value); rebuild({ person: true }); });
 ui.height.addEventListener('input', () => { state.H = Number(ui.height.value); rebuild({ person: true }); });
 ui.labels.addEventListener('change', () => { state.labels = ui.labels.checked; });
 // nach dem Loslassen des Reglers die Kamera an die neue Szene anpassen (langer Baum, anderes Plateau)
@@ -1258,9 +1312,10 @@ function loop(now) {
 
 function boot(data) {
   if (data && typeof data === 'object') {
-    for (const k of ['H', 'L', 'hp', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
+    for (const k of ['H', 'L', 'hp', 'mass', 'massManual', 'body', 'exoKg', 'foot', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
   }
   ui.hp.value = state.hp; ui.len.value = state.L; ui.height.value = state.H;
+  ui.mass.value = state.mass; ui.body.value = state.body; ui.exoKg.value = state.exoKg; ui.foot.value = state.foot;
   ui.labels.checked = state.labels;
   applyTheme();
   rebuild({ tree: true, platform: true, person: true });
