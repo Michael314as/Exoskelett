@@ -1,9 +1,13 @@
-# Konzept: Christbaum-Exo (Entwurf 1)
+# Konzept: Christbaum-Exo (Entwurf 2)
 
 Ziel: ein umsetzbares, robustes Exoskelett für zwei Arbeiten: Bäume am Stamm greifen und **schleifen** (Use Case 2)
 und Bäume am Stumpf greifen, fast senkrecht **aufrichten und aufladen** (Use Case 1). Es unterstützt Beine,
 Oberkörper und Arme und soll die eigene Kraft etwa verdoppeln. Budget: einige tausend Euro, verteilt über die Zeit.
 Keine Spezialteile für zehntausende Euro, sondern Serienteile, die man einzeln kaufen und tauschen kann.
+
+**Rahmenbedingungen (geklärt):** Schleifen bis etwa 100 m. Arbeiten bei Frostregen und nassem Schnee. Akku von vorhandenen
+Stihl-Geräten. Bauen mit einfacher Werkstatt: bohren, schrauben, ein wenig schweißen und löten, keine Drehbank.
+Bedienung nur Ein/Aus. Das Exo wird für eine Person (1,75 m, 75 kg) gebaut, Längen bleiben trotzdem einstellbar.
 
 ## 1. Grundidee in einem Satz
 
@@ -34,14 +38,19 @@ Warum so:
                                                                          Sprunggelenk (frei, mit Anschlag) ── Fußplatte mit Bindung
 ```
 
+- **Bauweise:** komplett **geschraubt**, keine Drehteile und keine tragenden Schweißnähte. Lager sitzen in gekauften
+  Flanschlagergehäusen, Achsen sind Passschrauben M10/M12, Seilrollen werden fertig mit Lager gekauft.
 - **Rückenrahmen:** Aluminium-Vierkantrohr 25 × 25 × 2 mm, Bauform wie eine Lastenkraxe. Er nimmt die Antriebsbox auf und
   verbindet Schultern und Hüfte. Als Start kann ein gekauftes Kraxengestell mit Hüftgurt dienen.
+- **Einstellbar (kostet fast nichts):** Länge von Ober- und Unterschenkel, Ober- und Unterarm über Lochraster, Hüftbreite
+  über Langlöcher. Alles andere wird fest auf dich angepasst.
 - **Hüfte:** breiter Hüftgurt mit Alu-Bügel. Seitlich je ein Hüftgelenk mit Kugellagern (z. B. 6202), Achse genau auf Höhe
   des eigenen Hüftgelenks, seitlich einstellbar.
 - **Beine:** Schienen aus Alu-Flachprofil bzw. Rohr, Länge über Lochraster einstellbar (Steckbolzen), Kniegelenk als
   einachsiges Scharnier mit Lagern und mechanischem Anschlag gegen Überstrecken.
 - **Füße:** Alu-Platte unter dem Schuh, festgehalten mit einer **Snowboard-Bindung** (günstig, schnell an- und ausziehbar,
-  für Winter gemacht). Die Platte ragt etwa 15 bis 20 cm nach vorne über die Schuhspitze, das vergrößert die Standfläche.
+  für Winter gemacht). Die Platte ragt etwa 18 cm nach vorne und 8 cm nach hinten über den Schuh hinaus. Vorne hilft das beim Aufladen
+  (Baum vor dem Körper), hinten beim Schleifen (Last hinter dem Körper).
 - **Schultern:** Bügel vom Rückenrahmen über die Schultern, Schultergelenk außen mit Drehachse für Heben/Senken.
   Seitwärts schwenkbar, damit die Arme frei bleiben.
 - **Arme:** leichte Schienen an Ober- und Unterarm mit Manschetten, Ellbogen als Scharnier.
@@ -76,14 +85,25 @@ Warum so:
 
 ## 4. Greifer
 
-Grundsatz: **Greifen mechanisch, ohne Motor**, selbstklemmend unter Last. So fällt nichts herunter, wenn der Strom weg ist.
+Grundsatz: **Greifen mechanisch, ohne Motor**, unter Last selbstklemmend. Fällt der Strom aus, fällt nichts herunter.
 
-- **Stumpfgreifer rechte Hand (Use Case 1):** kleine selbstklemmende Stammzange (Prinzip Rückezange), mit Handgriff und an der
-  rechten Unterarmschiene eingehängt. Zieht man, klemmt sie fester. Öffnen per Daumenhebel. Die linke Hand greift ganz normal
-  mit Handschuh weiter oben am Stamm.
-- **Zuggreifer hinten an der Hüfte (Use Case 2):** Querträger am Hüftbügel, daran bis zu vier kurze selbstklemmende Zangen.
-  Man setzt sie an den Stümpfen an, die Last hebt die Stümpfe leicht an und klemmt sie fest. Lösen über einen gemeinsamen
-  Zug am Hüftgurt. Die Kraft geht über Hüftbügel und Beinschienen in die Fußplatten, die Beinmotoren helfen beim Vorwärtsschieben.
+**Hand (Use Case 1), drei Möglichkeiten verglichen:**
+
+| Ansatz | Vorteil | Nachteil |
+|---|---|---|
+| Schlaufe, die sich zuzieht (deine Idee) | sehr einfach, leicht, billig | Stamm muss durch die Schlaufe, am Boden liegend umständlich; lose Schlaufe kann sich verhaken |
+| Selbstklemmende Zange (Rückezange) | hält sehr fest | schwer, muss man in die Hand nehmen, zwei Hände zum Ansetzen |
+| **Klemmgabel mit Schnappbügel** an der Unterarmschiene | Gabel einfach von oben auf den Stamm drücken, Bügel schnappt zu; unter Zug keilt sich der Stamm in die V-Form; Lösen mit Daumenhebel | etwas mehr Bauaufwand |
+
+**Entscheidung: Klemmgabel mit Schnappbügel an der rechten Unterarmschiene**, direkt hinter der Hand, V-Form mit
+TPU-Belag und kleinen Zähnen, passt für etwa 5 bis 18 cm. Die Kraft geht über die Unterarmschiene ins Exo, nicht über die
+Finger. Die linke Hand greift weiter oben ganz normal mit gutem Handschuh. Eine Würgeschlaufe als Ergänzung für sehr
+glatte oder dünne Stämme ist einfach nachrüstbar.
+
+**Zuggreifer hinten an der Hüfte (Use Case 2):** Querträger am Hüftbügel auf etwa 55 bis 60 cm Höhe, daran bis zu vier
+Klemmgabeln mit Schnappbügel nach dem gleichen Prinzip. Man geht leicht in die Knie, drückt sie rückwärts auf die Stümpfe,
+richtet sich auf: Die Stümpfe heben sich an und keilen sich fest. Lösen über einen gemeinsamen Zug am Hüftgurt.
+Die Kraft geht über Hüftbügel und Beinschienen in die Fußplatten, die Beinmotoren helfen beim Vorwärtsschieben.
 
 ## 5. Steuerung und Bedienung
 
@@ -91,45 +111,57 @@ Grundsatz: **Greifen mechanisch, ohne Motor**, selbstklemmend unter Last. So fä
 - **Sensoren:** Lagesensoren (IMU) an Rücken, Oberschenkeln und Oberarmen, dazu die Encoder und der Motorstrom.
   So erkennt das Exo, ob man in die Hocke geht, sich aufrichtet oder vorwärts drückt.
 - **Unterstützen statt fernsteuern:** Das Exo verstärkt die Bewegung, die man selbst macht. Bewegt man sich nicht, hält es nur.
-- **Betriebsarten:** *Aus* (alles locker), *Heben/Aufrichten*, *Tragen*, *Ziehen*. Umschalten über zwei große Tasten am
-  linken Schultergurt, mit Handschuhen bedienbar.
+- **Bedienung: nur Ein/Aus.** Ein großer Schalter am linken Schultergurt. Im Ein-Zustand erkennt das Exo selbst aus den
+  Sensoren, was du tust (in die Hocke gehen, aufrichten, vorwärts schieben, Arm heben), und unterstützt genau diese Bewegung.
+  Aus heißt: alle Seile locker, das Exo läuft frei mit.
 - **Not-Aus:** großer Pilzschalter am Schultergurt, trennt die Motoren hart vom Akku. Seile werden dann locker.
 
 ## 6. Energie
 
-- **Akku:** handelsüblicher E-Bike-Akku 36 oder 48 V, etwa 500 bis 700 Wh, in der Antriebsbox. Günstig, robust, mit
-  Ladegerät und Schutzschaltung. Reicht nach grober Schätzung für einen Arbeitstag mit Pausen.
-- Elektronik spritzwassergeschützt in der Box, Kabel nur am Rücken.
+- **Akku: Stihl AP-Akku** (36 V Akkusystem), den du schon hast. Er sitzt unten in der Antriebsbox in einer Halterung mit
+  Kontakten (3D-gedruckter Adapter, solche Adapter gibt es als Bauvorlage und fertig zu kaufen). Die Motoren laufen in
+  diesem Spannungsbereich. Vorher prüfen wir am Tisch, ob der Akku die nötigen Ströme ohne Abschalten liefert.
+- **Laufzeit, grob:** Ein AP 300 S hat etwa 280 Wh. Bei durchschnittlich 100 bis 150 W Unterstützung reicht das für
+  etwa 2 bis 3 Stunden, mit einem zweiten Akku zum Wechseln für den Tag.
+- **Kälte und Nässe:** Akku in der gedämmten Box, wasserdichte Rundstecker, Elektronik vergossen bzw. im dichten Gehäuse.
 
 ## 7. Gewicht und Gleichgewicht
 
-- Ziel: unter 20 kg gesamt. Ein großer Teil (Akku, Motoren) sitzt hinten und gleicht den Baum vorne aus.
+- **Gewichtsabwägung:** Motoren 6 × 0,5 bis 1 kg, Stihl-Akku etwa 2 kg, Alu-Rahmen etwa 5 kg, Fußplatten mit Bindung
+  etwa 2 kg, Rest etwa 2 kg. **Ziel: 15 bis 18 kg.** Mehr Gewicht lohnt sich nur, wo es tragend ist (Hüfte, Beine).
+  Die Last geht über die Beinschienen in den Boden, darum spürt man das Gewicht des Exos kaum.
+- Ein großer Teil (Akku, Motoren) sitzt hinten und gleicht den Baum vorne aus.
 - Verlängerte Fußplatten vorne (15 bis 20 cm) vergrößern die Standfläche, das wirkt direkt gegen das Vornüberkippen.
 
-## 8. Sicherheit
+## 8. Wetterfestigkeit
+
+Abgedichtete Lager (2RS), Seilrollen mit Abdeckung gegen Vereisen, Dyneema nimmt kein Wasser auf, Alu und
+Edelstahlschrauben rosten nicht, keine offene Elektronik an Armen und Beinen.
+
+## 9. Sicherheit
 
 Seile ziehen nur, Greifer klemmen mechanisch, Gelenke haben feste Endanschläge in Körpergrenzen, Drehmomente sind in der
 Software begrenzt, Not-Aus trennt hart. Erste Tests auf einem Prüfstand und mit Leergewicht, erst dann mit Bäumen.
 **Nicht mit Motorsäge in der Hand im unterstützten Modus arbeiten.**
 
-## 9. Kosten, grob
+## 10. Kosten, grob
 
 | Posten | etwa |
 |---|---|
 | 6 Robotergelenk-Motoren | 900 bis 3 000 € (je nach Typ) |
 | Steuerung, CAN, Sensoren, Not-Aus, Kabel | 150 bis 250 € |
-| E-Bike-Akku mit Ladegerät | 300 bis 500 € |
+| Akku-Adapter für Stihl AP (Akku vorhanden) | 20 bis 80 € |
 | Alu-Profile, Lager, Bolzen, Rollen, Dyneema-Seil | 250 bis 400 € |
 | Snowboard-Bindungen, Hüftgurt, Kraxengestell, Gasfedern | 150 bis 300 € |
-| Zangen für die Greifer | 100 bis 200 € |
+| Klemmgabeln (Alu, Federn, TPU) | 50 bis 120 € |
 | Filament (PETG, TPU) | 50 bis 100 € |
-| **Summe** | **etwa 1 900 bis 4 750 €** |
+| **Summe** | **etwa 1 600 bis 4 300 €** |
 
-## 10. Bauen in Stufen
+## 11. Bauen in Stufen
 
 1. **Beine + Rücken + Hüfte, passiv:** Rahmen, Fußplatten, Lastpfad, Zuggreifer. Schon ohne Motor nützlich beim Schleifen.
 2. **Beinmotoren:** Unterstützung beim Hochkommen und Vorwärtsschieben.
 3. **Schultern mit Gasfedern**, dann Schulter- und Ellbogenmotoren.
-4. **Steuerung verfeinern**, Betriebsarten, Akkulaufzeit messen.
+4. **Steuerung verfeinern**: Bewegungserkennung, Unterstützungsstärke, Akkulaufzeit messen.
 
 Jede Stufe ist für sich testbar und verteilt die Kosten über die Zeit.

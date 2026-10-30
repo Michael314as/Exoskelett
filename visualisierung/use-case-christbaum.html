@@ -121,6 +121,12 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 .ctl output{font:500 13px/1.2 var(--font-mono);font-variant-numeric:tabular-nums}
 .ctl input[type=range]{grid-column:1/-1;width:100%;margin:6px 0 0;accent-color:var(--accent)}
 .ctl .scale{grid-column:1/-1;display:flex;justify-content:space-between;font:500 11px/1.2 var(--font-mono);color:var(--muted)}
+.scen{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.scen button{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:500 14px/1 var(--font-body);padding:8px 12px;border-radius:7px;cursor:pointer}
+.scen button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.scen button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.scen.ground{grid-column:1/-1;margin-top:4px}
+.ctl .lab{font-size:14px;font-weight:500}
 .ctl .link{border:0;background:none;padding:0;color:var(--accent);font:500 11px/1.2 var(--font-mono);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ctl .link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .switch{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;cursor:pointer}
@@ -167,10 +173,14 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 <div class="app">
   <header class="top">
     <div>
-      <p class="kicker">Exoskelett · Use Case 1</p>
-      <h1>Christbaum aufladen</h1>
+      <p class="kicker" id="kicker">Exoskelett · Use Case 1</p>
+      <h1 id="title">Christbaum aufladen</h1>
+      <div class="scen" role="group" aria-label="Use Case">
+        <button type="button" id="scLoad" aria-pressed="true">Aufladen</button>
+        <button type="button" id="scDrag" aria-pressed="false">Schleifen</button>
+      </div>
     </div>
-    <p class="lede">Ein aktives Exoskelett greift den geschnittenen Christbaum am Schnittende, richtet ihn fast senkrecht auf und trägt ihn zurückgelehnt zum Plateau. Dort hebt es ihn an, bis das Schnittende auf Plateauhöhe ist (0 bis 1,75&nbsp;m), und lässt ihn 90° aufs Plateau kippen.</p>
+    <p class="lede" id="lede">Ein aktives Exoskelett greift den geschnittenen Christbaum am Schnittende, richtet ihn fast senkrecht auf und trägt ihn zurückgelehnt zum Plateau. Dort hebt es ihn an, bis das Schnittende auf Plateauhöhe ist (0 bis 1,75&nbsp;m), und lässt ihn 90° aufs Plateau kippen.</p>
   </header>
 
   <main class="work">
@@ -203,12 +213,6 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
       <section class="block">
         <h3>Ablauf</h3>
         <ol class="steps" id="steps">
-          <li><button type="button" data-step="1"><span class="no">1</span><span><b>Greifen</b><span class="d">In die Hocke, Stammgreifer am astfreien Stammende schließen.</span></span></button></li>
-          <li><button type="button" data-step="2"><span class="no">2</span><span><b>Aufrichten bis fast senkrecht</b><span class="d">Rechts am Stumpf, links weit oben am Stamm. Zurücklehnen, mit links hochziehen.</span></span></button></li>
-          <li><button type="button" data-step="3"><span class="no">3</span><span><b>Tragen</b><span class="d">Fast senkrecht zum Plateau tragen, kaum Hebel.</span></span></button></li>
-          <li><button type="button" data-step="4"><span class="no">4</span><span><b>Hochheben</b><span class="d">Fast lotrecht balancieren, bis das Schnittende auf Plateauhöhe ist, dann an der Kante absetzen.</span></span></button></li>
-          <li><button type="button" data-step="5"><span class="no">5</span><span><b>Umkippen lassen</b><span class="d">Greifer als Scharnier, der Baum kippt 90° aufs Plateau. Nichts wird geschoben.</span></span></button></li>
-          <li><button type="button" data-step="6"><span class="no">6</span><span><b>Zurücktreten</b><span class="d">Greifer ist offen, Arme runter, zurück.</span></span></button></li>
         </ol>
       </section>
 
@@ -229,7 +233,18 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 
       <section class="block">
         <h3>Baum und Plateau</h3>
-        <div class="ctl">
+        <div class="ctl" data-for="drag">
+          <label for="n">Anzahl Bäume</label><output id="nOut" for="n">2</output>
+          <input type="range" id="n" min="1" max="4" step="1" value="2">
+        </div>
+        <div class="ctl" data-for="drag">
+          <span class="lab">Boden</span><span></span>
+          <div class="scen ground" role="group" aria-label="Boden">
+            <button type="button" id="gGrass" aria-pressed="true">Gras (Reibung 0,6)</button>
+            <button type="button" id="gSnow" aria-pressed="false">Schnee (0,3)</button>
+          </div>
+        </div>
+        <div class="ctl" data-for="load">
           <label for="hp">Plateau-Höhe</label><output id="hpOut" for="hp">1,75 m</output>
           <input type="range" id="hp" min="0" max="1.75" step="0.05" value="1.75">
           <div class="scale" aria-hidden="true"><span>0 m</span><span>1,75 m</span></div>
@@ -262,8 +277,8 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <div class="scale" aria-hidden="true"><span>Hälfte am Rücken, Hälfte an den Beinen</span></div>
         </div>
         <div class="ctl">
-          <label for="foot">Fußplatten nach vorne verlängert</label><output id="footOut" for="foot">0 cm</output>
-          <input type="range" id="foot" min="0" max="40" step="1" value="0">
+          <label for="foot">Fußplatten nach vorne verlängert</label><output id="footOut" for="foot">18 cm</output>
+          <input type="range" id="foot" min="0" max="40" step="1" value="18">
           <div class="scale" aria-hidden="true"><span>vergrößert die Standfläche</span></div>
         </div>
         <label class="switch" for="labels"><input type="checkbox" id="labels" checked><span>Beschriftungen in 3D</span></label>
@@ -274,10 +289,10 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         <div class="statuses" id="statuses"></div>
         <div class="loads">
           <span class="h">Stelle</span><span class="h">jetzt</span><span class="h">max</span>
-          <span>Baumgewicht an den Händen</span><span class="v" id="nowF">–</span><span class="v max" id="maxF">–</span><span class="bar"><i id="barF"></i></span>
-          <span>Kippmoment am Stumpf</span><span class="v" id="nowM">–</span><span class="v max" id="maxM">–</span><span class="bar"><i id="barM"></i></span>
-          <span>Linke Hand · Hebelkraft</span><span class="v" id="nowFl">–</span><span class="v max" id="maxFl">–</span><span class="bar"><i id="barFl"></i></span>
-          <span>Schultern</span><span class="v" id="nowSh">–</span><span class="v max" id="maxSh">–</span><span class="bar"><i id="barSh"></i></span>
+          <span id="labF">Baumgewicht an den Händen</span><span class="v" id="nowF">–</span><span class="v max" id="maxF">–</span><span class="bar"><i id="barF"></i></span>
+          <span id="labM">Kippmoment am Stumpf</span><span class="v" id="nowM">–</span><span class="v max" id="maxM">–</span><span class="bar"><i id="barM"></i></span>
+          <span id="labFl">Linke Hand · Hebelkraft</span><span class="v" id="nowFl">–</span><span class="v max" id="maxFl">–</span><span class="bar"><i id="barFl"></i></span>
+          <span id="labSh">Schultern</span><span class="v" id="nowSh">–</span><span class="v max" id="maxSh">–</span><span class="bar"><i id="barSh"></i></span>
           <span>Hüfte / Rücken</span><span class="v" id="nowHip">–</span><span class="v max" id="maxHip">–</span><span class="bar"><i id="barHip"></i></span>
           <span>Knie</span><span class="v" id="nowKnee">–</span><span class="v max" id="maxKnee">–</span><span class="bar"><i id="barKnee"></i></span>
         </div>
@@ -379,7 +394,7 @@ function derive(st) {
   return { H, s, B, yStand, yMin, L, hp, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
     yTip, rRest, thLie, yCutLie, G0, thUp, yUp, offUp, leanUp, xe, Lp, Wp, xSt0, gripOf,
     thLift, offLift, cutCarryY, clear, dOff, cutAt, cutSetX, cutSetY, cutLiftY, Gl, xSt1, xSt2, xSt3, thContact, yRestG: hp + G0.y,
-    body: st.body, exoKg: st.exoKg, foot: st.foot / 100, xl };
+    body: st.body, exoKg: st.exoKg, foot: st.foot / 100, xl, scen: st.scen, n: st.n, mu: st.mu };
 }
 // typisches Gewicht einer frisch geschnittenen Nordmanntanne (nur Anhaltspunkt, echte Bäume streuen stark)
 const massTypical = (L) => Math.round(15 * Math.pow(L / 2, 2.5));
@@ -389,6 +404,7 @@ const STEPS = [
   { n: 4, ids: ['lift', 'approach'] }, { n: 5, ids: ['topple'] }, { n: 6, ids: ['release'] }, { n: 7, ids: ['hold'] },
 ];
 function buildTimeline(P) {
+  if (P.scen === 'drag') return buildTimelineDrag(P);
   const d = [['start', 1.0], ['grip', 2.4], ['raise', 2.8], ['carry', 1.0 + (P.xSt1 - P.xSt0) / 0.55],
     ['lift', 1.0 + Math.abs(P.cutLiftY - P.cutCarryY) / 0.35], ['approach', 1.4 + (P.xSt2 - P.xSt1) / 0.35],
     ['topple', 1.8], ['release', 2.4], ['hold', 1.6]];
@@ -516,7 +532,11 @@ function solve(P, ch) {
     yP = lerp(P.yStand, want, gb);
     xP = ch.xSt - 0.17 * s * clamp((P.yStand - yP) / (P.yStand - P.yMin), 0, 1);
   }
-  const alpha = aFull * gb, sa = Math.sin(alpha), ca = Math.cos(alpha);
+  if (ch.yPel != null) {                                        // Haltung direkt vorgegeben (Schleifen)
+    yP = Math.min(yP, ch.yPel);
+    xP = ch.xSt - 0.17 * s * clamp((P.yStand - yP) / (P.yStand - P.yMin), 0, 1);
+  }
+  const alpha = ch.alpha ?? aFull * gb, sa = Math.sin(alpha), ca = Math.cos(alpha);
   for (const f of ch.feet) {                                    // Schrittstellung senkt das Becken
     const dx = xP - f.x, dzz = B.hipHalf - Math.abs(f.z);
     yP = Math.min(yP, B.ankle + f.lift + Math.sqrt(Math.max(0, (0.996 * B.leg) ** 2 - dx * dx - dzz * dzz)));
@@ -639,9 +659,107 @@ function analyse(P, TL) {
   return pk;
 }
 
+
+/* ================= Use Case 2: Schleifen =================
+   Die Bäume liegen mit den Stümpfen zur Person, Spitzen nach hinten (-x). Der Zuggreifer hängt pendelnd hinter der
+   Hüfte, fasst die Stümpfe und hebt sie an; man geht vorwärts (+x), die Äste gleiten am Boden. */
+const DRAG_D = 7;                                               // gezeigte Strecke, steht für bis zu 100 m
+const dragZ = (i) => (i - (state.n - 1) / 2) * 0.15;
+const DRAG_STEPS = [{ n: 0, ids: ['start'] }, { n: 1, ids: ['dgrip'] }, { n: 2, ids: ['drise'] }, { n: 3, ids: ['dwalk'] },
+  { n: 4, ids: ['drelease'] }, { n: 5, ids: ['hold'] }];
+function dragForces(P) {
+  // Stumpf angehoben: Greifer trägt den Teil vor dem Bodenkontakt, die Äste gleiten mit Reibung mu
+  const W = P.mass * GRAV, N = W * (P.xcg - P.xg) / (P.L - P.xg);
+  return { hold: P.n * (W - N), pullLift: P.mu * P.n * N, pullFlat: P.mu * P.n * W };
+}
+function buildTimelineDrag(P) {
+  const s = P.s, f = dragForces(P);
+  P.dX0 = 0.3 * s; P.dPelGrip = P.yCutLie + 0.34 * s + 0.03;
+  P.dLean = deg(clamp(8 + 0.25 * f.hold / GRAV, 8, 28));     // je schwerer hinten, desto mehr vorbeugen
+  const d = [['start', 1.2], ['dgrip', 2.2], ['drise', 1.8], ['dwalk', 1 + DRAG_D / 0.45], ['drelease', 2.8], ['hold', 1.4]];
+  let t = 0;
+  const ph = d.map(([id, dur]) => { const p = { id, t0: t, t1: t + dur }; t += dur; return p; });
+  const byId = Object.fromEntries(ph.map((p) => [p.id, p]));
+  const steps = DRAG_STEPS.map((x) => ({ n: x.n, t0: byId[x.ids[0]].t0, t1: byId[x.ids[0]].t1 }));
+  return { ph, byId, steps, T: t };
+}
+function choreoDrag(P, TL, t) {
+  const ph = TL.ph.find((p) => t < p.t1) || TL.ph[TL.ph.length - 1];
+  const u = clamp((t - ph.t0) / (ph.t1 - ph.t0), 0, 1), s = P.s, fz = 0.12 * s;
+  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, lean: 0, th: 0, twoHand: 0, G: { x: P.G0.x, y: P.yStand }, clamp: 0, att: 0, lift: 0, walk: false };
+  let x = P.dX0, feet = null;
+  const walk = (xa, xb, k, step) => { const g = gait(xa, xb, k, step); x = g.x; feet = g.feet; };
+  switch (ph.id) {
+    case 'dgrip': {
+      const k = ease(u / 0.75);
+      o.yPel = lerp(P.yStand, P.dPelGrip, k); o.alpha = deg(22) * k; o.clamp = smooth(0.75, 1, u);
+      break;
+    }
+    case 'drise': {
+      const k = ease(u);
+      o.yPel = lerp(P.dPelGrip, P.yStand, k); o.alpha = lerp(deg(22), P.dLean, k); o.clamp = 1; o.att = 1; o.lift = k;
+      break;
+    }
+    case 'dwalk':
+      walk(P.dX0, P.dX0 + DRAG_D, smooth(0, 1, u), 0.62 * s);   // ruhiges Schritttempo, etwa 0,6 m/s
+      o.alpha = P.dLean; o.clamp = 1; o.att = 1; o.lift = 1; o.walk = true;
+      break;
+    case 'drelease': {
+      x = P.dX0 + DRAG_D;
+      const down = ease(smooth(0, 0.4, u)), up = smooth(0.55, 0.8, u);
+      o.yPel = lerp(P.yStand, P.dPelGrip, down * (1 - up)); o.alpha = lerp(P.dLean, deg(20), down) * (1 - up);
+      o.clamp = 1 - smooth(0.4, 0.55, u); o.att = 1 - smooth(0.42, 0.5, u); o.lift = 1 - down;
+      if (u > 0.6) walk(x, x + 0.6 * s, smooth(0.6, 1, u), 0.6 * s);
+      break;
+    }
+    case 'hold': x = P.dX0 + DRAG_D + 0.6 * s; break;
+    default: break;
+  }
+  const ft = feet || [{ x, lift: 0 }, { x, lift: 0 }];
+  o.xSt = x;
+  o.feet = [{ x: ft[0].x, lift: 0.06 * s * ft[0].lift, z: -fz }, { x: ft[1].x, lift: 0.06 * s * ft[1].lift, z: fz }];
+  return o;
+}
+// Liegeplätze der Stümpfe: am Anfang genau unter dem geschlossenen Greifer, am Ende dort, wo er öffnet
+function finalizeDrag(P, TL) {
+  const at = (id, u) => { const p = TL.byId[id]; const ch = choreoDrag(P, TL, p.t0 + (p.t1 - p.t0) * u); return clampPoint(P, solve(P, ch)); };
+  P.dLie0 = at('dgrip', 0.999); P.dLie1 = at('drelease', 0.42);
+}
+function dragTreePose(P, ch, pose, i) {
+  const lie = ['drelease', 'hold'].includes(ch.id) ? P.dLie1 : P.dLie0;
+  let cx = lie.x, cy = P.yCutLie;
+  if (ch.att > 0) { const cp = clampPoint(P, pose); cx = lerp(lie.x, cp.x, ch.att); cy = lerp(P.yCutLie, Math.max(cp.y, P.yCutLie * 0.6), ch.att); }
+  // Spitze schleift am Boden
+  const th = -Math.asin(clamp((cy - P.yTip) / P.L, 0, 0.95));
+  return { cx, cy, z: dragZ(i), th };
+}
+function loadsDrag(P, ch, pose) {
+  if (!ch.att) return { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0 };
+  const f = dragForces(P), F = f.hold * ch.lift * ch.att;
+  const pull = ch.walk ? f.pullLift : 0, cp = clampPoint(P, pose);
+  const m = (j) => Math.abs(F * (j.x - cp.x)) + pull * Math.abs(j.y - cp.y);
+  return { F, M: 0, Fl: pull, sh: 0, hip: m(pose.P), knee: m(mix(pose.knees[0], pose.knees[1], 0.5)), elb: 0 };
+}
+function analyseDrag(P, TL) {
+  const pk = { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0, tipB: 0, gy: 0 }, N = 300;
+  for (let i = 0; i <= N; i++) {
+    const ch = choreoDrag(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loadsDrag(P, ch, pose);
+    for (const k of ['F', 'Fl', 'hip', 'knee']) pk[k] = Math.max(pk[k], ld[k]);
+    if (!ch.att) continue;
+    // Gleichgewicht nach hinten: Last hängt hinter der Hüfte, die Zugkraft zieht zusätzlich nach hinten
+    const cp = clampPoint(P, pose), xu = pose.P.x + pose.dir.x * 0.45 * P.B.torso;
+    const xl = (pose.P.x + (pose.knees[0].x + pose.knees[1].x) / 2 + (pose.ankles[0].x + pose.ankles[1].x) / 2) / 3;
+    const xPack = pose.P.x + pose.dir.x * 0.6 * P.B.torso + pose.back.x * 0.205 * P.s;
+    const Wb = P.body * GRAV, We = P.exoKg * GRAV;
+    const xc = (Wb * (0.6 * xu + 0.4 * xl) + We * (0.5 * xPack + 0.5 * xl) + ld.F * cp.x - ld.Fl * cp.y) / (Wb + We + ld.F);
+    pk.tipB = Math.max(pk.tipB, Math.min(pose.ankles[0].x, pose.ankles[1].x) - 0.06 * P.s - 0.08 - xc);
+  }
+  return pk;
+}
+
 /* ================= Zustand ================= */
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 30, foot: 0,
+const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 30, foot: 18,
   labels: true, t: 0, playing: !reduced, view: 'oblique' };
 let P, TL, PK;
 
@@ -715,6 +833,7 @@ const MAT = {
   strap: std(0x1C2023, 0.95, { side: THREE.DoubleSide }),
   motor: std(0xD4520E, 0.45, { emissive: 0xFF5A10, emissiveIntensity: 0 }),
   jaw: std(0xD4520E, 0.5, { metalness: 0.2 }),
+  pulley: std(0x8C959B, 0.35, { metalness: 0.8 }), cable: std(0xE8C547, 0.6), stihl: std(0xE8641B, 0.5),
   led: std(0xFF7A33, 0.4, { emissive: 0xFF6A1A, emissiveIntensity: 1.3 }),
   fir1: std(0x2E5C43, 0.92, { flatShading: true }), fir2: std(0x376B4F, 0.92, { flatShading: true }),
   trunk: std(0x6A4A30, 0.95), cut: std(0xFFFFFF, 0.9, { map: cutTex }),
@@ -924,15 +1043,10 @@ function buildPerson(P) {
   const ball = (r, mat) => mk(new THREE.SphereGeometry(r, 18, 12), mat);
   const bar = (w, d) => mk(new THREE.BoxGeometry(w, 1, d), MAT.steel);
   const cuff = (r) => mk(new THREE.CylinderGeometry(r, r, 0.055 * s, 18, 1, true), MAT.strap);
-  const motor = (r, w) => {
-    const grp = new THREE.Group(), cap = MAT.motor.clone();
-    const a = new THREE.Mesh(new THREE.CylinderGeometry(r, r, w, 22), MAT.graphite);
-    const b = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.66, r * 0.66, w * 1.14, 22), cap);
-    a.castShadow = b.castShadow = true;
-    grp.add(a, b); grp.userData.cap = cap; g.add(grp);
-    return grp;
-  };
-  const o = { group: g, sides: [] };
+  const pulley = (r) => { const m = mk(new THREE.CylinderGeometry(r, r, 0.022 * s, 24), MAT.pulley); return m; };
+  const rope = () => mk(new THREE.CylinderGeometry(0.0055, 0.0055, 1, 6), MAT.cable, false);
+  const o = { group: g, sides: [], motors: {} };
+  // Körper
   const pelvisGeo = new THREE.CapsuleGeometry(0.1 * s, 0.17 * s, 6, 14); pelvisGeo.rotateX(Math.PI / 2);
   o.pelvis = mk(pelvisGeo, MAT.pants); o.pelvis.scale.set(1.05, 1, 1);
   o.torso = mk(new THREE.CapsuleGeometry(0.125 * s, B.torso - 0.12 * s, 6, 16), MAT.jacket); o.torso.scale.set(0.84, 1, 1.24);
@@ -944,33 +1058,64 @@ function buildPerson(P) {
   shell.position.y = B.headR * 0.12; brim.position.set(0.012 * s, B.headR * 0.14, 0);
   shell.castShadow = brim.castShadow = true;
   o.helmet.add(shell, brim); g.add(o.helmet);
-  o.backPlate = mk(new THREE.BoxGeometry(0.03 * s, B.torso * 0.96, 0.13 * s), MAT.steel);
-  o.pack = mk(new THREE.BoxGeometry(0.11 * s, 0.34 * s, 0.27 * s), MAT.graphite);
-  o.led = mk(new THREE.BoxGeometry(0.006, 0.2 * s, 0.03 * s), MAT.led, false);
+  // Rückenrahmen (Kraxe), Antriebsbox mit 6 Motoren, Stihl-Akku, Schulterbügel, Hüftgurt
+  o.rails = [bar(0.025 * s, 0.025 * s), bar(0.025 * s, 0.025 * s)];
+  o.box = mk(new THREE.BoxGeometry(0.12 * s, 0.3 * s, 0.3 * s), MAT.graphite);
+  const motorRow = () => [0, 1].map(() => {
+    const cap = MAT.motor.clone();
+    const m = mk(new THREE.CylinderGeometry(0.042 * s, 0.042 * s, 0.035 * s, 22), cap);
+    m.userData.cap = cap; return m;
+  });
+  o.motors = { leg: motorRow(), sh: motorRow(), el: motorRow() };
+  o.battery = new THREE.Group();
+  const batBody = new THREE.Mesh(new THREE.BoxGeometry(0.075 * s, 0.11 * s, 0.17 * s), MAT.stihl);
+  const batTop = new THREE.Mesh(new THREE.BoxGeometry(0.078 * s, 0.03 * s, 0.172 * s), MAT.graphite);
+  batTop.position.y = 0.07 * s; batBody.castShadow = true;
+  o.battery.add(batBody, batTop); g.add(o.battery);
+  o.yokeBar = limb(0.014 * s, 0.014 * s, MAT.steel);
+  o.switchBtn = mk(new THREE.CylinderGeometry(0.022 * s, 0.022 * s, 0.02 * s, 16), MAT.motor);
   const beltGeo = new THREE.TorusGeometry(0.16 * s, 0.02 * s, 8, 36); beltGeo.rotateX(Math.PI / 2);
   o.belt = mk(beltGeo, MAT.steel); o.belt.scale.set(0.8, 1, 1.18);
+  // Zuggreifer hinten an der Hüfte (pendelnd an zwei Zugstreben)
+  o.drawbars = [limb(0.012 * s, 0.012 * s, MAT.steel), limb(0.012 * s, 0.012 * s, MAT.steel)];
+  o.crossbar = mk(new THREE.BoxGeometry(0.05 * s, 0.05 * s, 0.62 * s), MAT.steel);
+  o.forks = [0, 1, 2, 3].map(() => {
+    const geo = new THREE.TorusGeometry(P.rt0 + 0.022, 0.012, 6, 16, Math.PI * 1.35); geo.rotateY(Math.PI / 2); geo.rotateX(Math.PI * 0.82);
+    return mk(geo, MAT.jaw);
+  });
   for (const side of [-1, 1]) {
     const q = { side };
     q.hip = ball(0.074 * s, MAT.pants); q.thigh = limb(0.054 * s, 0.07 * s, MAT.pants);
     q.knee = ball(0.056 * s, MAT.pants); q.shank = limb(0.041 * s, 0.052 * s, MAT.pants);
+    // Fußplatte mit Snowboard-Bindung, vorne und hinten verlängert
     q.foot = new THREE.Group();
     const boot = new THREE.Mesh(new THREE.BoxGeometry(0.27 * s, 0.085 * s, 0.105 * s), MAT.boot);
     boot.position.set(0.075 * s, -0.028 * s, 0); boot.castShadow = true;
-    const plate = new THREE.Mesh(new THREE.BoxGeometry(0.29 * s + P.foot, 0.012 * s, 0.12 * s), MAT.steel);
-    plate.position.set(0.075 * s + P.foot / 2, -0.074 * s, 0); plate.castShadow = true;
-    q.foot.add(boot, plate); g.add(q.foot);
+    const back = 0.08, len = 0.29 * s + P.foot + back;
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(len, 0.014 * s, 0.13 * s), MAT.steel);
+    plate.position.set(0.075 * s + (P.foot - back) / 2, -0.075 * s, 0); plate.castShadow = true;
+    const strap1 = new THREE.Mesh(new THREE.BoxGeometry(0.045 * s, 0.03 * s, 0.13 * s), MAT.strap);
+    const strap2 = strap1.clone(); strap1.position.set(0.15 * s, 0.018 * s, 0); strap2.position.set(0.0, 0.03 * s, 0);
+    const heel = new THREE.Mesh(new THREE.BoxGeometry(0.02 * s, 0.11 * s, 0.12 * s), MAT.graphite); heel.position.set(-0.075 * s, 0.0, 0);
+    q.foot.add(boot, plate, strap1, strap2, heel); g.add(q.foot);
     q.shoulder = ball(0.058 * s, MAT.jacket); q.upper = limb(0.043 * s, 0.05 * s, MAT.jacket);
     q.elbow = ball(0.045 * s, MAT.jacket); q.fore = limb(0.035 * s, 0.043 * s, MAT.jacket); q.hand = ball(0.047 * s, MAT.glove);
-    q.mHip = motor(0.058 * s, 0.05 * s); q.mKnee = motor(0.046 * s, 0.045 * s);
-    q.mSh = motor(0.05 * s, 0.048 * s); q.mEl = motor(0.038 * s, 0.04 * s);
+    // Gelenke mit Seilrollen (keine Motoren an den Gliedern)
+    q.pHip = pulley(0.07 * s); q.pKnee = pulley(0.055 * s); q.pSh = pulley(0.05 * s); q.pEl = pulley(0.042 * s);
     q.sThigh = bar(0.028 * s, 0.012 * s); q.sShank = bar(0.026 * s, 0.012 * s);
     q.sUpper = bar(0.024 * s, 0.011 * s); q.sFore = bar(0.022 * s, 0.011 * s);
     q.yoke = limb(0.016 * s, 0.016 * s, MAT.steel);
     q.ankleHinge = mk(new THREE.CylinderGeometry(0.024 * s, 0.024 * s, 0.03 * s, 14), MAT.graphite);
     q.cThigh = cuff(0.077 * s); q.cShank = cuff(0.058 * s); q.cUpper = cuff(0.054 * s); q.cFore = cuff(0.046 * s);
-    q.jaw = mk(jawGeometry(P.rtG + 0.004, 0.016, 2 * P.jawHalf, side), MAT.jaw);
+    // Seile: Bein (Box → Hüftrolle hinten → Knierolle vorne → Unterschenkel), Schulter, Ellbogen
+    q.ropeLeg = [rope(), rope(), rope()]; q.ropeSh = [rope(), rope()]; q.ropeEl = [rope(), rope(), rope()];
+    // Gasfeder Schulter: Zylinder + Kolbenstange
+    q.gasBody = limb(0.013 * s, 0.013 * s, MAT.graphite); q.gasRod = limb(0.005 * s, 0.005 * s, MAT.steel);
+    // Klemmgabel nur rechts (Stumpf), links greift der Handschuh
+    q.jaw = side > 0 ? mk(jawGeometry(P.rtG + 0.004, 0.018, 2 * P.jawHalf, side), MAT.jaw) : null;
     o.sides.push(q);
   }
+  o.lblBox = label('Motoren + Stihl-Akku'); o.lblBox.position.set(0, 0.26 * s, 0); o.box.add(o.lblBox);
   return o;
 }
 
@@ -987,20 +1132,50 @@ function seg(m, a, b) {
 const at = (m, p) => m.position.set(p.x, p.y, p.z);
 function axis(m, p, dir) { at(m, p); m.quaternion.setFromUnitVectors(Y_AXIS, _d.set(dir.x, dir.y, dir.z).normalize()); }
 
+// Zuggreifer-Punkt: an zwei Streben pendelnd hinter der Hüfte, bleibt dadurch waagrecht
+function clampPoint(P, pose) { return add(pose.P, v3(-0.3 * P.s, -0.34 * P.s, 0)); }
+
 function posePerson(pose, ch, tr, ld) {
   const o = person, s = P.s, B = P.B, pa = -pose.alpha;
   at(o.pelvis, add(pose.P, v3(-0.015 * s, 0.03 * s, 0))); o.pelvis.rotation.set(0, 0, pa * 0.5);
   at(o.torso, add(pose.P, mul(pose.dir, B.torso * 0.53))); o.torso.rotation.set(0, 0, pa);
   seg(o.neck, add(pose.S, mul(pose.dir, -0.02 * s)), add(pose.S, mul(sub(pose.head, pose.S), 0.6)));
   at(o.head, pose.head); at(o.helmet, pose.head); o.helmet.rotation.set(0, 0, -pose.beta);
-  const onBack = (k, b) => add(add(pose.P, mul(pose.dir, B.torso * k)), mul(pose.back, b * s));
-  at(o.backPlate, onBack(0.5, 0.13)); o.backPlate.rotation.set(0, 0, pa);
-  at(o.pack, onBack(0.6, 0.205)); o.pack.rotation.set(0, 0, pa);
-  at(o.led, onBack(0.6, 0.262)); o.led.rotation.set(0, 0, pa);
+  const onBack = (k, b, z = 0) => add(add(add(pose.P, mul(pose.dir, B.torso * k)), mul(pose.back, b * s)), v3(0, 0, z * s));
+  // Rückenrahmen, Box, Motoren, Akku
+  seg(o.rails[0], onBack(0.0, 0.14, -0.1), onBack(1.08, 0.14, -0.1)); seg(o.rails[1], onBack(0.0, 0.14, 0.1), onBack(1.08, 0.14, 0.1));
+  at(o.box, onBack(0.62, 0.23)); o.box.rotation.set(0, 0, pa);
+  const rows = { el: 0.1, sh: 0, leg: -0.1 };
+  const motorPos = {};
+  for (const [k, dy] of Object.entries(rows)) {
+    o.motors[k].forEach((m, i) => {
+      const p = add(onBack(0.62, 0.29, i ? 0.075 : -0.075), mul(pose.dir, dy * s));
+      at(m, p); m.quaternion.setFromUnitVectors(Y_AXIS, _d.set(pose.back.x, pose.back.y, 0).normalize());
+      (motorPos[k] = motorPos[k] || [])[i] = p;
+    });
+  }
+  at(o.battery, onBack(0.17, 0.22)); o.battery.rotation.set(0, 0, pa);
+  seg(o.yokeBar, onBack(0.98, 0.1, -0.2), onBack(0.98, 0.1, 0.2));
+  at(o.switchBtn, add(onBack(0.86, -0.12, -0.13), v3(0, 0, 0))); o.switchBtn.rotation.set(Math.PI / 2, 0, 0);
   at(o.belt, add(pose.P, v3(0, 0.05 * s, 0))); o.belt.rotation.set(0, 0, pa * 0.5);
-  const yokeTop = onBack(0.93, 0.13);
+  // Zuggreifer (nur beim Schleifen sichtbar)
+  const drag = state.scen === 'drag', cp = clampPoint(P, pose);
+  [o.drawbars[0], o.drawbars[1], o.crossbar, ...o.forks].forEach((m) => { m.visible = drag; });
+  if (drag) {
+    seg(o.drawbars[0], add(pose.P, v3(-0.12 * s, 0.02 * s, -0.17 * s)), add(cp, v3(0.02, 0.02, -0.27 * s)));
+    seg(o.drawbars[1], add(pose.P, v3(-0.12 * s, 0.02 * s, 0.17 * s)), add(cp, v3(0.02, 0.02, 0.27 * s)));
+    at(o.crossbar, add(cp, v3(0.02, 0.03, 0)));
+    o.forks.forEach((f, i) => {
+      f.visible = i < state.n;
+      at(f, add(cp, v3(-0.02, 0, dragZ(i))));
+      f.rotation.set(0, 0, 0); f.scale.setScalar(lerp(1.35, 1, ch.clamp ?? 0));
+    });
+  }
   const glow = (v, p) => (p > 1 ? clamp(v / p, 0, 1) * smooth(5, 40, p) * 1.8 : 0);
-  const gH = glow(ld.hip, PK.hip), gK = glow(ld.knee, PK.knee), gS = glow(ld.sh, PK.sh), gE = glow(ld.elb, PK.elb);
+  const gLeg = Math.max(glow(ld.hip, PK.hip), glow(ld.knee, PK.knee)), gS = glow(ld.sh, PK.sh), gE = glow(ld.elb, PK.elb);
+  o.motors.leg.forEach((m) => { m.userData.cap.emissiveIntensity = gLeg; });
+  o.motors.sh.forEach((m) => { m.userData.cap.emissiveIntensity = gS; });
+  o.motors.el.forEach((m) => { m.userData.cap.emissiveIntensity = gE; });
   const grip = smooth(0, 1, ch.gb);
   for (let k = 0; k < 2; k++) {
     const q = o.sides[k], side = q.side;
@@ -1009,20 +1184,38 @@ function posePerson(pose, ch, tr, ld) {
     at(q.foot, ank); q.foot.rotation.set(0, 0, -Math.asin(clamp(pose.heel / (0.2 * s), 0, 0.9)));
     const sh = pose.shoulders[k], el = pose.elbows[k], wr = pose.wrists[k], hd = pose.hands[k], hg = pose.hinge[k];
     at(q.shoulder, sh); seg(q.upper, sh, el); at(q.elbow, el); seg(q.fore, el, wr); at(q.hand, hd);
-    const mh = add(hip, v3(0, 0, side * 0.115 * s)), mk = add(knee, v3(0, 0, side * 0.078 * s)), ma = add(ank, v3(0, 0, side * 0.07 * s));
-    axis(q.mHip, mh, ZDIR); axis(q.mKnee, mk, ZDIR); axis(q.ankleHinge, ma, ZDIR);
+    // Beinschiene mit Rollen
+    const out = (p, d) => add(p, v3(0, 0, side * d * s));
+    const mh = out(hip, 0.12), mk = out(knee, 0.085), ma = out(ank, 0.07);
+    axis(q.pHip, mh, ZDIR); axis(q.pKnee, mk, ZDIR); axis(q.ankleHinge, ma, ZDIR);
     seg(q.sThigh, mh, mk); seg(q.sShank, mk, ma);
     axis(q.cThigh, mix(hip, knee, 0.55), sub(knee, hip)); axis(q.cShank, mix(knee, ank, 0.42), sub(ank, knee));
+    // Beinseil: von der Box hinten über die Hüftrolle, vorne über die Knierolle zum Unterschenkel
+    const thighD = norm(sub(knee, hip)), front = norm(v3(thighD.y, -thighD.x, 0));     // senkrecht zum Oberschenkel, nach vorne
+    const hipBack = add(mh, mul(pose.back, 0.07 * s)), kneeFront = add(mk, mul(front, -0.06 * s));
+    const shankA = add(out(mix(knee, ank, 0.4), 0.07), mul(front, -0.04 * s));
+    const m0 = motorPos.leg[k];
+    seg(q.ropeLeg[0], m0, hipBack); seg(q.ropeLeg[1], hipBack, kneeFront); seg(q.ropeLeg[2], kneeFront, shankA);
+    // Arm: Schulterrolle, Ellbogenrolle, Streben
     const ms = add(add(sh, mul(pose.back, 0.02 * s)), v3(0, 0, side * 0.072 * s));
     const me = add(el, mul(hg, 0.052 * s)), mw = add(wr, mul(hg, 0.04 * s));
-    axis(q.mSh, ms, ZDIR); axis(q.mEl, me, hg);
+    axis(q.pSh, ms, ZDIR); axis(q.pEl, me, hg);
     seg(q.sUpper, ms, me); seg(q.sFore, me, mw);
     axis(q.cUpper, mix(sh, el, 0.5), sub(el, sh)); axis(q.cFore, mix(el, wr, 0.55), sub(wr, el));
-    seg(q.yoke, add(yokeTop, v3(0, 0, side * 0.05 * s)), ms);
-    q.jaw.position.set(hd.x, hd.y, hd.z - side * P.handHalf * grip);
-    q.jaw.rotation.set(0, 0, tr.th * grip);
-    q.mHip.userData.cap.emissiveIntensity = gH; q.mKnee.userData.cap.emissiveIntensity = gK;
-    q.mSh.userData.cap.emissiveIntensity = gS; q.mEl.userData.cap.emissiveIntensity = gE;
+    seg(q.yoke, onBack(0.98, 0.1, side * 0.2), ms);
+    // Schulterseil hebt den Oberarm, Ellbogenseil beugt den Unterarm
+    const shTop = add(ms, v3(0, 0.05 * s, 0)), upA = add(mix(ms, me, 0.45), v3(0, 0.03 * s, 0));
+    seg(q.ropeSh[0], motorPos.sh[k], shTop); seg(q.ropeSh[1], shTop, upA);
+    const upperD = norm(sub(el, sh)), elFront = add(me, mul(norm(cross(hg, upperD)), 0.045 * s)), foreA = mix(me, mw, 0.45);
+    seg(q.ropeEl[0], motorPos.el[k], add(shTop, v3(0, 0.012, 0))); seg(q.ropeEl[1], add(shTop, v3(0, 0.012, 0)), elFront); seg(q.ropeEl[2], elFront, foreA);
+    // Gasfeder vom Rückenrahmen zum Oberarm
+    const gA = onBack(0.72, 0.12, side * 0.17), gB = add(mix(sh, el, 0.42), v3(0, 0, side * 0.06 * s)), gM = mix(gA, gB, 0.58);
+    seg(q.gasBody, gA, gM); seg(q.gasRod, gM, gB);
+    if (q.jaw) {
+      q.jaw.visible = state.scen !== 'drag';
+      q.jaw.position.set(hd.x, hd.y, hd.z - side * P.handHalf * grip);
+      q.jaw.rotation.set(0, 0, tr.th * grip);
+    }
   }
 }
 
@@ -1047,8 +1240,19 @@ function poseTree(tr, pose) {
 
 const lblGrip = label('Stammgreifer', true);
 scene.add(lblGrip);
+function poseLabelsDrag(ch, pose, ld) {
+  const on = state.labels;
+  person.lblBox.visible = on;
+  lblGrip.visible = on && ch.att > 0.5;
+  if (lblGrip.visible) {
+    const cp = clampPoint(P, pose); lblGrip.position.set(cp.x, cp.y + 0.25, 0.45);
+    const txt = `Zuggreifer · ${Math.round(ld.F / GRAV)}${NB}kg`;
+    if (lblGrip.element.textContent !== txt) lblGrip.element.textContent = txt;
+  }
+}
 function poseLabels(ch, pose) {
   const on = state.labels;
+  person.lblBox.visible = on;
   tree.lblCut.visible = on && !ch.carried;
   tree.lblTip.visible = on;
   tree.lblCg.visible = tree.cgDot.visible = tree.cgLine.visible = on;
@@ -1057,7 +1261,7 @@ function poseLabels(ch, pose) {
   lblGrip.visible = on && ch.carried;
   if (ch.carried) {
     lblGrip.position.set(pose.Gact.x, pose.Gact.y + 0.2, 0);
-    const txt = `Stammgreifer · ${fmt(pose.Gact.y)}${NB}m`;
+    const txt = `Klemmgabel · ${fmt(pose.Gact.y)}${NB}m`;
     if (lblGrip.element.textContent !== txt) lblGrip.element.textContent = txt;
   }
 }
@@ -1077,6 +1281,13 @@ function fitDistance(dir, tgt, box) {
   return d * 1.03;
 }
 function viewPose(kind) {
+  if (state.scen === 'drag') {
+    if (kind === 'follow') return { pos: new THREE.Vector3(curPelvisX + 1.2, 2.2, 4.2), tgt: new THREE.Vector3(curPelvisX - 0.9, 0.7, 0) };
+    const box = { x0: P.dLie0.x - P.L - 0.3, x1: P.dX0 + DRAG_D + 1.2, y0: 0, y1: 2.0, z0: -0.9, z1: 1.0 };
+    const tgt = new THREE.Vector3((box.x0 + box.x1) / 2, 0.8, 0);
+    const dir = (kind === 'side' ? new THREE.Vector3(0, 0.12, 1) : new THREE.Vector3(0.35, 0.38, 0.85)).normalize();
+    return { pos: tgt.clone().addScaledVector(dir, fitDistance(dir, tgt, box)), tgt };
+  }
   const top = Math.max(2.3, P.yUp + (P.L - P.xg) * Math.sin(P.thUp), P.cutLiftY + P.L * Math.sin(P.thLift)) + 0.15;
   const box = { x0: P.xSt0 - 0.5, x1: P.xe + Math.max(P.L + 0.1, P.Lp * 0.7), y0: 0, y1: top, z0: -0.9, z1: 1.3 };
   const tgt = new THREE.Vector3((box.x0 + box.x1) / 2, 0.42 * top, 0.1);
@@ -1108,7 +1319,9 @@ const ui = {
   mass: $('mass'), massOut: $('massOut'), massHint: $('massHint'), massTypical: $('massTypical'),
   body: $('body'), bodyOut: $('bodyOut'), exoKg: $('exoKg'), exoKgOut: $('exoKgOut'), foot: $('foot'), footOut: $('footOut'),
   hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), statuses: $('statuses'), momentNote: $('momentNote'),
-  steps: [...document.querySelectorAll('#steps button')],
+  stepsList: $('steps'), steps: [],
+  scLoad: $('scLoad'), scDrag: $('scDrag'), n: $('n'), nOut: $('nOut'), gGrass: $('gGrass'), gSnow: $('gSnow'),
+  kicker: $('kicker'), title: $('title'), lede: $('lede'), labF: $('labF'), labM: $('labM'), labFl: $('labFl'), labSh: $('labSh'),
 };
 const ROWS = [['F', 'F', 'kg', GRAV], ['M', 'M', 'Nm', 1], ['Fl', 'Fl', 'kg', GRAV], ['sh', 'Sh', 'Nm', 1], ['hip', 'Hip', 'Nm', 1], ['knee', 'Knee', 'Nm', 1]]
   .map(([k, id, unit, div]) => ({ k, unit, div, now: $('now' + id), max: $('max' + id), bar: $('bar' + id) }));
@@ -1116,6 +1329,17 @@ let segEls = [];
 
 function captionFor(id) {
   const hp = `${fmt(P.hp)}${NB}m`;
+  if (state.scen === 'drag') {
+    const n = state.n, trees = n > 1 ? `${n} Bäume` : 'Ein Baum', f = dragForces(P);
+    switch (id) {
+      case 'start': return ['Ausgangslage', 'Ausgangslage', `${trees} liegen am Boden, die Stümpfe zeigen zu dir. Du stehst mit dem Rücken zu den Stümpfen.`];
+      case 'dgrip': return ['Schritt 1 von 4', 'Ansetzen', 'Leicht in die Knie und vorbeugen, den Zuggreifer hinter der Hüfte rückwärts auf die Stümpfe drücken. Die Schnappbügel der Gabeln schließen.'];
+      case 'drise': return ['Schritt 2 von 4', 'Aufrichten', 'Hochkommen: Die Stümpfe heben sich auf etwa 60 cm und keilen sich in den Gabeln fest. Die Beinseile ziehen Hüfte und Knie in die Streckung.'];
+      case 'dwalk': return ['Schritt 3 von 4', 'Vorwärts schleifen', `Vorgebeugt vorwärts gehen, gezeigt sind 7 m, gedacht für bis zu 100 m. ${Math.round(f.hold / GRAV)} kg hängen am Greifer und gehen über Rahmen und Beinschienen in die Fußplatten. Ziehen musst du nur etwa ${Math.round(f.pullLift / GRAV)} kg, die Hände bleiben frei.`];
+      case 'drelease': return ['Schritt 4 von 4', 'Ablegen', 'In die Knie, Stümpfe absetzen, Lösezug am Hüftgurt ziehen und weitergehen.'];
+      default: return ['Fertig', 'Am Plateau', `${trees} liegen am Ziel, bereit zum Aufladen.`];
+    }
+  }
   switch (id) {
     case 'start': return ['Ausgangslage', 'Ausgangslage', `Der geschnittene Christbaum liegt am Boden, das Plateau ist ${hp} hoch.`];
     case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen und den Stammgreifer am astfreien Stammende schließen.'];
@@ -1133,7 +1357,30 @@ function captionFor(id) {
       : 'Für diese Körpergröße ist das Plateau zu hoch.'];
   }
 }
-function stepOf(id) { return { grip: 1, raise: 2, carry: 3, lift: 4, approach: 4, topple: 5, release: 6 }[id] || 0; }
+const STEP_TEXT = {
+  load: [['Greifen', 'In die Hocke, rechts die Klemmgabel am Stumpf, links weit oben am Stamm.'],
+    ['Aufrichten bis fast senkrecht', 'Zurücklehnen, rechts ist der Drehpunkt, links hebelt den Baum hoch. Die Beinseile helfen beim Hochkommen.'],
+    ['Tragen', 'Fast senkrecht zum Plateau tragen, kaum Hebel. Die Gasfedern halten die Arme.'],
+    ['Hochheben', 'Fast lotrecht anheben, bis das Schnittende über der Ladefläche ist, dann an der Kante absetzen.'],
+    ['Umkippen lassen', 'Die Klemmgabel dreht als Scharnier mit, der Baum kippt 90° aufs Plateau.'],
+    ['Zurücktreten', 'Gabel offen, Arme runter, zurück.']],
+  drag: [['Ansetzen', 'Rücken zu den Stümpfen, leicht in die Knie, Zuggreifer rückwärts auf die Stümpfe drücken.'],
+    ['Aufrichten', 'Hochkommen, die Stümpfe heben sich an und keilen sich fest. Die Beinseile helfen.'],
+    ['Vorwärts schleifen', 'Leicht vorgebeugt vorwärts gehen, bis 100 m. Hände frei.'],
+    ['Ablegen', 'In die Knie, Stümpfe absetzen, Lösezug ziehen, weitergehen.']],
+};
+function buildSteps() {
+  ui.stepsList.replaceChildren(...STEP_TEXT[state.scen].map(([title, d], i) => {
+    const li = document.createElement('li'), b = document.createElement('button');
+    b.type = 'button'; b.dataset.step = i + 1;
+    b.innerHTML = `<span class="no">${i + 1}</span><span><b></b><span class="d"></span></span>`;
+    b.querySelector('b').textContent = title; b.querySelector('.d').textContent = d;
+    b.addEventListener('click', () => { const st = TL.steps.find((x) => x.n === i + 1); state.t = st.t0 + 0.001; setPlaying(!reduced); });
+    li.append(b); return li;
+  }));
+  ui.steps = [...ui.stepsList.querySelectorAll('button')];
+}
+function stepOf(id) { return { grip: 1, raise: 2, carry: 3, lift: 4, approach: 4, topple: 5, release: 6, dgrip: 1, drise: 2, dwalk: 3, drelease: 4 }[id] || 0; }
 
 function buildSegs() {
   ui.segs.textContent = '';
@@ -1143,7 +1390,7 @@ function buildSegs() {
     d.style.flexGrow = (st.t1 - st.t0).toFixed(3);
     const fill = document.createElement('i');
     d.append(fill);
-    if (st.n >= 1 && st.n <= 6) { const b = document.createElement('b'); b.textContent = st.n; d.append(b); }
+    if (st.n >= 1 && st.n <= STEP_TEXT[state.scen].length) { const b = document.createElement('b'); b.textContent = st.n; d.append(b); }
     ui.segs.append(d);
     return { el: d, fill, st };
   });
@@ -1172,6 +1419,13 @@ function updateLoads(ld) {
   }
 }
 function updateStatic() {
+  const drag = state.scen === 'drag';
+  ui.nOut.textContent = state.n;
+  ui.labF.textContent = drag ? 'Gewicht am Zuggreifer' : 'Baumgewicht an den Händen';
+  ui.labFl.textContent = drag ? 'Zugkraft nach vorne' : 'Linke Hand · Hebelkraft';
+  for (const k of ['M', 'Sh']) for (const id of ['lab', 'now', 'max']) $(id + k).hidden = drag;
+  $('barM').parentElement.hidden = drag; $('barSh').parentElement.hidden = drag;
+  if (drag) { updateStaticDrag(); return; }
   ui.hpOut.textContent = `${fmt(state.hp)}${NB}m`;
   ui.lenOut.textContent = `${fmt(state.L, 1)}${NB}m`;
   ui.massOut.textContent = `${state.mass}${NB}kg`;
@@ -1206,13 +1460,57 @@ function updateStatic() {
   ui.momentNote.textContent = `Das Kippmoment ist nur kurz beim Aufrichten hoch (${Math.round(PK.M)}${NB}Nm, solange der Baum noch flach ist). Die linke Hand fängt es mit bis zu ${Math.round(PK.Fl / GRAV)}${NB}kg Hebelkraft ab. Beim Tragen sind es ${Math.round(PK.Mcarry)}${NB}Nm, beim lotrechten Hochheben ${Math.round(PK.Mlift)}${NB}Nm. Beim Umkippen dreht der Greifer als Scharnier mit, dann wirkt kein Moment.`;
 }
 
+function updateStaticDrag() {
+  ui.lenOut.textContent = `${fmt(state.L, 1)}${NB}m`;
+  ui.massOut.textContent = `${state.mass}${NB}kg`;
+  ui.massHint.textContent = `typisch für ${fmt(state.L, 1)}${NB}m: ${massTypical(state.L)}${NB}kg`;
+  ui.massTypical.hidden = state.mass === massTypical(state.L);
+  ui.heightOut.textContent = `${fmt(state.H)}${NB}m`; ui.bodyOut.textContent = `${state.body}${NB}kg`;
+  ui.exoKgOut.textContent = `${state.exoKg}${NB}kg`; ui.footOut.textContent = `${state.foot}${NB}cm`;
+  for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k] / r.div)}${NB}${r.unit}`;
+  const f = dragForces(P), items = [];
+  items.push(['ok', '✓', `${state.n} × ${state.mass} kg = ${state.n * state.mass} kg gesamt. Am Greifer ${Math.round(f.hold / GRAV)} kg, Zugkraft nur ${Math.round(f.pullLift / GRAV)} kg`]);
+  if (PK.tipB > 0.08) items.push(['bad', '✕', `Kippgefahr nach hinten: ${Math.round(PK.tipB * 100)} cm hinter der Ferse. Stärker vorbeugen, Fußplatten hinten verlängern oder weniger Bäume`]);
+  else if (PK.tipB > 0.02) items.push(['warn', '▲', `Gleichgewicht nach hinten knapp (${Math.round(PK.tipB * 100)} cm), stärker vorbeugen`]);
+  ui.statuses.replaceChildren(...items.map(([level, icon, text]) => {
+    const p = document.createElement('p'); p.className = 'status'; p.dataset.level = level;
+    const i = document.createElement('span'); i.className = 'ic'; i.setAttribute('aria-hidden', 'true'); i.textContent = icon;
+    const t = document.createElement('span'); t.textContent = text; p.append(i, t); return p;
+  }));
+  ui.momentNote.textContent = `Mit angehobenen Stümpfen gleiten nur die Äste, darum ist die Zugkraft klein. Würden die Bäume ganz am Boden schleifen, wären es etwa ${Math.round(f.pullFlat / GRAV)} kg Zugkraft.`;
+}
+
+let dragTrees = [];
+function buildDragTrees() {
+  dragTrees.forEach((d) => disposeGroup(d.wrap));
+  dragTrees = [];
+  if (state.scen !== 'drag') return;
+  for (let i = 0; i < state.n; i++) {
+    const wrap = new THREE.Group(); wrap.rotation.y = Math.PI;      // gespiegelt: Spitzen zeigen nach hinten (-x)
+    const t = buildTree(P);
+    [t.lblCut, t.lblTip, t.lblCg, t.cgDot, t.cgLine].forEach((m) => { m.visible = false; });
+    wrap.add(t.group); scene.add(wrap); dragTrees.push({ wrap, t });
+  }
+}
+function poseDragTrees(ch, pose) {
+  dragTrees.forEach(({ t }, i) => {
+    const tp = dragTreePose(P, ch, pose, i), c = Math.cos(tp.th), sn = Math.sin(tp.th);
+    t.group.position.set(-tp.cx, tp.cy, -tp.z); t.group.rotation.set(0, 0, tp.th);
+    for (const tier of t.tiers) {
+      tier.low.scale.y = clamp((tp.cy + sn * tier.x) / tier.r, P.cLow, 1); tier.up.scale.y = 1;
+    }
+    [t.lblCut, t.lblTip, t.lblCg, t.cgDot, t.cgLine].forEach((m) => { m.visible = false; });
+  });
+}
+
 function rebuild(parts) {
   P = derive(state);
   TL = buildTimeline(P);
-  finalize(P, TL);
-  PK = analyse(P, TL);
+  if (P.scen === 'drag') { finalizeDrag(P, TL); PK = analyseDrag(P, TL); }
+  else { finalize(P, TL); PK = analyse(P, TL); }
   // Sonne und Schattenbereich mitführen (lange Bäume, langes Plateau)
-  const cx = (P.xSt0 + P.xe + P.Lp) / 2, half = (P.xe + P.Lp - P.xSt0) / 2 + 1.5;
+  const cx = P.scen === 'drag' ? DRAG_D / 2 - P.L / 2 : (P.xSt0 + P.xe + P.Lp) / 2;
+  const half = P.scen === 'drag' ? (DRAG_D + P.L) / 2 + 2 : (P.xe + P.Lp - P.xSt0) / 2 + 1.5;
   sun.target.position.set(cx, 0, 0);
   sun.position.set(cx - 3.5, 10, 7);
   Object.assign(sun.shadow.camera, { left: -half, right: half, top: half, bottom: -half });
@@ -1220,6 +1518,8 @@ function rebuild(parts) {
   if (parts.tree) { if (tree) disposeGroup(tree.group); tree = buildTree(P); scene.add(tree.group); }
   if (parts.platform) { disposePlatform(); plat = buildPlatform(P); scene.add(plat.group); }
   if (parts.person) { if (person) disposeGroup(person.group); person = buildPerson(P); scene.add(person.group); }
+  if (parts.tree || parts.drag) buildDragTrees();
+  tree.group.visible = plat.group.visible = P.scen !== 'drag';
   ui.scrub.max = TL.T.toFixed(2);
   state.t = clamp(state.t, 0, TL.T);
   buildSegs();
@@ -1229,10 +1529,14 @@ function rebuild(parts) {
 
 let lastId = null, frameNo = 0;
 function update() {
-  const ch = choreo(P, TL, state.t), pose = solve(P, ch), tr = treePose(P, ch, pose), ld = loads(P, ch, pose, tr);
-  posePerson(pose, ch, tr, ld);
-  poseTree(tr, pose);
-  poseLabels(ch, pose);
+  let ch, pose, ld;
+  if (state.scen === 'drag') {
+    ch = choreoDrag(P, TL, state.t); pose = solve(P, ch); ld = loadsDrag(P, ch, pose);
+    posePerson(pose, ch, { th: 0 }, ld); poseDragTrees(ch, pose); poseLabelsDrag(ch, pose, ld);
+  } else {
+    ch = choreo(P, TL, state.t); pose = solve(P, ch); const tr = treePose(P, ch, pose); ld = loads(P, ch, pose, tr);
+    posePerson(pose, ch, tr, ld); poseTree(tr, pose); poseLabels(ch, pose);
+  }
   curPelvisX = pose.P.x;
   if (ch.id !== lastId) { lastId = ch.id; updateCaption(ch); }
   if ((frameNo++ & 1) === 0) updateLoads(ld);
@@ -1246,12 +1550,26 @@ function setPlaying(on) {
 }
 ui.play.addEventListener('click', () => { if (!state.playing && state.t >= TL.T - 0.05) state.t = 0; setPlaying(!state.playing); });
 ui.scrub.addEventListener('input', () => { state.t = Number(ui.scrub.value); setPlaying(false); });
-ui.steps.forEach((b) => b.addEventListener('click', () => {
-  const st = TL.steps.find((x) => x.n === Number(b.dataset.step));
-  state.t = st.t0 + 0.001;
-  setPlaying(!reduced);
-}));
 for (const b of document.querySelectorAll('.views button')) b.addEventListener('click', () => setView(b.dataset.view));
+function setScen(scen) {
+  state.scen = scen; state.t = 0;
+  ui.scLoad.setAttribute('aria-pressed', String(scen === 'load')); ui.scDrag.setAttribute('aria-pressed', String(scen === 'drag'));
+  document.querySelectorAll('[data-for]').forEach((el) => { el.hidden = el.dataset.for !== scen; });
+  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Use Case 2' : 'Exoskelett · Use Case 1';
+  ui.title.textContent = scen === 'drag' ? 'Bäume schleifen' : 'Christbaum aufladen';
+  ui.lede.textContent = scen === 'drag'
+    ? 'Ein Zuggreifer hinter der Hüfte fasst ein bis vier Stümpfe und hebt sie an. Das Gewicht geht über Rahmen und Beine in die Fußplatten, man geht vorwärts und hat die Hände frei.'
+    : 'Rechts die Klemmgabel am Stumpf, links weit oben am Stamm: zurücklehnen, fast senkrecht aufrichten, tragen, bis zur Ladefläche anheben und 90° aufs Plateau kippen lassen. Motoren und Akku sitzen hinten, Seile ziehen an Hüfte, Knie, Schultern und Ellbogen.';
+  buildSteps();
+  rebuild({ drag: true });
+  setView(state.view, true);
+}
+ui.scLoad.addEventListener('click', () => setScen('load'));
+ui.scDrag.addEventListener('click', () => setScen('drag'));
+ui.n.addEventListener('input', () => { state.n = Number(ui.n.value); rebuild({ drag: true }); });
+ui.n.addEventListener('change', () => setView(state.view));
+ui.gGrass.addEventListener('click', () => { state.mu = 0.6; ui.gGrass.setAttribute('aria-pressed', 'true'); ui.gSnow.setAttribute('aria-pressed', 'false'); rebuild({}); });
+ui.gSnow.addEventListener('click', () => { state.mu = 0.3; ui.gSnow.setAttribute('aria-pressed', 'true'); ui.gGrass.setAttribute('aria-pressed', 'false'); rebuild({}); });
 ui.hp.addEventListener('input', () => { state.hp = Number(ui.hp.value); rebuild({ platform: true }); });
 ui.len.addEventListener('input', () => {
   state.L = Number(ui.len.value);
@@ -1323,14 +1641,15 @@ function loop(now) {
 
 function boot(data) {
   if (data && typeof data === 'object') {
-    for (const k of ['H', 'L', 'hp', 'mass', 'massManual', 'body', 'exoKg', 'foot', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
+    for (const k of ['scen', 'n', 'mu', 'H', 'L', 'hp', 'mass', 'massManual', 'body', 'exoKg', 'foot', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
   }
   ui.hp.value = state.hp; ui.len.value = state.L; ui.height.value = state.H;
   ui.mass.value = state.mass; ui.body.value = state.body; ui.exoKg.value = state.exoKg; ui.foot.value = state.foot;
-  ui.labels.checked = state.labels;
+  ui.labels.checked = state.labels; ui.n.value = state.n;
   applyTheme();
   rebuild({ tree: true, platform: true, person: true });
-  if (reduced && state.t === 0) state.t = (TL.byId.carry.t0 + TL.byId.carry.t1) / 2;
+  const t0 = state.t; setScen(state.scen); state.t = t0;
+  if (reduced && state.t === 0) state.t = state.scen === 'drag' ? (TL.byId.dwalk.t0 + TL.byId.dwalk.t1) / 2 : (TL.byId.carry.t0 + TL.byId.carry.t1) / 2;
   setPlaying(state.playing && !reduced);
   resize();
   update();
@@ -1342,7 +1661,7 @@ if (window.claude?.hot?.ready) window.claude.hot.ready(boot);
 else boot(window.claude?.hot?.data ?? {});
 
 // Testzugang für automatische Prüfungen der Kinematik (wird von der Seite selbst nicht benutzt)
-window.__exo = { derive, buildTimeline, choreo, solve, treePose, loads, finalize, analyse, state, get P() { return P; }, get TL() { return TL; }, get PK() { return PK; } };
+window.__exo = { choreoDrag, finalizeDrag, analyseDrag, dragTreePose, clampPoint, derive, buildTimeline, choreo, solve, treePose, loads, finalize, analyse, state, get P() { return P; }, get TL() { return TL; }, get PK() { return PK; } };
 </script>
 </body>
 </html>

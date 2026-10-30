@@ -103,7 +103,7 @@ Für den schwersten angenommenen Fall: 4 m Baum, 120 kg, Plateau 1,75 m, mit Lei
 
 ## Use Case 2: Bäume schleifen
 
-3D-Skizze: [`visualisierung/use-case-schleifen.html`](visualisierung/use-case-schleifen.html) (mit Exo vorwärts gegen ohne Exo rückwärts).
+3D: in [`visualisierung/use-case-christbaum.html`](visualisierung/use-case-christbaum.html) oben auf „Schleifen“ umschalten.
 
 Ein bis vier Bäume (je nach Größe) über den Boden zum Plateau ziehen. Ohne Seil und Gurt: Etwas am Exo fasst die Stämme direkt.
 Am liebsten vorwärts gehen. Ohne Exo geht man in der Praxis rückwärts, je schwerer, desto eher.
@@ -169,6 +169,5 @@ und erste Tests auf einem Prüfstand ohne Person.
 docs/
   konzept.md                 Konzept: Aufbau, Antriebe, Greifer, Steuerung, Kosten
 visualisierung/
-  use-case-christbaum.html   3D: Use Case 1, Christbaum aufladen
-  use-case-schleifen.html    3D-Skizze: Use Case 2, Bäume schleifen
+  use-case-christbaum.html   3D: beide Use Cases (Aufladen, Schleifen) mit dem Exo laut Konzept
 ```
