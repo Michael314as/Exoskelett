@@ -9,8 +9,8 @@ Aktives Exoskelett aus Metall, das beim Aufladen frisch geschnittener Christbäu
 
 Der Use Case ist der Grundstein des Projekts. Gelenke, Motoren, Greifer und Akku werden daraus abgeleitet.
 
-1. **Greifen:** In die Hocke gehen und den Stammgreifer am astfreien Stammende (Schnittende) schließen.
-2. **Aufrichten bis fast senkrecht:** Aus der Hocke hochkommen, den Baum hochschwenken und sich zurücklehnen.
+1. **Greifen:** In die Hocke gehen. Die rechte Hand greift am Stumpf (dort sitzt der Stammgreifer), die linke so weit Richtung Spitze wie möglich.
+2. **Aufrichten bis fast senkrecht:** Zurücklehnen. Die rechte Hand ist der Drehpunkt, die linke bringt über den Hebel den Baum in die Senkrechte.
 3. **Tragen:** Fast senkrecht (78°) und leicht zurückgelehnt zum Plateau gehen.
 4. **Hochheben:** Den Baum fast lotrecht (84°) balancieren und anheben, bis das Schnittende auf Plateauhöhe ist. Dann das Schnittende über die Kante führen und knapp dahinter auf der Ladefläche absetzen.
 5. **Umkippen lassen:** Der Greifer hält das Schnittende wie ein Scharnier, der Baum kippt 90° nach vorne aufs Plateau und darf dabei frei fallen. Sobald die untersten Äste aufliegen, öffnet der Greifer. Nichts wird geschoben, das schont den Baum.
@@ -25,7 +25,9 @@ Schwerpunkts vom Greifer. Waagrecht gehalten ist dieser Abstand am größten (br
 
 | Thema | Festlegung |
 |---|---|
-| Ziel | Das Exo so kräftig wie möglich machen, für möglichst viele Fälle. Grenzen sind Stand der Technik und Budget, nicht die Baumgröße. |
+| Ziel | Das Exo unterstützt die eigene Bewegung, im besten Fall mit doppelter Kraft. So kräftig wie möglich, Grenzen sind Stand der Technik und Budget. |
+| Aufrichten | Rechte Hand am Stumpf als Drehpunkt, linke Hand weit Richtung Spitze als Hebel, zurücklehnen. Die meisten Bäume gehen so schon ohne Exo. |
+| Weiterer Einsatz | Das Exo soll auch beim Ziehen schwerer Lasten helfen (z. B. Bäume schleifen), siehe Use Case 2. |
 | Bäume | 1 bis 4 m lang, nicht eingenetzt, sehr unterschiedlich schwer (das Gewicht folgt nicht sicher aus der Länge) |
 | Umkippen | Der Baum darf frei aufs Plateau fallen |
 | Person | 1,75 m groß, etwa 75 kg |
@@ -75,7 +77,7 @@ Erster Wert: beim Hochschwenken aus der flachen Lage (Schritt 2). Zweiter Wert: 
 
 Was daraus folgt:
 
-- **Das Hochschwenken aus der flachen Lage ist der teuerste Moment.** Es treibt jeden Wert um das Zwei- bis Fünffache hoch. Schwere Bäume sollten deshalb wie eine Leiter von der Spitze her aufgestellt werden: Schnittende am Boden gegen die Fußplatte, Spitze anheben und unter dem Baum zum Stamm gehen. Dafür braucht es selbst beim 4 m, 120 kg Baum nur etwa 35 kg Kraft an den Händen, die das Exo über Kopf unterstützen kann. Erst danach greift der Stammgreifer unten. Leichte Bäume kann das Exo weiter hochschwenken.
+- **Das Hochschwenken aus der flachen Lage ist der teuerste Moment.** Es treibt jeden Wert um das Zwei- bis Fünffache hoch. Mit deiner Technik nimmt die linke Hand das Kippmoment als Hebelkraft auf (Hebel etwa 0,73 m), ein Greifer muss es nicht halten. Nötige Hebelkraft links: 2 m / 15 kg etwa 10 kg, 3 m / 41 kg etwa 43 kg, 4 m / 85 kg etwa 118 kg, 4 m / 120 kg etwa 166 kg. Verdoppelt das Exo deine Kraft, schaffst du ungefähr doppelt so schwere Bäume wie heute. Für die ganz schweren 4 m Bäume reicht auch das nicht, dort hilft die Leiter-Methode (Spitze anheben, unter dem Baum zum Stamm gehen).
 - **Mehr Kraft allein hilft beim Gleichgewicht nicht.** Der Baum hängt vor dem Körper, die Standfläche ist zu klein. Dagegen helfen nach vorne verlängerte Fußplatten (bis etwa 20 cm), eine ausklappbare Stütze vorne für das Hochheben an der Kante und schwere Teile wie den Akku hinten am Rücken.
 - **Die Last muss über den Rahmen in den Boden, nicht durch den Körper.** Das Exo trägt den Baum über Greifer, Rahmen und Beine bis zu den Fußplatten, die Person führt nur. Gelenke, die eine Last nur halten, sollten sich sperren lassen (Bremse), dann müssen die Motoren nur bewegen.
 - **Zum Vergleich mit dem Stand der Technik:** Übliche Exo-Gelenkantriebe liegen bei etwa 50 bis 200 Nm. Eines der stärksten tragbaren Ganzkörper-Exos (Sarcos Guardian XO) hebt rund 90 kg. Der 4 m Baum mit 120 kg liegt also an der Grenze dessen, was es gibt, und geht nur mit Leiter-Methode, Lastpfad in den Boden und größerer Standfläche.
@@ -90,13 +92,18 @@ Für den schwersten angenommenen Fall: 4 m Baum, 120 kg, Plateau 1,75 m, mit Lei
 | A1 | Baumgewicht | bis 120 kg (nach dem Wiegen echter Bäume anpassen) |
 | A2 | Stammdurchmesser im Greifer | etwa 5 bis 18 cm |
 | A3 | Greifer: Haltekraft entlang des Stamms | mindestens 1,2 kN, mit Sicherheitsfaktor 2 also 2,4 kN |
-| A4 | Greifer: Kippmoment | etwa 250 Nm, beim Umkippen frei drehbar (Scharnier) |
+| A4 | Greifer (rechte Hand) | hält den Stumpf, Kippmoment übernimmt die linke Hand; beim Umkippen frei drehbar (Scharnier) |
+| A4b | Unterstützung | jede Bewegung mit bis zu gleich viel Kraft wie die Person unterstützen (Kraft verdoppeln) |
 | A5 | Hubhöhe des Greifers | bis etwa 2,1 m (Schnittende knapp über 1,75 m) |
 | A6 | Hüfte, Knie, Schultern | je Seite etwa 320 bis 370 Nm halten, Gelenke sperrbar |
 | A7 | Standfläche | Fußplatten etwa 20 cm nach vorne verlängert oder ausklappbare Stütze |
 | A8 | Lastpfad | Baumgewicht über Rahmen und Beine in die Fußplatten, nicht über den Körper |
 | A9 | Gewicht des Exos | so leicht wie möglich, schwere Teile hinten am Rücken |
 | A10 | Sicherheit | Not-Aus, Endanschläge, Drehmoment- und Geschwindigkeitsbegrenzung, zuerst Prüfstand ohne Person |
+
+## Use Case 2: Schwere Lasten ziehen (noch offen)
+
+Das Exo soll auch beim Ziehen helfen, z. B. Bäume über den Boden schleifen. Dafür zählen vor allem Beine und Hüfte (Schieben gegen den Boden) und eine gute Kraftübertragung zum Zugseil oder Griff. Details folgen, siehe offene Fragen.
 
 ## 3D-Druck (Bambu Lab A1 mini)
 
@@ -108,7 +115,7 @@ Für den schwersten angenommenen Fall: 4 m Baum, 120 kg, Plateau 1,75 m, mit Lei
 
 ## Offene Fragen
 
-1. Passt die Leiter-Methode für schwere Bäume (Spitze anheben, unter dem Baum zum Stamm gehen, dann unten greifen)?
+1. Ziehen schwerer Lasten: Was ziehst du (einzelne Bäume, mehrere, Schlitten), wie (Seil, Gurt, am Stamm), wie weit, und gehst du dabei vorwärts oder rückwärts?
 2. Wie hoch ist das Budget ungefähr? Davon hängt ab, welche Antriebe infrage kommen (z. B. Wellgetriebe gegen Spindelantriebe).
 3. Kannst du die schwersten Bäume wiegen (z. B. mit einer Kofferwaage oder Kranwaage)? Dann wird A1 aus einer Annahme ein Messwert.
 4. Was genau ist das Plateau (Anhänger, LKW, Palette)? Wie weit ist der Weg vom Schnitt zum Plateau, und wie ist der Boden (Wiese, Hang, Schnee, Matsch)?
