@@ -36,7 +36,11 @@ Schwerpunkts vom Greifer. Waagrecht gehalten ist dieser Abstand am größten (br
 
 ## 3D-Darstellung
 
-[`visualisierung/use-case-christbaum.html`](visualisierung/use-case-christbaum.html) herunterladen und im Browser öffnen.
+**Konstruktion:** [`visualisierung/exo-konstruktion.html`](visualisierung/exo-konstruktion.html) zeigt das Exo im Detail:
+12 Baugruppen zum Antippen (was, wie gebaut, welche Teile, worauf achten), Seilführung, die sich mit den Reglern
+mitbewegt, und Antrieb und Kniegelenk zerlegt auf einer Werkbank.
+
+**Ablauf:** [`visualisierung/use-case-christbaum.html`](visualisierung/use-case-christbaum.html) herunterladen und im Browser öffnen.
 Die Seite braucht Internet für die 3D-Bibliothek [three.js](https://threejs.org) und die Schriften.
 
 - Ablauf abspielen, anhalten oder an jede Stelle springen
@@ -158,16 +162,21 @@ und erste Tests auf einem Prüfstand ohne Person.
 
 ## Nächste Schritte
 
-1. Leiter-Methode und Budget klären, schwerste Bäume wiegen
-2. Anforderungen festziehen
-3. Konzept: Lastpfad, welche Gelenke aktiv und welche sperrbar, Hubmast oder Schultermotoren, Aufbau des Stammgreifers
-4. Erster Prototyp: der Stammgreifer, weil dort die größte Last sitzt
+Der Weg vom Konzept zum tragbaren Exo, mit Grundwissen, Phasen, Tests und Werkzeug, steht in
+[`docs/entwicklungsplan.md`](docs/entwicklungsplan.md). Kurz:
+
+1. Maße nehmen und echte Arbeit filmen
+2. Greifer ohne Exo bauen und eine Woche testen
+3. Passiver Rahmen mit Gelenken, ohne Motoren
+4. Prüfstand mit einem Motor, dann Beine, dann Arme
 
 ## Projektstruktur
 
 ```
 docs/
   konzept.md                 Konzept: Aufbau, Antriebe, Greifer, Steuerung, Kosten
+  entwicklungsplan.md        Grundwissen, Phasen, Tests, Werkzeug, Stolpersteine
 visualisierung/
+  exo-konstruktion.html      3D: Konstruktion im Detail, Baugruppen erklärt
   use-case-christbaum.html   3D: beide Use Cases (Aufladen, Schleifen) mit dem Exo laut Konzept
 ```
