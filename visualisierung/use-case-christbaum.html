@@ -173,7 +173,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 <div class="app">
   <header class="top">
     <div>
-      <p class="kicker" id="kicker">Exoskelett · Use Case 1</p>
+      <p class="kicker" id="kicker">Exoskelett · Entwurf 3 · Use Case 1</p>
       <h1 id="title">Christbaum aufladen</h1>
       <div class="scen" role="group" aria-label="Use Case">
         <button type="button" id="scLoad" aria-pressed="true">Aufladen</button>
@@ -220,14 +220,15 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         <h3>So habe ich dich verstanden</h3>
         <ul class="assume">
           <li>Der Christbaum liegt nach dem Schneiden am Boden, die Spitze zeigt Richtung Plateau.</li>
-          <li>Die rechte Hand greift am Stumpf (Drehpunkt, dort sitzt der Stammgreifer), die linke so weit Richtung Spitze wie möglich (Hebel).</li>
+          <li>Der rechte Unterarm fasst den Stumpf mit zwei Schlaufen an der Unterseite (Drehpunkt), die linke Hand greift so weit Richtung Spitze wie möglich (Hebel).</li>
           <li>Das Exo ersetzt die Kraft nicht, es unterstützt die eigene Bewegung, im besten Fall mit doppelter Kraft.</li>
           <li>Getragen wird der Baum fast senkrecht (78°), damit der Hebel klein bleibt. Die Person lehnt sich dabei zurück.</li>
           <li>Zum Aufladen wird der Baum fast lotrecht hochgehoben, bis das Schnittende auf Plateauhöhe ist. Dann kippt er 90° aufs Plateau, ohne geschoben zu werden.</li>
           <li>Das Plateau ist eine Ladefläche, zum Beispiel Anhänger oder LKW, zwischen 0 und 1,75&nbsp;m hoch.</li>
           <li>Bäume von 1 bis 4&nbsp;m, nicht eingenetzt und unterschiedlich schwer. Das Gewicht ist frei einstellbar, als Anhaltspunkt dient eine Nordmanntanne (2&nbsp;m ≈ 15&nbsp;kg).</li>
           <li>Beim Umkippen darf der Baum frei fallen.</li>
-          <li>Das Exo ist aktiv: Motoren an Hüfte, Knie, Schulter und Ellbogen, Rahmen aus Metall, Akku und Steuerung am Rücken.</li>
+          <li>Das Exo ist aktiv: Motoren und Akku am Rücken, Seile an Hüfte und Knie, Bowdenzug-Paare bewegen Schultern und Ellbogen in beide Richtungen. Die blauen Manschetten messen, wohin du drückst, und das Exo folgt.</li>
+          <li>Füße: schmaler Steigbügel mit Spikes wie bei einem Steigeisen, nur so groß wie der Schuh, damit er in Schlamm und Schnee nicht hängen bleibt.</li>
         </ul>
       </section>
 
@@ -272,14 +273,9 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <input type="range" id="body" min="45" max="130" step="1" value="75">
         </div>
         <div class="ctl">
-          <label for="exoKg">Gewicht des Exos</label><output id="exoKgOut" for="exoKg">30 kg</output>
-          <input type="range" id="exoKg" min="0" max="60" step="1" value="30">
+          <label for="exoKg">Gewicht des Exos</label><output id="exoKgOut" for="exoKg">18 kg</output>
+          <input type="range" id="exoKg" min="0" max="60" step="1" value="18">
           <div class="scale" aria-hidden="true"><span>Hälfte am Rücken, Hälfte an den Beinen</span></div>
-        </div>
-        <div class="ctl">
-          <label for="foot">Fußplatten nach vorne verlängert</label><output id="footOut" for="foot">18 cm</output>
-          <input type="range" id="foot" min="0" max="40" step="1" value="18">
-          <div class="scale" aria-hidden="true"><span>vergrößert die Standfläche</span></div>
         </div>
         <label class="switch" for="labels"><input type="checkbox" id="labels" checked><span>Beschriftungen in 3D</span></label>
       </section>
@@ -394,7 +390,7 @@ function derive(st) {
   return { H, s, B, yStand, yMin, L, hp, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
     yTip, rRest, thLie, yCutLie, G0, thUp, yUp, offUp, leanUp, xe, Lp, Wp, xSt0, gripOf,
     thLift, offLift, cutCarryY, clear, dOff, cutAt, cutSetX, cutSetY, cutLiftY, Gl, xSt1, xSt2, xSt3, thContact, yRestG: hp + G0.y,
-    body: st.body, exoKg: st.exoKg, foot: st.foot / 100, xl, scen: st.scen, n: st.n, mu: st.mu };
+    body: st.body, exoKg: st.exoKg, foot: 0, xl, scen: st.scen, n: st.n, mu: st.mu };
 }
 // typisches Gewicht einer frisch geschnittenen Nordmanntanne (nur Anhaltspunkt, echte Bäume streuen stark)
 const massTypical = (L) => Math.round(15 * Math.pow(L / 2, 2.5));
@@ -564,7 +560,11 @@ function solve(P, ch) {
       const d = (P.xl - P.xg) * ch.twoHand;
       grip = v3(G.x + d * Math.cos(ch.th), G.y + d * Math.sin(ch.th), side * (P.handHalf * (1 - 0.4 * ch.twoHand) + open));
     }
-    const tgt = mix(rest, grip, gb);
+    let tgt = mix(rest, grip, gb);
+    if (ch.hang != null) {                                      // Schleifen: Arme hängen, die Stümpfe sitzen in den Unterarm-Schlaufen
+      const R = 0.95 * B.arm, hang = v3(sh.x - Math.sin(ch.hang) * R, sh.y - Math.cos(ch.hang) * R, side * (B.shHalf + 0.04 * s));
+      tgt = ch.handW ? mix(hang, ch.handW[k], ch.hw) : hang;
+    }
     const up = smooth(-0.15, 0.6, clamp((tgt.y - sh.y) / B.arm, -1, 1));
     const pole = norm(mix(v3(-0.65, -0.55, side * 0.35), v3(-0.15, -0.25, side * 0.95), up));
     const arm = ik2(sh, tgt, B.upper, B.lower, pole);
@@ -644,7 +644,7 @@ function analyse(P, TL) {
       const xPack = pose.P.x + pose.dir.x * 0.6 * P.B.torso + pose.back.x * 0.205 * P.s;
       const Wb = P.body * GRAV, We = P.exoKg * GRAV;
       const xc = (Wb * (0.6 * xUpper + 0.4 * xLegs) + We * (0.5 * xPack + 0.5 * xLegs) + ld.F * pose.Gact.x + ld.M) / (Wb + We + ld.F);
-      // Standfläche bis zum Fußballen, mit verlängerten Fußplatten entsprechend weiter
+      // Standfläche bis zum Fußballen (Steigbügel nur so lang wie der Schuh)
       const tip = xc - (Math.max(pose.ankles[0].x, pose.ankles[1].x) + 0.15 * P.s + P.foot);
       if (tip > pk.tip) { pk.tip = tip; pk.tipAt = ch.id; }
       pk.gy = Math.max(pk.gy, pose.Gact.y);
@@ -660,23 +660,65 @@ function analyse(P, TL) {
 }
 
 
+/* ================= Schlaufengreifer =================
+   Zwei Schlaufen an der Unterseite jedes Unterarms: j = 0 am Handgelenk, j = 1 etwa 12 cm Richtung Ellbogen.
+   Dyneema im Gummischlauch mit Federstahl-Einlage, bleibt offen als Ring; ein kleiner selbsthemmender
+   Schneckengetriebemotor am Unterarm zieht eine Seite ein und schließt die Schlaufe um den Stamm. */
+const LOOP_SP = 0.12, LOOP_OPEN = 0.1;
+// Unterseite des Unterarms: nach unten, bei hängendem Arm nach hinten
+function underOf(pose, k) {
+  const fd = norm(sub(pose.hands[k], pose.elbows[k]));
+  const proj = (d) => sub(d, mul(fd, dot(d, fd)));
+  const dn = proj(v3(0, -1, 0)), bk = proj(v3(-1, 0, 0)), w = smooth(0.25, 0.55, len(dn));
+  const a = len(bk) > 1e-6 ? norm(bk) : v3(0, -1, 0), b = len(dn) > 1e-6 ? norm(dn) : a;
+  return { fd, n: norm(add(mul(a, 1 - w), mul(b, w))) };
+}
+function loopAnchor(P, pose, k, j) {
+  const { fd, n } = underOf(pose, k);
+  return add(sub(pose.hands[k], mul(fd, 0.05 * P.H + 0.02 + j * LOOP_SP)), mul(n, 0.035 * P.s));
+}
+// Mitte der zugezogenen Schlaufe = Stammachse
+function loopCenter(P, pose, k, j) { return add(loopAnchor(P, pose, k, j), mul(underOf(pose, k).n, P.rtG + 0.008)); }
+// welche Schlaufe welchen Stumpf hält: 1 Baum rechts, 2 je Arm einer, 3–4 zwei Schlaufen pro Arm
+function dragSlots(n) {
+  return [[{ k: 1, j: 0 }], [{ k: 0, j: 0 }, { k: 1, j: 0 }], [{ k: 0, j: 0 }, { k: 1, j: 0 }, { k: 1, j: 1 }],
+    [{ k: 0, j: 0 }, { k: 0, j: 1 }, { k: 1, j: 0 }, { k: 1, j: 1 }]][clamp(n, 1, 4) - 1];
+}
+function dragHold(P, pose) {
+  const sl = dragSlots(P.n), c = sl.map(({ k, j }) => loopCenter(P, pose, k, j));
+  return { slots: sl, centers: c, mean: mul(c.reduce((a, b) => add(a, b), v3()), 1 / c.length) };
+}
+
 /* ================= Use Case 2: Schleifen =================
-   Die Bäume liegen mit den Stümpfen zur Person, Spitzen nach hinten (-x). Der Zuggreifer hängt pendelnd hinter der
-   Hüfte, fasst die Stümpfe und hebt sie an; man geht vorwärts (+x), die Äste gleiten am Boden. */
+   Die Bäume liegen mit den Stümpfen zur Person, Spitzen nach hinten (-x). Man greift die Stümpfe neben den Füßen
+   mit den Unterarm-Schlaufen, richtet sich auf und geht vorwärts (+x); die Arme hängen, die Äste gleiten am Boden. */
 const DRAG_D = 7;                                               // gezeigte Strecke, steht für bis zu 100 m
-const dragZ = (i) => (i - (state.n - 1) / 2) * 0.15;
 const DRAG_STEPS = [{ n: 0, ids: ['start'] }, { n: 1, ids: ['dgrip'] }, { n: 2, ids: ['drise'] }, { n: 3, ids: ['dwalk'] },
   { n: 4, ids: ['drelease'] }, { n: 5, ids: ['hold'] }];
+const HANG0 = deg(-2);
 function dragForces(P) {
-  // Stumpf angehoben: Greifer trägt den Teil vor dem Bodenkontakt, die Äste gleiten mit Reibung mu
+  // Stumpf angehoben: die Schlaufen tragen den Teil vor dem Bodenkontakt, die Äste gleiten mit Reibung mu
   const W = P.mass * GRAV, N = W * (P.xcg - P.xg) / (P.L - P.xg);
   return { hold: P.n * (W - N), pullLift: P.mu * P.n * N, pullFlat: P.mu * P.n * W };
 }
+// Handziel beim Greifen und Ablegen: neben den Füßen, knapp über dem Boden
+function dragGround(P, x) { return [-1, 1].map((sd) => v3(x + 0.04 * P.s, Math.max(0.08, P.yCutLie - 0.08), sd * (P.B.shHalf + 0.04 * P.s))); }
 function buildTimelineDrag(P) {
-  const s = P.s, f = dragForces(P);
-  P.dX0 = 0.3 * s; P.dPelGrip = P.yCutLie + 0.34 * s + 0.03;
-  P.dLean = deg(clamp(8 + 0.25 * f.hold / GRAV, 8, 28));     // je schwerer hinten, desto mehr vorbeugen
-  const d = [['start', 1.2], ['dgrip', 2.2], ['drise', 1.8], ['dwalk', 1 + DRAG_D / 0.45], ['drelease', 2.8], ['hold', 1.4]];
+  const s = P.s, B = P.B, T = B.torso, f = dragForces(P);
+  P.dX0 = 0.3 * s;
+  // Hocke zum Greifen: so weit vorbeugen und in die Knie, dass die Hände die Stümpfe erreichen
+  const ty = Math.max(0.08, P.yCutLie - 0.08), dz = 0.04 * s, reach = 0.93 * B.arm;
+  let a = deg(30), yP = P.yStand;
+  for (; a <= deg(60); a += deg(2)) {
+    const dx = P.dX0 + 0.04 * s - (P.dX0 - 0.12 * s + T * Math.sin(a));
+    yP = ty + Math.sqrt(Math.max(0, reach * reach - dx * dx - dz * dz)) - T * Math.cos(a);
+    if (yP >= P.yMin + 0.03) break;
+  }
+  P.dAlphaGrip = Math.min(a, deg(60)); P.dPelGrip = clamp(yP, P.yMin, P.yStand);
+  P.dLean = deg(clamp(6 + 0.15 * f.hold / GRAV, 6, 22));       // je schwerer, desto mehr vorbeugen
+  // Arme hängen dort, wo Gewicht und Zugkraft sich die Waage halten: kaum Moment in der Schulter
+  P.dHang = clamp(Math.atan2(f.pullLift, Math.max(1, f.hold)), deg(4), deg(25));
+  const d = [['start', 1.2], ['dgrip', 2.2], ['drise', 1.8], ['dwalk', 1 + DRAG_D / 0.45], ['drelease', 3.4], ['hold', 1.4]];
   let t = 0;
   const ph = d.map(([id, dur]) => { const p = { id, t0: t, t1: t + dur }; t += dur; return p; });
   const byId = Object.fromEntries(ph.map((p) => [p.id, p]));
@@ -686,28 +728,30 @@ function buildTimelineDrag(P) {
 function choreoDrag(P, TL, t) {
   const ph = TL.ph.find((p) => t < p.t1) || TL.ph[TL.ph.length - 1];
   const u = clamp((t - ph.t0) / (ph.t1 - ph.t0), 0, 1), s = P.s, fz = 0.12 * s;
-  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, lean: 0, th: 0, twoHand: 0, G: { x: P.G0.x, y: P.yStand }, clamp: 0, att: 0, lift: 0, walk: false };
+  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, lean: 0, th: 0, twoHand: 0, G: { x: P.G0.x, y: P.yStand }, clamp: 0, att: 0, lift: 0, walk: false, hang: HANG0, hw: 0 };
   let x = P.dX0, feet = null;
   const walk = (xa, xb, k, step) => { const g = gait(xa, xb, k, step); x = g.x; feet = g.feet; };
   switch (ph.id) {
     case 'dgrip': {
-      const k = ease(u / 0.75);
-      o.yPel = lerp(P.yStand, P.dPelGrip, k); o.alpha = deg(22) * k; o.clamp = smooth(0.75, 1, u);
+      const k = smooth(0, 0.75, u);
+      o.yPel = lerp(P.yStand, P.dPelGrip, k); o.alpha = P.dAlphaGrip * k; o.hw = k; o.clamp = smooth(0.75, 1, u);
       break;
     }
     case 'drise': {
       const k = ease(u);
-      o.yPel = lerp(P.dPelGrip, P.yStand, k); o.alpha = lerp(deg(22), P.dLean, k); o.clamp = 1; o.att = 1; o.lift = k;
+      o.yPel = lerp(P.dPelGrip, P.yStand, k); o.alpha = lerp(P.dAlphaGrip, P.dLean, k); o.hw = 1 - k; o.hang = lerp(HANG0, P.dHang, k);
+      o.clamp = 1; o.att = 1; o.lift = k;
       break;
     }
     case 'dwalk':
       walk(P.dX0, P.dX0 + DRAG_D, smooth(0, 1, u), 0.62 * s);   // ruhiges Schritttempo, etwa 0,6 m/s
-      o.alpha = P.dLean; o.clamp = 1; o.att = 1; o.lift = 1; o.walk = true;
+      o.alpha = P.dLean; o.hang = P.dHang; o.clamp = 1; o.att = 1; o.lift = 1; o.walk = true;
       break;
     case 'drelease': {
       x = P.dX0 + DRAG_D;
-      const down = ease(smooth(0, 0.4, u)), up = smooth(0.55, 0.8, u);
-      o.yPel = lerp(P.yStand, P.dPelGrip, down * (1 - up)); o.alpha = lerp(P.dLean, deg(20), down) * (1 - up);
+      const down = smooth(0, 0.42, u), up = smooth(0.55, 0.8, u);
+      o.yPel = lerp(P.yStand, P.dPelGrip, down * (1 - up)); o.alpha = lerp(P.dLean, P.dAlphaGrip, down) * (1 - up);
+      o.hang = lerp(P.dHang, HANG0, Math.max(down, up)); o.hw = down * (1 - up);
       o.clamp = 1 - smooth(0.4, 0.55, u); o.att = 1 - smooth(0.42, 0.5, u); o.lift = 1 - down;
       if (u > 0.6) walk(x, x + 0.6 * s, smooth(0.6, 1, u), 0.6 * s);
       break;
@@ -717,49 +761,58 @@ function choreoDrag(P, TL, t) {
   }
   const ft = feet || [{ x, lift: 0 }, { x, lift: 0 }];
   o.xSt = x;
+  if (o.hw > 0) o.handW = dragGround(P, ph.id === 'dgrip' || ph.id === 'drise' ? P.dX0 : P.dX0 + DRAG_D);
   o.feet = [{ x: ft[0].x, lift: 0.06 * s * ft[0].lift, z: -fz }, { x: ft[1].x, lift: 0.06 * s * ft[1].lift, z: fz }];
   return o;
 }
-// Liegeplätze der Stümpfe: am Anfang genau unter dem geschlossenen Greifer, am Ende dort, wo er öffnet
+// Liegeplätze der Stümpfe: am Anfang genau in den geschlossenen Schlaufen, am Ende dort, wo sie öffnen
 function finalizeDrag(P, TL) {
-  const at = (id, u) => { const p = TL.byId[id]; const ch = choreoDrag(P, TL, p.t0 + (p.t1 - p.t0) * u); return clampPoint(P, solve(P, ch)); };
+  const at = (id, u) => { const p = TL.byId[id]; const ch = choreoDrag(P, TL, p.t0 + (p.t1 - p.t0) * u); return dragHold(P, solve(P, ch)).centers; };
   P.dLie0 = at('dgrip', 0.999); P.dLie1 = at('drelease', 0.42);
 }
+// Lage eines geschleiften Baums: cx/cy = Schnittende, th = Neigung (Spitze am Boden hinten)
 function dragTreePose(P, ch, pose, i) {
-  const lie = ['drelease', 'hold'].includes(ch.id) ? P.dLie1 : P.dLie0;
-  let cx = lie.x, cy = P.yCutLie;
-  if (ch.att > 0) { const cp = clampPoint(P, pose); cx = lerp(lie.x, cp.x, ch.att); cy = lerp(P.yCutLie, Math.max(cp.y, P.yCutLie * 0.6), ch.att); }
-  // Spitze schleift am Boden
-  const th = -Math.asin(clamp((cy - P.yTip) / P.L, 0, 0.95));
-  return { cx, cy, z: dragZ(i), th };
+  const lie = (['drelease', 'hold'].includes(ch.id) ? P.dLie1 : P.dLie0)[i];
+  let c = lie;
+  if (ch.att > 0) { const sl = dragSlots(P.n)[i]; c = mix(lie, loopCenter(P, pose, sl.k, sl.j), ch.att); }
+  const cy0 = Math.max(0.05, c.y), th = -Math.asin(clamp((cy0 - P.yTip) / P.L, 0, 0.95));
+  // das Schnittende steht ein paar Zentimeter vor der Schlaufe
+  return { cx: c.x + 0.05 * Math.cos(th), cy: cy0 - 0.05 * Math.sin(th), z: c.z, th };
 }
 function loadsDrag(P, ch, pose) {
   if (!ch.att) return { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0 };
   const f = dragForces(P), F = f.hold * ch.lift * ch.att;
-  const pull = ch.walk ? f.pullLift : 0, cp = clampPoint(P, pose);
-  const m = (j) => Math.abs(F * (j.x - cp.x)) + pull * Math.abs(j.y - cp.y);
-  return { F, M: 0, Fl: pull, sh: 0, hip: m(pose.P), knee: m(mix(pose.knees[0], pose.knees[1], 0.5)), elb: 0 };
+  const pull = ch.walk ? f.pullLift : 0, h = dragHold(P, pose), share = 1 / h.slots.length;
+  // Schulter: Gewicht schwingt die Hand nach vorne, die Zugkraft nach hinten (hängende Arme gleichen das aus)
+  let sh = 0;
+  h.slots.forEach(({ k }, i) => { const d = sub(h.centers[i], pose.shoulders[k]); sh += share * (-F * d.x + pull * d.y); });
+  // Ellbogen: Arm fast gestreckt, die Last zieht längs durch, nur ein kleiner Hebel
+  let el = 0;
+  h.slots.forEach(({ k }, i) => { const d = sub(h.centers[i], pose.elbows[k]); el += share * (-F * d.x + pull * d.y); });
+  const cp = h.mean, m = (j) => Math.abs(F * (j.x - cp.x)) + pull * Math.abs(j.y - cp.y);
+  return { F, M: 0, Fl: pull, sh: Math.abs(sh), hip: m(pose.P), knee: m(mix(pose.knees[0], pose.knees[1], 0.5)), elb: Math.abs(el) };
 }
 function analyseDrag(P, TL) {
   const pk = { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0, tipB: 0, gy: 0 }, N = 300;
   for (let i = 0; i <= N; i++) {
     const ch = choreoDrag(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loadsDrag(P, ch, pose);
-    for (const k of ['F', 'Fl', 'hip', 'knee']) pk[k] = Math.max(pk[k], ld[k]);
+    for (const k of ['F', 'Fl', 'sh', 'hip', 'knee', 'elb']) pk[k] = Math.max(pk[k], ld[k]);
     if (!ch.att) continue;
-    // Gleichgewicht nach hinten: Last hängt hinter der Hüfte, die Zugkraft zieht zusätzlich nach hinten
-    const cp = clampPoint(P, pose), xu = pose.P.x + pose.dir.x * 0.45 * P.B.torso;
+    // Gleichgewicht nach hinten: die Last hängt neben und leicht hinter der Hüfte, die Zugkraft zieht zusätzlich nach hinten
+    const cp = dragHold(P, pose).mean, xu = pose.P.x + pose.dir.x * 0.45 * P.B.torso;
     const xl = (pose.P.x + (pose.knees[0].x + pose.knees[1].x) / 2 + (pose.ankles[0].x + pose.ankles[1].x) / 2) / 3;
     const xPack = pose.P.x + pose.dir.x * 0.6 * P.B.torso + pose.back.x * 0.205 * P.s;
     const Wb = P.body * GRAV, We = P.exoKg * GRAV;
     const xc = (Wb * (0.6 * xu + 0.4 * xl) + We * (0.5 * xPack + 0.5 * xl) + ld.F * cp.x - ld.Fl * cp.y) / (Wb + We + ld.F);
-    pk.tipB = Math.max(pk.tipB, Math.min(pose.ankles[0].x, pose.ankles[1].x) - 0.06 * P.s - 0.08 - xc);
+    // Standfläche nur bis zur Ferse (Steigbügel ohne Verlängerung)
+    pk.tipB = Math.max(pk.tipB, Math.min(pose.ankles[0].x, pose.ankles[1].x) - 0.06 * P.s - xc);
   }
   return pk;
 }
 
 /* ================= Zustand ================= */
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 30, foot: 18,
+const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 18, foot: 0,
   labels: true, t: 0, playing: !reduced, view: 'oblique' };
 let P, TL, PK;
 
@@ -832,7 +885,8 @@ const MAT = {
   steel: std(0xB4BCC2, 0.3, { metalness: 0.9 }), graphite: std(0x2A2F34, 0.45, { metalness: 0.5 }),
   strap: std(0x1C2023, 0.95, { side: THREE.DoubleSide }),
   motor: std(0xD4520E, 0.45, { emissive: 0xFF5A10, emissiveIntensity: 0 }),
-  jaw: std(0xD4520E, 0.5, { metalness: 0.2 }),
+  loop: std(0xD4520E, 0.6), cuff: std(0x3E7CB1, 0.55, { side: THREE.DoubleSide }),
+  housing: std(0x23282C, 0.6), spike: std(0x8C959B, 0.3, { metalness: 0.9 }),
   pulley: std(0x8C959B, 0.35, { metalness: 0.8 }), cable: std(0xE8C547, 0.6), stihl: std(0xE8641B, 0.5),
   led: std(0xFF7A33, 0.4, { emissive: 0xFF6A1A, emissiveIntensity: 1.3 }),
   fir1: std(0x2E5C43, 0.92, { flatShading: true }), fir2: std(0x376B4F, 0.92, { flatShading: true }),
@@ -1025,16 +1079,6 @@ function disposePlatform() {
 }
 
 /* ---------- Person mit Exoskelett ---------- */
-function jawGeometry(rIn, thick, length, side) {
-  const sh = new THREE.Shape();
-  sh.absarc(0, 0, rIn + thick, -Math.PI / 2, Math.PI / 2, false);
-  sh.absarc(0, 0, rIn, Math.PI / 2, -Math.PI / 2, true);
-  sh.closePath();
-  const g = new THREE.ExtrudeGeometry(sh, { depth: length, bevelEnabled: false, curveSegments: 10 });
-  g.translate(0, 0, -length / 2);
-  g.rotateY(side > 0 ? -Math.PI / 2 : Math.PI / 2);
-  return g;
-}
 let person = null;
 function buildPerson(P) {
   const s = P.s, B = P.B, g = new THREE.Group();
@@ -1042,7 +1086,7 @@ function buildPerson(P) {
   const limb = (rTop, rBot, mat) => mk(new THREE.CylinderGeometry(rTop, rBot, 1, 14), mat);
   const ball = (r, mat) => mk(new THREE.SphereGeometry(r, 18, 12), mat);
   const bar = (w, d) => mk(new THREE.BoxGeometry(w, 1, d), MAT.steel);
-  const cuff = (r) => mk(new THREE.CylinderGeometry(r, r, 0.055 * s, 18, 1, true), MAT.strap);
+  const cuff = (r) => mk(new THREE.CylinderGeometry(r, r, 0.055 * s, 18, 1, true), MAT.cuff);     // Sensor-Manschette
   const pulley = (r) => { const m = mk(new THREE.CylinderGeometry(r, r, 0.022 * s, 24), MAT.pulley); return m; };
   const rope = () => mk(new THREE.CylinderGeometry(0.0055, 0.0055, 1, 6), MAT.cable, false);
   const o = { group: g, sides: [], motors: {} };
@@ -1076,28 +1120,22 @@ function buildPerson(P) {
   o.switchBtn = mk(new THREE.CylinderGeometry(0.022 * s, 0.022 * s, 0.02 * s, 16), MAT.motor);
   const beltGeo = new THREE.TorusGeometry(0.16 * s, 0.02 * s, 8, 36); beltGeo.rotateX(Math.PI / 2);
   o.belt = mk(beltGeo, MAT.steel); o.belt.scale.set(0.8, 1, 1.18);
-  // Zuggreifer hinten an der Hüfte (pendelnd an zwei Zugstreben)
-  o.drawbars = [limb(0.012 * s, 0.012 * s, MAT.steel), limb(0.012 * s, 0.012 * s, MAT.steel)];
-  o.crossbar = mk(new THREE.BoxGeometry(0.05 * s, 0.05 * s, 0.62 * s), MAT.steel);
-  o.forks = [0, 1, 2, 3].map(() => {
-    const geo = new THREE.TorusGeometry(P.rt0 + 0.022, 0.012, 6, 16, Math.PI * 1.35); geo.rotateY(Math.PI / 2); geo.rotateX(Math.PI * 0.82);
-    return mk(geo, MAT.jaw);
-  });
   for (const side of [-1, 1]) {
     const q = { side };
     q.hip = ball(0.074 * s, MAT.pants); q.thigh = limb(0.054 * s, 0.07 * s, MAT.pants);
     q.knee = ball(0.056 * s, MAT.pants); q.shank = limb(0.041 * s, 0.052 * s, MAT.pants);
-    // Fußplatte mit Snowboard-Bindung, vorne und hinten verlängert
+    // Steigbügel wie ein Steigeisen: offener Rahmen nur so groß wie der Schuh, kurze Spikes, zwei Riemen
     q.foot = new THREE.Group();
-    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.27 * s, 0.085 * s, 0.105 * s), MAT.boot);
-    boot.position.set(0.075 * s, -0.028 * s, 0); boot.castShadow = true;
-    const back = 0.08, len = 0.29 * s + P.foot + back;
-    const plate = new THREE.Mesh(new THREE.BoxGeometry(len, 0.014 * s, 0.13 * s), MAT.steel);
-    plate.position.set(0.075 * s + (P.foot - back) / 2, -0.075 * s, 0); plate.castShadow = true;
-    const strap1 = new THREE.Mesh(new THREE.BoxGeometry(0.045 * s, 0.03 * s, 0.13 * s), MAT.strap);
-    const strap2 = strap1.clone(); strap1.position.set(0.15 * s, 0.018 * s, 0); strap2.position.set(0.0, 0.03 * s, 0);
-    const heel = new THREE.Mesh(new THREE.BoxGeometry(0.02 * s, 0.11 * s, 0.12 * s), MAT.graphite); heel.position.set(-0.075 * s, 0.0, 0);
-    q.foot.add(boot, plate, strap1, strap2, heel); g.add(q.foot);
+    const fm = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; q.foot.add(m); return m; };
+    fm(new THREE.BoxGeometry(0.27 * s, 0.085 * s, 0.105 * s), MAT.boot, 0.075 * s, -0.028 * s, 0);
+    for (const z of [-1, 1]) fm(new THREE.BoxGeometry(0.27 * s, 0.012 * s, 0.014 * s), MAT.steel, 0.075 * s, -0.076 * s, z * 0.05 * s);
+    for (const x of [-0.045, 0.06, 0.18]) fm(new THREE.BoxGeometry(0.016 * s, 0.01 * s, 0.11 * s), MAT.steel, x * s, -0.076 * s, 0);
+    const spikeGeo = new THREE.ConeGeometry(0.006 * s, 0.022 * s, 6); spikeGeo.rotateX(Math.PI);
+    for (const x of [-0.05, 0.02, 0.1, 0.18]) for (const z of [-1, 1]) fm(spikeGeo, MAT.spike, x * s, -0.091 * s, z * 0.05 * s);
+    fm(new THREE.BoxGeometry(0.03 * s, 0.03 * s, 0.13 * s), MAT.strap, 0.16 * s, 0.018 * s, 0);
+    fm(new THREE.BoxGeometry(0.03 * s, 0.03 * s, 0.13 * s), MAT.strap, 0.0, 0.03 * s, 0);
+    fm(new THREE.BoxGeometry(0.014 * s, 0.07 * s, 0.11 * s), MAT.steel, -0.065 * s, -0.04 * s, 0);    // Fersenbügel
+    g.add(q.foot);
     q.shoulder = ball(0.058 * s, MAT.jacket); q.upper = limb(0.043 * s, 0.05 * s, MAT.jacket);
     q.elbow = ball(0.045 * s, MAT.jacket); q.fore = limb(0.035 * s, 0.043 * s, MAT.jacket); q.hand = ball(0.047 * s, MAT.glove);
     // Gelenke mit Seilrollen (keine Motoren an den Gliedern)
@@ -1107,12 +1145,16 @@ function buildPerson(P) {
     q.yoke = limb(0.016 * s, 0.016 * s, MAT.steel);
     q.ankleHinge = mk(new THREE.CylinderGeometry(0.024 * s, 0.024 * s, 0.03 * s, 14), MAT.graphite);
     q.cThigh = cuff(0.077 * s); q.cShank = cuff(0.058 * s); q.cUpper = cuff(0.054 * s); q.cFore = cuff(0.046 * s);
-    // Seile: Bein (Box → Hüftrolle hinten → Knierolle vorne → Unterschenkel), Schulter, Ellbogen
-    q.ropeLeg = [rope(), rope(), rope()]; q.ropeSh = [rope(), rope()]; q.ropeEl = [rope(), rope(), rope()];
-    // Gasfeder Schulter: Zylinder + Kolbenstange
-    q.gasBody = limb(0.013 * s, 0.013 * s, MAT.graphite); q.gasRod = limb(0.005 * s, 0.005 * s, MAT.steel);
-    // Klemmgabel nur rechts (Stumpf), links greift der Handschuh
-    q.jaw = side > 0 ? mk(jawGeometry(P.rtG + 0.004, 0.018, 2 * P.jawHalf, side), MAT.jaw) : null;
+    // Beinseil (Box → Hüftrolle hinten → Knierolle vorne → Unterschenkel): zieht nur, streckt Hüfte und Knie
+    q.ropeLeg = [rope(), rope(), rope()];
+    // Arme: je Gelenk ein Bowdenzug-Paar (vor und hinter der Seilscheibe), dadurch in beide Richtungen
+    const housing = () => mk(new THREE.CylinderGeometry(0.0065, 0.0065, 1, 8), MAT.housing, false);
+    q.bowSh = [housing(), housing()]; q.bowEl = [[housing(), housing()], [housing(), housing()]];
+    // Schlaufengreifer: Träger unter dem Unterarm, Schneckengetriebemotor, zwei Schlaufen mit Zugseil
+    q.carrier = mk(new THREE.BoxGeometry(0.03 * s, 1, 0.022 * s), MAT.steel);
+    q.loopMotor = mk(new THREE.BoxGeometry(0.045 * s, 0.07 * s, 0.04 * s), MAT.graphite);
+    q.loops = [0, 1].map(() => mk(new THREE.TorusGeometry(1, 0.1, 8, 32), MAT.loop));
+    q.loopRope = [0, 1].map(() => [rope(), rope()]);
     o.sides.push(q);
   }
   o.lblBox = label('Motoren + Stihl-Akku'); o.lblBox.position.set(0, 0.26 * s, 0); o.box.add(o.lblBox);
@@ -1132,8 +1174,16 @@ function seg(m, a, b) {
 const at = (m, p) => m.position.set(p.x, p.y, p.z);
 function axis(m, p, dir) { at(m, p); m.quaternion.setFromUnitVectors(Y_AXIS, _d.set(dir.x, dir.y, dir.z).normalize()); }
 
-// Zuggreifer-Punkt: an zwei Streben pendelnd hinter der Hüfte, bleibt dadurch waagrecht
-function clampPoint(P, pose) { return add(pose.P, v3(-0.3 * P.s, -0.34 * P.s, 0)); }
+// Ring in Lage bringen: Mitte c, Normale nrm (Stammrichtung), xAx zeigt zum Unterarm; f < 1 = flach angelegt
+const _m4 = new THREE.Matrix4(), _bx = new THREE.Vector3(), _by = new THREE.Vector3(), _bz = new THREE.Vector3();
+function placeRing(m, c, nrm, xAx, r, f = 1) {
+  _bz.set(nrm.x, nrm.y, nrm.z).normalize();
+  _bx.set(xAx.x, xAx.y, xAx.z).addScaledVector(_bz, -_bx.set(xAx.x, xAx.y, xAx.z).dot(_bz));
+  if (_bx.lengthSq() < 1e-8) _bx.set(1, 0, 0).cross(_bz);
+  _bx.normalize(); _by.crossVectors(_bz, _bx);
+  m.quaternion.setFromRotationMatrix(_m4.makeBasis(_bx, _by, _bz));
+  at(m, c); m.scale.set(r * f, r, r);
+}
 
 function posePerson(pose, ch, tr, ld) {
   const o = person, s = P.s, B = P.B, pa = -pose.alpha;
@@ -1158,25 +1208,23 @@ function posePerson(pose, ch, tr, ld) {
   seg(o.yokeBar, onBack(0.98, 0.1, -0.2), onBack(0.98, 0.1, 0.2));
   at(o.switchBtn, add(onBack(0.86, -0.12, -0.13), v3(0, 0, 0))); o.switchBtn.rotation.set(Math.PI / 2, 0, 0);
   at(o.belt, add(pose.P, v3(0, 0.05 * s, 0))); o.belt.rotation.set(0, 0, pa * 0.5);
-  // Zuggreifer (nur beim Schleifen sichtbar)
-  const drag = state.scen === 'drag', cp = clampPoint(P, pose);
-  [o.drawbars[0], o.drawbars[1], o.crossbar, ...o.forks].forEach((m) => { m.visible = drag; });
-  if (drag) {
-    seg(o.drawbars[0], add(pose.P, v3(-0.12 * s, 0.02 * s, -0.17 * s)), add(cp, v3(0.02, 0.02, -0.27 * s)));
-    seg(o.drawbars[1], add(pose.P, v3(-0.12 * s, 0.02 * s, 0.17 * s)), add(cp, v3(0.02, 0.02, 0.27 * s)));
-    at(o.crossbar, add(cp, v3(0.02, 0.03, 0)));
-    o.forks.forEach((f, i) => {
-      f.visible = i < state.n;
-      at(f, add(cp, v3(-0.02, 0, dragZ(i))));
-      f.rotation.set(0, 0, 0); f.scale.setScalar(lerp(1.35, 1, ch.clamp ?? 0));
-    });
-  }
+  const drag = state.scen === 'drag';
   const glow = (v, p) => (p > 1 ? clamp(v / p, 0, 1) * smooth(5, 40, p) * 1.8 : 0);
   const gLeg = Math.max(glow(ld.hip, PK.hip), glow(ld.knee, PK.knee)), gS = glow(ld.sh, PK.sh), gE = glow(ld.elb, PK.elb);
   o.motors.leg.forEach((m) => { m.userData.cap.emissiveIntensity = gLeg; });
   o.motors.sh.forEach((m) => { m.userData.cap.emissiveIntensity = gS; });
   o.motors.el.forEach((m) => { m.userData.cap.emissiveIntensity = gE; });
-  const grip = smooth(0, 1, ch.gb);
+  // Schlaufen: welche ist in Gebrauch, wie weit zugezogen, wo liegt der Stamm
+  const ring = [[null, null], [null, null]];
+  if (drag) {
+    dragSlots(P.n).forEach(({ k, j }, i) => {
+      const tp = dragTreePose(P, ch, pose, i);
+      ring[k][j] = { c: ch.clamp ?? 0, at: loopCenter(P, pose, k, j), dir: v3(-Math.cos(tp.th), Math.sin(tp.th), 0) };
+    });
+  } else {
+    const d = v3(Math.cos(tr.th), Math.sin(tr.th), 0), sp = Math.min(LOOP_SP, 2 * P.jawHalf) / 2;
+    [-1, 1].forEach((sg, j) => { ring[1][j] = { c: ch.jaw, at: v3(tr.gx + d.x * sg * sp, tr.gy + d.y * sg * sp, 0), dir: d }; });
+  }
   for (let k = 0; k < 2; k++) {
     const q = o.sides[k], side = q.side;
     const hip = pose.hips[k], knee = pose.knees[k], ank = pose.ankles[k];
@@ -1203,19 +1251,36 @@ function posePerson(pose, ch, tr, ld) {
     seg(q.sUpper, ms, me); seg(q.sFore, me, mw);
     axis(q.cUpper, mix(sh, el, 0.5), sub(el, sh)); axis(q.cFore, mix(el, wr, 0.55), sub(wr, el));
     seg(q.yoke, onBack(0.98, 0.1, side * 0.2), ms);
-    // Schulterseil hebt den Oberarm, Ellbogenseil beugt den Unterarm
-    const shTop = add(ms, v3(0, 0.05 * s, 0)), upA = add(mix(ms, me, 0.45), v3(0, 0.03 * s, 0));
-    seg(q.ropeSh[0], motorPos.sh[k], shTop); seg(q.ropeSh[1], shTop, upA);
-    const upperD = norm(sub(el, sh)), elFront = add(me, mul(norm(cross(hg, upperD)), 0.045 * s)), foreA = mix(me, mw, 0.45);
-    seg(q.ropeEl[0], motorPos.el[k], add(shTop, v3(0, 0.012, 0))); seg(q.ropeEl[1], add(shTop, v3(0, 0.012, 0)), elFront); seg(q.ropeEl[2], elFront, foreA);
-    // Gasfeder vom Rückenrahmen zum Oberarm
-    const gA = onBack(0.72, 0.12, side * 0.17), gB = add(mix(sh, el, 0.42), v3(0, 0, side * 0.06 * s)), gM = mix(gA, gB, 0.58);
-    seg(q.gasBody, gA, gM); seg(q.gasRod, gM, gB);
-    if (q.jaw) {
-      q.jaw.visible = state.scen !== 'drag';
-      q.jaw.position.set(hd.x, hd.y, hd.z - side * P.handHalf * grip);
-      q.jaw.rotation.set(0, 0, tr.th * grip);
-    }
+    // Bowdenzug-Paare: Schulter (oben und hinten an der Seilscheibe), Ellbogen (vor und hinter der Seilscheibe)
+    seg(q.bowSh[0], motorPos.sh[k], add(ms, mul(pose.dir, 0.055 * s)));
+    seg(q.bowSh[1], motorPos.sh[k], add(ms, mul(pose.back, 0.055 * s)));
+    const upperD = norm(sub(el, sh)), elF = norm(cross(hg, upperD));
+    [1, -1].forEach((sg, i) => {
+      const via = add(add(ms, mul(pose.dir, 0.075 * s)), v3(0, 0, side * (0.012 + 0.012 * i)));
+      seg(q.bowEl[i][0], motorPos.el[k], via); seg(q.bowEl[i][1], via, add(me, mul(elF, sg * 0.045 * s)));
+    });
+    // Schlaufengreifer unter dem Unterarm
+    const { fd, n } = underOf(pose, k), a0 = loopAnchor(P, pose, k, 0), a1 = loopAnchor(P, pose, k, 1);
+    seg(q.carrier, add(a0, mul(fd, 0.03)), add(a1, mul(fd, -0.04)));
+    const lm = add(add(el, mul(fd, 0.07 * s)), mul(n, 0.04 * s));
+    axis(q.loopMotor, lm, fd);
+    [a0, a1].forEach((A, j) => {
+      const rg = ring[k][j], m = q.loops[j];
+      if (!rg) {                                                // nicht gebraucht: flach am Träger angelegt
+        placeRing(m, add(A, mul(n, LOOP_OPEN * 0.3)), fd, n, LOOP_OPEN * 0.8, 0.3);
+        q.loopRope[j].forEach((r) => { r.visible = false; });
+        return;
+      }
+      const c = rg.c, rClosed = P.rtG + 0.008;
+      const center = mix(add(A, mul(n, LOOP_OPEN)), rg.at, c), r = lerp(LOOP_OPEN, rClosed, c);
+      const nrm = norm(mix(fd, rg.dir, c));
+      placeRing(m, center, nrm, sub(A, center), r);
+      // Zugseil vom Motor über den Träger zur Schlaufe
+      let e = sub(A, center); e = sub(e, mul(nrm, dot(e, nrm)));
+      const edge = add(center, mul(len(e) > 1e-6 ? norm(e) : n, r));
+      q.loopRope[j].forEach((r2) => { r2.visible = true; });
+      seg(q.loopRope[j][0], lm, A); seg(q.loopRope[j][1], A, edge);
+    });
   }
 }
 
@@ -1238,15 +1303,15 @@ function poseTree(tr, pose) {
   }
 }
 
-const lblGrip = label('Stammgreifer', true);
+const lblGrip = label('Schlaufen', true);
 scene.add(lblGrip);
 function poseLabelsDrag(ch, pose, ld) {
   const on = state.labels;
   person.lblBox.visible = on;
   lblGrip.visible = on && ch.att > 0.5;
   if (lblGrip.visible) {
-    const cp = clampPoint(P, pose); lblGrip.position.set(cp.x, cp.y + 0.25, 0.45);
-    const txt = `Zuggreifer · ${Math.round(ld.F / GRAV)}${NB}kg`;
+    const cp = dragHold(P, pose).mean; lblGrip.position.set(cp.x, cp.y + 0.3, 0.45);
+    const txt = `Schlaufen · ${Math.round(ld.F / GRAV)}${NB}kg`;
     if (lblGrip.element.textContent !== txt) lblGrip.element.textContent = txt;
   }
 }
@@ -1261,7 +1326,7 @@ function poseLabels(ch, pose) {
   lblGrip.visible = on && ch.carried;
   if (ch.carried) {
     lblGrip.position.set(pose.Gact.x, pose.Gact.y + 0.2, 0);
-    const txt = `Klemmgabel · ${fmt(pose.Gact.y)}${NB}m`;
+    const txt = `Schlaufen · ${fmt(pose.Gact.y)}${NB}m`;
     if (lblGrip.element.textContent !== txt) lblGrip.element.textContent = txt;
   }
 }
@@ -1283,7 +1348,7 @@ function fitDistance(dir, tgt, box) {
 function viewPose(kind) {
   if (state.scen === 'drag') {
     if (kind === 'follow') return { pos: new THREE.Vector3(curPelvisX + 1.2, 2.2, 4.2), tgt: new THREE.Vector3(curPelvisX - 0.9, 0.7, 0) };
-    const box = { x0: P.dLie0.x - P.L - 0.3, x1: P.dX0 + DRAG_D + 1.2, y0: 0, y1: 2.0, z0: -0.9, z1: 1.0 };
+    const box = { x0: Math.min(...P.dLie0.map((c) => c.x)) - P.L - 0.3, x1: P.dX0 + DRAG_D + 1.2, y0: 0, y1: 2.0, z0: -0.9, z1: 1.0 };
     const tgt = new THREE.Vector3((box.x0 + box.x1) / 2, 0.8, 0);
     const dir = (kind === 'side' ? new THREE.Vector3(0, 0.12, 1) : new THREE.Vector3(0.35, 0.38, 0.85)).normalize();
     return { pos: tgt.clone().addScaledVector(dir, fitDistance(dir, tgt, box)), tgt };
@@ -1317,7 +1382,7 @@ const ui = {
   play: $('play'), scrub: $('scrub'), segs: $('segs'), capStep: $('capStep'), capTitle: $('capTitle'), capText: $('capText'),
   hp: $('hp'), len: $('len'), height: $('height'), labels: $('labels'),
   mass: $('mass'), massOut: $('massOut'), massHint: $('massHint'), massTypical: $('massTypical'),
-  body: $('body'), bodyOut: $('bodyOut'), exoKg: $('exoKg'), exoKgOut: $('exoKgOut'), foot: $('foot'), footOut: $('footOut'),
+  body: $('body'), bodyOut: $('bodyOut'), exoKg: $('exoKg'), exoKgOut: $('exoKgOut'),
   hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), statuses: $('statuses'), momentNote: $('momentNote'),
   stepsList: $('steps'), steps: [],
   scLoad: $('scLoad'), scDrag: $('scDrag'), n: $('n'), nOut: $('nOut'), gGrass: $('gGrass'), gSnow: $('gSnow'),
@@ -1332,24 +1397,24 @@ function captionFor(id) {
   if (state.scen === 'drag') {
     const n = state.n, trees = n > 1 ? `${n} Bäume` : 'Ein Baum', f = dragForces(P);
     switch (id) {
-      case 'start': return ['Ausgangslage', 'Ausgangslage', `${trees} liegen am Boden, die Stümpfe zeigen zu dir. Du stehst mit dem Rücken zu den Stümpfen.`];
-      case 'dgrip': return ['Schritt 1 von 4', 'Ansetzen', 'Leicht in die Knie und vorbeugen, den Zuggreifer hinter der Hüfte rückwärts auf die Stümpfe drücken. Die Schnappbügel der Gabeln schließen.'];
-      case 'drise': return ['Schritt 2 von 4', 'Aufrichten', 'Hochkommen: Die Stümpfe heben sich auf etwa 60 cm und keilen sich in den Gabeln fest. Die Beinseile ziehen Hüfte und Knie in die Streckung.'];
-      case 'dwalk': return ['Schritt 3 von 4', 'Vorwärts schleifen', `Vorgebeugt vorwärts gehen, gezeigt sind 7 m, gedacht für bis zu 100 m. ${Math.round(f.hold / GRAV)} kg hängen am Greifer und gehen über Rahmen und Beinschienen in die Fußplatten. Ziehen musst du nur etwa ${Math.round(f.pullLift / GRAV)} kg, die Hände bleiben frei.`];
-      case 'drelease': return ['Schritt 4 von 4', 'Ablegen', 'In die Knie, Stümpfe absetzen, Lösezug am Hüftgurt ziehen und weitergehen.'];
+      case 'start': return ['Ausgangslage', 'Ausgangslage', `${trees} liegen am Boden, die Stümpfe zeigen nach vorne. Du stehst zwischen den Stümpfen, Blick in Laufrichtung.`];
+      case 'dgrip': return ['Schritt 1 von 4', 'Greifen', `In die Knie und vorbeugen, die Unterarme neben die Stümpfe legen. Die offenen Schlaufen unter den Unterarmen über die Stümpfe schieben, auf Tastendruck zieht je ein kleiner Motor seine Schlaufe zu.${n > 2 ? ' Bei mehr als zwei Bäumen halten beide Schlaufen eines Arms je einen Stumpf.' : ''}`];
+      case 'drise': return ['Schritt 2 von 4', 'Aufrichten', 'Hochkommen, die Arme hängen lassen. Die Stümpfe heben sich mit, die Beinseile ziehen Hüfte und Knie in die Streckung.'];
+      case 'dwalk': return ['Schritt 3 von 4', 'Vorwärts schleifen', `Leicht vorgebeugt vorwärts gehen, gezeigt sind 7 m, gedacht für bis zu 100 m. Das Gewicht hängt in den Schlaufen und geht über Arme, Schultergelenke und Rahmen in den Hüftgurt und die Beinschienen. Die Arme hängen leicht nach hinten, dort gleichen sich Gewicht und Zug fast aus.`];
+      case 'drelease': return ['Schritt 4 von 4', 'Ablegen', 'In die Knie, Stümpfe absetzen, Schlaufen auf Tastendruck öffnen und weitergehen.'];
       default: return ['Fertig', 'Am Plateau', `${trees} liegen am Ziel, bereit zum Aufladen.`];
     }
   }
   switch (id) {
     case 'start': return ['Ausgangslage', 'Ausgangslage', `Der geschnittene Christbaum liegt am Boden, das Plateau ist ${hp} hoch.`];
-    case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen und den Stammgreifer am astfreien Stammende schließen.'];
+    case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen, den rechten Unterarm ans astfreie Stammende legen und die beiden rechten Schlaufen zuziehen.'];
     case 'raise': return ['Schritt 2 von 6', 'Aufrichten bis fast senkrecht', 'Rechte Hand am Stumpf ist der Drehpunkt, die linke greift so weit Richtung Spitze wie möglich. Zurücklehnen und mit links in die Senkrechte ziehen.'];
     case 'carry': return ['Schritt 3 von 6', 'Tragen', 'Fast senkrecht und leicht zurückgelehnt zum Plateau gehen. Die linke Hand stützt oben, der Hebel ist jetzt klein.'];
     case 'lift': return ['Schritt 4 von 6', P.cutLiftY > P.cutCarryY ? 'Hochheben' : 'Absenken',
       `Den Baum fast lotrecht balancieren, bis das Schnittende auf Plateauhöhe (${hp}) ist.${P.clear ? '' : ' Dabei Abstand zur Kante halten, damit die Äste nicht anstoßen.'}`];
     case 'approach': return ['Schritt 4 von 6', 'An die Kante', 'Das Schnittende über die Kante führen und knapp dahinter auf der Ladefläche absetzen.'];
     case 'topple': return ['Schritt 5 von 6', 'Umkippen lassen', P.final.loaded
-      ? 'Der Greifer hält das Schnittende wie ein Scharnier, der Baum kippt 90° nach vorne aufs Plateau. Sobald die untersten Äste aufliegen, öffnet der Greifer.'
+      ? 'Die Schlaufen halten das Schnittende wie ein Scharnier, der Baum kippt 90° nach vorne aufs Plateau. Sobald die untersten Äste aufliegen, öffnen die Schlaufen.'
       : 'Das Schnittende kommt nicht auf die Ladefläche, der Baum bleibt an der Kante lehnen.'];
     case 'release': return ['Schritt 6 von 6', 'Zurücktreten', 'Arme runter und zurücktreten. Bereit für den nächsten Baum.'];
     default: return ['Fertig', P.final.loaded ? 'Baum geladen' : 'Nicht geladen', P.final.loaded
@@ -1358,16 +1423,16 @@ function captionFor(id) {
   }
 }
 const STEP_TEXT = {
-  load: [['Greifen', 'In die Hocke, rechts die Klemmgabel am Stumpf, links weit oben am Stamm.'],
+  load: [['Greifen', 'In die Hocke, rechts die Schlaufen um den Stumpf, links weit oben am Stamm.'],
     ['Aufrichten bis fast senkrecht', 'Zurücklehnen, rechts ist der Drehpunkt, links hebelt den Baum hoch. Die Beinseile helfen beim Hochkommen.'],
-    ['Tragen', 'Fast senkrecht zum Plateau tragen, kaum Hebel. Die Gasfedern halten die Arme.'],
+    ['Tragen', 'Fast senkrecht zum Plateau tragen, kaum Hebel. Die Schultermotoren halten die Arme.'],
     ['Hochheben', 'Fast lotrecht anheben, bis das Schnittende über der Ladefläche ist, dann an der Kante absetzen.'],
-    ['Umkippen lassen', 'Die Klemmgabel dreht als Scharnier mit, der Baum kippt 90° aufs Plateau.'],
-    ['Zurücktreten', 'Gabel offen, Arme runter, zurück.']],
-  drag: [['Ansetzen', 'Rücken zu den Stümpfen, leicht in die Knie, Zuggreifer rückwärts auf die Stümpfe drücken.'],
-    ['Aufrichten', 'Hochkommen, die Stümpfe heben sich an und keilen sich fest. Die Beinseile helfen.'],
-    ['Vorwärts schleifen', 'Leicht vorgebeugt vorwärts gehen, bis 100 m. Hände frei.'],
-    ['Ablegen', 'In die Knie, Stümpfe absetzen, Lösezug ziehen, weitergehen.']],
+    ['Umkippen lassen', 'Die Schlaufen halten das Schnittende als Scharnier, der Baum kippt 90° aufs Plateau.'],
+    ['Zurücktreten', 'Schlaufen auf, Arme runter, zurück.']],
+  drag: [['Greifen', 'Zwischen den Stümpfen in die Knie, Schlaufen unter den Unterarmen über die Stümpfe, zuziehen.'],
+    ['Aufrichten', 'Hochkommen, Arme hängen lassen. Die Beinseile helfen.'],
+    ['Vorwärts schleifen', 'Leicht vorgebeugt vorwärts gehen, bis 100 m. Die Schlaufen tragen, nicht die Finger.'],
+    ['Ablegen', 'In die Knie, Stümpfe absetzen, Schlaufen öffnen, weitergehen.']],
 };
 function buildSteps() {
   ui.stepsList.replaceChildren(...STEP_TEXT[state.scen].map(([title, d], i) => {
@@ -1421,10 +1486,10 @@ function updateLoads(ld) {
 function updateStatic() {
   const drag = state.scen === 'drag';
   ui.nOut.textContent = state.n;
-  ui.labF.textContent = drag ? 'Gewicht am Zuggreifer' : 'Baumgewicht an den Händen';
+  ui.labF.textContent = drag ? 'Gewicht in den Schlaufen' : 'Baumgewicht an den Händen';
   ui.labFl.textContent = drag ? 'Zugkraft nach vorne' : 'Linke Hand · Hebelkraft';
-  for (const k of ['M', 'Sh']) for (const id of ['lab', 'now', 'max']) $(id + k).hidden = drag;
-  $('barM').parentElement.hidden = drag; $('barSh').parentElement.hidden = drag;
+  for (const id of ['lab', 'now', 'max']) $(id + 'M').hidden = drag;
+  $('barM').parentElement.hidden = drag;
   if (drag) { updateStaticDrag(); return; }
   ui.hpOut.textContent = `${fmt(state.hp)}${NB}m`;
   ui.lenOut.textContent = `${fmt(state.L, 1)}${NB}m`;
@@ -1434,7 +1499,6 @@ function updateStatic() {
   ui.heightOut.textContent = `${fmt(state.H)}${NB}m`;
   ui.bodyOut.textContent = `${state.body}${NB}kg`;
   ui.exoKgOut.textContent = `${state.exoKg}${NB}kg`;
-  ui.footOut.textContent = `${state.foot}${NB}cm`;
   for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k] / r.div)}${NB}${r.unit}`;
   const gy = `${fmt(PK.gy)}${NB}m`;
   const kg = `${Math.round(P.mass)}${NB}kg`, cm = `${Math.round(PK.tip * 100)}${NB}cm`;
@@ -1442,13 +1506,13 @@ function updateStatic() {
   const items = [];
   if (!PK.loaded) items.push(['bad', '✕', `Zu hoch für die Arme: das Schnittende kommt nicht auf die Ladefläche, es fehlen ${Math.round(Math.max(PK.gap, P.hp - P.final.pivot.y) * 100)}${NB}cm`]);
   if (PK.tip > 0.08) items.push(['bad', '✕', `Kippgefahr ${where}: der gemeinsame Schwerpunkt liegt ${cm} vor der Standfläche. ${PK.tipAt === 'raise'
-    ? 'Schwere Bäume besser wie eine Leiter von der Spitze her aufstellen oder die Fußplatten verlängern'
-    : 'Längere Fußplatten am Exo würden helfen'}`]);
+    ? 'Weiter zurücklehnen und einen Ausfallschritt nach vorne machen. Sehr schwere Bäume besser wie eine Leiter von der Spitze her aufstellen'
+    : 'Ausfallschritt nach vorne, den Baum näher am Körper führen'}`]);
   else if (PK.tip > 0.02) items.push(['warn', '▲', `Gleichgewicht knapp ${where}: ${cm} vor der Standfläche, ein Ausfallschritt nach vorne gleicht das aus`]);
-  if (PK.loaded && PK.gap > 0.02) items.push(['warn', '▲', `Gerade noch erreichbar: Greifer bis ${gy}`]);
+  if (PK.loaded && PK.gap > 0.02) items.push(['warn', '▲', `Gerade noch erreichbar: Schlaufen bis ${gy}`]);
   if (PK.overLoad) items.push(['warn', '▲', `Über Kopf mit vollem Gewicht: ${kg} bis ${gy}`]);
   else if (PK.overLight) items.push(['warn', '▲', `Kurz über Kopf (bis ${gy}), aber fast ohne Last`]);
-  if (!items.length) items.push(['ok', '✓', `Im grünen Bereich: Greifer höchstens auf ${gy}`]);
+  if (!items.length) items.push(['ok', '✓', `Im grünen Bereich: Schlaufen höchstens auf ${gy}`]);
   ui.statuses.replaceChildren(...items.map(([level, icon, text]) => {
     const p = document.createElement('p');
     p.className = 'status'; p.dataset.level = level;
@@ -1457,7 +1521,7 @@ function updateStatic() {
     p.append(i, t);
     return p;
   }));
-  ui.momentNote.textContent = `Das Kippmoment ist nur kurz beim Aufrichten hoch (${Math.round(PK.M)}${NB}Nm, solange der Baum noch flach ist). Die linke Hand fängt es mit bis zu ${Math.round(PK.Fl / GRAV)}${NB}kg Hebelkraft ab. Beim Tragen sind es ${Math.round(PK.Mcarry)}${NB}Nm, beim lotrechten Hochheben ${Math.round(PK.Mlift)}${NB}Nm. Beim Umkippen dreht der Greifer als Scharnier mit, dann wirkt kein Moment.`;
+  ui.momentNote.textContent = `Das Kippmoment ist nur kurz beim Aufrichten hoch (${Math.round(PK.M)}${NB}Nm, solange der Baum noch flach ist). Die linke Hand fängt es mit bis zu ${Math.round(PK.Fl / GRAV)}${NB}kg Hebelkraft ab. Beim Tragen sind es ${Math.round(PK.Mcarry)}${NB}Nm, beim lotrechten Hochheben ${Math.round(PK.Mlift)}${NB}Nm. Beim Umkippen halten die Schlaufen das Schnittende als Scharnier, dann wirkt kein Moment.`;
 }
 
 function updateStaticDrag() {
@@ -1466,11 +1530,11 @@ function updateStaticDrag() {
   ui.massHint.textContent = `typisch für ${fmt(state.L, 1)}${NB}m: ${massTypical(state.L)}${NB}kg`;
   ui.massTypical.hidden = state.mass === massTypical(state.L);
   ui.heightOut.textContent = `${fmt(state.H)}${NB}m`; ui.bodyOut.textContent = `${state.body}${NB}kg`;
-  ui.exoKgOut.textContent = `${state.exoKg}${NB}kg`; ui.footOut.textContent = `${state.foot}${NB}cm`;
+  ui.exoKgOut.textContent = `${state.exoKg}${NB}kg`;
   for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k] / r.div)}${NB}${r.unit}`;
   const f = dragForces(P), items = [];
-  items.push(['ok', '✓', `${state.n} × ${state.mass} kg = ${state.n * state.mass} kg gesamt. Am Greifer ${Math.round(f.hold / GRAV)} kg, Zugkraft nur ${Math.round(f.pullLift / GRAV)} kg`]);
-  if (PK.tipB > 0.08) items.push(['bad', '✕', `Kippgefahr nach hinten: ${Math.round(PK.tipB * 100)} cm hinter der Ferse. Stärker vorbeugen, Fußplatten hinten verlängern oder weniger Bäume`]);
+  items.push(['ok', '✓', `${state.n} × ${state.mass} kg = ${state.n * state.mass} kg gesamt. In den Schlaufen ${Math.round(f.hold / GRAV)} kg, Zugkraft etwa ${Math.round(f.pullLift / GRAV)} kg`]);
+  if (PK.tipB > 0.08) items.push(['bad', '✕', `Kippgefahr nach hinten: ${Math.round(PK.tipB * 100)} cm hinter der Ferse. Stärker vorbeugen, kürzere Schritte oder weniger Bäume auf einmal`]);
   else if (PK.tipB > 0.02) items.push(['warn', '▲', `Gleichgewicht nach hinten knapp (${Math.round(PK.tipB * 100)} cm), stärker vorbeugen`]);
   ui.statuses.replaceChildren(...items.map(([level, icon, text]) => {
     const p = document.createElement('p'); p.className = 'status'; p.dataset.level = level;
@@ -1555,11 +1619,11 @@ function setScen(scen) {
   state.scen = scen; state.t = 0;
   ui.scLoad.setAttribute('aria-pressed', String(scen === 'load')); ui.scDrag.setAttribute('aria-pressed', String(scen === 'drag'));
   document.querySelectorAll('[data-for]').forEach((el) => { el.hidden = el.dataset.for !== scen; });
-  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Use Case 2' : 'Exoskelett · Use Case 1';
+  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Entwurf 3 · Use Case 2' : 'Exoskelett · Entwurf 3 · Use Case 1';
   ui.title.textContent = scen === 'drag' ? 'Bäume schleifen' : 'Christbaum aufladen';
   ui.lede.textContent = scen === 'drag'
-    ? 'Ein Zuggreifer hinter der Hüfte fasst ein bis vier Stümpfe und hebt sie an. Das Gewicht geht über Rahmen und Beine in die Fußplatten, man geht vorwärts und hat die Hände frei.'
-    : 'Rechts die Klemmgabel am Stumpf, links weit oben am Stamm: zurücklehnen, fast senkrecht aufrichten, tragen, bis zur Ladefläche anheben und 90° aufs Plateau kippen lassen. Motoren und Akku sitzen hinten, Seile ziehen an Hüfte, Knie, Schultern und Ellbogen.';
+    ? 'Schlaufen an der Unterseite beider Unterarme fassen ein bis vier Stümpfe, jede Schlaufe wird von einem eigenen kleinen Motor zugezogen. Die Arme hängen, das Gewicht geht über Schultergelenke und Rahmen in den Hüftgurt, man geht vorwärts.'
+    : 'Rechts zwei Schlaufen unter dem Unterarm um den Stumpf, links weit oben am Stamm: zurücklehnen, fast senkrecht aufrichten, tragen, bis zur Ladefläche anheben und 90° aufs Plateau kippen lassen. Motoren und Akku sitzen hinten, Seile und Bowdenzüge bewegen Hüfte, Knie, Schultern und Ellbogen.';
   buildSteps();
   rebuild({ drag: true });
   setView(state.view, true);
@@ -1582,7 +1646,6 @@ ui.massTypical.addEventListener('click', () => {
 });
 ui.body.addEventListener('input', () => { state.body = Number(ui.body.value); rebuild({}); });
 ui.exoKg.addEventListener('input', () => { state.exoKg = Number(ui.exoKg.value); rebuild({}); });
-ui.foot.addEventListener('input', () => { state.foot = Number(ui.foot.value); rebuild({ person: true }); });
 ui.height.addEventListener('input', () => { state.H = Number(ui.height.value); rebuild({ person: true }); });
 ui.labels.addEventListener('change', () => { state.labels = ui.labels.checked; });
 // nach dem Loslassen des Reglers die Kamera an die neue Szene anpassen (langer Baum, anderes Plateau)
@@ -1641,10 +1704,10 @@ function loop(now) {
 
 function boot(data) {
   if (data && typeof data === 'object') {
-    for (const k of ['scen', 'n', 'mu', 'H', 'L', 'hp', 'mass', 'massManual', 'body', 'exoKg', 'foot', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
+    for (const k of ['scen', 'n', 'mu', 'H', 'L', 'hp', 'mass', 'massManual', 'body', 'exoKg', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
   }
   ui.hp.value = state.hp; ui.len.value = state.L; ui.height.value = state.H;
-  ui.mass.value = state.mass; ui.body.value = state.body; ui.exoKg.value = state.exoKg; ui.foot.value = state.foot;
+  ui.mass.value = state.mass; ui.body.value = state.body; ui.exoKg.value = state.exoKg;
   ui.labels.checked = state.labels; ui.n.value = state.n;
   applyTheme();
   rebuild({ tree: true, platform: true, person: true });
@@ -1661,7 +1724,7 @@ if (window.claude?.hot?.ready) window.claude.hot.ready(boot);
 else boot(window.claude?.hot?.data ?? {});
 
 // Testzugang für automatische Prüfungen der Kinematik (wird von der Seite selbst nicht benutzt)
-window.__exo = { choreoDrag, finalizeDrag, analyseDrag, dragTreePose, clampPoint, derive, buildTimeline, choreo, solve, treePose, loads, finalize, analyse, state, get P() { return P; }, get TL() { return TL; }, get PK() { return PK; } };
+window.__exo = { camera, controls, choreoDrag, finalizeDrag, analyseDrag, dragTreePose, dragHold, dragSlots, loopCenter, derive, buildTimeline, choreo, solve, treePose, loads, finalize, analyse, state, get P() { return P; }, get TL() { return TL; }, get PK() { return PK; } };
 </script>
 </body>
 </html>

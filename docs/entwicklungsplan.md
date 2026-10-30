@@ -19,7 +19,7 @@ dabei nie stört, ist besser als ein starkes, das klemmt oder dich aus dem Gleic
   das weiter vom Gelenk entfernt angreift, braucht weniger Kraft. Das ist der Kern, warum
   Umlenkrollen und Ankerpunkte da sitzen, wo sie sitzen.
 - **Kraftfluss.** Sich immer fragen: Wo geht die Kraft hin? Beim Exo soll sie über Schienen in
-  die Fußplatten und in den Boden gehen – nicht über Haut, Knie oder Wirbelsäule.
+  die Steigbügel und in den Boden gehen – nicht über Haut, Knie oder Wirbelsäule.
 - **Gelenkachsen und Fluchtung.** Die Achse des Exo-Gelenks muss möglichst genau auf der
   Achse deines Gelenks liegen. Liegt sie daneben, rutschen die Manschetten bei jeder Bewegung
   und scheuern. Das ist der häufigste Fehler bei Exos überhaupt.
@@ -90,15 +90,17 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
   Das entscheidet, welche Gelenke zuerst Unterstützung brauchen.
 - **Ergebnis:** Maßblatt + kurze Liste „Was tut am meisten weh / wo wird es zäh“.
 
-### Phase 1 – Greifer ohne Exo (2–4 Wochen, ~100–200 €)
-- Klemmgabel mit Schnappbügel als **Handwerkzeug** bauen (Griff statt Armschiene).
-- Zuggreifer als einfache Deichsel mit 2 Gabeln bauen, mit Hüftgurt einer Kraxe.
-- **Test:** Eine Saison-Woche mit echten Bäumen. Hält die Gabel bei Nässe und Frost? Lässt sie
-  sich mit Handschuhen lösen? Schleifen vorwärts möglich?
+### Phase 1 – Schlaufengreifer und Steigbügel ohne Exo (2–4 Wochen, ~150–250 €)
+- **Schlaufengreifer als Handwerkzeug:** U-Profil mit Zahnleiste an einer festen Unterarm-Manschette
+  mit Handgriff, zwei Schlaufen, zwei Schneckengetriebe-Winden, Daumentaster, ein Akku-Pack.
+- **Steigbügel** mit Spikes für die eigenen Arbeitsschuhe.
+- **Test:** Eine Saison-Woche mit echten Bäumen. Schließen die Schlaufen schnell genug? Halten sie bei
+  Nässe und Frost? Lassen sie sich mit Handschuhen bedienen und notfalls von Hand öffnen? Wie läuft es
+  sich mit den Steigbügeln im Schlamm?
 - Warum zuerst: Der Greifer bringt sofort Nutzen, ist billig und zeigt, wie Kräfte wirklich wirken.
 
 ### Phase 2 – Passiver Rahmen (4–8 Wochen, ~400–800 €)
-- Rückenrahmen, Hüftgurt, Hüftgelenke, Bein-Schienen mit Knie, Fußplatten mit Bindung.
+- Rückenrahmen, Hüftgurt, Hüftgelenke, Bein-Schienen mit Knie, Steigbügel.
   **Noch ohne Motoren**, aber mit allen Gelenkanschlägen.
 - Längen über Steckbolzen einstellbar; Gelenkachsen nach Maßblatt ausrichten.
 - **Tests:**
@@ -107,8 +109,10 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
   - Rahmen mit Gewichten belasten (Sandsäcke), Verbindungen auf Spiel prüfen.
 - Hier passiert die meiste Anpassung. Rechne mit 2–3 Umbauten. Das ist normal.
 
-### Phase 3 – Prüfstand für einen Antrieb (3–6 Wochen, ~400–900 €)
-- **Ein** Motor mit Trommel und Seil auf einem Brett, ein Gewicht am Seil oder eine Federwaage.
+### Phase 3 – Prüfstand: ein Antrieb, eine Sensor-Manschette (3–6 Wochen, ~400–900 €)
+- **Ein** Motor mit Doppeltrommel, ein Bowdenzug-Paar, eine Seilscheibe an einem Holzarm mit Scharnier.
+- **Eine Sensor-Manschette** (Wägezelle + Verstärker) auf dem Holzarm. Mit der Hand führen: Das Exo
+  soll folgen. Verstärkung K langsam steigern, Schwingungsgrenze finden (siehe [steuerung.md](steuerung.md)).
 - Steuerung: ESP32 oder Teensy, CAN-Transceiver, Not-Aus-Schütz, Sicherung, Akku-Adapter.
 - Lernen: Motor ansprechen, Strom/Moment vorgeben, Encoder auslesen, Seil spannen ohne zu
   ziehen („Leerlauf mit leichter Vorspannung“), Fehlerfälle.
@@ -118,15 +122,17 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
 
 ### Phase 4 – Beinantrieb (4–8 Wochen, ~800–1.500 €)
 - Antriebsbox mit zwei Beinmotoren an den Rahmen, Seile über Hüft- und Knierolle.
-- Zuerst mit **sehr kleinem Moment** und nur auf Knopfdruck (Totmannschalter in der Hand).
-- Dann einfache Erkennung: Rumpf geneigt + Knie gebeugt + Streckbewegung beginnt → Unterstützen.
+- Sensor-Manschetten an Ober- und Unterschenkel.
+- Zuerst mit **sehr kleinem K** und Totmannschalter in der Hand.
+- Unterstützung erst ab Kniebeugung; beim normalen Gehen bleiben die Beine durchsichtig.
 - **Tests:** Aufstehen aus der Hocke 50× mit und ohne Exo, Gefühl und Puls vergleichen.
   Treppen. Gehen auf Schnee. Wie fühlt sich das Abschalten mitten in der Bewegung an?
 
 ### Phase 5 – Schultern und Arme (4–8 Wochen, ~600–1.200 €)
-- Erst **Gasfedern** an den Schultern (passiv, hält die Arme). Testen, ob das allein schon reicht.
-- Dann Schulter- und Ellbogenmotoren, gleiche Vorgehensweise wie bei den Beinen.
-- **Tests:** Aufrichten eines Baumes mit beiden Händen; Ablegen; Arme frei bewegen ohne Widerstand.
+- Schulter- und Ellbogenmotoren mit Bowdenzug-Paaren und Sensor-Manschetten, in beide Richtungen.
+- Dann den Schlaufengreifer aus Phase 1 an die Unterarmschienen.
+- **Tests:** Arme frei bewegen ohne Widerstand (Exo „schwerelos“); Sandsack in den Schlaufen heben und
+  senken; Baum aufrichten; 2–4 Bäume schleifen.
 
 ### Phase 6 – Wetter und Dauer (1 Saison)
 - Abdichten, Kondenswasser, Frost an Gelenken, Seilverschleiß, Akkulaufzeit bei Kälte.
@@ -175,7 +181,7 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
 | Phase | Zeit (Feierabend) | Kosten |
 | --- | --- | --- |
 | 0 Messen | 1–2 Wochen | ~0 € |
-| 1 Greifer | 2–4 Wochen | 100–200 € |
+| 1 Schlaufengreifer, Steigbügel | 2–4 Wochen | 150–250 € |
 | 2 Passiver Rahmen | 4–8 Wochen | 400–800 € |
 | 3 Prüfstand | 3–6 Wochen | 400–900 € |
 | 4 Beinantrieb | 4–8 Wochen | 800–1.500 € |

@@ -1,167 +1,185 @@
-# Konzept: Christbaum-Exo (Entwurf 2)
+# Konzept: Christbaum-Exo (Entwurf 3)
 
 Ziel: ein umsetzbares, robustes Exoskelett für zwei Arbeiten: Bäume am Stamm greifen und **schleifen** (Use Case 2)
 und Bäume am Stumpf greifen, fast senkrecht **aufrichten und aufladen** (Use Case 1). Es unterstützt Beine,
 Oberkörper und Arme und soll die eigene Kraft etwa verdoppeln. Budget: einige tausend Euro, verteilt über die Zeit.
 Keine Spezialteile für zehntausende Euro, sondern Serienteile, die man einzeln kaufen und tauschen kann.
 
-**Rahmenbedingungen (geklärt):** Schleifen bis etwa 100 m. Arbeiten bei Frostregen und nassem Schnee. Akku von vorhandenen
-Stihl-Geräten. Bauen mit einfacher Werkstatt: bohren, schrauben, ein wenig schweißen und löten, keine Drehbank.
-Bedienung nur Ein/Aus. Das Exo wird für eine Person (1,75 m, 75 kg) gebaut, Längen bleiben trotzdem einstellbar.
+**Rahmenbedingungen (geklärt):** Schleifen bis etwa 100 m. Arbeiten bei Frostregen, nassem Schnee, **Schlamm und unebenem
+Gelände**. Akku von vorhandenen Stihl-Geräten. Bauen mit einfacher Werkstatt: bohren, schrauben, ein wenig löten, keine
+Drehbank. Das Exo wird für eine Person (1,75 m, 75 kg) gebaut, Längen bleiben trotzdem einstellbar. Die meisten Bäume
+schaffst du selbst; das Exo soll **entlasten**, nicht ersetzen.
+
+**Neu in Entwurf 3:** Schlaufengreifer an beiden Unterarmen statt Klemmgabel, Zuggreifer hinten gestrichen,
+Sensor-Manschetten als Steuerung, Arme in beide Richtungen angetrieben (Bowdenzug-Paar), Steigbügel mit Spikes statt
+langer Fußplatten, Gasfedern gestrichen.
+
+Dazu: [steuerung.md](steuerung.md) (wie das Exo merkt, was du willst), [kraftverteilung.md](kraftverteilung.md)
+(welche Kräfte wo auftreten), [entwicklungsplan.md](entwicklungsplan.md) (wie man es baut).
 
 ## 1. Grundidee in einem Satz
 
-**Motoren sitzen hinten im Rückenrahmen, Seile übertragen die Kraft zu Hüfte, Knie, Schultern und Ellbogen,
-ein Metallrahmen leitet die Last bis in die Fußplatten, und Federn übernehmen das reine Halten.**
-
-Warum so:
+**Motoren sitzen hinten im Rückenrahmen, Seile übertragen die Kraft zu Hüfte, Knie, Schultern und Ellbogen, Schlaufen an
+den Unterarmen halten die Stämme, und Kraftsensoren in den Manschetten sagen dem Exo, wohin du dich bewegen willst.**
 
 | Entscheidung | Begründung |
 |---|---|
-| Motoren am Rücken statt in jedem Gelenk | Arme und Beine bleiben leicht, schwere Teile sitzen hinten (hilft auch beim Gleichgewicht, siehe Use Case 1). Motoren sind gut geschützt vor Nässe und Stößen. |
-| Seilzug statt Zahnräder an den Gelenken | Seile übertragen hohe Zugkräfte leicht und günstig, Übersetzung kommt über Seilrollen fast gratis. Ein Seil kann nur ziehen: fällt etwas aus, lässt es los statt zu drücken. Das ist sicherer. |
-| Zug nur in Lastrichtung | Beim Heben, Aufrichten und Ziehen braucht es fast nur eine Richtung: Hüfte und Knie strecken, Arme heben bzw. beugen. Die Gegenrichtung macht der Körper selbst. Das halbiert die Zahl der Antriebe. |
-| Federn für Dauerhaltung | Arme oben halten und Rumpf halten kostet beim Motor Strom, bei einer Feder nichts. Gasfedern wie bei Industrie-Armstützen sind billig und bewährt. |
-| Starrer Rahmen bis in die Fußplatten | Baumgewicht soll über Metall in den Boden, nicht über Knochen und Gelenke. |
+| Motoren am Rücken statt in jedem Gelenk | Arme und Beine bleiben leicht, schwere Teile sitzen hinten (gleicht den Baum vorne aus). Motoren sind gut geschützt vor Nässe und Stößen. |
+| Beine: offenes Seil, zieht nur | Beine brauchen nur Strecken (aus der Hocke hoch, schieben). Beugen macht der Körper selbst. Seil über Rollen hat kaum Reibung. |
+| Arme: Bowdenzug-Paar, beide Richtungen | Arme sollen heben **und** senken bzw. beugen **und** strecken. Zwei Züge auf einer Trommel, gegenläufig gewickelt: ein Motor, zwei Richtungen. Die Hülle entkoppelt Ellbogen und Schulter. |
+| Sensor-Manschetten | Die blauen Manschetten sind die Schnittstelle: Drückst du gegen eine Manschette, bewegt das Exo das Gelenk in diese Richtung. Intuitiv, keine Knöpfe. |
+| Schlaufen statt Gabel | Eine Schlaufe passt sich jedem Stammdurchmesser an, ist leicht und hält mehrere Bäume getrennt. |
+| Starrer Rahmen bis in den Steigbügel | Baumgewicht soll über Metall in den Boden, nicht über Knochen und Gelenke. |
 
 ## 2. Grundstruktur
 
 ```
-           Schulterbügel ── Schulterrolle (Gasfeder + Seil) ── Oberarmschiene ── Ellbogen (Seil) ── Unterarmschiene
+           Schulterbügel ── Schulter (Seilscheibe, Bowden-Paar) ── Oberarmschiene ── Ellbogen (Seilscheibe, Bowden-Paar) ── Unterarmschiene
+                 │                                                                                                         └─ Schlaufenträger, 2 Schlaufen
+  Rückenrahmen (Kraxe-Prinzip, Alu) ── Antriebsbox: 6 Gelenkmotoren, 4 Schlaufenmotoren, Akku, Steuerung
                  │
-  Rückenrahmen (Kraxe-Prinzip, Alu) ── Antriebsbox: 6 Motoren, Akku, Steuerung
-                 │
-           Hüftgurt + Hüftbügel ── Zuggreifer hinten (Use Case 2)
+           Hüftgurt + Hüftbügel
                  │
   Hüftgelenk (Lager + Seilrolle) ── Oberschenkelschiene ── Kniegelenk (Lager + Seilrolle) ── Unterschenkelschiene
-                                                                                                │
-                                                                         Sprunggelenk (frei, mit Anschlag) ── Fußplatte mit Bindung
+                                                                                                    │
+                                                                      Sprunggelenk (frei, gummigedämpft) ── Steigbügel mit Spikes
 ```
 
-- **Bauweise:** komplett **geschraubt**, keine Drehteile und keine tragenden Schweißnähte. Lager sitzen in gekauften
-  Flanschlagergehäusen, Achsen sind Passschrauben M10/M12, Seilrollen werden fertig mit Lager gekauft.
-- **Rückenrahmen:** Aluminium-Vierkantrohr 25 × 25 × 2 mm, Bauform wie eine Lastenkraxe. Er nimmt die Antriebsbox auf und
-  verbindet Schultern und Hüfte. Als Start kann ein gekauftes Kraxengestell mit Hüftgurt dienen.
-- **Einstellbar (kostet fast nichts):** Länge von Ober- und Unterschenkel, Ober- und Unterarm über Lochraster, Hüftbreite
-  über Langlöcher. Alles andere wird fest auf dich angepasst.
-- **Hüfte:** breiter Hüftgurt mit Alu-Bügel. Seitlich je ein Hüftgelenk mit Kugellagern (z. B. 6202), Achse genau auf Höhe
-  des eigenen Hüftgelenks, seitlich einstellbar.
-- **Beine:** Schienen aus Alu-Flachprofil bzw. Rohr, Länge über Lochraster einstellbar (Steckbolzen), Kniegelenk als
-  einachsiges Scharnier mit Lagern und mechanischem Anschlag gegen Überstrecken.
-- **Füße:** Alu-Platte unter dem Schuh, festgehalten mit einer **Snowboard-Bindung** (günstig, schnell an- und ausziehbar,
-  für Winter gemacht). Die Platte ragt etwa 18 cm nach vorne und 8 cm nach hinten über den Schuh hinaus. Vorne hilft das beim Aufladen
-  (Baum vor dem Körper), hinten beim Schleifen (Last hinter dem Körper).
-- **Schultern:** Bügel vom Rückenrahmen über die Schultern, Schultergelenk außen mit Drehachse für Heben/Senken.
-  Seitwärts schwenkbar, damit die Arme frei bleiben.
-- **Arme:** leichte Schienen an Ober- und Unterarm mit Manschetten, Ellbogen als Scharnier.
-- **Manschetten, Gehäuse, Seilführungen:** 3D-Druck (PETG, Polster und Greifbeläge in TPU), alles innerhalb 18 × 18 × 18 cm.
+- **Bauweise:** komplett **geschraubt**, keine Drehteile und keine tragenden Schweißnähte. Lager in gekauften
+  Flanschlagergehäusen, Achsen als Passschrauben M10/M12, Seilrollen fertig mit Lager gekauft.
+- **Rückenrahmen:** Alu-Vierkantrohr 25 × 25 × 2 mm, Bauform wie eine Lastenkraxe, Eckverbindungen mit Doppelplatten.
+  Als Start kann ein gekauftes Kraxengestell mit Hüftgurt dienen.
+- **Einstellbar:** Länge von Ober- und Unterschenkel, Ober- und Unterarm über Lochraster mit Steckbolzen, Hüftbreite über
+  Langlöcher.
+- **Hüfte:** breiter Hüftgurt mit Alu-Bügel, seitlich je ein Hüftgelenk mit Kugellagern, Achse auf Höhe des eigenen
+  Hüftgelenks.
+- **Beine:** Schienen aus Alu-Rohr (Außen 25 × 25, innen 20 × 20 teleskopierbar), Kniegelenk einachsig mit Anschlag.
+- **Schultern:** Bügel vom Rahmen über die Schultern, Schultergelenk außen. Ein freies Gelenk erlaubt das seitliche
+  Abspreizen, angetrieben wird Heben und Senken nach vorne.
+- **Arme:** Schienen an Ober- und Unterarm, Ellbogen als Scharnier mit Seilscheibe.
+- **Manschetten:** gedruckte PETG-Schalen mit Polster und Klettgurt, jede auf einer **Wägezelle** gelagert (siehe Abschnitt 5).
 
-## 3. Antriebe
+## 3. Füße: Steigbügel für Schlamm und Gelände
 
-**Sechs Motorkanäle:**
+Die langen Fußplatten aus Entwurf 2 bleiben in Schlamm stecken, saugen sich fest, haken an Wurzeln und machen
+unebenes Gelände gefährlich. **Neu: Steigbügel nach dem Prinzip eines Steigeisens.**
 
-| Kanal | wirkt auf | Richtung | Zweck |
+- **Sohlenrahmen** nur so groß wie der Schuh: Alu oder Edelstahl 4 mm, **offene Rahmenform** (große Aussparungen),
+  damit Schlamm durchfällt und sich nichts festsaugt.
+- **Spikes:** 8 bis 10 kurze, verschraubte Hartmetall-Spikes oder Schuhketten-Zacken, tauschbar. Greifen in Schnee,
+  Eis und Schlamm, auf Asphalt abschraubbar.
+- **Bindung:** wie bei einem Steigeisen: Zehenkorb aus Kunststoff vorne, Fersenbügel hinten, ein Ratschenriemen.
+  Passt zu jedem festen Arbeitsschuh, an- und ausziehen in Sekunden.
+- **Sprunggelenk:** frei nach vorne/hinten (Gehen, Hocke), seitlich etwas nachgiebig über Gummipuffer, damit der Fuß
+  sich an schräges Gelände anpasst, ohne dass die Schiene das Knie verdreht.
+- **Lasteinleitung:** Die Unterschenkelschiene endet in einem U-Bügel seitlich am Schuh, der unter der Schuhmitte in
+  den Sohlenrahmen geht. So landet die Last dort, wo du ohnehin stehst.
+- **Gleichgewicht ohne lange Platten:** Beim Aufrichten schwerer Bäume ein Ausfallschritt, das ist ohnehin die
+  natürliche Technik. Beim Tragen und Schleifen bleibt der Schwerpunkt über dem Fuß (siehe Kraftverteilung).
+
+## 4. Antriebe
+
+**Sechs Gelenkkanäle:**
+
+| Kanal | wirkt auf | Richtung | Übertragung |
 |---|---|---|---|
-| Bein links / rechts | Hüfte **und** Knie über ein gemeinsames Seil | strecken | aus der Hocke hochkommen, Last tragen, beim Ziehen vorwärts schieben |
-| Schulter links / rechts | Oberarm | heben | Arme mit Last heben, Baum hochziehen, über Kopf |
-| Ellbogen links / rechts | Unterarm | beugen | Baum heranziehen, Hebel der linken Hand beim Aufrichten |
+| Bein links / rechts | Hüfte **und** Knie über ein gemeinsames Seil | strecken | offenes Dyneema-Seil über Rollen |
+| Schulter links / rechts | Oberarm | **heben und senken** | Bowdenzug-Paar auf Seilscheibe Ø 14 cm |
+| Ellbogen links / rechts | Unterarm | **beugen und strecken** | Bowdenzug-Paar auf Seilscheibe Ø 10 cm |
 
-- **Motoren:** bürstenlose Robotergelenk-Motoren mit eingebautem Planetengetriebe aus der Laufroboter-Szene
-  (Quasi-Direct-Drive-Klasse). Sie werden in Stückzahlen gebaut, haben Encoder und CAN-Bus eingebaut und kosten je
-  nach Größe etwa 150 bis 600 €. Genaue Typen wählen wir im nächsten Schritt nach Datenblatt aus.
-- **Seiltrommel:** auf jedem Motor eine Trommel mit etwa 2 cm Radius. An der Gelenkrolle mit 6 bis 8 cm Radius ergibt sich
-  noch einmal Faktor 3 bis 4 Übersetzung. Beispiel: 25 Nm am Motor → 1,25 kN Seilkraft → etwa 75 bis 100 Nm am Gelenk.
-- **Seil:** Dyneema-Seil 3 bis 4 mm (sehr reißfest, leicht, dehnt sich kaum), über Rollen am Rahmen geführt statt in
-  Bowdenzughüllen (weniger Reibung).
-- **Beinseil über Hüfte und Knie:** ein Seil pro Bein läuft hinten über die Hüftrolle und vorne über die Knierolle. Zieht der
-  Motor, strecken sich Hüfte und Knie gleichzeitig, genau die Bewegung beim Hochkommen aus der Hocke und beim Schieben.
-  Spart zwei Motoren.
-- **Federn:** je Schulter eine Gasfeder, die das Gewicht der Arme plus etwas Last ausgleicht. Rückenstrecker-Feder
-  optional. Federn sind wegklappbar, falls sie stören.
+- **Motoren:** bürstenlose Robotergelenk-Motoren mit Planetengetriebe (Quasi-Direct-Drive-Klasse, z. B. aus dem
+  Laufroboter-Bereich), Encoder und CAN-Bus eingebaut, 24–48 V, etwa 150 bis 500 € je Stück. Sie lassen sich von
+  Hand zurückdrehen: Ohne Strom laufen Arme und Beine frei mit.
+- **Seiltrommel** Ø 3 cm auf jedem Motor.
+- **Beinseil über Hüfte und Knie:** läuft hinten über die Hüftrolle und vorne über die Knierolle. Zieht der Motor,
+  strecken sich Hüfte und Knie gleichzeitig, genau wie beim Hochkommen aus der Hocke.
+- **Bowdenzug-Paar für die Arme:** Auf der Trommel sind zwei Innenzüge gegenläufig aufgewickelt. Dreht der Motor, wird
+  einer aufgewickelt und der andere gleich viel abgewickelt. Am Gelenk umschlingen beide die Seilscheibe von zwei Seiten.
+  Eine Spannschraube an der Hülle stellt die Vorspannung ein. Innenzug 2 mm Edelstahl 7 × 7 oder Dyneema in PTFE-Hülle,
+  große Biegeradien (mindestens 15 cm), damit die Reibung klein bleibt.
+- **Keine Gasfedern mehr:** Die Arm-Motoren arbeiten jetzt in beide Richtungen; das Gewicht von Arm und Exo-Schiene
+  gleicht die Software aus. Weniger Teile, nichts drückt gegen das Absenken.
 
-**Unterstützung, Größenordnung:** Für einen schweren 2 m Baum (30 kg) braucht die Hüfte beim Aufrichten etwa 150 Nm pro Seite.
-Übernimmt das Exo die Hälfte, also 75 Nm, ist das mit Motoren dieser Klasse und Seilübersetzung machbar. Das ist das Ziel
-„Kraft verdoppeln“. Für die sehr schweren 4 m Bäume reicht auch das nicht ganz, dafür gibt es die Leiter-Methode.
+Was die Antriebe leisten und wie viel du noch spürst: [kraftverteilung.md](kraftverteilung.md).
 
-## 4. Greifer
+## 5. Steuerung: Sensor-Manschetten
 
-Grundsatz: **Greifen mechanisch, ohne Motor**, unter Last selbstklemmend. Fällt der Strom aus, fällt nichts herunter.
+Kurz (Details in [steuerung.md](steuerung.md)):
 
-**Hand (Use Case 1), drei Möglichkeiten verglichen:**
+- Jede blaue Manschette sitzt nicht fest auf der Schiene, sondern auf einer **Wägezelle** (Biegebalken aus Alu, wie in
+  Küchenwaagen). Drückst du deinen Arm nach oben, misst die Zelle diese Kraft.
+- Die Steuerung dreht das Gelenk in genau diese Richtung, mit einem einstellbaren Verstärkungsfaktor. Das Exo folgt dir,
+  du führst.
+- Die Baumlast geht über die Schlaufen direkt in die Schienen, **nicht** über die Manschetten. Die Sensoren messen also
+  nur deine Absicht, nicht das Gewicht des Baums.
+- 8 Sensor-Manschetten: Oberarm, Unterarm, Oberschenkel, Unterschenkel je Seite.
+- Bedienung: Ein/Aus-Schalter und Not-Aus am Schultergurt, zwei Daumentaster je Hand für die Schlaufen.
 
-| Ansatz | Vorteil | Nachteil |
-|---|---|---|
-| Schlaufe, die sich zuzieht (deine Idee) | sehr einfach, leicht, billig | Stamm muss durch die Schlaufe, am Boden liegend umständlich; lose Schlaufe kann sich verhaken |
-| Selbstklemmende Zange (Rückezange) | hält sehr fest | schwer, muss man in die Hand nehmen, zwei Hände zum Ansetzen |
-| **Klemmgabel mit Schnappbügel** an der Unterarmschiene | Gabel einfach von oben auf den Stamm drücken, Bügel schnappt zu; unter Zug keilt sich der Stamm in die V-Form; Lösen mit Daumenhebel | etwas mehr Bauaufwand |
+## 6. Greifer: Schlaufen an den Unterarmen
 
-**Entscheidung: Klemmgabel mit Schnappbügel an der rechten Unterarmschiene**, direkt hinter der Hand, V-Form mit
-TPU-Belag und kleinen Zähnen, passt für etwa 5 bis 18 cm. Die Kraft geht über die Unterarmschiene ins Exo, nicht über die
-Finger. Die linke Hand greift weiter oben ganz normal mit gutem Handschuh. Eine Würgeschlaufe als Ergänzung für sehr
-glatte oder dünne Stämme ist einfach nachrüstbar.
+**Prinzip Fangschlinge:** Eine Schlaufe aus Dyneema-Seil steckt in einem Gummischlauch mit Federstahl-Einlage. Dadurch
+bleibt sie offen wie ein Ring und lässt sich über den Stamm schieben. Ein Ende ist fest, das andere läuft zu einer
+kleinen Winde. Verkürzt die Winde das Seil, zieht sich die Schlaufe um den Stamm zu.
 
-**Zuggreifer hinten an der Hüfte (Use Case 2):** Querträger am Hüftbügel auf etwa 55 bis 60 cm Höhe, daran bis zu vier
-Klemmgabeln mit Schnappbügel nach dem gleichen Prinzip. Man geht leicht in die Knie, drückt sie rückwärts auf die Stümpfe,
-richtet sich auf: Die Stümpfe heben sich an und keilen sich fest. Lösen über einen gemeinsamen Zug am Hüftgurt.
-Die Kraft geht über Hüftbügel und Beinschienen in die Fußplatten, die Beinmotoren helfen beim Vorwärtsschieben.
+- **Schlaufenträger:** Alu-U-Profil unter dem Unterarm, an der Unterarmschiene verschraubt, innen eine **Zahnleiste** aus
+  Alu/TPU. Der Stamm wird gegen die Zähne gezogen und hält formschlüssig, nicht nur über Reibung.
+- **Zwei Schlaufen pro Unterarm**, eine nahe dem Handgelenk, eine etwa 12 cm weiter Richtung Ellbogen. **Jede Schlaufe hat
+  eine eigene Winde und wird einzeln gesteuert.**
+  - Use Case 1: rechts beide Schlaufen um den Stumpf (stabil, der Stamm liegt am Unterarm an); links frei oder eine
+    Schlaufe weiter oben am Stamm, für schwere Bäume beide Arme am Stamm (halbiert die Last je Schulter).
+  - Use Case 2: bis zu 4 Stümpfe, je Schlaufe einer. Arme hängen, du gehst vorwärts, die Bäume schleifen hinterher.
+- **Winde:** selbsthemmender Schneckengetriebemotor 24 V (Bauform 5840, etwa 40 U/min, 15–25 €) mit Trommel Ø 12 mm:
+  etwa 400 N Seilzug, schließt in 3 bis 6 Sekunden, **hält ohne Strom**.
+- **Bedienung:** zwei große Daumentaster an der Hand (auch mit Handschuh): kurz drücken = zuziehen bis zur eingestellten
+  Kraft (Motorstrom), lang drücken = öffnen.
+- **Notöffnung:** Das feste Ende jeder Schlaufe hängt an einem Schnappschäkel mit Zuglasche. Ein Ruck an der Lasche
+  öffnet die Schlaufe sofort, auch ohne Strom.
+- Schlaufenschlauch und Winden sind Verschleißteile, steckbar und schnell tauschbar.
 
-## 5. Steuerung und Bedienung
+## 7. Energie
 
-- **Rechner:** ein Mikrocontroller mit CAN-Bus (z. B. ESP32 oder Teensy), spricht alle Motoren direkt an.
-- **Sensoren:** Lagesensoren (IMU) an Rücken, Oberschenkeln und Oberarmen, dazu die Encoder und der Motorstrom.
-  So erkennt das Exo, ob man in die Hocke geht, sich aufrichtet oder vorwärts drückt.
-- **Unterstützen statt fernsteuern:** Das Exo verstärkt die Bewegung, die man selbst macht. Bewegt man sich nicht, hält es nur.
-- **Bedienung: nur Ein/Aus.** Ein großer Schalter am linken Schultergurt. Im Ein-Zustand erkennt das Exo selbst aus den
-  Sensoren, was du tust (in die Hocke gehen, aufrichten, vorwärts schieben, Arm heben), und unterstützt genau diese Bewegung.
-  Aus heißt: alle Seile locker, das Exo läuft frei mit.
-- **Not-Aus:** großer Pilzschalter am Schultergurt, trennt die Motoren hart vom Akku. Seile werden dann locker.
+- **Akku: Stihl AP 500 S** (36 V, etwa 337 Wh), unten in der Antriebsbox in einem gedruckten Adapter.
+- **Laufzeit, grob:** bei durchschnittlich 100 bis 150 W etwa 2 bis 3 Stunden. Schlaufenwinden brauchen fast nichts.
+- **Kälte und Nässe:** Akku in der gedämmten Box, wasserdichte Rundstecker, Elektronik im dichten Gehäuse.
 
-## 6. Energie
+## 8. Gewicht
 
-- **Akku: Stihl AP-Akku** (36 V Akkusystem), den du schon hast. Er sitzt unten in der Antriebsbox in einer Halterung mit
-  Kontakten (3D-gedruckter Adapter, solche Adapter gibt es als Bauvorlage und fertig zu kaufen). Die Motoren laufen in
-  diesem Spannungsbereich. Vorher prüfen wir am Tisch, ob der Akku die nötigen Ströme ohne Abschalten liefert.
-- **Laufzeit, grob:** Vorhanden ist ein **Stihl AP 500 S** mit etwa 337 Wh. Bei durchschnittlich 100 bis 150 W
-  Unterstützung reicht das für etwa 2 bis 3 Stunden. Ein zweiter Akku zum Wechseln deckt einen Arbeitstag ab.
-- **Kälte und Nässe:** Akku in der gedämmten Box, wasserdichte Rundstecker, Elektronik vergossen bzw. im dichten Gehäuse.
+Motoren 6 × 0,5–1 kg, Schlaufenwinden 4 × 0,3 kg, Akku etwa 2 kg, Alu-Rahmen etwa 5 kg, Steigbügel etwa 1 kg,
+Rest etwa 2 kg. **Ziel: 15 bis 18 kg.** Ohne lange Fußplatten und Gasfedern etwas leichter als Entwurf 2,
+dafür kommen Winden und Wägezellen dazu.
 
-## 7. Gewicht und Gleichgewicht
+## 9. Wetterfestigkeit
 
-- **Gewichtsabwägung:** Motoren 6 × 0,5 bis 1 kg, Stihl-Akku etwa 2 kg, Alu-Rahmen etwa 5 kg, Fußplatten mit Bindung
-  etwa 2 kg, Rest etwa 2 kg. **Ziel: 15 bis 18 kg.** Mehr Gewicht lohnt sich nur, wo es tragend ist (Hüfte, Beine).
-  Die Last geht über die Beinschienen in den Boden, darum spürt man das Gewicht des Exos kaum.
-- Ein großer Teil (Akku, Motoren) sitzt hinten und gleicht den Baum vorne aus.
-- Verlängerte Fußplatten vorne (15 bis 20 cm) vergrößern die Standfläche, das wirkt direkt gegen das Vornüberkippen.
+Abgedichtete Lager (2RS), Seilrollen mit Abdeckung gegen Vereisen, Bowdenhüllen mit Endkappen, Dyneema nimmt kein
+Wasser auf, Alu und Edelstahl rosten nicht, Wägezellen in IP65-Ausführung oder vergossen, Stecker nach unten.
 
-## 8. Wetterfestigkeit
+## 10. Sicherheit
 
-Abgedichtete Lager (2RS), Seilrollen mit Abdeckung gegen Vereisen, Dyneema nimmt kein Wasser auf, Alu und
-Edelstahlschrauben rosten nicht, keine offene Elektronik an Armen und Beinen.
-
-## 9. Sicherheit
-
-Seile ziehen nur, Greifer klemmen mechanisch, Gelenke haben feste Endanschläge in Körpergrenzen, Drehmomente sind in der
-Software begrenzt, Not-Aus trennt hart. Erste Tests auf einem Prüfstand und mit Leergewicht, erst dann mit Bäumen.
+Not-Aus trennt die Motoren hart. Ohne Strom laufen alle Gelenke frei, die Schlaufen halten (Schneckengetriebe) und lassen
+sich über die Schnappschäkel von Hand öffnen. Gelenke haben feste Endanschläge, Momente und Geschwindigkeiten sind in der
+Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 **Nicht mit Motorsäge in der Hand im unterstützten Modus arbeiten.**
 
-## 10. Kosten, grob
+## 11. Kosten, grob
 
 | Posten | etwa |
 |---|---|
-| 6 Robotergelenk-Motoren | 900 bis 3 000 € (je nach Typ) |
-| Steuerung, CAN, Sensoren, Not-Aus, Kabel | 150 bis 250 € |
+| 6 Robotergelenk-Motoren | 900 bis 3 000 € |
+| 4 Schlaufenwinden (Schneckengetriebemotor, Treiber) | 100 bis 160 € |
+| Steuerung, CAN, 8 Wägezellen + Verstärker, Not-Aus, Kabel | 200 bis 320 € |
 | Akku-Adapter für Stihl AP (Akku vorhanden) | 20 bis 80 € |
-| Alu-Profile, Lager, Bolzen, Rollen, Dyneema-Seil | 250 bis 400 € |
-| Snowboard-Bindungen, Hüftgurt, Kraxengestell, Gasfedern | 150 bis 300 € |
-| Klemmgabeln (Alu, Federn, TPU) | 50 bis 120 € |
+| Alu-Profile, Lager, Bolzen, Rollen, Seilscheiben, Dyneema, Bowdenzüge | 300 bis 450 € |
+| Steigbügel, Spikes, Hüftgurt, Kraxengestell | 120 bis 250 € |
 | Filament (PETG, TPU) | 50 bis 100 € |
-| **Summe** | **etwa 1 600 bis 4 300 €** |
+| **Summe** | **etwa 1 700 bis 4 400 €** |
 
-## 11. Bauen in Stufen
+## 12. Bauen in Stufen
 
-1. **Beine + Rücken + Hüfte, passiv:** Rahmen, Fußplatten, Lastpfad, Zuggreifer. Schon ohne Motor nützlich beim Schleifen.
-2. **Beinmotoren:** Unterstützung beim Hochkommen und Vorwärtsschieben.
-3. **Schultern mit Gasfedern**, dann Schulter- und Ellbogenmotoren.
-4. **Steuerung verfeinern**: Bewegungserkennung, Unterstützungsstärke, Akkulaufzeit messen.
+1. **Schlaufengreifer als Handwerkzeug** (an einer Unterarm-Manschette, ohne Exo) und Steigbügel testen.
+2. **Rahmen, Beine, Hüfte passiv**, mit Steigbügeln: Lastpfad und Passform prüfen.
+3. **Prüfstand:** ein Motor, ein Bowdenzug-Paar, eine Sensor-Manschette auf einem Holzarm.
+4. **Beinmotoren** mit Sensor-Manschetten an Ober- und Unterschenkel.
+5. **Arme:** Schulter und Ellbogen mit Bowdenzug-Paaren, dann Schlaufen ans Exo.
+6. **Feinschliff:** Verstärkung, Filter, Akkulaufzeit, eine Saison Praxis.
 
 Jede Stufe ist für sich testbar und verteilt die Kosten über die Zeit.
