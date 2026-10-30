@@ -16,7 +16,7 @@ G = 9.81
 H = 1.75                      # Körpergröße
 BODY = 75.0                   # Körpergewicht
 SEG = dict(ankle=0.039 * H, shank=0.246 * H, thigh=0.245 * H, torso=0.288 * H, upper=0.186 * H)
-LOOP = 0.16                   # Mitte der beiden Schlaufen, gemessen vom Ellbogen am Unterarm
+LOOP = 0.29                   # Schlaufen sitzen am Handgelenk (Unterarm 0,26 m + Schlaufenkopf), gemessen vom Ellbogen
 EXO_MASS = 15.0               # Ziel-Gesamtgewicht Exo
 
 # ---------------- Baum ----------------
@@ -34,10 +34,10 @@ MOTOR_CONT, MOTOR_PEAK = 9.0, 25.0     # Nm am Abtrieb
 DRUM_R = 0.015                         # Seiltrommel-Radius
 DRIVES = {
     # Gelenk: (Hebel bzw. Seilscheibenradius am Gelenk, Wirkungsgrad der Seilführung)
-    'Schulter': (0.070, 0.70),         # Bowdenzug-Paar auf Seilscheibe Ø 14 cm
-    'Ellbogen': (0.050, 0.70),         # Seilscheibe Ø 10 cm
-    'Hüfte':    (0.095, 0.90),         # offenes Seil über Rollen, Rolle 9,5 cm hinter der Achse
-    'Knie':     (0.060, 0.90),         # gleiches Seil, Rolle vor dem Knie
+    'Schulter': (0.070, 0.88),         # offenes Seilpaar über 2 Umlenkrollen auf Seilscheibe Ø 14 cm
+    'Ellbogen': (0.050, 0.70),         # Bowdenzug-Paar auf Seilscheibe Ø 10 cm
+    'Hüfte':    (0.095, 0.90),         # Beinseil um Umlenkscheibe Ø 19 cm auf der Hüftachse (Hebel bleibt in jeder Beugung gleich)
+    'Knie':     (0.080, 0.90),         # Kurvenscheibe am Knie: 5 cm gestreckt, 8 cm in der Hocke (hier: Hocke)
 }
 
 
@@ -93,7 +93,8 @@ def case_rows():
             hip_m += moment(px, py, Hp[0], Hp[1], fx, fy)
             knee_m += moment(px, py, K[0], K[1], fx, fy)
             fx_tot += fx; fy_tot += fy
-            res['grips'].append(dict(name=gname, F=hypot(fx, fy), loop=hypot(fx, fy) / 2, el=m_el, sh=m_sh))
+            nl = 2 if gname == 'rechts' else 1
+            res['grips'].append(dict(name=gname, F=hypot(fx, fy), loop=hypot(fx, fy) / nl, el=m_el, sh=m_sh))
         res['hip'] = hip_m
         res['knee'] = knee_m
         res['Fv'] = -fy_tot
@@ -118,28 +119,30 @@ def case_rows():
             [('links', (0.30, -0.30), (0, -Fl)), ('rechts', (0.20, -0.42), (0.15 * Fl, 0))],
             'Schnittende steht am Boden, linker Unterarm hebt bei 15°')
 
-    # 2 Tragen fast senkrecht: rechte Schlaufen tragen das Gewicht, linker Arm stützt nur seitlich
+    # 2 Tragen fast senkrecht: Stamm als Verlängerung des rechten Unterarms (Unterarm steil nach oben, wie eine Fackel),
+    #   die rechten Schlaufen tragen das Gewicht, der linke Arm stützt nur seitlich
     for L in (2, 3, 4):
         tr = tree(L)
         add(f'Tragen {L} m', tr, body_pose(15, -6),
-            [('rechts', (0.33, -0.30), (0, -tr['W'])), ('links', (0.38, -0.05), (-0.08 * tr['W'], 0))],
+            [('rechts', (0.25, -0.02), (0, -tr['W'])), ('links', (0.30, 0.20), (-0.08 * tr['W'], 0))],
             'Baum fast senkrecht vor dem Körper')
 
     # 3 Hochheben: Schnittende auf etwa 1,2 bis 1,4 m
     for L in (2, 3, 4):
         tr = tree(L)
         add(f'Hochheben {L} m', tr, body_pose(10, -8),
-            [('rechts', (0.38, -0.05), (0, -tr['W'])), ('links', (0.36, 0.15), (-0.08 * tr['W'], 0))],
+            [('rechts', (0.32, -0.10), (0, -tr['W'])), ('links', (0.34, 0.20), (-0.08 * tr['W'], 0))],
             'Schnittende knapp über Ladefläche')
 
     # 4 Schleifen: Stümpfe in den Schlaufen, Arme hängen, Spitzen schleifen. mu = Reibung Äste auf nassem Schnee/Schlamm.
-    for n, L, mu in ((2, 2, 0.7), (4, 2, 0.7), (2, 3, 0.7)):
+    # rechts 2 Schlaufen, links 1: je Schlaufe ein Stumpf
+    for n, L, mu in ((2, 2, 0.7), (3, 2, 0.7), (2, 3, 0.7)):
         tr = tree(L)
         Vt = tr['W'] * (L - tr['xcg']) / L      # Anteil Gewicht an den Händen, Rest liegt auf der Spitze
         Ft = mu * (tr['W'] - Vt)                # Schleppkraft je Baum
-        per = n / 2
+        right, left = (1, 1) if n == 2 else (2, 1)
         add(f'Schleifen {n} × {L} m', tr, body_pose(10, 12),
-            [('rechts', (-0.08, -0.47), (-Ft * per, -Vt * per)), ('links', (-0.08, -0.47), (-Ft * per, -Vt * per))],
+            [('rechts', (-0.06, -0.55), (-Ft * right, -Vt * right)), ('links', (-0.06, -0.55), (-Ft * left, -Vt * left))],
             f'{n} Bäume, Reibung {mu}')
     return rows
 

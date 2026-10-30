@@ -2,15 +2,16 @@
 
 Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnittener Christbäume entlastet.
 
-> **Stand: Entwurf 3.** Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
+> **Stand: Entwurf 3.1.** Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt
 
 - Motoren und Stihl-Akku sitzen hinten im Rückenrahmen.
-- **Beine:** ein Dyneema-Seil pro Bein streckt Hüfte und Knie (nur nach oben, Beugen macht man selbst).
-- **Arme:** Bowdenzug-Paare auf Seilscheiben bewegen Schultern und Ellbogen in **beide Richtungen**.
-- **Greifen:** zwei Schlaufen an der Unterseite jedes Unterarms, jede mit eigener kleiner Winde, einzeln gesteuert.
+- **Beine:** ein Dyneema-Seil pro Bein streckt Hüfte und Knie (nur nach oben, Beugen macht man selbst). Es läuft um Scheiben auf den Gelenkachsen, am Knie eine Kurvenscheibe mit mehr Hebel in der Hocke.
+- **Hüfte:** Beine lassen sich frei seitlich abspreizen und drehen; angetrieben wird nur vor/zurück.
+- **Arme:** Seilpaare auf Seilscheiben bewegen Schultern (offenes Seil) und Ellbogen (Bowdenzug) in **beide Richtungen**.
+- **Greifen:** Schlaufen kommen am Handgelenk nach unten heraus, rechts zwei, links eine; der Stamm liegt längs als Verlängerung des Unterarms. Jede Schlaufe hat eine eigene kleine Winde.
 - **Steuerung:** Die blauen Manschetten sitzen auf Kraftsensoren. Drückst du gegen eine Manschette, bewegt das Exo das Gelenk mit.
 - **Füße:** Steigbügel mit Spikes nach dem Prinzip eines Steigeisens, für Schlamm, Schnee und unebenes Gelände.
 
@@ -19,7 +20,7 @@ Details: [docs/konzept.md](docs/konzept.md) · [docs/steuerung.md](docs/steuerun
 
 ## Use Case 1: Christbaum aufladen
 
-1. **Greifen:** In die Hocke gehen. Der rechte Unterarm legt sich an den Stumpf, beide rechten Schlaufen ziehen zu. Die linke Hand greift so weit Richtung Spitze wie möglich.
+1. **Greifen:** In die Hocke gehen. Die rechte Hand fasst den Stumpf wie einen Stiel, beide rechten Schlaufen am Handgelenk ziehen zu. Die linke Hand greift so weit Richtung Spitze wie möglich.
 2. **Aufrichten bis fast senkrecht:** Zurücklehnen. Rechts ist der Drehpunkt, links bringt der Hebel den Baum in die Senkrechte.
 3. **Tragen:** Fast senkrecht und leicht zurückgelehnt zum Plateau gehen.
 4. **Hochheben:** Den Baum fast lotrecht anheben, bis das Schnittende auf Plateauhöhe ist, und knapp hinter der Kante absetzen.
@@ -30,8 +31,8 @@ Das Plateau ist eine Ladefläche mit einer Höhe zwischen **0 und 1,75 m**.
 
 ## Use Case 2: Bäume schleifen
 
-Ein bis vier Bäume über den Boden zum Plateau ziehen, bis etwa 100 m, **vorwärts gehend**. Die Stümpfe hängen in den
-Unterarm-Schlaufen (je Schlaufe ein Stumpf), die Arme hängen, die Spitzen schleifen hinterher. Die Last geht über
+Ein bis drei Bäume über den Boden zum Plateau ziehen, bis etwa 100 m, **vorwärts gehend**. Die Stümpfe hängen in den
+Schlaufen am Handgelenk (je Schlaufe ein Stumpf: rechts zwei, links einer), die Arme hängen, die Spitzen schleifen hinterher. Die Last geht über
 Schultergelenke und Rahmen in Hüftgurt und Exo-Beine statt in die Arme.
 
 ## Festgelegt
@@ -67,7 +68,7 @@ Beide Seiten herunterladen und im Browser öffnen; sie brauchen Internet für [t
 
 Ausführlich in [docs/kraftverteilung.md](docs/kraftverteilung.md). Das Wichtigste:
 
-- Die **Schultern** sind der Engpass, wenn der Baum vor dem Körper hängt. Schwere Bäume deshalb mit beiden Unterarmen am Stamm tragen.
+- Die **Schultern** sind der Engpass, wenn der Baum vor dem Körper hängt. Tragen mit steilem Unterarm (wie eine Fackel) hält den Ellbogen fast lastfrei.
 - **Beine und Hüfte** sind gut versorgt; Aufrichten und Hochheben kommen am besten aus den Beinen.
 - **Schleifen** ist für das Exo leicht: Die Last zieht fast nur längs an den Schienen.
 - Ohne lange Fußplatten hilft beim Aufrichten schwerer Bäume ein **Ausfallschritt**.
@@ -76,7 +77,7 @@ Ausführlich in [docs/kraftverteilung.md](docs/kraftverteilung.md). Das Wichtigs
 
 - Bauraum 18 × 18 × 18 cm: größere Teile in Segmente teilen und verschrauben.
 - Für draußen im Winter PETG statt PLA; TPU für Polster, Puffer und Zahnleisten.
-- Tragende Teile (Rahmen, Achsen, Schlaufenträger) aus Metall. Gedruckt werden Manschetten, Gehäuse, Kabel- und Seilführungen, Sensorhalter und Bohrschablonen.
+- Tragende Teile (Rahmen, Achsen, Schlaufenkopf, Seilscheiben) aus Metall. Gedruckt werden Manschetten, Gehäuse, Kabel- und Seilführungen, Sensorhalter und Bohrschablonen.
 
 ## Offene Fragen
 

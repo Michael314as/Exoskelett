@@ -1,4 +1,4 @@
-# Kraftverteilung (Entwurf 3)
+# Kraftverteilung (Entwurf 3.1)
 
 Grobe statische Abschätzung: Welche Kräfte entstehen beim Aufladen und Schleifen, über welche
 Teile laufen sie in den Boden und wie viel davon kann das Exo übernehmen.
@@ -13,10 +13,10 @@ Die Zahlen sind **Größenordnungen** für die Auslegung, keine Vorhersage für 
 
 ```
 Stamm
- └─ Zahnleiste + 2 Schlaufen (Unterseite Unterarm)
-     └─ Schlaufenträger (Alu-U-Profil)
+ └─ Zahnleiste + Schlaufen am Handgelenk (rechts 2, links 1)
+     └─ Schlaufenkopf (Alu, an der Unterarmschiene verschraubt)
          └─ Unterarmschiene ── Ellbogengelenk (Motor über Bowdenzug-Paar)
-             └─ Oberarmschiene ── Schultergelenk (Motor über Bowdenzug-Paar)
+             └─ Oberarmschiene ── Schultergelenk (Motor über offenes Seilpaar)
                  └─ Schulterbügel ── Rückenrahmen
                      └─ Hüftbügel ── Hüftgelenk (Motor über Beinseil)
                          └─ Oberschenkelschiene ── Kniegelenk (gleiches Beinseil)
@@ -39,32 +39,32 @@ Wo die Last am Körper ankommt:
 
 ## 2. Lasten je Arbeitsschritt
 
-„Kraft je Arm“ ist die Kraft am stärker belasteten Arm, „je Schlaufe“ bei zwei geschlossenen
-Schlaufen. Momente sind die **Zusatzmomente durch den Baum** (das Eigengewicht von Körper und
+„Kraft je Arm“ ist die Kraft am stärker belasteten Arm, „je Schlaufe“ teilt sie rechts auf zwei
+Schlaufen, links auf eine (beim Aufrichten hebelt links die Hand). Momente sind die **Zusatzmomente durch den Baum** (das Eigengewicht von Körper und
 Exo kommt dazu). „Schwerpunkt vor Knöchel“: Liegt der Wert über etwa 20 cm, kippt man ohne
 Ausfallschritt nach vorne (Schuh reicht etwa 20 cm vor den Knöchel).
 
 | Schritt | Baum | Kraft je Arm (N) | je Schlaufe (N) | Ellbogen je Arm (Nm) | Schulter je Arm (Nm) | Hüfte beide (Nm) | Knie beide (Nm) | Schwerpunkt vor Knöchel (cm) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Aufrichten 2 m | 15 kg | 92 | 46 | 15 | 28 | 54 | 33 | 9 |
-| Aufrichten 3 m | 41 kg | 361 | 180 | 58 | 108 | 212 | 129 | 21 |
-| Aufrichten 4 m | 85 kg | 960 | 480 | 153 | 288 | 564 | 343 | 35 |
-| Tragen 2 m | 15 kg | 147 | 74 | 23 | 49 | 35 | 21 | -1 |
-| Tragen 3 m | 41 kg | 402 | 201 | 64 | 133 | 97 | 57 | 2 |
-| Tragen 4 m | 85 kg | 834 | 417 | 132 | 275 | 201 | 119 | 5 |
-| Hochheben 2 m | 15 kg | 147 | 74 | 15 | 56 | 38 | 27 | -1 |
-| Hochheben 3 m | 41 kg | 402 | 201 | 42 | 153 | 104 | 73 | 3 |
-| Hochheben 4 m | 85 kg | 834 | 417 | 86 | 317 | 215 | 150 | 6 |
-| Schleifen 2 × 2 m | 15 kg | 107 | 53 | 7 | 7 | 4 | 32 | -5 |
-| Schleifen 4 × 2 m | 15 kg | 213 | 107 | 13 | 13 | 7 | 65 | -9 |
-| Schleifen 2 × 3 m | 41 kg | 296 | 148 | 18 | 16 | 10 | 85 | -10 |
+| Aufrichten 2 m | 15 kg | 92 | 92 | 27 | 28 | 54 | 33 | 9 |
+| Aufrichten 3 m | 41 kg | 361 | 361 | 104 | 108 | 212 | 129 | 21 |
+| Aufrichten 4 m | 85 kg | 960 | 960 | 277 | 288 | 564 | 343 | 35 |
+| Tragen 2 m | 15 kg | 147 | 74 | 15 | 37 | 21 | 6 | -3 |
+| Tragen 3 m | 41 kg | 402 | 201 | 42 | 101 | 57 | 17 | -1 |
+| Tragen 4 m | 85 kg | 834 | 417 | 87 | 208 | 118 | 35 | 0 |
+| Hochheben 2 m | 15 kg | 147 | 74 | 30 | 47 | 29 | 17 | -2 |
+| Hochheben 3 m | 41 kg | 402 | 201 | 83 | 129 | 78 | 47 | 1 |
+| Hochheben 4 m | 85 kg | 834 | 417 | 171 | 267 | 162 | 97 | 3 |
+| Schleifen 2 × 2 m | 15 kg | 107 | 53 | 19 | 11 | 13 | 23 | -4 |
+| Schleifen 3 × 2 m | 15 kg | 213 | 107 | 39 | 23 | 19 | 35 | -6 |
+| Schleifen 2 × 3 m | 41 kg | 296 | 148 | 52 | 28 | 35 | 60 | -9 |
 
 Annahmen der Schritte:
 - **Aufrichten:** Schnittende steht am Boden (Drehpunkt), linker Unterarm hebt etwa 90 cm weiter
   oben, Baum bei 15°. Hocke, Rumpf vorgeneigt.
-- **Tragen:** Baum fast senkrecht, rechter Unterarm trägt, linker stützt nur seitlich.
+- **Tragen:** Baum fast senkrecht, rechter Unterarm steil nach oben wie eine Fackel, linker stützt nur seitlich.
 - **Hochheben:** Schnittende auf etwa Brusthöhe.
-- **Schleifen:** Arme hängen, Stümpfe auf Oberschenkelhöhe, Spitzen schleifen über nassen Schnee
+- **Schleifen:** Arme hängen, Stümpfe am Handgelenk (rechts bis zu zwei, links einer), Spitzen schleifen über nassen Schnee
   oder Schlamm (Reibwert 0,7, eher hoch angesetzt).
 
 ---
@@ -72,14 +72,18 @@ Annahmen der Schritte:
 ## 3. Was die Antriebe schaffen
 
 Motor-Klasse „Robotergelenk mittel“ (etwa 9 Nm dauernd, 25 Nm Spitze am Abtrieb), Seiltrommel
-Ø 3 cm. Je Körperseite, nach Reibungsverlusten (Bowdenzug 30 %, offenes Seil 10 %):
+Ø 3 cm. Je Körperseite, nach Reibungsverlusten (Bowdenzug 30 %, offenes Seil über Rollen 10–12 %):
 
 | Gelenk | Übersetzung | Dauer (Nm) | Spitze (Nm) |
 | --- | --- | --- | --- |
-| Schulter | Seilscheibe Ø 14 cm | 29 | 82 |
-| Ellbogen | Seilscheibe Ø 10 cm | 21 | 58 |
-| Hüfte | Rolle 9,5 cm hinter der Achse | 51 | 143 |
-| Knie | Rolle 6 cm vor der Achse | 32 | 90 |
+| Schulter | Seilscheibe Ø 14 cm, offenes Seilpaar | 37 | 103 |
+| Ellbogen | Seilscheibe Ø 10 cm, Bowdenzug-Paar | 21 | 58 |
+| Hüfte | Umlenkscheibe Ø 19 cm auf der Achse | 51 | 143 |
+| Knie | Kurvenscheibe, 8 cm Radius in der Hocke (5 cm gestreckt) | 43 | 120 |
+
+Gegenüber Entwurf 3 bringt die neue Seilführung an der Schulter rund 25 % mehr (offenes Seil statt Bowdenzug) und
+am Knie in der Hocke rund 33 % mehr (Kurvenscheibe statt fester Rolle), ohne stärkere Motoren. Dazu kommt das Seil
+nicht mehr an die Gelenke: Vorher lief es in tiefer Hocke durch das Kniegelenk, und der Hebel an der Hüfte schrumpfte.
 
 Seilkraft bei Motorspitze: etwa 1.700 N. Dyneema 3 mm hält ein Vielfaches; Bowden-Innenzug
 deshalb **2 mm Edelstahl 7 × 7 oder Dyneema in PTFE-Hülle**, Software begrenzt auf etwa 1.000 N.
@@ -88,15 +92,17 @@ deshalb **2 mm Edelstahl 7 × 7 oder Dyneema in PTFE-Hülle**, Software begrenzt
 
 | Bereich | 2 m | 3 m | 4 m |
 | --- | --- | --- | --- |
-| Schultern | Exo kann fast alles übernehmen | Exo übernimmt gut die Hälfte | Exo hilft spürbar (rund ein Viertel bis ein Drittel), Rest du |
-| Ellbogen | Exo kann fast alles übernehmen | drei Viertel bis fast alles | etwa ein Drittel bis die Hälfte |
+| Schultern | Exo kann alles übernehmen | Exo übernimmt fast alles bis drei Viertel | Exo hilft spürbar (rund ein Drittel bis die Hälfte), Rest du |
+| Ellbogen | Exo kann alles übernehmen | beim Tragen fast alles, beim Aufrichten gut die Hälfte | ein Fünftel (Aufrichten) bis zwei Drittel (Tragen) |
 | Hüfte, Knie | locker | Exo übernimmt die Hälfte oder mehr | beim Aufrichten etwa die Hälfte, beim Tragen das meiste |
 | Schleifen | kaum Moment, Last hängt an den Schultern | dito | dito |
 
 Daraus folgt:
-1. **Die Schultern sind der Engpass**, sobald der Baum vor dem Körper hängt. Deshalb trägt
-   man schwere Bäume mit **beiden Unterarmen** am Stamm (linke Schlaufen auch zu): Das halbiert die
-   Last je Schulter. Und möglichst nah am Körper.
+1. **Die Schultern sind der Engpass**, sobald der Baum vor dem Körper hängt. Weil der Stamm jetzt als
+   Verlängerung des Unterarms am Handgelenk hängt, trägt man ihn am besten mit **steil aufgerichtetem
+   Unterarm, wie eine Fackel**: Dann drückt die Last fast längs durch Unterarm und Ellbogen, und der
+   Ellbogen muss kaum Moment halten. Möglichst nah am Körper; die linke Hand stützt weiter oben.
+   Beim Aufrichten (Unterarm flach) ist dagegen der Ellbogen stark gefordert, dort helfen die Beine.
 2. **Beine und Hüfte** sind gut versorgt. Das ist gewollt: Aufrichten und Hochheben kommen am
    besten aus den Beinen, wie beim richtigen Heben.
 3. **Schleifen ist für das Exo leicht:** Mit hängenden Armen zieht die Last fast nur in
@@ -106,8 +112,8 @@ Daraus folgt:
    Schuhspitze. Ohne verlängerte Fußplatten heißt das: **Ausfallschritt**, also einen Fuß nach vorne,
    und mit den Beinen hochdrücken. Das macht man ohnehin intuitiv. Beim Tragen, Hochheben und
    Schleifen bleibt der Schwerpunkt über dem Fuß.
-5. **Schlaufen:** typisch 50–200 N je Schlaufe, im Extremfall rund 500 N. Mit Zahnleiste im
-   Schlaufenträger hält der Stamm formschlüssig und nicht nur über Reibung.
+5. **Schlaufen:** typisch 50–200 N je Schlaufe, im Extremfall rund 500 N (rechts verteilt auf zwei
+   Schlaufen). Mit Zahnleiste im Schlaufenkopf hält der Stamm formschlüssig und nicht nur über Reibung.
 
 ---
 
@@ -130,10 +136,15 @@ kaum noch, was gefährlich ist: Man merkt nicht mehr, wenn etwas zu schwer wird.
 
 ## 5. Folgen für die Konstruktion
 
-- Schulter- und Ellbogengelenke mit **großer Seilscheibe** (Ø 10–14 cm), weil dort am meisten
-  Moment gebraucht wird und die Bowdenzüge Reibung kosten.
-- Schlaufenträger und Unterarmschiene **biegesteif** (Alu 25 × 25 × 2 oder U-Profil 30 × 20 × 3),
-  denn bis zu rund 1.000 N greifen hier außermittig an.
+- Schulter- und Ellbogengelenke mit **großer Seilscheibe** (Ø 10–14 cm), Schulter mit offenem Seilpaar,
+  weil dort am meisten Moment gebraucht wird. Bowdenzug nur dort, wo ein Seil über mehrere bewegte
+  Gelenke müsste (Ellbogen).
+- **Seilscheiben auf den Gelenkachsen** statt Rollen daneben: konstanter Hebel, das Seil kommt nie ans
+  Gelenk. Am Knie eine Kurvenscheibe, die in der Hocke den größten Hebel gibt.
+- Jede Rolle kostet ein paar Prozent: so wenige wie möglich, Kugellager, Durchmesser mindestens
+  10 × Seildicke.
+- Schlaufenkopf und Unterarmschiene **biegesteif** (Alu 25 × 25 × 2), denn bis zu rund 1.000 N greifen
+  hier außermittig an.
 - Schulterbügel und Rahmen-Eckverbindungen mit **Doppelplatten**, dort sammelt sich die Last
   beider Arme.
 - Hüftgurt wie bei einer Lastenkraxe: Er muss beim Schleifen 20–45 kg zusätzlich aufnehmen

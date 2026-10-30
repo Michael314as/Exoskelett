@@ -173,7 +173,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 <div class="app">
   <header class="top">
     <div>
-      <p class="kicker" id="kicker">Exoskelett · Entwurf 3 · Use Case 1</p>
+      <p class="kicker" id="kicker">Exoskelett · Entwurf 3.1 · Use Case 1</p>
       <h1 id="title">Christbaum aufladen</h1>
       <div class="scen" role="group" aria-label="Use Case">
         <button type="button" id="scLoad" aria-pressed="true">Aufladen</button>
@@ -220,14 +220,14 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         <h3>So habe ich dich verstanden</h3>
         <ul class="assume">
           <li>Der Christbaum liegt nach dem Schneiden am Boden, die Spitze zeigt Richtung Plateau.</li>
-          <li>Der rechte Unterarm fasst den Stumpf mit zwei Schlaufen an der Unterseite (Drehpunkt), die linke Hand greift so weit Richtung Spitze wie möglich (Hebel).</li>
+          <li>Rechts kommen zwei Schlaufen am Handgelenk nach unten heraus und fassen den Stumpf (Drehpunkt). Der Stamm liegt dabei wie eine Verlängerung des Unterarms an der Hand. Die linke Hand greift so weit Richtung Spitze wie möglich (Hebel), links gibt es eine Schlaufe.</li>
           <li>Das Exo ersetzt die Kraft nicht, es unterstützt die eigene Bewegung, im besten Fall mit doppelter Kraft.</li>
           <li>Getragen wird der Baum fast senkrecht (78°), damit der Hebel klein bleibt. Die Person lehnt sich dabei zurück.</li>
           <li>Zum Aufladen wird der Baum fast lotrecht hochgehoben, bis das Schnittende auf Plateauhöhe ist. Dann kippt er 90° aufs Plateau, ohne geschoben zu werden.</li>
           <li>Das Plateau ist eine Ladefläche, zum Beispiel Anhänger oder LKW, zwischen 0 und 1,75&nbsp;m hoch.</li>
           <li>Bäume von 1 bis 4&nbsp;m, nicht eingenetzt und unterschiedlich schwer. Das Gewicht ist frei einstellbar, als Anhaltspunkt dient eine Nordmanntanne (2&nbsp;m ≈ 15&nbsp;kg).</li>
           <li>Beim Umkippen darf der Baum frei fallen.</li>
-          <li>Das Exo ist aktiv: Motoren und Akku am Rücken, Seile an Hüfte und Knie, Bowdenzug-Paare bewegen Schultern und Ellbogen in beide Richtungen. Die blauen Manschetten messen, wohin du drückst, und das Exo folgt.</li>
+          <li>Das Exo ist aktiv: Motoren und Akku am Rücken. Das Beinseil läuft um Kurvenscheiben an Hüfte und Knie (Radius wächst mit der Beugung), die Schultern bewegt ein offenes Seilpaar, die Ellbogen ein Bowdenzug-Paar, beide in beide Richtungen. Die Hüfte hat ein freies Abspreizgelenk und ein Drehlager im Oberschenkel. Die blauen Manschetten messen, wohin du drückst, und das Exo folgt.</li>
           <li>Füße: schmaler Steigbügel mit Spikes wie bei einem Steigeisen, nur so groß wie der Schuh, damit er in Schlamm und Schnee nicht hängen bleibt.</li>
         </ul>
       </section>
@@ -236,7 +236,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         <h3>Baum und Plateau</h3>
         <div class="ctl" data-for="drag">
           <label for="n">Anzahl Bäume</label><output id="nOut" for="n">2</output>
-          <input type="range" id="n" min="1" max="4" step="1" value="2">
+          <input type="range" id="n" min="1" max="3" step="1" value="2">
         </div>
         <div class="ctl" data-for="drag">
           <span class="lab">Boden</span><span></span>
@@ -349,10 +349,11 @@ function derive(st) {
   const R = 0.28 * L;                                      // Radius der untersten Äste (nicht eingenetzt)
   const cLow = 0.45;                                       // so weit lassen sich die unteren Äste flachdrücken
   const rt0 = 0.018 * L + 0.012;                           // Stammradius am Schnitt
-  const jawHalf = Math.min(0.09, (bare - 0.05) / 2);
-  const xg = 0.03 + jawHalf;                               // Greifpunkt, gemessen ab Schnittende
+  // Greifpunkt (Handmitte), gemessen ab Schnittende: der Stumpf sitzt in Schlaufe 1 am Handgelenk (4 cm vom Schnitt),
+  // der Stamm liegt als Verlängerung des Unterarms an der Hand entlang
+  const xg = 0.04 + 0.05 * H;
   const rtG = rt0 * (1 - xg / L) + 0.006 * (xg / L);
-  const handHalf = rtG + 0.055;
+  const handHalf = rtG + 0.045;
   const mass = st.mass;                                    // eingestellt; Bäume sind unterschiedlich schwer
   const xcg = 0.55 * (bare + (L - bare) / 4) + 0.45 * (L / 4);
   const yTip = 0.03, rRest = cLow * R;
@@ -387,7 +388,7 @@ function derive(st) {
   const xSt3 = xSt2 - 0.6 * s;
   // Umkippen: das Schnittende ist Drehpunkt; ab diesem Winkel liegen die untersten Äste auf und heben es an
   const thContact = Math.min(thLift, Math.asin(clamp(rRest / bare, 0, 1)));
-  return { H, s, B, yStand, yMin, L, hp, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
+  return { H, s, B, yStand, yMin, L, hp, bare, R, cLow, rt0, xg, rtG, handHalf, mass, xcg,
     yTip, rRest, thLie, yCutLie, G0, thUp, yUp, offUp, leanUp, xe, Lp, Wp, xSt0, gripOf,
     thLift, offLift, cutCarryY, clear, dOff, cutAt, cutSetX, cutSetY, cutLiftY, Gl, xSt1, xSt2, xSt3, thContact, yRestG: hp + G0.y,
     body: st.body, exoKg: st.exoKg, foot: 0, xl, scen: st.scen, n: st.n, mu: st.mu };
@@ -661,11 +662,13 @@ function analyse(P, TL) {
 
 
 /* ================= Schlaufengreifer =================
-   Zwei Schlaufen an der Unterseite jedes Unterarms: j = 0 am Handgelenk, j = 1 etwa 12 cm Richtung Ellbogen.
-   Dyneema im Gummischlauch mit Federstahl-Einlage, bleibt offen als Ring; ein kleiner selbsthemmender
-   Schneckengetriebemotor am Unterarm zieht eine Seite ein und schließt die Schlaufe um den Stamm. */
-const LOOP_SP = 0.12, LOOP_OPEN = 0.1;
-// Unterseite des Unterarms: nach unten, bei hängendem Arm nach hinten
+   Die Schlaufen kommen am Handgelenk nach unten heraus: rechts zwei (j = 0 am Handgelenk, j = 1 etwa 8,5 cm weiter
+   auf Höhe der Hand), links eine. Der Stamm liegt längs als Verlängerung des Unterarms, das Schnittende am Handgelenk.
+   Dyneema im Gummischlauch mit Federstahl-Einlage, bleibt offen als Ring. Ein kurzer Schlaufenkopf (Alu-Rohrstück)
+   unter dem Handgelenk führt die Zugseile; kleine selbsthemmende Winden am Unterarm nahe dem Ellbogen ziehen sie ein. */
+const LOOP1 = 0.04, LOOP_SP = 0.085, LOOP_OPEN = 0.1;
+const loopsOn = (k) => (k ? 2 : 1);
+// Unterseite (Handflächenseite) des Unterarms: nach unten, bei hängendem Arm nach hinten
 function underOf(pose, k) {
   const fd = norm(sub(pose.hands[k], pose.elbows[k]));
   const proj = (d) => sub(d, mul(fd, dot(d, fd)));
@@ -673,16 +676,16 @@ function underOf(pose, k) {
   const a = len(bk) > 1e-6 ? norm(bk) : v3(0, -1, 0), b = len(dn) > 1e-6 ? norm(dn) : a;
   return { fd, n: norm(add(mul(a, 1 - w), mul(b, w))) };
 }
+// Schlaufenkopf unter dem Handgelenk, Schlaufe j sitzt j·8,5 cm weiter in Unterarmrichtung
 function loopAnchor(P, pose, k, j) {
   const { fd, n } = underOf(pose, k);
-  return add(sub(pose.hands[k], mul(fd, 0.05 * P.H + 0.02 + j * LOOP_SP)), mul(n, 0.035 * P.s));
+  return add(add(pose.wrists[k], mul(fd, j * LOOP_SP)), mul(n, 0.03 * P.s));
 }
-// Mitte der zugezogenen Schlaufe = Stammachse
-function loopCenter(P, pose, k, j) { return add(loopAnchor(P, pose, k, j), mul(underOf(pose, k).n, P.rtG + 0.008)); }
-// welche Schlaufe welchen Stumpf hält: 1 Baum rechts, 2 je Arm einer, 3–4 zwei Schlaufen pro Arm
+// Mitte der zugezogenen Schlaufe = Stammachse (leicht zur Handflächenseite versetzt)
+function loopCenter(P, pose, k, j) { return add(loopAnchor(P, pose, k, j), mul(underOf(pose, k).n, P.rtG + 0.01)); }
+// welche Schlaufe welchen Stumpf hält: 1 Baum rechts, 2 je Arm einer, 3 rechts zwei und links einer
 function dragSlots(n) {
-  return [[{ k: 1, j: 0 }], [{ k: 0, j: 0 }, { k: 1, j: 0 }], [{ k: 0, j: 0 }, { k: 1, j: 0 }, { k: 1, j: 1 }],
-    [{ k: 0, j: 0 }, { k: 0, j: 1 }, { k: 1, j: 0 }, { k: 1, j: 1 }]][clamp(n, 1, 4) - 1];
+  return [[{ k: 1, j: 0 }], [{ k: 0, j: 0 }, { k: 1, j: 0 }], [{ k: 0, j: 0 }, { k: 1, j: 0 }, { k: 1, j: 1 }]][clamp(n, 1, 3) - 1];
 }
 function dragHold(P, pose) {
   const sl = dragSlots(P.n), c = sl.map(({ k, j }) => loopCenter(P, pose, k, j));
@@ -776,8 +779,8 @@ function dragTreePose(P, ch, pose, i) {
   let c = lie;
   if (ch.att > 0) { const sl = dragSlots(P.n)[i]; c = mix(lie, loopCenter(P, pose, sl.k, sl.j), ch.att); }
   const cy0 = Math.max(0.05, c.y), th = -Math.asin(clamp((cy0 - P.yTip) / P.L, 0, 0.95));
-  // das Schnittende steht ein paar Zentimeter vor der Schlaufe
-  return { cx: c.x + 0.05 * Math.cos(th), cy: cy0 - 0.05 * Math.sin(th), z: c.z, th };
+  // das Schnittende steht 4 cm vor der Schlaufe
+  return { cx: c.x + LOOP1 * Math.cos(th), cy: cy0 - LOOP1 * Math.sin(th), z: c.z, th };
 }
 function loadsDrag(P, ch, pose) {
   if (!ch.att) return { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0 };
@@ -1138,23 +1141,35 @@ function buildPerson(P) {
     g.add(q.foot);
     q.shoulder = ball(0.058 * s, MAT.jacket); q.upper = limb(0.043 * s, 0.05 * s, MAT.jacket);
     q.elbow = ball(0.045 * s, MAT.jacket); q.fore = limb(0.035 * s, 0.043 * s, MAT.jacket); q.hand = ball(0.047 * s, MAT.glove);
-    // Gelenke mit Seilrollen (keine Motoren an den Gliedern)
-    q.pHip = pulley(0.07 * s); q.pKnee = pulley(0.055 * s); q.pSh = pulley(0.05 * s); q.pEl = pulley(0.042 * s);
+    // Gelenke: Lagergehäuse an Hüfte und Knie, Seilscheiben an Schulter und Ellbogen (keine Motoren an den Gliedern)
+    q.pHip = pulley(0.045 * s); q.pKnee = pulley(0.038 * s); q.pSh = pulley(0.05 * s); q.pEl = pulley(0.042 * s);
+    // Kurvenscheiben koaxial auf Hüft- und Kniegelenk: Radius wächst mit der Beugung, das Seil kommt nie ans Gelenk
+    const cam = (rmin, rmax, range, mirror) => { const m = mk(camGeo(rmin, rmax, range, mirror), MAT.pulley); return m; };
+    q.camHip = cam(0.08, 0.11, deg(110), false); q.camKnee = cam(0.05, 0.08, deg(120), true);
+    // Hüfte: freies Abspreizgelenk (Achse nach vorne) zwischen Hüftbügel und Hüftgelenk, Drehlager in der Oberschenkelschiene
+    q.abd = mk(new THREE.CylinderGeometry(0.02 * s, 0.02 * s, 0.07 * s, 16), MAT.graphite);
+    q.abdBar = bar(0.026 * s, 0.014 * s);
+    q.rotBear = mk(new THREE.CylinderGeometry(0.026 * s, 0.026 * s, 0.045 * s, 16), MAT.graphite);
     q.sThigh = bar(0.028 * s, 0.012 * s); q.sShank = bar(0.026 * s, 0.012 * s);
     q.sUpper = bar(0.024 * s, 0.011 * s); q.sFore = bar(0.022 * s, 0.011 * s);
     q.yoke = limb(0.016 * s, 0.016 * s, MAT.steel);
     q.ankleHinge = mk(new THREE.CylinderGeometry(0.024 * s, 0.024 * s, 0.03 * s, 14), MAT.graphite);
     q.cThigh = cuff(0.077 * s); q.cShank = cuff(0.058 * s); q.cUpper = cuff(0.054 * s); q.cFore = cuff(0.046 * s);
-    // Beinseil (Box → Hüftrolle hinten → Knierolle vorne → Unterschenkel): zieht nur, streckt Hüfte und Knie
-    q.ropeLeg = [rope(), rope(), rope()];
-    // Arme: je Gelenk ein Bowdenzug-Paar (vor und hinter der Seilscheibe), dadurch in beide Richtungen
+    // Beinseil (Box → hinten um die Hüftscheibe → vorne um die Knie-Scheibe → Unterschenkel): zieht nur, streckt Hüfte und Knie
+    const ropes = (n) => Array.from({ length: n }, rope);
+    q.ropeLeg = ropes(32);
+    // Schulter: offenes Seilpaar über zwei Umlenkrollen am Schwenkgelenk des Schulterbügels zur Schulter-Seilscheibe
+    q.ropeSh = [ropes(14), ropes(14)];
+    q.pSwing = [0, 1].map(() => mk(new THREE.CylinderGeometry(0.02 * s, 0.02 * s, 0.012 * s, 18), MAT.pulley));
+    // Ellbogen: Bowdenzug-Paar (vor und hinter der Seilscheibe), dadurch in beide Richtungen
     const housing = () => mk(new THREE.CylinderGeometry(0.0065, 0.0065, 1, 8), MAT.housing, false);
-    q.bowSh = [housing(), housing()]; q.bowEl = [[housing(), housing()], [housing(), housing()]];
-    // Schlaufengreifer: Träger unter dem Unterarm, Schneckengetriebemotor, zwei Schlaufen mit Zugseil
-    q.carrier = mk(new THREE.BoxGeometry(0.03 * s, 1, 0.022 * s), MAT.steel);
-    q.loopMotor = mk(new THREE.BoxGeometry(0.045 * s, 0.07 * s, 0.04 * s), MAT.graphite);
-    q.loops = [0, 1].map(() => mk(new THREE.TorusGeometry(1, 0.1, 8, 32), MAT.loop));
-    q.loopRope = [0, 1].map(() => [rope(), rope()]);
+    q.bowEl = [[housing(), housing()], [housing(), housing()]];
+    // Schlaufengreifer: kurzer Schlaufenkopf unter dem Handgelenk, Winden am Unterarm, rechts zwei Schlaufen, links eine
+    const nl = side > 0 ? 2 : 1;
+    q.head = mk(new THREE.CylinderGeometry(0.014 * s, 0.014 * s, 1, 12), MAT.steel);
+    q.winch = Array.from({ length: nl }, () => mk(new THREE.BoxGeometry(0.04 * s, 0.055 * s, 0.035 * s), MAT.graphite));
+    q.loops = Array.from({ length: nl }, () => mk(new THREE.TorusGeometry(1, 0.1, 8, 32), MAT.loop));
+    q.loopRope = Array.from({ length: nl }, () => [rope(), rope()]);
     o.sides.push(q);
   }
   o.lblBox = label('Motoren + Stihl-Akku'); o.lblBox.position.set(0, 0.26 * s, 0); o.box.add(o.lblBox);
@@ -1174,6 +1189,45 @@ function seg(m, a, b) {
 const at = (m, p) => m.position.set(p.x, p.y, p.z);
 function axis(m, p, dir) { at(m, p); m.quaternion.setFromUnitVectors(Y_AXIS, _d.set(dir.x, dir.y, dir.z).normalize()); }
 
+// Kurvenscheibe: Radius wächst über den Beugewinkel von rmin auf rmax (Profilwinkel -psi, gespiegelt +psi)
+function camGeo(rmin, rmax, range, mirror) {
+  const sh = new THREE.Shape(), N = 64;
+  for (let i = 0; i <= N; i++) {
+    const psi = (i / N) * Math.PI * 2;
+    const r = psi <= range ? rmin + (rmax - rmin) * psi / range : rmax - (rmax - rmin) * (psi - range) / (Math.PI * 2 - range);
+    const a = mirror ? psi : -psi, x = Math.cos(a) * r * P.s, y = Math.sin(a) * r * P.s;
+    if (i === 0) sh.moveTo(x, y); else sh.lineTo(x, y);
+  }
+  sh.holes.push(new THREE.Path().absarc(0, 0, 0.012, 0, Math.PI * 2, true));
+  const g = new THREE.ExtrudeGeometry(sh, { depth: 0.008, bevelEnabled: false, curveSegments: 4 });
+  g.translate(0, 0, -0.004); return g;
+}
+// Seilführung in der Bewegungsebene (x, y): Tangente von Punkt q an Kreis (c, r) auf der Seite pref
+function tangent(q, c, r, pref) {
+  const dx = q.x - c.x, dy = q.y - c.y, d = Math.hypot(dx, dy), z = c.z;
+  if (d <= r + 1e-4) { const p = norm(v3(pref.x, pref.y, 0)); return v3(c.x + p.x * r, c.y + p.y * r, z); }
+  const ph = Math.atan2(dy, dx), al = Math.acos(r / d);
+  const pts = [ph + al, ph - al].map((a) => v3(c.x + Math.cos(a) * r, c.y + Math.sin(a) * r, z));
+  return dot(sub(pts[0], c), pref) >= dot(sub(pts[1], c), pref) ? pts[0] : pts[1];
+}
+// Bogen auf dem Kreis von p0 nach p1, auf der Seite pref
+function arc(c, r, p0, p1, pref, n = 8) {
+  const a0 = Math.atan2(p0.y - c.y, p0.x - c.x);
+  let d = Math.atan2(p1.y - c.y, p1.x - c.x) - a0;
+  d = Math.atan2(Math.sin(d), Math.cos(d));
+  const mid = (dd) => v3(Math.cos(a0 + dd / 2), Math.sin(a0 + dd / 2), 0);
+  const alt = d - Math.sign(d || 1) * Math.PI * 2;
+  if (dot(mid(alt), pref) > dot(mid(d), pref)) d = alt;
+  const out = [];
+  for (let i = 1; i < n; i++) { const a = a0 + d * i / n; out.push(v3(c.x + Math.cos(a) * r, c.y + Math.sin(a) * r, c.z)); }
+  return out;
+}
+// Polylinie auf eine Reihe von Seilstücken verteilen, übrige ausblenden
+function poly(segs, pts) {
+  segs.forEach((m, i) => { m.visible = i < pts.length - 1; if (m.visible) seg(m, pts[i], pts[i + 1]); });
+}
+// Winkel von a nach b in der Bewegungsebene (gegen den Uhrzeigersinn positiv)
+const angTo = (a, b) => Math.atan2(a.x * b.y - a.y * b.x, a.x * b.x + a.y * b.y);
 // Ring in Lage bringen: Mitte c, Normale nrm (Stammrichtung), xAx zeigt zum Unterarm; f < 1 = flach angelegt
 const _m4 = new THREE.Matrix4(), _bx = new THREE.Vector3(), _by = new THREE.Vector3(), _bz = new THREE.Vector3();
 function placeRing(m, c, nrm, xAx, r, f = 1) {
@@ -1215,15 +1269,16 @@ function posePerson(pose, ch, tr, ld) {
   o.motors.sh.forEach((m) => { m.userData.cap.emissiveIntensity = gS; });
   o.motors.el.forEach((m) => { m.userData.cap.emissiveIntensity = gE; });
   // Schlaufen: welche ist in Gebrauch, wie weit zugezogen, wo liegt der Stamm
-  const ring = [[null, null], [null, null]];
+  const ring = [[null], [null, null]];
   if (drag) {
     dragSlots(P.n).forEach(({ k, j }, i) => {
       const tp = dragTreePose(P, ch, pose, i);
       ring[k][j] = { c: ch.clamp ?? 0, at: loopCenter(P, pose, k, j), dir: v3(-Math.cos(tp.th), Math.sin(tp.th), 0) };
     });
   } else {
-    const d = v3(Math.cos(tr.th), Math.sin(tr.th), 0), sp = Math.min(LOOP_SP, 2 * P.jawHalf) / 2;
-    [-1, 1].forEach((sg, j) => { ring[1][j] = { c: ch.jaw, at: v3(tr.gx + d.x * sg * sp, tr.gy + d.y * sg * sp, 0), dir: d }; });
+    // rechts beide Schlaufen um den Stumpf: 4 cm und 12,5 cm vom Schnittende, der Stamm liegt längs an der Hand
+    const d = v3(Math.cos(tr.th), Math.sin(tr.th), 0);
+    [0, 1].forEach((j) => { const b = P.xg - LOOP1 - j * LOOP_SP; ring[1][j] = { c: ch.jaw, at: v3(tr.gx - d.x * b, tr.gy - d.y * b, 0), dir: d }; });
   }
   for (let k = 0; k < 2; k++) {
     const q = o.sides[k], side = q.side;
@@ -1238,35 +1293,58 @@ function posePerson(pose, ch, tr, ld) {
     axis(q.pHip, mh, ZDIR); axis(q.pKnee, mk, ZDIR); axis(q.ankleHinge, ma, ZDIR);
     seg(q.sThigh, mh, mk); seg(q.sShank, mk, ma);
     axis(q.cThigh, mix(hip, knee, 0.55), sub(knee, hip)); axis(q.cShank, mix(knee, ank, 0.42), sub(ank, knee));
-    // Beinseil: von der Box hinten über die Hüftrolle, vorne über die Knierolle zum Unterschenkel
-    const thighD = norm(sub(knee, hip)), front = norm(v3(thighD.y, -thighD.x, 0));     // senkrecht zum Oberschenkel, nach vorne
-    const hipBack = add(mh, mul(pose.back, 0.07 * s)), kneeFront = add(mk, mul(front, -0.06 * s));
-    const shankA = add(out(mix(knee, ank, 0.4), 0.07), mul(front, -0.04 * s));
-    const m0 = motorPos.leg[k];
-    seg(q.ropeLeg[0], m0, hipBack); seg(q.ropeLeg[1], hipBack, kneeFront); seg(q.ropeLeg[2], kneeFront, shankA);
+    // Abspreizgelenk über dem Hüftgelenk (Achse nach vorne), Hüftbügel vom Gurt dorthin; Drehlager oben in der Schiene
+    const fwdP = v3(pose.dir.y, -pose.dir.x, 0), abdP = add(mh, mul(pose.dir, 0.075 * s));
+    axis(q.abd, abdP, fwdP);
+    seg(q.abdBar, add(add(pose.P, mul(pose.dir, 0.075 * s)), v3(0, 0, side * 0.15 * s)), abdP);
+    axis(q.rotBear, mix(mh, mk, 0.2), sub(mk, mh));
+    // Beinseil: von der Box hinten um die Hüft-Kurvenscheibe, vorne um die Knie-Kurvenscheibe zum Unterschenkel
+    const thighD = norm(sub(knee, hip)), shankD = norm(sub(ank, knee));
+    const fwdK = norm(v3(-thighD.y, thighD.x, 0));                  // senkrecht zum Oberschenkel, nach vorne
+    const flexH = Math.max(0, angTo(mul(pose.dir, -1), thighD)), flexK = Math.max(0, -angTo(thighD, shankD));
+    const rH = (0.08 + 0.03 * clamp(flexH / deg(110), 0, 1)) * s, rK = (0.05 + 0.03 * clamp(flexK / deg(120), 0, 1)) * s;
+    const cH = add(mh, v3(0, 0, side * 0.03 * s)), cK = add(mk, v3(0, 0, side * 0.03 * s));
+    const aH = Math.atan2(pose.back.y, pose.back.x), aK = Math.atan2(fwdK.y, fwdK.x);
+    at(q.camHip, cH); q.camHip.rotation.set(0, 0, aH + flexH);
+    at(q.camKnee, cK); q.camKnee.rotation.set(0, 0, aK - flexK);
+    const anchor = add(add(mix(knee, ank, 0.4), v3(0, 0, side * 0.115 * s)), mul(fwdK, 0.05 * s));
+    const m0 = motorPos.leg[k], h1 = tangent(m0, cH, rH, pose.back);
+    let h2 = add(cH, mul(pose.back, rH)), k1 = tangent(h2, cK, rK, fwdK);
+    for (let it = 0; it < 4; it++) { h2 = tangent(k1, cH, rH, pose.back); k1 = tangent(h2, cK, rK, fwdK); }
+    const k2 = tangent(anchor, cK, rK, fwdK);
+    poly(q.ropeLeg, [m0, h1, ...arc(cH, rH, h1, h2, pose.back), h2, k1, ...arc(cK, rK, k1, k2, fwdK), k2, anchor]);
     // Arm: Schulterrolle, Ellbogenrolle, Streben
     const ms = add(add(sh, mul(pose.back, 0.02 * s)), v3(0, 0, side * 0.072 * s));
     const me = add(el, mul(hg, 0.052 * s)), mw = add(wr, mul(hg, 0.04 * s));
     axis(q.pSh, ms, ZDIR); axis(q.pEl, me, hg);
     seg(q.sUpper, ms, me); seg(q.sFore, me, mw);
     axis(q.cUpper, mix(sh, el, 0.5), sub(el, sh)); axis(q.cFore, mix(el, wr, 0.55), sub(wr, el));
-    seg(q.yoke, onBack(0.98, 0.1, side * 0.2), ms);
-    // Bowdenzug-Paare: Schulter (oben und hinten an der Seilscheibe), Ellbogen (vor und hinter der Seilscheibe)
-    seg(q.bowSh[0], motorPos.sh[k], add(ms, mul(pose.dir, 0.055 * s)));
-    seg(q.bowSh[1], motorPos.sh[k], add(ms, mul(pose.back, 0.055 * s)));
+    const swing = onBack(0.98, 0.1, side * 0.2);
+    seg(q.yoke, swing, ms);
+    // Schulter: offenes Seilpaar, Umlenkrollen auf der Achse des seitlichen Schwenkgelenks, dann um die Seilscheibe
+    const rS = 0.05 * s, up = pose.dir;
+    [[1, up], [-1, pose.back]].forEach(([sg, pref], i) => {
+      const pr = add(swing, mul(fwdP, sg * 0.018 * s));
+      axis(q.pSwing[i], pr, fwdP);
+      const over = add(pr, mul(up, 0.02 * s)), t1 = tangent(over, ms, rS, pref);
+      const end = add(ms, mul(sg > 0 ? fwdP : mul(up, -1), rS));
+      poly(q.ropeSh[i], [motorPos.sh[k], over, t1, ...arc(ms, rS, t1, end, sg > 0 ? add(up, fwdP) : add(pose.back, mul(up, -1)), 6), end]);
+    });
+    // Ellbogen: Bowdenzug-Paar (vor und hinter der Seilscheibe)
     const upperD = norm(sub(el, sh)), elF = norm(cross(hg, upperD));
     [1, -1].forEach((sg, i) => {
       const via = add(add(ms, mul(pose.dir, 0.075 * s)), v3(0, 0, side * (0.012 + 0.012 * i)));
       seg(q.bowEl[i][0], motorPos.el[k], via); seg(q.bowEl[i][1], via, add(me, mul(elF, sg * 0.045 * s)));
     });
-    // Schlaufengreifer unter dem Unterarm
-    const { fd, n } = underOf(pose, k), a0 = loopAnchor(P, pose, k, 0), a1 = loopAnchor(P, pose, k, 1);
-    seg(q.carrier, add(a0, mul(fd, 0.03)), add(a1, mul(fd, -0.04)));
-    const lm = add(add(el, mul(fd, 0.07 * s)), mul(n, 0.04 * s));
-    axis(q.loopMotor, lm, fd);
-    [a0, a1].forEach((A, j) => {
-      const rg = ring[k][j], m = q.loops[j];
-      if (!rg) {                                                // nicht gebraucht: flach am Träger angelegt
+    // Schlaufengreifer: Kopf unter dem Handgelenk, Winden am Unterarm nahe dem Ellbogen, Zugseile innen an der Schiene
+    const { fd, n } = underOf(pose, k), nl = q.loops.length;
+    const a0 = loopAnchor(P, pose, k, 0);
+    seg(q.head, add(a0, mul(fd, -0.02)), add(loopAnchor(P, pose, k, nl - 1), mul(fd, 0.02)));
+    q.loops.forEach((m, j) => {
+      const A = loopAnchor(P, pose, k, j), rg = ring[k][j];
+      const wp = add(add(el, mul(fd, (0.06 + 0.05 * j) * s)), add(mul(n, 0.035 * s), v3(0, 0, -side * 0.01)));
+      axis(q.winch[j], wp, fd);
+      if (!rg) {                                                // nicht gebraucht: offen, flach am Kopf angelegt
         placeRing(m, add(A, mul(n, LOOP_OPEN * 0.3)), fd, n, LOOP_OPEN * 0.8, 0.3);
         q.loopRope[j].forEach((r) => { r.visible = false; });
         return;
@@ -1275,11 +1353,11 @@ function posePerson(pose, ch, tr, ld) {
       const center = mix(add(A, mul(n, LOOP_OPEN)), rg.at, c), r = lerp(LOOP_OPEN, rClosed, c);
       const nrm = norm(mix(fd, rg.dir, c));
       placeRing(m, center, nrm, sub(A, center), r);
-      // Zugseil vom Motor über den Träger zur Schlaufe
+      // Zugseil von der Winde innen an der Schiene zum Kopf und zur Schlaufe
       let e = sub(A, center); e = sub(e, mul(nrm, dot(e, nrm)));
       const edge = add(center, mul(len(e) > 1e-6 ? norm(e) : n, r));
       q.loopRope[j].forEach((r2) => { r2.visible = true; });
-      seg(q.loopRope[j][0], lm, A); seg(q.loopRope[j][1], A, edge);
+      seg(q.loopRope[j][0], wp, A); seg(q.loopRope[j][1], A, edge);
     });
   }
 }
@@ -1398,7 +1476,7 @@ function captionFor(id) {
     const n = state.n, trees = n > 1 ? `${n} Bäume` : 'Ein Baum', f = dragForces(P);
     switch (id) {
       case 'start': return ['Ausgangslage', 'Ausgangslage', `${trees} liegen am Boden, die Stümpfe zeigen nach vorne. Du stehst zwischen den Stümpfen, Blick in Laufrichtung.`];
-      case 'dgrip': return ['Schritt 1 von 4', 'Greifen', `In die Knie und vorbeugen, die Unterarme neben die Stümpfe legen. Die offenen Schlaufen unter den Unterarmen über die Stümpfe schieben, auf Tastendruck zieht je ein kleiner Motor seine Schlaufe zu.${n > 2 ? ' Bei mehr als zwei Bäumen halten beide Schlaufen eines Arms je einen Stumpf.' : ''}`];
+      case 'dgrip': return ['Schritt 1 von 4', 'Greifen', `In die Knie und vorbeugen, die Hände an die Stümpfe. Die offenen Schlaufen am Handgelenk über die Stümpfe schieben, auf Tastendruck zieht je eine kleine Winde ihre Schlaufe zu.${n > 2 ? ' Beim dritten Baum hält rechts jede der zwei Schlaufen einen eigenen Stumpf.' : ''}`];
       case 'drise': return ['Schritt 2 von 4', 'Aufrichten', 'Hochkommen, die Arme hängen lassen. Die Stümpfe heben sich mit, die Beinseile ziehen Hüfte und Knie in die Streckung.'];
       case 'dwalk': return ['Schritt 3 von 4', 'Vorwärts schleifen', `Leicht vorgebeugt vorwärts gehen, gezeigt sind 7 m, gedacht für bis zu 100 m. Das Gewicht hängt in den Schlaufen und geht über Arme, Schultergelenke und Rahmen in den Hüftgurt und die Beinschienen. Die Arme hängen leicht nach hinten, dort gleichen sich Gewicht und Zug fast aus.`];
       case 'drelease': return ['Schritt 4 von 4', 'Ablegen', 'In die Knie, Stümpfe absetzen, Schlaufen auf Tastendruck öffnen und weitergehen.'];
@@ -1407,7 +1485,7 @@ function captionFor(id) {
   }
   switch (id) {
     case 'start': return ['Ausgangslage', 'Ausgangslage', `Der geschnittene Christbaum liegt am Boden, das Plateau ist ${hp} hoch.`];
-    case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen, den rechten Unterarm ans astfreie Stammende legen und die beiden rechten Schlaufen zuziehen.'];
+    case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen, die rechte Hand längs ans astfreie Stammende legen, Schnittende am Handgelenk, und die beiden rechten Schlaufen zuziehen.'];
     case 'raise': return ['Schritt 2 von 6', 'Aufrichten bis fast senkrecht', 'Rechte Hand am Stumpf ist der Drehpunkt, die linke greift so weit Richtung Spitze wie möglich. Zurücklehnen und mit links in die Senkrechte ziehen.'];
     case 'carry': return ['Schritt 3 von 6', 'Tragen', 'Fast senkrecht und leicht zurückgelehnt zum Plateau gehen. Die linke Hand stützt oben, der Hebel ist jetzt klein.'];
     case 'lift': return ['Schritt 4 von 6', P.cutLiftY > P.cutCarryY ? 'Hochheben' : 'Absenken',
@@ -1429,7 +1507,7 @@ const STEP_TEXT = {
     ['Hochheben', 'Fast lotrecht anheben, bis das Schnittende über der Ladefläche ist, dann an der Kante absetzen.'],
     ['Umkippen lassen', 'Die Schlaufen halten das Schnittende als Scharnier, der Baum kippt 90° aufs Plateau.'],
     ['Zurücktreten', 'Schlaufen auf, Arme runter, zurück.']],
-  drag: [['Greifen', 'Zwischen den Stümpfen in die Knie, Schlaufen unter den Unterarmen über die Stümpfe, zuziehen.'],
+  drag: [['Greifen', 'Zwischen den Stümpfen in die Knie, die Schlaufen am Handgelenk über die Stümpfe, zuziehen.'],
     ['Aufrichten', 'Hochkommen, Arme hängen lassen. Die Beinseile helfen.'],
     ['Vorwärts schleifen', 'Leicht vorgebeugt vorwärts gehen, bis 100 m. Die Schlaufen tragen, nicht die Finger.'],
     ['Ablegen', 'In die Knie, Stümpfe absetzen, Schlaufen öffnen, weitergehen.']],
@@ -1619,11 +1697,11 @@ function setScen(scen) {
   state.scen = scen; state.t = 0;
   ui.scLoad.setAttribute('aria-pressed', String(scen === 'load')); ui.scDrag.setAttribute('aria-pressed', String(scen === 'drag'));
   document.querySelectorAll('[data-for]').forEach((el) => { el.hidden = el.dataset.for !== scen; });
-  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Entwurf 3 · Use Case 2' : 'Exoskelett · Entwurf 3 · Use Case 1';
+  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Entwurf 3.1 · Use Case 2' : 'Exoskelett · Entwurf 3.1 · Use Case 1';
   ui.title.textContent = scen === 'drag' ? 'Bäume schleifen' : 'Christbaum aufladen';
   ui.lede.textContent = scen === 'drag'
-    ? 'Schlaufen an der Unterseite beider Unterarme fassen ein bis vier Stümpfe, jede Schlaufe wird von einem eigenen kleinen Motor zugezogen. Die Arme hängen, das Gewicht geht über Schultergelenke und Rahmen in den Hüftgurt, man geht vorwärts.'
-    : 'Rechts zwei Schlaufen unter dem Unterarm um den Stumpf, links weit oben am Stamm: zurücklehnen, fast senkrecht aufrichten, tragen, bis zur Ladefläche anheben und 90° aufs Plateau kippen lassen. Motoren und Akku sitzen hinten, Seile und Bowdenzüge bewegen Hüfte, Knie, Schultern und Ellbogen.';
+    ? 'Schlaufen am Handgelenk (rechts zwei, links eine) fassen ein bis drei Stümpfe, jede Schlaufe hat ihre eigene kleine Winde. Die Arme hängen, das Gewicht geht über Schultergelenke und Rahmen in den Hüftgurt, man geht vorwärts.'
+    : 'Rechts zwei Schlaufen am Handgelenk um den Stumpf, der Stamm liegt längs an der Hand, links weit oben am Stamm: zurücklehnen, fast senkrecht aufrichten, tragen, bis zur Ladefläche anheben und 90° aufs Plateau kippen lassen. Motoren und Akku sitzen hinten, Seile über Kurvenscheiben und Rollen bewegen Hüfte, Knie und Schultern, Bowdenzüge die Ellbogen.';
   buildSteps();
   rebuild({ drag: true });
   setView(state.view, true);
@@ -1708,6 +1786,7 @@ function boot(data) {
   }
   ui.hp.value = state.hp; ui.len.value = state.L; ui.height.value = state.H;
   ui.mass.value = state.mass; ui.body.value = state.body; ui.exoKg.value = state.exoKg;
+  state.n = clamp(Math.round(state.n), 1, 3);
   ui.labels.checked = state.labels; ui.n.value = state.n;
   applyTheme();
   rebuild({ tree: true, platform: true, person: true });

@@ -91,7 +91,7 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
 - **Ergebnis:** Maßblatt + kurze Liste „Was tut am meisten weh / wo wird es zäh“.
 
 ### Phase 1 – Schlaufengreifer und Steigbügel ohne Exo (2–4 Wochen, ~150–250 €)
-- **Schlaufengreifer als Handwerkzeug:** U-Profil mit Zahnleiste an einer festen Unterarm-Manschette
+- **Schlaufengreifer als Handwerkzeug:** Schlaufenkopf mit Zahnleiste am Handgelenk einer festen Unterarm-Manschette
   mit Handgriff, zwei Schlaufen, zwei Schneckengetriebe-Winden, Daumentaster, ein Akku-Pack.
 - **Steigbügel** mit Spikes für die eigenen Arbeitsschuhe.
 - **Test:** Eine Saison-Woche mit echten Bäumen. Schließen die Schlaufen schnell genug? Halten sie bei
@@ -100,7 +100,7 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
 - Warum zuerst: Der Greifer bringt sofort Nutzen, ist billig und zeigt, wie Kräfte wirklich wirken.
 
 ### Phase 2 – Passiver Rahmen (4–8 Wochen, ~400–800 €)
-- Rückenrahmen, Hüftgurt, Hüftgelenke, Bein-Schienen mit Knie, Steigbügel.
+- Rückenrahmen, Hüftgurt, Hüftgelenke mit Abspreizgelenk und Drehlager, Bein-Schienen mit Knie, Steigbügel.
   **Noch ohne Motoren**, aber mit allen Gelenkanschlägen.
 - Längen über Steckbolzen einstellbar; Gelenkachsen nach Maßblatt ausrichten.
 - **Tests:**

@@ -87,9 +87,9 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
 
 <div class="app">
   <header>
-    <p class="kicker">Exoskelett · Konstruktion, Entwurf 3</p>
+    <p class="kicker">Exoskelett · Konstruktion, Entwurf 3.1</p>
     <h1>So ist das Exo aufgebaut</h1>
-    <p class="lede">Motoren und Akku sitzen hinten. Ein Seil pro Bein streckt Hüfte und Knie, Bowdenzug-Paare bewegen Schultern und Ellbogen in beide Richtungen. Schlaufen unter den Unterarmen halten die Stämme, Kraftsensoren in den blauen Manschetten sagen dem Exo, wohin du willst. Nummer antippen oder in der Liste wählen; bei „Arm heben“ und „Ellbogen“ siehst du, wie das Exo deinem Arm folgt.</p>
+    <p class="lede">Motoren und Akku sitzen hinten. Ein Seil pro Bein streckt Hüfte und Knie, Seilpaare bewegen Schultern und Ellbogen in beide Richtungen. Schlaufen am Handgelenk halten die Stämme, Kraftsensoren in den blauen Manschetten sagen dem Exo, wohin du willst. Nummer antippen oder in der Liste wählen; bei „Arm heben“ und „Ellbogen“ siehst du, wie das Exo deinem Arm folgt.</p>
   </header>
   <main class="work">
     <div class="left">
@@ -100,6 +100,7 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
         <label for="squat">Hocke <input type="range" id="squat" min="0" max="1" step="0.01" value="0.2"></label>
         <label for="arm">Arm heben <input type="range" id="arm" min="0" max="1" step="0.01" value="0.25"></label>
         <label for="elb">Ellbogen <input type="range" id="elb" min="0" max="1" step="0.01" value="0.35"></label>
+        <label for="spread">Beine spreizen <input type="range" id="spread" min="0" max="1" step="0.01" value="0"></label>
         <label for="loop">Schlaufen zu <input type="range" id="loop" min="0" max="1" step="0.01" value="0"></label>
         <button type="button" id="anim">Bewegen</button>
         <label for="log"><input type="checkbox" id="log"> Stamm</label>
@@ -150,6 +151,9 @@ const H = 1.75;
 const D = { ankle: 0.039 * H, shank: 0.246 * H, thigh: 0.245 * H, torso: 0.288 * H, shHalf: 0.1 * H, hipHalf: 0.05 * H,
   upper: 0.186 * H, fore: 0.146 * H, exoHip: 0.205, exoSh: 0.265 };
 const R_SH = 0.07, R_EL = 0.05, R_DRUM = 0.015;      // Seilscheiben Schulter/Ellbogen, Trommel am Motor
+const R_HIP = 0.095;                                  // Umlenkscheibe auf der Hüftachse
+const ZR = (sd) => sd * (D.exoHip + 0.08);            // Ebene des Beinseils, außen neben der Schiene
+const camR = (a) => 0.05 + 0.03 * clamp((a + deg(11)) / deg(111), 0, 1);   // Knie-Kurvenscheibe: 5 cm gestreckt, 8 cm in der Hocke
 
 /* ================= Szene ================= */
 const stage = $('stage');
@@ -281,35 +285,35 @@ const PART_INFO = [
     parts: 'Stihl AP 500 S (vorhanden), Adapter, Teensy 4.1 mit CAN-Transceiver, DC/DC-Wandler 24 V und 5 V, 4 Motortreiber für die Winden, Schütz, Sicherung, Pilz-Not-Aus, wasserdichte Rundstecker.',
     care: 'Not-Aus trennt hart, nicht nur per Software. Akkustrom am Tisch prüfen, bevor man weiterbaut.' },
   { key: 'hip', name: 'Hüftgelenk', dist: 0.6,
-    what: 'Lässt das Bein vor und zurück schwingen und überträgt die Streckkraft auf den Oberschenkel.',
-    how: 'Kugellager im Flanschgehäuse am Hüftbügel, Achse genau auf Höhe deines Hüftgelenks. Das Beinseil läuft über eine Umlenkrolle 9,5 cm hinter der Achse: Zieht der Motor, streckt sich die Hüfte. TPU-Anschlag begrenzt den Winkel.',
-    parts: 'Flanschlager (UCFL/KFL-Bauform), Passschraube M10, Alu-Platte 6 bis 8 mm, Seilrolle mit Lager.',
-    care: 'Achse muss zum Körpergelenk fluchten, sonst scheuern die Manschetten. Seitliches Spreizen übernimmt das Spiel in den Manschetten.' },
+    what: 'Hüfte mit drei Bewegungen: vor und zurück (Motor), seitlich abspreizen (frei) und Fußspitze nach außen drehen (frei).',
+    how: 'Am Ende des Hüftbügels sitzt ein Scharnier mit Achse nach vorne: Damit kannst du das Bein seitlich abspreizen, Gummianschläge begrenzen es auf etwa ±20°. Darunter das Flanschlager für Vor- und Zurückschwingen, Achse auf Höhe deines Hüftgelenks. In der Oberschenkelschiene ein Drehlager, damit die Fußspitze nach außen oder innen zeigen kann. Regler „Beine spreizen“ probieren.',
+    parts: 'Scharnier mit Bolzen M10 und Gummipuffern, Flanschlager (UCFL/KFL), Drehlager (Axial-Rillenkugellager oder Drehkranz Ø 40 mm), Alu-Platten 6 bis 8 mm.',
+    care: 'Angetrieben wird nur Vor/Zurück. Abspreizen und Drehen bleiben frei, sonst zwingt das Exo die Beine in eine Bahn. Achsen auf deine Hüfte ausrichten.' },
   { key: 'leg', name: 'Bein- und Armschienen', dist: 0.8,
     what: 'Tragen die Last in den Boden und halten Rollen, Manschetten und Sensoren.',
     how: 'Außenrohr 25 × 25 und Innenrohr 20 × 20, ineinander geschoben. Lochraster und Steckbolzen mit Ring stellen die Länge ein.',
     parts: 'Alu-Vierkantrohre, Steckbolzen mit Federring, Schellen.',
     care: 'Lochabstand 2 cm reicht. Unterarmschiene biegesteif, sie trägt den Schlaufenträger.' },
   { key: 'knee', name: 'Kniegelenk', dist: 0.55,
-    what: 'Beugen und Strecken des Knies, mit festem Anschlag gegen Überstrecken.',
-    how: 'Zwei Alu-Platten, dazwischen ein Flanschlager, verbunden mit Passschraube und selbstsichernder Mutter. Das Beinseil läuft vorne über eine Rolle über dem Knie zum Anker am Unterschenkel: Zieht es, streckt sich das Knie.',
-    parts: 'Flanschlager, Passschraube M10, Nylon-Mutter, Alu-Platten, TPU-Anschlag.',
+    what: 'Beugen und Strecken des Knies, mit Kurvenscheibe für das Beinseil und festem Anschlag gegen Überstrecken.',
+    how: 'Zwei Alu-Platten, dazwischen ein Flanschlager, Passschraube und selbstsichernde Mutter. Außen sitzt fest am Unterschenkel eine Kurvenscheibe: Das Seil liegt vorne in ihrer Rille, deshalb kommt es auch in tiefer Hocke nie an das Gelenk. Ihr Radius wächst mit der Beugung von 5 auf 8 cm: In der Hocke, wo es am schwersten ist, hat das Seil den größten Hebel.',
+    parts: 'Flanschlager, Passschraube M10, Nylon-Mutter, Alu-Platten, Kurvenscheibe (Alu 10 mm, lasern lassen), TPU-Anschlag.',
     care: 'Ein einachsiges Gelenk passt nie ganz zum Knie, darum Manschetten mit etwas Spiel. Anschlag so, dass das Knie nie ganz durchgestreckt wird.' },
   { key: 'rope', name: 'Beinseil (Dyneema)', dist: 1.1,
     what: 'Streckt Hüfte und Knie mit einem einzigen Seil, wie beim Aufstehen aus der Hocke.',
-    how: 'Box → hinter der Hüftachse vorbei → am Oberschenkel nach unten → vorne über das Knie → Anker am Unterschenkel. Kleine Feder am Anker hält das Seil gespannt. Die Beine brauchen nur Strecken, Beugen machst du selbst.',
-    parts: 'Dyneema-Seil 3 mm, Seilrollen mit Kugellager, Kausche, Zugfeder, gedruckte Seilführungen.',
-    care: 'Seil zieht nur: Bei Fehlern wird es locker, das ist gewollt. Regelmäßig auf Scheuerstellen prüfen.' },
-  { key: 'bowden', name: 'Bowdenzüge für die Arme', dist: 0.75,
-    what: 'Bewegen Schultern und Ellbogen in beide Richtungen: heben und senken, beugen und strecken.',
-    how: 'Pro Gelenk zwei Züge in schwarzen Hüllen. Die Hüllen stützen sich am Rahmen bzw. am Oberarm ab, die Innenzüge laufen von oben und unten auf eine Seilscheibe. Ein Zug zieht, der andere gibt gleich viel nach. Die Hülle für den Ellbogen läuft über die Schulter, darum stört die Schulterbewegung den Ellbogen nicht.',
+    how: 'Box → Rolle am Becken → hinten um eine Umlenkscheibe Ø 19 cm, die genau auf der Hüftachse sitzt → zwei Rollen am Oberschenkel → vorne um die Kurvenscheibe am Knie → Klemme. Weil die Scheiben auf den Gelenkachsen sitzen, bleibt der Hebel in jeder Stellung gleich groß bzw. wächst in der Hocke, und das Seil berührt nie ein Gelenk. Es läuft in einer eigenen Ebene außen neben der Schiene.',
+    parts: 'Dyneema-Seil 3 mm, Umlenkscheibe, Kurvenscheibe, 3 Rollen mit Kugellager (Ø mindestens 3 cm), Seilklemme.',
+    care: 'Jede Rolle kostet ein paar Prozent Kraft: so wenige wie möglich, große Durchmesser, gute Lager. Seil zieht nur, bei Fehlern wird es locker.' },
+  { key: 'bowden', name: 'Bowdenzüge für die Ellbogen', dist: 0.75,
+    what: 'Bewegen die Ellbogen in beide Richtungen: beugen und strecken.',
+    how: 'Zwei Züge in schwarzen Hüllen von der Box über die Schulter am Oberarm entlang, Anschlag oberhalb des Ellbogens, dann auf die Seilscheibe: vorne beugen, hinten strecken. Hier bleibt es beim Bowdenzug, weil der Weg über zwei bewegte Gelenke (Schulter vor/zurück und seitlich) führt. Die Hülle macht das unabhängig von der Schulterstellung.',
     parts: 'Bowdenhülle (kompressionsarm, z. B. Schaltzughülle 5 mm), Innenzug 2 mm Edelstahl 7 × 7 oder Dyneema in PTFE-Hülle, Endkappen, Spannschrauben.',
-    care: 'Biegeradius mindestens 15 cm, sonst steigt die Reibung stark. Vorspannung mit den Spannschrauben einstellen, bis kein Spiel mehr ist.' },
+    care: 'Biegeradius mindestens 15 cm, sonst steigt die Reibung stark. PTFE-Innenhülle verwenden.' },
   { key: 'shoulder', name: 'Schulter mit Seilscheibe', dist: 0.6,
     what: 'Hebt und senkt den Arm mit dem Motor, seitliches Abspreizen bleibt frei.',
-    how: 'Schulterbügel vom Rahmen über die Schulter, mit freiem Gelenk zum seitlichen Schwenken. Außen ein Flanschlager, darauf die Seilscheibe Ø 14 cm, fest mit der Oberarmschiene verbunden. Oberer Zug hebt, unterer senkt.',
-    parts: 'Flanschlager, Seilscheibe (Alu 10 mm, gelasert oder gefräst bestellen), Hüllenanschlag, Bolzen.',
-    care: 'Die große Scheibe gibt Übersetzung, die Schulter braucht von allen Gelenken am Arm das meiste Moment.' },
+    how: 'Schulterbügel mit freiem Gelenk zum seitlichen Schwenken, außen ein Flanschlager mit Seilscheibe Ø 14 cm am Oberarm. Neu: ein offenes Seilpaar statt Bowdenzug. Die Seile laufen von der Box über zwei Rollen, die genau auf der Achse des Schwenkgelenks sitzen (so ändert Schwenken die Seillänge nicht), und über zwei Rollen hinter der Scheibe. Oberes Seil hebt, unteres senkt. Das bringt rund ein Viertel mehr Kraft als ein Bowdenzug.',
+    parts: 'Flanschlager, Seilscheibe (Alu 10 mm), 4 Seilrollen mit Lager, Dyneema 3 mm, Bolzen.',
+    care: 'Rollen mit Abdeckung gegen Vereisen. Die große Scheibe gibt Übersetzung, die Schulter braucht am Arm das meiste Moment.' },
   { key: 'elbow', name: 'Ellbogen mit Seilscheibe', dist: 0.55,
     what: 'Beugt und streckt den Unterarm, zum Heranziehen, Hebeln und Halten.',
     how: 'Flanschlager zwischen Ober- und Unterarmschiene, Seilscheibe Ø 10 cm am Unterarm. Die Züge kommen am Oberarm entlang von oben: vorne beugen, hinten strecken.',
@@ -321,10 +325,10 @@ const PART_INFO = [
     parts: '8 Wägezellen 10 bis 20 kg, 8 Verstärker (HX711 oder NAU7802), gedruckte Schalen, Polster, Klettgurte.',
     care: 'Schale straff, Polster dünn, sonst wird die Regelung schwammig. Beim Einschalten 2 s ruhig stehen, dann stellt die Steuerung den Nullpunkt.' },
   { key: 'loop', name: 'Schlaufengreifer', dist: 0.85,
-    what: 'Hält Stämme an der Unterseite der Unterarme, zwei Schlaufen pro Arm, jede einzeln.',
-    how: 'Unter dem Unterarm ein Alu-U-Profil mit Zahnleiste. Jede Schlaufe ist Dyneema in einem Gummischlauch mit Federstahl-Einlage und bleibt dadurch offen wie ein Ring. Ein Ende hängt an einem Schnappschäkel, das andere läuft zu einer kleinen Winde mit Schneckengetriebe. Daumentaster: kurz = zuziehen, lang = öffnen. Regler „Schlaufen zu“ und „Stamm“ probieren.',
-    parts: 'Alu-U-Profil 30 × 20 × 3, Zahnleiste, 4 Schneckengetriebemotoren 24 V, Gummischlauch, Federstahldraht, Dyneema 4 mm, Schnappschäkel, Daumentaster.',
-    care: 'Schneckengetriebe hält ohne Strom. Notöffnung: Lasche am Schnappschäkel ziehen. Schläuche sind Verschleißteile, steckbar machen.' },
+    what: 'Hält Stämme am Handgelenk: rechts zwei Schlaufen, links eine, jede einzeln gesteuert.',
+    how: 'An der Unterseite des Handgelenks sitzt ein kurzer Schlaufenkopf mit Zahnleiste. Die Schlaufen kommen dort nach unten heraus, der Stamm liegt längs als Verlängerung des Unterarms, das Schnittende direkt am Handgelenk. Jede Schlaufe ist Dyneema in einem Gummischlauch mit Federstahl-Einlage und bleibt offen wie ein Ring. Ein Ende hängt an einem Schnappschäkel, das andere läuft innen an der Schiene zu einer kleinen Winde mit Schneckengetriebe. Daumentaster: kurz = zuziehen, lang = öffnen. Regler „Schlaufen zu“ und „Stamm“ probieren.',
+    parts: 'Schlaufenkopf aus Alu, Zahnleiste, 3 Schneckengetriebemotoren 24 V, Gummischlauch, Federstahldraht, Dyneema 4 mm, Schnappschäkel, Daumentaster.',
+    care: 'Schneckengetriebe hält ohne Strom. Notöffnung: Lasche am Schnappschäkel ziehen. Schleifen: rechts zwei Stümpfe, links einer, also bis zu drei Bäume.' },
   { key: 'foot', name: 'Steigbügel mit Spikes', dist: 0.75,
     what: 'Leitet die Last in den Boden, auch in Schlamm, Schnee und unebenem Gelände.',
     how: 'Sohlenrahmen nur so groß wie der Schuh, offen, damit Schlamm durchfällt. Kurze Spikes greifen. Zehenkorb vorne, Fersenbügel hinten, ein Ratschenriemen, wie bei einem Steigeisen. Die Unterschenkelschiene geht über ein gummigedämpftes Sprunggelenk und einen seitlichen Bügel unter die Schuhmitte.',
@@ -452,14 +456,22 @@ SIDE.forEach((sd, k) => {
   cur = 'hip'; fl = 4;
   {
     const g = G.torso;
-    flangeBearing(g, 0, 0, z + sd * 0.006, 1, sd);
+    // Abspreizgelenk: Scharnier mit Achse nach vorne am Ende des Hüftbügels, Gummianschläge ±20°
+    box(g, 0.06, 0.04, 0.03, M.aluDark, -0.03, 0.05, z);
+    put(g, mesh(cyl(0.009, 0.009, 0.075, 16), M.steel), -0.03, 0.05, z, 0, 0, Math.PI / 2);
+    for (const dy of [-0.012, 0.012]) box(g, 0.012, 0.01, 0.012, M.tpu, -0.065, 0.05 + dy, z + sd * 0.016);
     fl = null;
-    pulley(g, -0.095, 0.0, z + sd * 0.012, 0.022, 0.012);
-    box(g, 0.05, 0.016, 0.004, M.alu, -0.07, 0.0, z + sd * 0.004);
-    if (k === 1) hotspot('hip', g, 0.0, 0.04, z + sd * 0.06);
+    cur = 'rope';
+    pulley(g, -0.1, 0.13, ZR(sd), 0.016, 0.012);
+    tube(g, V(-0.155, 0.13, sd * 0.085), V(-0.1, 0.13, ZR(sd) - sd * 0.012), 0.012, M.aluDark);
+    cur = 'hip';
+    if (k === 1) hotspot('hip', g, -0.03, 0.1, z + sd * 0.05);
   }
   {
     const g = G.thigh[k];
+    cur = 'hip'; fl = 4;
+    flangeBearing(g, 0, 0, z + sd * 0.006, 1, sd);
+    fl = null;
     box(g, 0.07, 0.07, 0.008, M.alu, 0, 0, z + sd * 0.03);
     put(g, mesh(cyl(0.008, 0.008, 0.06, 12), M.steel), 0, 0, z + sd * 0.015, Math.PI / 2);
     box(g, 0.012, 0.025, 0.014, M.tpu, 0.04, 0.02, z + sd * 0.03);
@@ -471,11 +483,15 @@ SIDE.forEach((sd, k) => {
     rod(g, V(0, -0.205, z + sd * 0.012), V(0, -0.205, z + sd * 0.05), 0.003, M.chrome);
     put(g, mesh(new THREE.TorusGeometry(0.008, 0.0015, 6, 14), M.chrome), 0, -0.205, z + sd * 0.052);
     sensorCuff(g, -0.15, sd * D.hipHalf, 0.072, 0.07, z + sd * 0.03, sd, k === 1 ? 'thigh' : null);
+    cur = 'hip';                                                                                         // Drehlager: Fußspitze nach außen/innen
+    put(g, mesh(cyl(0.022, 0.022, 0.02, 24), M.steel), 0, -0.065, z + sd * 0.03);
+    put(g, mesh(new THREE.TorusGeometry(0.022, 0.003, 8, 24), M.chrome), 0, -0.065, z + sd * 0.03, Math.PI / 2);
     cur = 'rope';
-    pulley(g, -0.06, -0.11, z + sd * 0.045, 0.018, 0.012);
-    box(g, 0.06, 0.014, 0.004, M.alu, -0.03, -0.11, z + sd * 0.04);
-    pulley(g, 0.06, -D.thigh + 0.05, z + sd * 0.045, 0.02, 0.012);
-    box(g, 0.06, 0.014, 0.004, M.alu, 0.03, -D.thigh + 0.05, z + sd * 0.04);
+    sheave(g, 0, 0, ZR(sd), R_HIP, 0.01);                                                               // Umlenkscheibe auf der Hüftachse
+    pulley(g, -0.07, -0.17, ZR(sd), 0.016, 0.012);
+    box(g, 0.07, 0.014, 0.005, M.alu, -0.035, -0.17, z + sd * 0.042);
+    pulley(g, 0.075, -D.thigh + 0.1, ZR(sd), 0.016, 0.012);
+    box(g, 0.075, 0.014, 0.005, M.alu, 0.0375, -D.thigh + 0.1, z + sd * 0.042);
     cur = 'power'; box(g, 0.012, 0.03, 0.03, M.pcb, -0.02, -0.08, z + sd * 0.05);                      // IMU
     if (k === 1) { hotspot('leg', g, 0.03, -0.26, z + sd * 0.08); hotspot('rope', g, -0.07, -0.12, z + sd * 0.08); }
   }
@@ -493,9 +509,16 @@ SIDE.forEach((sd, k) => {
     for (let i = 0; i < 5; i++) put(g, mesh(cyl(0.003, 0.003, 0.022, 8), M.chip), 0, -0.21 - i * 0.022, z + sd * 0.03, Math.PI / 2);
     sensorCuff(g, -0.13, sd * D.hipHalf, 0.055, 0.06, z + sd * 0.03, sd, null);
     cur = 'rope';
-    box(g, 0.05, 0.012, 0.004, M.alu, 0.035, -0.12, z + sd * 0.04);
-    spring(g, 0.06, -0.15, z + sd * 0.045, 0.006, 0.035, 7, 0.0012);
-    put(g, mesh(new THREE.TorusGeometry(0.006, 0.002, 6, 12), M.steel), 0.06, -0.11, z + sd * 0.045, 0, Math.PI / 2);
+    {                                                                                                   // Kurvenscheibe am Knie: Hebel wächst mit der Beugung
+      const sh = new THREE.Shape();
+      for (let i = 0; i <= 60; i++) { const a = deg(-110 + 300 * i / 60), r = camR(a); i ? sh.lineTo(Math.cos(a) * r, Math.sin(a) * r) : sh.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
+      sh.lineTo(0, 0); sh.closePath();
+      const hole = new THREE.Path(); hole.absarc(0.025, 0.012, 0.012, 0, Math.PI * 2, true); sh.holes.push(hole);
+      const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.01, bevelEnabled: true, bevelThickness: 0.001, bevelSize: 0.001, bevelSegments: 1 }); geo.translate(0, 0, -0.005);
+      put(g, mesh(geo, M.alu), 0, 0, ZR(sd));
+      put(g, mesh(cyl(0.012, 0.012, Math.abs(ZR(sd) - z) + 0.01, 6), M.steel), 0, 0, (ZR(sd) + z) / 2, Math.PI / 2);
+      box(g, 0.012, 0.012, 0.012, M.steel, Math.cos(deg(-70)) * (camR(deg(-70)) - 0.008), Math.sin(deg(-70)) * (camR(deg(-70)) - 0.008), ZR(sd) + sd * 0.009);   // Seilklemme
+    }
   }
   cur = 'foot'; fl = 6;
   {
@@ -536,10 +559,12 @@ SIDE.forEach((sd, k) => {
     flangeBearing(g, 0, D.torso, zs + sd * 0.006, 0.8, sd);
     fl = null;
     cur = 'bowden';
-    // Hüllenanschlag hinter der Schulter für das Schulter-Zugpaar
-    box(g, 0.012, 2 * R_SH + 0.03, 0.01, M.aluDark, -0.125, D.torso, zDisc);
-    tube(g, V(-0.125, D.torso - 0.02, zDisc), V(-0.05, D.torso + 0.06, zs + sd * 0.004), 0.012, M.aluDark);
-    for (const s of [1, -1]) { put(g, mesh(cyl(0.006, 0.006, 0.02, 12), M.chrome), -0.115, D.torso + s * R_SH, zDisc, 0, 0, Math.PI / 2); }
+    // Umlenkrollen für das offene Schulter-Seilpaar: zwei auf der Achse des seitlichen Schwenkgelenks, zwei hinter der Seilscheibe
+    cur = 'shoulder';
+    box(g, 0.012, 2 * R_SH + 0.05, 0.01, M.aluDark, -0.13, D.torso, zDisc + sd * 0.012);
+    tube(g, V(-0.13, D.torso - 0.02, zDisc + sd * 0.012), V(-0.05, D.torso + 0.06, zs + sd * 0.004), 0.012, M.aluDark);
+    for (const s of [1, -1]) pulley(g, -0.13, D.torso + s * (R_SH + 0.012), zDisc, 0.012, 0.01);
+    for (const x of [-0.105, -0.135]) pulley(g, x, D.torso + 0.1, sd * 0.2, 0.012, 0.01);
     if (k === 1) hotspot('shoulder', g, 0.03, D.torso + R_SH + 0.03, zDisc + sd * 0.03);
   }
   {
@@ -576,44 +601,47 @@ SIDE.forEach((sd, k) => {
   }
 });
 
-/* ---------- 12 Schlaufengreifer an beiden Unterarmen ---------- */
-const loops = [];   // { ring, g, y, zc }
+/* ---------- 12 Schlaufengreifer am Handgelenk: rechts 2 Schlaufen, links 1 ---------- */
+const loops = [];   // { ring, hook, y, zc, xh, sd }
 const logs = [];
+const XH = -0.05;   // Unterseite des Schlaufenkopfs (Handflächenseite)
 SIDE.forEach((sd, k) => {
-  const g = G.fore[k], zc = sd * D.shHalf, zFo = ZS(sd) + sd * 0.014, xb = -0.062;
+  const g = G.fore[k], zc = sd * D.shHalf, zFo = ZS(sd) + sd * 0.014, yw = -D.fore;
+  const ys = k === 1 ? [yw - 0.005, yw - 0.09] : [yw - 0.005];
   cur = 'loop'; fl = k === 1 ? 0 : null;
-  // U-Profil unter dem Unterarm, Zahnleiste, zwei Halter zur Schiene
-  const y0 = -0.06, y1 = -D.fore - 0.01, Lc = y0 - y1, yc = (y0 + y1) / 2;
-  box(g, 0.004, Lc, 0.05, M.alu, xb, yc, zc);
-  for (const s of [-1, 1]) box(g, 0.022, Lc, 0.004, M.alu, xb - 0.011, yc, zc + s * 0.025);
-  for (let i = 0; i < 9; i++) put(g, mesh(new THREE.ConeGeometry(0.005, 0.01, 4), M.tpu), xb - 0.007, y0 - 0.01 - i * Lc / 9.5, zc, 0, 0, Math.PI / 2);
-  for (const yy of [-0.08, -0.2]) box(g, 0.02, 0.02, Math.abs(zFo - zc) + 0.01, M.aluDark, xb + 0.004, yy, (zFo + zc) / 2);
+  // Schlaufenkopf: kurzes Alu-Profil an der Handgelenk-Unterseite, Halter zur Unterarmschiene
+  const yTop = yw + 0.04, yBot = ys[ys.length - 1] - 0.02, Lh = yTop - yBot;
+  box(g, 0.012, Lh, 0.04, M.alu, XH + 0.006, (yTop + yBot) / 2, zc);
+  for (let i = 0; i < Math.round(Lh / 0.018); i++) put(g, mesh(new THREE.ConeGeometry(0.005, 0.01, 4), M.tpu), XH - 0.003, yTop - 0.01 - i * 0.018, zc, 0, 0, Math.PI / 2);
+  box(g, 0.02, 0.025, Math.abs(zFo - zc) + 0.012, M.aluDark, XH + 0.012, yw + 0.03, (zFo + zc) / 2);
+  tube(g, V(XH + 0.012, yw + 0.03, zFo), V(0, -0.12, zFo), 0.014, M.aluDark);
   fl = null;
-  // zwei Schlaufen (Gummischlauch mit Federstahl), Schnappschäkel, Seil zur Winde
-  for (const [i, yl] of [[0, -0.225], [1, -0.105]].values()) {
+  ys.forEach((yl, i) => {
     const ring = mesh(new THREE.TorusGeometry(1, 0.0075 / 0.075, 10, 40), M.hose); ring.rotation.x = Math.PI / 2; g.add(ring);
-    const hook = put(g, mesh(new THREE.TorusGeometry(0.008, 0.0022, 6, 14), M.chrome), xb - 0.004, yl, zc - sd * 0.03, 0, Math.PI / 2, 0);
-    box(g, 0.004, 0.012, 0.02, M.red, xb - 0.002, yl, zc - sd * 0.045);                                   // Zuglasche Notöffnung
-    rod(g, V(xb + 0.004, yl, zc + sd * 0.02), V(xb + 0.004, -0.05 - i * 0.012, zFo + sd * 0.03), 0.0018, M.rope);
-    loops.push({ ring, hook, g, y: yl, zc, xb, sd });
-  }
+    const hook = put(g, mesh(new THREE.TorusGeometry(0.008, 0.0022, 6, 14), M.chrome), XH, yl, zc - sd * 0.03, 0, Math.PI / 2, 0);
+    box(g, 0.004, 0.012, 0.02, M.red, XH + 0.002, yl, zc - sd * 0.045);                                      // Zuglasche Notöffnung
+    rod(g, V(XH + 0.008, yl, zc + sd * 0.022), V(XH + 0.012, yw + 0.03, zc + sd * 0.022), 0.0018, M.rope);
+    rod(g, V(XH + 0.012, yw + 0.03, zc + sd * 0.022), V(0.0, -0.05 - i * 0.055, zFo + sd * 0.03), 0.0018, M.rope);
+    loops.push({ ring, hook, y: yl, zc, sd });
+  });
   // Winden: Schneckengetriebemotor + Trommel außen an der Unterarmschiene
-  for (const [i, yw] of [[0, -0.04], [1, -0.095]].values()) {
-    box(g, 0.034, 0.046, 0.03, M.motorDark, 0.0, yw, zFo + sd * 0.03);
-    put(g, mesh(cyl(0.012, 0.012, 0.05, 18), M.steel), 0.026, yw, zFo + sd * 0.03, 0, 0, Math.PI / 2);
-    put(g, mesh(cyl(0.007, 0.007, 0.012, 16), M.alu), -0.022, yw, zFo + sd * 0.03, 0, 0, Math.PI / 2);
-  }
-  // Daumentaster an der Hand
+  ys.forEach((_, i) => {
+    const y = -0.05 - i * 0.055;
+    box(g, 0.034, 0.046, 0.03, M.motorDark, 0.0, y, zFo + sd * 0.03);
+    put(g, mesh(cyl(0.012, 0.012, 0.05, 18), M.steel), 0.026, y, zFo + sd * 0.03, 0, 0, Math.PI / 2);
+    put(g, mesh(cyl(0.007, 0.007, 0.012, 16), M.alu), -0.022, y, zFo + sd * 0.03, 0, 0, Math.PI / 2);
+  });
+  // Daumentaster an der Hand (rechts 2, links 1)
   box(g, 0.035, 0.03, 0.04, M.print, 0.035, -D.fore - 0.02, zc);
-  for (const [dz, mat] of [[-0.009, M.yellow], [0.009, M.motor]]) put(g, mesh(cyl(0.007, 0.007, 0.006, 16), mat), 0.053, -D.fore - 0.02, zc + dz, 0, 0, Math.PI / 2);
-  if (k === 1) hotspot('loop', g, -0.12, -0.17, zc + sd * 0.06);
+  (k === 1 ? [[-0.009, M.yellow], [0.009, M.motor]] : [[0, M.yellow]]).forEach(([dz, mat]) => put(g, mesh(cyl(0.007, 0.007, 0.006, 16), mat), 0.053, -D.fore - 0.02, zc + dz, 0, 0, Math.PI / 2));
+  if (k === 1) hotspot('loop', g, XH - 0.11, yw - 0.05, zc + sd * 0.05);
   cur = null;
-  // Stamm zum Ausprobieren (nicht Teil des Exos)
+  // Stamm zum Ausprobieren (nicht Teil des Exos): längs als Verlängerung des Unterarms, Schnittende am Handgelenk
   const lg = new THREE.Group(); lg.visible = false; g.add(lg);
-  const lr = 0.045;
-  const trunk = new THREE.Mesh(cyl(lr * 0.92, lr, 0.75, 20), M.bark); trunk.castShadow = true; trunk.position.set(xb - 0.006 - lr, -0.17, zc); lg.add(trunk);
-  const cut = new THREE.Mesh(cyl(lr - 0.002, lr - 0.002, 0.002, 20), M.wood); cut.position.set(xb - 0.006 - lr, -0.17 - 0.376, zc); lg.add(cut);
-  for (let i = 0; i < 5; i++) { const b = new THREE.Mesh(cyl(0.006, 0.01, 0.07, 6), M.bark); const a = i * 2.3; b.position.set(xb - 0.006 - lr + Math.cos(a) * lr, 0.05 + i * 0.03, zc + Math.sin(a) * lr); b.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9); lg.add(b); }
+  const lr = 0.045, xl = XH - 0.004 - lr, y0 = yw + 0.035, len = 0.75;
+  const trunk = new THREE.Mesh(cyl(lr * 0.9, lr, len, 20), M.bark); trunk.castShadow = true; trunk.position.set(xl, y0 - len / 2, zc); lg.add(trunk);
+  const cut = new THREE.Mesh(cyl(lr - 0.002, lr - 0.002, 0.002, 20), M.wood); cut.position.set(xl, y0 + 0.001, zc); lg.add(cut);
+  for (let i = 0; i < 6; i++) { const b = new THREE.Mesh(cyl(0.006, 0.01, 0.07, 6), M.bark); const a = i * 2.3; b.position.set(xl + Math.cos(a) * lr, y0 - 0.3 - i * 0.07, zc + Math.sin(a) * lr); b.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9); lg.add(b); }
   logs.push(lg);
 });
 
@@ -626,22 +654,33 @@ const angOf = (g, dx, dy) => { const v = new THREE.Vector3(dx, dy, 0).transformD
 const legLen = [];
 SIDE.forEach((sd, k) => {
   const zh = sd * D.exoHip, zs = ZS(sd), zDisc = zs + sd * 0.054;
-  // Beinseil
-  legLen[k] = dynTube(M.rope, 0.0032, 'rope', () => [W(G.torso, -0.25, 0.2, sd * 0.07), W(G.torso, -0.25, 0.12, sd * 0.1), W(G.torso, -0.12, 0.02, zh + sd * 0.012), W(G.torso, -0.095, -0.022, zh + sd * 0.012),
-    W(G.thigh[k], -0.06, -0.128, zh + sd * 0.045), W(G.thigh[k], 0.08, -D.thigh + 0.05, zh + sd * 0.045), W(G.shank[k], 0.06, -0.115, zh + sd * 0.045)]);
-  legLen[k].len0 = null; legLen[k].spool = 'leg' + k;
-  // Schulter: zwei Hüllen von der Box zum Anschlag, Innenzüge über die Seilscheibe
-  for (const s of [1, -1]) {
-    dynTube(M.housing, 0.0042, 'bowden', () => [W(G.torso, -0.25, 0.3 + s * 0.01, sd * 0.1), W(G.torso, -0.21, 0.42, sd * 0.13), W(G.torso, -0.17, D.torso - 0.04 + s * 0.03, zDisc - sd * 0.02), W(G.torso, -0.125, D.torso + s * R_SH, zDisc)], true);
-  }
-  dynTube(M.cable, 0.0016, 'bowden', () => {      // heben: oben, wickelt nach vorne ab
-    const c = W(G.upper[k], 0, 0, zDisc + 0.003 * sd), at = angOf(G.torso, 0, 1), aa = angOf(G.upper[k], Math.cos(deg(-70)), Math.sin(deg(-70)));
-    return [W(G.torso, -0.115, D.torso + R_SH, zDisc + 0.003 * sd), ...arcPts(c, R_SH, at, Math.min(aa, at))];
+  // Beinseil: Box → Rolle am Becken → hinten um die Umlenkscheibe der Hüfte → Rollen am Oberschenkel → vorne um die Kurvenscheibe am Knie
+  const zr = ZR(sd);
+  legLen[k] = dynTube(M.rope, 0.0032, 'rope', () => {
+    const T = G.thigh[k], S = G.shank[k], loc = (g, v) => g.worldToLocal(v.clone());
+    const tang = (p, r) => { const d = Math.hypot(p.x, p.y), b = Math.atan2(p.y, p.x), a = Math.acos(Math.min(1, r / Math.max(d, r))); return [b + a, b - a]; };
+    const norm2 = (a) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    const g1w = W(G.torso, -0.1, 0.13, zr), g1 = loc(T, g1w), g2 = V(-0.07, -0.17 + 0.016, zr);
+    const back = (p) => tang(p, R_HIP).map(norm2).reduce((x, y) => (Math.cos(x) < Math.cos(y) ? x : y));
+    const h1 = back(g1), h2 = back(g2), hip = [];
+    for (let i = 0; i <= 12; i++) { const a = h1 + (h2 - h1) * i / 12; hip.push(T.localToWorld(V(Math.cos(a) * R_HIP, Math.sin(a) * R_HIP, zr))); }
+    const g3w = W(T, 0.075 + 0.016, -D.thigh + 0.1, zr), g3 = loc(S, g3w);
+    let at = 0; for (let i = 0; i < 3; i++) at = Math.atan2(g3.y, g3.x) - Math.acos(Math.min(1, camR(at) / Math.hypot(g3.x, g3.y)));
+    const knee = []; const a1 = deg(-70);
+    for (let i = 0; i <= 14; i++) { const a = at + (a1 - at) * i / 14; knee.push(S.localToWorld(V(Math.cos(a) * camR(a), Math.sin(a) * camR(a), zr))); }
+    return [W(G.torso, -0.25, 0.2, sd * 0.07), W(G.torso, -0.25, 0.12, sd * 0.1), g1w, ...hip, W(T, -0.07 - 0.016, -0.17, zr), g3w, ...knee];
   });
-  dynTube(M.cable, 0.0016, 'bowden', () => {      // senken: unten
+  legLen[k].len0 = null; legLen[k].spool = 'leg' + k;
+  dynTube(M.aluDark, 0.011, 'hip', () => [W(G.torso, -0.03, 0.035, zh), W(G.thigh[k], -0.012, 0.03, zh + sd * 0.004)]);   // Schwinge Abspreizgelenk → Hüftlager
+  // Schulter: offenes Seilpaar von der Box über die Umlenkrollen auf die Seilscheibe
+  dynTube(M.rope, 0.0016, 'shoulder', () => {      // heben: oben, wickelt nach vorne ab
+    const c = W(G.upper[k], 0, 0, zDisc + 0.003 * sd), at = angOf(G.torso, 0, 1), aa = angOf(G.upper[k], Math.cos(deg(-70)), Math.sin(deg(-70)));
+    return [W(G.torso, -0.25, 0.48, sd * 0.1), W(G.torso, -0.105, D.torso + 0.112, sd * 0.2), W(G.torso, -0.13, D.torso + R_SH + 0.024, zDisc + 0.003 * sd), W(G.torso, -0.115, D.torso + R_SH, zDisc + 0.003 * sd), ...arcPts(c, R_SH, at, Math.min(aa, at))];
+  });
+  dynTube(M.rope, 0.0016, 'shoulder', () => {      // senken: unten
     const c = W(G.upper[k], 0, 0, zDisc - 0.003 * sd), ab = angOf(G.torso, 0, -1), aa = angOf(G.upper[k], Math.cos(deg(-90)), Math.sin(deg(-90)));
     let a1 = aa; while (a1 < ab) a1 += Math.PI * 2; if (a1 - ab > Math.PI * 1.6) a1 = ab;
-    return [W(G.torso, -0.115, D.torso - R_SH, zDisc - 0.003 * sd), ...arcPts(c, R_SH, ab, a1)];
+    return [W(G.torso, -0.24, 0.48, sd * 0.08), W(G.torso, -0.135, D.torso + 0.112, sd * 0.2), W(G.torso, -0.142, D.torso - R_SH - 0.012, zDisc - 0.003 * sd), W(G.torso, -0.115, D.torso - R_SH, zDisc - 0.003 * sd), ...arcPts(c, R_SH, ab, a1)];
   });
   // Ellbogen: Hüllen von der Box über die Schulter am Oberarm entlang
   for (const s of [1, -1]) {
@@ -720,12 +759,12 @@ benchLabel('Arm-Antrieb zerlegt', -0.02, 1.02, 0); benchLabel('Sensor-Manschette
 
 /* ---------- Kraftfluss (Beispiel: 3 m Baum fast senkrecht tragen) ---------- */
 const FLOW_TEXT = [
-  ['Schlaufen', 'Der Stamm (41 kg) hängt in zwei Schlaufen, je etwa 200 N. Die Zahnleiste hält ihn formschlüssig.'],
-  ['Unterarm, Ellbogen', 'Die Unterarmschiene trägt die Last zum Ellbogen: etwa 64 Nm, der Ellbogenmotor schafft bis 58 Nm.'],
-  ['Oberarm, Schulter', 'Schulter: etwa 133 Nm, der Motor schafft bis 82 Nm. Mit beiden Unterarmen am Stamm halbiert sich das je Seite.'],
+  ['Schlaufen am Handgelenk', 'Der Stamm (41 kg) hängt längs in den zwei rechten Schlaufen, je etwa 200 N. Die Zahnleiste hält ihn formschlüssig.'],
+  ['Unterarm, Ellbogen', 'Der Unterarm zeigt steil nach oben wie bei einer Fackel, die Last drückt fast längs: Ellbogen nur etwa 42 Nm, der Motor schafft bis 58 Nm.'],
+  ['Oberarm, Schulter', 'Schulter: etwa 100 Nm, der Motor schafft mit dem offenen Seilpaar bis etwa 100 Nm. Die linke Hand stützt den Stamm weiter oben.'],
   ['Rahmen', 'Schulterbügel → Rückenrahmen → Hüftbügel. Die Last läuft über Metall, nicht über deinen Rücken.'],
-  ['Hüftgelenke', 'Zusatzmoment beide Hüften etwa 97 Nm, das Exo schafft bis 286 Nm.'],
-  ['Beinschienen, Knie', 'Knie etwa 57 Nm, das Exo bis 180 Nm. Bei fast gestreckten Knien tragen die Schienen fast ohne Motor.'],
+  ['Hüftgelenke', 'Zusatzmoment beide Hüften etwa 57 Nm, das Exo schafft bis 286 Nm.'],
+  ['Beinschienen, Knie', 'Knie etwa 17 Nm, das Exo bis 240 Nm (Kurvenscheibe in der Hocke). Bei fast gestreckten Knien tragen die Schienen fast ohne Motor.'],
   ['Steigbügel', 'Alles zusammen geht unter der Schuhmitte in den Boden: Mensch, Exo und Baum, etwa 1.300 N.'],
 ];
 const flowMarks = [];
@@ -733,7 +772,7 @@ const flowArrow = new THREE.ArrowHelper(V(0, -1, 0), V(), 0.3, 0xD32F2F, 0.06, 0
 {
   const add = (g, i, x, y, z) => { const el = document.createElement('div'); el.className = 'hot'; el.style.background = 'var(--flow)'; el.style.pointerEvents = 'none'; el.textContent = 'K' + (i + 1); el.style.width = 'auto'; el.style.padding = '0 5px'; el.style.borderRadius = '12px';
     const o = new CSS2DObject(el); o.position.set(x, y, z); o.visible = false; g.add(o); flowMarks.push(o); };
-  add(G.fore[1], 0, -0.13, -0.22, D.shHalf + 0.06);
+  add(G.fore[1], 0, XH - 0.12, -D.fore - 0.03, D.shHalf + 0.06);
   add(G.fore[1], 1, 0.03, 0.0, D.exoSh + 0.09);
   add(G.upper[1], 2, 0.05, 0.02, D.exoSh + 0.11);
   add(G.torso, 3, -0.17, 0.3, 0.16);
@@ -749,7 +788,7 @@ function showFlowText() {
 }
 
 /* ================= Haltung ================= */
-const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0 };
+const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0 };
 const ex = { psi: null, eps: null };                       // Winkel des Exo-Arms (folgt dem Menschen)
 const live = { fUp: 0, fFo: 0, mSh: 0, mEl: 0 };
 const armAng = () => ({ psi: deg(5) + deg(110) * st.arm, eps: deg(8) + deg(100) * st.elb });
@@ -758,6 +797,18 @@ function pose(dt) {
   const ank = V(0, D.ankle, 0);
   const knee = ank.clone().add(V(Math.sin(phS) * D.shank, Math.cos(phS) * D.shank));
   const hip = knee.clone().add(V(-Math.sin(th) * D.thigh, Math.cos(th) * D.thigh));
+  // Beine spreizen: Drehung um eine Achse nach vorne durch das Hüftgelenk (freies Abspreizgelenk am Exo)
+  const ab = deg(20) * st.spread;
+  const legChain = (k) => {
+    const sd = SIDE[k], a = -sd * ab, pv = V(0, 0, sd * D.hipHalf);
+    const R1 = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(a, 0, th)), R2 = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(a, 0, -phS));
+    const tPos = hip.clone().add(pv).sub(pv.clone().applyMatrix4(R1));
+    const kW = tPos.clone().add(V(0, -D.thigh, sd * D.hipHalf).applyMatrix4(R1));
+    const sPos = kW.clone().sub(pv.clone().applyMatrix4(R2));
+    const aW = sPos.clone().add(V(0, -D.shank, sd * D.hipHalf).applyMatrix4(R2));
+    return { a, tPos, sPos, aW };
+  };
+  hip.y -= legChain(1).aW.y - D.ankle;                       // Füße bleiben am Boden
   G.torso.position.copy(hip); G.torso.rotation.set(0, 0, -lam);
   G.torso.updateMatrixWorld();
   const s2 = V(0, D.torso, 0).applyMatrix4(G.torso.matrixWorld);
@@ -767,9 +818,10 @@ function pose(dt) {
   const a = 1 - Math.exp(-dt / 0.16);
   ex.psi += (hum.psi - ex.psi) * a; ex.eps += (hum.eps - ex.eps) * a;
   for (let k = 0; k < 2; k++) {
-    G.thigh[k].position.copy(hip); G.thigh[k].rotation.set(0, 0, th);
-    G.shank[k].position.copy(knee); G.shank[k].rotation.set(0, 0, -phS);
-    G.foot[k].position.copy(ank);
+    const c = legChain(k);
+    G.thigh[k].position.copy(c.tPos); G.thigh[k].rotation.set(c.a, 0, th);
+    G.shank[k].position.copy(c.sPos); G.shank[k].rotation.set(c.a, 0, -phS);
+    G.foot[k].position.set(c.aW.x, c.aW.y, c.aW.z - SIDE[k] * D.hipHalf);
     for (const [U, F, psi, eps] of [[G.upper[k], G.fore[k], ex.psi, ex.eps], [BG.upper[k], BG.fore[k], hum.psi, hum.eps]]) {
       U.position.set(s2.x, s2.y, 0); U.rotation.set(0, 0, psi); U.updateMatrixWorld();
       const el = V(0, -D.upper, 0).applyMatrix4(U.matrixWorld);
@@ -788,16 +840,15 @@ function pose(dt) {
     if (show) { const dir = f > 0 ? 1 : -1; c.arr.setDirection(V(dir, 0, 0)); c.arr.position.set(dir * 0.065, c.y, c.zc + 0.0); c.arr.setLength(Math.min(0.16, 0.035 + Math.abs(f) * 0.004), 0.025, 0.018); }
   }
   // Schlaufen: offen → zu (um den Stamm, falls eingelegt)
-  const rOpen = 0.08, rClosed = logs[0].visible ? 0.045 + 0.0075 + 0.001 : 0.022;
-  const r = rOpen + (rClosed - rOpen) * st.loop;
   for (const L of loops) {
-    L.ring.scale.setScalar(r); L.ring.position.set(L.xb - 0.006 - r + (logs[0].visible ? 0 : 0), L.y, L.zc);
-    L.hook.position.set(L.xb - 0.004, L.y, L.zc - L.sd * Math.min(0.03, r * 0.5));
+    const rClosed = logs[L.sd > 0 ? 1 : 0].visible ? 0.045 + 0.0075 + 0.001 : 0.022, r = 0.08 + (rClosed - 0.08) * st.loop;
+    L.ring.scale.setScalar(r); L.ring.position.set(XH - 0.004 - r, L.y, L.zc);
+    L.hook.position.set(XH, L.y, L.zc - L.sd * Math.min(0.03, r * 0.5));
   }
   // Trommeln der Armmotoren drehen mit dem Gelenk
   for (let k = 0; k < 2; k++) { spools['sh' + k].rotation.z = (ex.psi + lam) * R_SH / R_DRUM; spools['el' + k].rotation.z = ex.eps * R_EL / R_DRUM; }
   // Kraftfluss-Pfeil an den Schlaufen
-  if (flowOn) { flowArrow.position.copy(W(G.fore[1], -0.14, -0.165, D.shHalf)); }
+  if (flowOn) { flowArrow.position.copy(W(G.fore[1], XH - 0.05, -D.fore - 0.05, D.shHalf)); }
   layDyn();
 }
 
@@ -840,7 +891,7 @@ controls.addEventListener('start', () => { tween = null; });
 
 /* ================= Bedienung ================= */
 let animOn = false, animT = 0;
-const sliders = ['squat', 'arm', 'elb', 'loop'];
+const sliders = ['squat', 'arm', 'elb', 'loop', 'spread'];
 const stopAnim = () => { animOn = false; $('anim').textContent = 'Bewegen'; };
 for (const id of sliders) $(id).addEventListener('input', () => { st[id] = Number($(id).value); stopAnim(); });
 $('anim').addEventListener('click', () => { animOn = !animOn; $('anim').textContent = animOn ? 'Anhalten' : 'Bewegen'; });
@@ -853,7 +904,7 @@ $('flow').addEventListener('change', () => {
   flowMarks.forEach((o) => { o.visible = flowOn; }); flowArrow.visible = flowOn;
   if (flowOn) {
     // Haltung „Tragen“: rechter Unterarm fast senkrecht am Stamm, Schlaufen zu
-    setSlider('squat', 0.12); setSlider('arm', 0.3); setSlider('elb', 1); setSlider('loop', 1);
+    setSlider('squat', 0.12); setSlider('arm', 0.5); setSlider('elb', 1); setSlider('loop', 1);
     $('log').checked = false; logs[0].visible = false; logs[1].visible = true;
     showFlowText();
     tween = { p0: camera.position.clone(), q0: controls.target.clone(), p1: V(2.0, 1.25, 2.6), q1: V(0.05, 0.85, 0.1), t0: performance.now() };
@@ -883,7 +934,7 @@ renderer.setAnimationLoop((now) => {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (animOn && !reduced) {
     animT += dt;
-    st.squat = 0.45 - 0.4 * Math.cos(animT * 1.0); st.arm = 0.4 - 0.35 * Math.cos(animT * 0.9); st.elb = 0.5 - 0.4 * Math.cos(animT * 1.3); st.loop = 0.5 - 0.5 * Math.cos(animT * 0.7);
+    st.squat = 0.45 - 0.4 * Math.cos(animT * 1.0); st.arm = 0.4 - 0.35 * Math.cos(animT * 0.9); st.elb = 0.5 - 0.4 * Math.cos(animT * 1.3); st.loop = 0.5 - 0.5 * Math.cos(animT * 0.7); st.spread = 0.5 - 0.5 * Math.cos(animT * 0.6);
     for (const id of sliders) $(id).value = st[id];
   }
   pose(dt);

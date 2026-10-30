@@ -40,7 +40,7 @@ Bastelwerkzeug, Teilen für ein paar Euro und einem Mikrocontroller bauen kann.
 | Oberschenkel links/rechts | Beinseil (Hüfte) | nur strecken |
 | Unterschenkel links/rechts | Beinseil (Knie) | nur strecken |
 
-**Warum die Baumlast die Messung nicht stört:** Der Stamm hängt in den Schlaufen am Schlaufenträger, und der ist fest mit
+**Warum die Baumlast die Messung nicht stört:** Der Stamm hängt in den Schlaufen am Schlaufenkopf, und der ist fest mit
 der Unterarmschiene verschraubt. Die Last geht über die Schienen in den Rahmen. Durch die Manschette geht nur, was **dein
 Körper** gegen das Exo drückt. Wenn das Exo unter der Baumlast etwas nachgibt, drückt die Manschette auf deinen Arm, du
 hältst dagegen, die Zelle misst das und das Exo drückt stärker. Du spürst dadurch einen Teil der Last und merkst, wenn
@@ -73,7 +73,7 @@ einem Seil: Die Steuerung nimmt den größeren der beiden Wünsche (Oberschenkel
 Beim normalen Gehen (Knie fast gestreckt, Rumpf aufrecht) bleiben die Beine durchsichtig und unterstützen nicht, erst ab
 einer Kniebeugung von etwa 25° oder beim Vorwärtsdrücken unter Last.
 
-**Arme (beide Richtungen):** Das Bowdenzug-Paar kann ziehen und drücken. Heben, Senken, Beugen und Strecken werden gleich
+**Arme (beide Richtungen):** Das Seilpaar kann in beide Richtungen ziehen. Heben, Senken, Beugen und Strecken werden gleich
 behandelt. Senken unter Last heißt dabei „kontrolliert nachgeben“: Das Exo hält gegen und lässt so schnell nach, wie du
 nach unten drückst.
 
@@ -94,7 +94,7 @@ nach unten drückst.
 |---|---|---|
 | Ein/Aus (Kippschalter mit Schutzkappe) | linker Schultergurt | Aus: alles stromlos, Exo läuft frei mit |
 | Not-Aus (Pilz) | linker Schultergurt, mit beiden Händen erreichbar | trennt Motoren hart vom Akku |
-| 2 Daumentaster je Hand | Handschlaufe am Unterarm | Schlaufe 1/2: kurz = zuziehen, lang = öffnen |
+| Daumentaster: rechts 2, links 1 | Handschlaufe am Unterarm | je Schlaufe: kurz = zuziehen, lang = öffnen |
 | Summer + Vibration | Schultergurt | Bereit, Grenze erreicht, Akku schwach, Fehler |
 
 Die Verstärkung K wird nicht im Feld verstellt, sondern einmal am Laptop oder Handy eingestellt.
@@ -120,12 +120,12 @@ Motor meldet Übertemperatur, CAN-Nachricht fehlt, Akkuspannung zu niedrig, Stur
 
 ```
 Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 6 Gelenkmotoren (CAN-Bus)
-                                                               ├── DC/DC 24 V ── 4 Motortreiber ── 4 Schlaufenwinden
+                                                               ├── DC/DC 24 V ── 3 Motortreiber ── 3 Schlaufenwinden
                                                                └── DC/DC 5 V ── Steuerung
 Steuerung: Teensy 4.1 (oder ESP32-S3) + CAN-Transceiver
            ├── 8 Wägezellen-Verstärker
            ├── 3 IMUs
-           ├── 4 Daumentaster, Ein/Aus, Summer, Vibrationsmotor
+           ├── 3 Daumentaster, Ein/Aus, Summer, Vibrationsmotor
            └── Watchdog: hängt die Software, fällt das Schütz ab
 ```
 
