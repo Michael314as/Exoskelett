@@ -124,7 +124,8 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 .switch{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;cursor:pointer}
 .switch input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
 
-.status{display:inline-flex;align-items:center;gap:7px;margin:10px 0 2px;padding:5px 11px;border-radius:999px;background:var(--surface-2);font-size:13px;font-weight:500;line-height:1.3}
+.statuses{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:10px 0 2px}
+.status{display:inline-flex;align-items:baseline;gap:7px;margin:0;padding:5px 11px;border-radius:14px;background:var(--surface-2);font-size:13px;font-weight:500;line-height:1.35}
 .status[data-level="ok"]{color:var(--ok)}
 .status[data-level="warn"]{color:var(--warn)}
 .status[data-level="bad"]{color:var(--bad)}
@@ -217,7 +218,8 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <li>Getragen wird der Baum fast senkrecht (78°), damit der Hebel klein bleibt. Die Person lehnt sich dabei zurück.</li>
           <li>Zum Aufladen wird der Baum fast lotrecht hochgehoben, bis das Schnittende auf Plateauhöhe ist. Dann kippt er 90° aufs Plateau, ohne geschoben zu werden.</li>
           <li>Das Plateau ist eine Ladefläche, zum Beispiel Anhänger oder LKW, zwischen 0 und 1,75&nbsp;m hoch.</li>
-          <li>Das Gewicht ist aus der Länge geschätzt (Nordmanntanne, 2&nbsp;m ≈ 15&nbsp;kg).</li>
+          <li>Bäume von 1 bis 4&nbsp;m, nicht eingenetzt. Das Gewicht ist aus der Länge geschätzt (Nordmanntanne, 2&nbsp;m ≈ 15&nbsp;kg).</li>
+          <li>Beim Umkippen darf der Baum frei fallen.</li>
           <li>Das Exo ist aktiv: Motoren an Hüfte, Knie, Schulter und Ellbogen, Rahmen aus Metall, Akku und Steuerung am Rücken.</li>
         </ul>
       </section>
@@ -231,22 +233,22 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         </div>
         <div class="ctl">
           <label for="len">Baumlänge</label><output id="lenOut" for="len">2,0 m · ≈ 15 kg</output>
-          <input type="range" id="len" min="1" max="3" step="0.1" value="2">
+          <input type="range" id="len" min="1" max="4" step="0.1" value="2">
+          <div class="scale" aria-hidden="true"><span>1 m</span><span>4 m</span></div>
         </div>
         <div class="ctl">
-          <label for="height">Deine Körpergröße</label><output id="heightOut" for="height">1,80 m</output>
-          <input type="range" id="height" min="1.5" max="2" step="0.01" value="1.8">
+          <label for="height">Körpergröße</label><output id="heightOut" for="height">1,75 m</output>
+          <input type="range" id="height" min="1.5" max="2" step="0.01" value="1.75">
         </div>
-        <label class="switch" for="net"><input type="checkbox" id="net"><span>Baum ist schon eingenetzt</span></label>
         <label class="switch" for="labels"><input type="checkbox" id="labels" checked><span>Beschriftungen in 3D</span></label>
       </section>
 
       <section class="block">
         <h3>Last durch den Baum</h3>
-        <p class="status" id="reach" data-level="ok"><span class="ic" aria-hidden="true">✓</span><span id="reachText">–</span></p>
+        <div class="statuses" id="statuses"></div>
         <div class="loads">
           <span class="h">Stelle</span><span class="h">jetzt</span><span class="h">max</span>
-          <span>Greifer · Kraft</span><span class="v" id="nowF">–</span><span class="v max" id="maxF">–</span><span class="bar"><i id="barF"></i></span>
+          <span>Greifer · Last</span><span class="v" id="nowF">–</span><span class="v max" id="maxF">–</span><span class="bar"><i id="barF"></i></span>
           <span>Greifer · Kippmoment</span><span class="v" id="nowM">–</span><span class="v max" id="maxM">–</span><span class="bar"><i id="barM"></i></span>
           <span>Schultern</span><span class="v" id="nowSh">–</span><span class="v max" id="maxSh">–</span><span class="bar"><i id="barSh"></i></span>
           <span>Hüfte / Rücken</span><span class="v" id="nowHip">–</span><span class="v max" id="maxHip">–</span><span class="bar"><i id="barHip"></i></span>
@@ -297,7 +299,7 @@ const mix = (a, b, t) => v3(lerp(a.x, b.x, t), lerp(a.y, b.y, t), lerp(a.z, b.z,
    Koordinaten: x = Laufrichtung (Baumspitze/Plateau), y = oben, z = seitlich (rechts = +z).
    Der Baum liegt mit dem Schnittende bei x = 0. */
 function derive(st) {
-  const H = st.H, s = H / 1.8, L = st.L, hp = st.hp, net = st.netted;
+  const H = st.H, s = H / 1.8, L = st.L, hp = st.hp;
   // Körpermaße als Anteile der Körpergröße (anthropometrische Mittelwerte)
   const B = { ankle: 0.039 * H, thigh: 0.245 * H, shank: 0.246 * H, torso: 0.288 * H,
     upper: 0.186 * H, lower: 0.196 * H, hipHalf: 0.05 * H, shHalf: 0.1 * H, neck: 0.11 * H, headR: 0.058 * H };
@@ -306,8 +308,8 @@ function derive(st) {
   const yStand = B.ankle + 0.996 * B.leg, yMin = 0.235 * H;
   // Baum
   const bare = clamp(0.12 * L + 0.04, 0.16, 0.32);        // astfreies Stammende
-  const R = net ? 0.075 * L + 0.04 : 0.28 * L;             // Radius der untersten Äste
-  const cLow = net ? 0.92 : 0.45;                          // so weit lassen sich die unteren Äste flachdrücken
+  const R = 0.28 * L;                                      // Radius der untersten Äste (nicht eingenetzt)
+  const cLow = 0.45;                                       // so weit lassen sich die unteren Äste flachdrücken
   const rt0 = 0.018 * L + 0.012;                           // Stammradius am Schnitt
   const jawHalf = Math.min(0.09, (bare - 0.05) / 2);
   const xg = 0.03 + jawHalf;                               // Greifpunkt, gemessen ab Schnittende
@@ -345,7 +347,7 @@ function derive(st) {
   const xSt3 = xSt2 - 0.6 * s;
   // Umkippen: das Schnittende ist Drehpunkt; ab diesem Winkel liegen die untersten Äste auf und heben es an
   const thContact = Math.min(thLift, Math.asin(clamp(rRest / bare, 0, 1)));
-  return { H, s, B, yStand, yMin, L, hp, net, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
+  return { H, s, B, yStand, yMin, L, hp, bare, R, cLow, rt0, jawHalf, xg, rtG, handHalf, mass, xcg,
     yTip, rRest, thLie, yCutLie, G0, thUp, yUp, offUp, leanUp, xe, Lp, Wp, xSt0, gripOf,
     thLift, offLift, cutCarryY, clear, dOff, cutAt, cutSetX, cutSetY, cutLiftY, Gl, xSt1, xSt2, xSt3, thContact, yRestG: hp + G0.y };
 }
@@ -561,18 +563,27 @@ function finalize(P, TL) {
   const uc = loaded ? Math.pow((P.thLift - P.thContact) / (P.thLift - P.thLie), 1 / 2.2) : 1;
   const thOpen = loaded ? P.thContact : thEnd;
   // Höhe des Schnittendes beim Kippen: steigt, sobald die untersten Äste aufliegen (relativ zur Absetzhöhe)
-  const cutY = (th) => (loaded ? pivot.y + P.cutAt(th) - P.cutAt(P.thLift) : pivot.y);
+  // (kam das Schnittende etwas zu tief an, legt sich der Baum trotzdem ganz auf seine Äste)
+  const cutY = (th) => (loaded
+    ? pivot.y + P.cutAt(th) - P.cutAt(P.thLift) + (P.cutSetY - pivot.y) * (P.thLift - th) / (P.thLift - P.thLie)
+    : pivot.y);
   const gEnd = P.gripOf(pivot.x, cutY(thEnd), thEnd);
   P.final = { pivot, loaded, thEnd, uc, cutY, G: P.gripOf(pivot.x, cutY(thOpen), thOpen), tree: { gx: gEnd.x, gy: gEnd.y, th: thEnd } };
 }
 
 function analyse(P, TL) {
-  const pk = { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, overLoad: false, overLight: false, Mcarry: 0, Mlift: 0, loaded: P.final.loaded };
-  const N = 360;
+  const pk = { F: 0, M: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, overLoad: false, overLight: false, Mcarry: 0, Mlift: 0, tip: 0, loaded: P.final.loaded };
+  const N = 360, mp = 75 * P.s * P.s;                        // Körpermasse (Annahme: 75 kg bei 1,80 m)
   for (let i = 0; i <= N; i++) {
     const ch = choreo(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loads(P, ch, pose, treePose(P, ch, pose));
     for (const k of ['F', 'M', 'sh', 'hip', 'knee', 'elb']) pk[k] = Math.max(pk[k], ld[k]);
     if (ch.carried) {
+      // Gleichgewicht: gemeinsamer Schwerpunkt aus Körper und Baumlast muss über dem Fuß bleiben (bis zum Fußballen)
+      const xUpper = pose.P.x + pose.dir.x * 0.45 * P.B.torso;
+      const xLegs = (pose.P.x + (pose.knees[0].x + pose.knees[1].x) / 2 + (pose.ankles[0].x + pose.ankles[1].x) / 2) / 3;
+      const W = mp * GRAV, xc = (W * (0.6 * xUpper + 0.4 * xLegs) + ld.F * pose.Gact.x + ld.M) / (W + ld.F);
+      const tip = xc - (Math.max(pose.ankles[0].x, pose.ankles[1].x) + 0.15 * P.s);
+      if (tip > pk.tip) { pk.tip = tip; pk.tipAt = ch.id; }
       pk.gy = Math.max(pk.gy, pose.Gact.y);
       if (ch.gb > 0.99) pk.gap = Math.max(pk.gap, pose.gripGap);
       if (pose.Gact.y > pose.S.y + 0.12 * P.s) {
@@ -587,7 +598,7 @@ function analyse(P, TL) {
 
 /* ================= Zustand ================= */
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { H: 1.8, L: 2.0, hp: 1.75, netted: false, labels: true, t: 0, playing: !reduced, view: 'oblique' };
+const state = { H: 1.75, L: 2.0, hp: 1.75, labels: true, t: 0, playing: !reduced, view: 'oblique' };
 let P, TL, PK;
 
 /* ================= Szene ================= */
@@ -663,7 +674,6 @@ const MAT = {
   led: std(0xFF7A33, 0.4, { emissive: 0xFF6A1A, emissiveIntensity: 1.3 }),
   fir1: std(0x2E5C43, 0.92, { flatShading: true }), fir2: std(0x376B4F, 0.92, { flatShading: true }),
   trunk: std(0x6A4A30, 0.95), cut: std(0xFFFFFF, 0.9, { map: cutTex }),
-  net: new THREE.MeshBasicMaterial({ color: 0xEDE7D6, wireframe: true, transparent: true, opacity: 0.75 }),
   deck: std(0xFFFFFF, 0.85, { map: deckTex }), frame: std(0x4A535A, 0.5, { metalness: 0.6 }),
   hazard: std(0xFFFFFF, 0.6, { map: hazardTex }),
   bgFir: std(0x5A8069, 1, { flatShading: true }), bgTrunk: std(0x6B5640, 1),
@@ -760,13 +770,6 @@ function buildTree(P) {
     up.add(half(Math.PI));
     g.add(low, up);
     tiers.push({ x: x0 + h * 0.3, r, low, up });
-  }
-  if (P.net) {
-    const pts = [new THREE.Vector2(P.rt0 + 0.012, Math.max(0.02, P.bare - 0.1))];
-    for (let k = 0; k <= 12; k++) { const f = k / 12; pts.push(new THREE.Vector2(P.R * 1.05 * Math.pow(1 - f, 0.92) + 0.02, P.bare + span * f)); }
-    const ng = new THREE.LatheGeometry(pts, 16);
-    ng.rotateZ(-Math.PI / 2);
-    g.add(new THREE.Mesh(ng, MAT.net));
   }
   // Schwerpunkt mit Hilfslinie
   const cgDot = new THREE.Mesh(new THREE.SphereGeometry(0.035, 16, 12), MAT.cgDot);
@@ -1057,12 +1060,12 @@ controls.addEventListener('start', () => { tween = null; });
 const $ = (id) => document.getElementById(id);
 const ui = {
   play: $('play'), scrub: $('scrub'), segs: $('segs'), capStep: $('capStep'), capTitle: $('capTitle'), capText: $('capText'),
-  hp: $('hp'), len: $('len'), height: $('height'), net: $('net'), labels: $('labels'),
-  hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), reach: $('reach'), reachText: $('reachText'), momentNote: $('momentNote'),
+  hp: $('hp'), len: $('len'), height: $('height'), labels: $('labels'),
+  hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), statuses: $('statuses'), momentNote: $('momentNote'),
   steps: [...document.querySelectorAll('#steps button')],
 };
-const ROWS = [['F', 'F', 'N'], ['M', 'M', 'Nm'], ['sh', 'Sh', 'Nm'], ['hip', 'Hip', 'Nm'], ['knee', 'Knee', 'Nm']]
-  .map(([k, id, unit]) => ({ k, unit, now: $('now' + id), max: $('max' + id), bar: $('bar' + id) }));
+const ROWS = [['F', 'F', 'kg', GRAV], ['M', 'M', 'Nm', 1], ['sh', 'Sh', 'Nm', 1], ['hip', 'Hip', 'Nm', 1], ['knee', 'Knee', 'Nm', 1]]
+  .map(([k, id, unit, div]) => ({ k, unit, div, now: $('now' + id), max: $('max' + id), bar: $('bar' + id) }));
 let segEls = [];
 
 function captionFor(id) {
@@ -1117,7 +1120,7 @@ function updateCaption(ch) {
 function updateLoads(ld) {
   for (const r of ROWS) {
     const v = ld[r.k], pk = PK[r.k];
-    const txt = `${Math.round(v)}${NB}${r.unit}`;
+    const txt = `${Math.round(v / r.div)}${NB}${r.unit}`;
     if (r.now.textContent !== txt) r.now.textContent = txt;
     r.bar.style.width = (pk > 0 ? clamp(v / pk, 0, 1) * 100 : 0).toFixed(1) + '%';
   }
@@ -1126,16 +1129,26 @@ function updateStatic() {
   ui.hpOut.textContent = `${fmt(state.hp)}${NB}m`;
   ui.lenOut.textContent = `${fmt(state.L, 1)}${NB}m · ≈${NB}${Math.round(P.mass)}${NB}kg`;
   ui.heightOut.textContent = `${fmt(state.H)}${NB}m`;
-  for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k])}${NB}${r.unit}`;
+  for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k] / r.div)}${NB}${r.unit}`;
   const gy = `${fmt(PK.gy)}${NB}m`;
-  let level = 'ok', icon = '✓', text = `Stamm höchstens auf ${gy}, unter Kopfhöhe`;
-  if (!PK.loaded) { level = 'bad'; icon = '✕'; text = `Zu hoch für die Arme: das Schnittende kommt nicht auf die Ladefläche, es fehlen ${Math.round(Math.max(PK.gap, P.hp - P.final.pivot.y) * 100)}${NB}cm`; }
-  else if (PK.gap > 0.02) { level = 'warn'; icon = '▲'; text = `Gerade noch erreichbar: Greifer bis ${gy}, über Kopf mit vollem Gewicht`; }
-  else if (PK.overLoad) { level = 'warn'; icon = '▲'; text = `Hochheben über Kopf mit vollem Gewicht: Greifer bis ${gy}`; }
-  else if (PK.overLight) { level = 'warn'; icon = '▲'; text = `Kurz über Kopf (bis ${gy}), aber fast ohne Last`; }
-  ui.reach.dataset.level = level;
-  ui.reach.querySelector('.ic').textContent = icon;
-  ui.reachText.textContent = text;
+  const kg = `${Math.round(P.mass)}${NB}kg`, cm = `${Math.round(PK.tip * 100)}${NB}cm`;
+  const where = { raise: 'beim Aufrichten', carry: 'beim Tragen', lift: 'beim Hochheben', approach: 'an der Kante' }[PK.tipAt] || '';
+  const items = [];
+  if (!PK.loaded) items.push(['bad', '✕', `Zu hoch für die Arme: das Schnittende kommt nicht auf die Ladefläche, es fehlen ${Math.round(Math.max(PK.gap, P.hp - P.final.pivot.y) * 100)}${NB}cm`]);
+  if (PK.tip > 0.08) items.push(['bad', '✕', `Kippgefahr ${where}: der Baum zieht nach vorne, der gemeinsame Schwerpunkt liegt ${cm} vor dem Fußballen`]);
+  else if (PK.tip > 0.02) items.push(['warn', '▲', `Gleichgewicht knapp ${where}: ${cm} vor dem Fußballen, ein Ausfallschritt nach vorne gleicht das aus`]);
+  if (PK.loaded && PK.gap > 0.02) items.push(['warn', '▲', `Gerade noch erreichbar: Greifer bis ${gy}`]);
+  if (PK.overLoad) items.push(['warn', '▲', `Über Kopf mit vollem Gewicht: ${kg} bis ${gy}`]);
+  else if (PK.overLight) items.push(['warn', '▲', `Kurz über Kopf (bis ${gy}), aber fast ohne Last`]);
+  if (!items.length) items.push(['ok', '✓', `Im grünen Bereich: Greifer höchstens auf ${gy}`]);
+  ui.statuses.replaceChildren(...items.map(([level, icon, text]) => {
+    const p = document.createElement('p');
+    p.className = 'status'; p.dataset.level = level;
+    const i = document.createElement('span'); i.className = 'ic'; i.setAttribute('aria-hidden', 'true'); i.textContent = icon;
+    const t = document.createElement('span'); t.textContent = text;
+    p.append(i, t);
+    return p;
+  }));
   ui.momentNote.textContent = `Das Kippmoment am Greifer ist nur kurz beim Aufrichten hoch (${Math.round(PK.M)}${NB}Nm, solange der Baum noch flach ist). Beim Tragen sind es ${Math.round(PK.Mcarry)}${NB}Nm, beim lotrechten Hochheben ${Math.round(PK.Mlift)}${NB}Nm. Beim Umkippen dreht der Greifer als Scharnier mit, dann wirkt kein Moment.`;
 }
 
@@ -1144,6 +1157,12 @@ function rebuild(parts) {
   TL = buildTimeline(P);
   finalize(P, TL);
   PK = analyse(P, TL);
+  // Sonne und Schattenbereich mitführen (lange Bäume, langes Plateau)
+  const cx = (P.xSt0 + P.xe + P.Lp) / 2, half = (P.xe + P.Lp - P.xSt0) / 2 + 1.5;
+  sun.target.position.set(cx, 0, 0);
+  sun.position.set(cx - 3.5, 10, 7);
+  Object.assign(sun.shadow.camera, { left: -half, right: half, top: half, bottom: -half });
+  sun.shadow.camera.updateProjectionMatrix();
   if (parts.tree) { if (tree) disposeGroup(tree.group); tree = buildTree(P); scene.add(tree.group); }
   if (parts.platform) { disposePlatform(); plat = buildPlatform(P); scene.add(plat.group); }
   if (parts.person) { if (person) disposeGroup(person.group); person = buildPerson(P); scene.add(person.group); }
@@ -1182,8 +1201,11 @@ for (const b of document.querySelectorAll('.views button')) b.addEventListener('
 ui.hp.addEventListener('input', () => { state.hp = Number(ui.hp.value); rebuild({ platform: true }); });
 ui.len.addEventListener('input', () => { state.L = Number(ui.len.value); rebuild({ tree: true, platform: true }); });
 ui.height.addEventListener('input', () => { state.H = Number(ui.height.value); rebuild({ person: true }); });
-ui.net.addEventListener('change', () => { state.netted = ui.net.checked; rebuild({ tree: true }); });
 ui.labels.addEventListener('change', () => { state.labels = ui.labels.checked; });
+// nach dem Loslassen des Reglers die Kamera an die neue Szene anpassen (langer Baum, anderes Plateau)
+ui.hp.addEventListener('change', () => setView(state.view));
+ui.len.addEventListener('change', () => setView(state.view));
+ui.height.addEventListener('change', () => setView(state.view));
 
 /* ================= Farbschema ================= */
 function token(name, fallback) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback; }
@@ -1236,10 +1258,10 @@ function loop(now) {
 
 function boot(data) {
   if (data && typeof data === 'object') {
-    for (const k of ['H', 'L', 'hp', 'netted', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
+    for (const k of ['H', 'L', 'hp', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
   }
   ui.hp.value = state.hp; ui.len.value = state.L; ui.height.value = state.H;
-  ui.net.checked = state.netted; ui.labels.checked = state.labels;
+  ui.labels.checked = state.labels;
   applyTheme();
   rebuild({ tree: true, platform: true, person: true });
   if (reduced && state.t === 0) state.t = (TL.byId.carry.t0 + TL.byId.carry.t1) / 2;
