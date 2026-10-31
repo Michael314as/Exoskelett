@@ -54,6 +54,7 @@ class App {
   bool light = false;
   float gainLevel[3] = {0.5f, 1.0f, 2.0f};   // Stufen sanft / normal / kräftig
   int level = 1;
+  uint8_t jointMask = 0x3F;                  // nicht aktive Gelenke bleiben stromlos (Prüfstand)
 
   App() { for (int i = 0; i < NJ; i++) joint[i] = Joint(defaultJoint(JointId(i))); setLevel(1); }
 
@@ -85,7 +86,7 @@ class App {
     sup.step(s, in.standingStill, dt);
     // Gelenke
     for (int i = 0; i < NJ; i++) {
-      if (sup.scale <= 0.f) { joint[i].off(); o.tau[i] = 0.f; continue; }
+      if (sup.scale <= 0.f || !((jointMask >> i) & 1u)) { joint[i].off(); o.tau[i] = 0.f; continue; }
       o.tau[i] = joint[i].step(in.joint[i], dt, sup.scale);
     }
     // Schlaufen: unabhängig vom Gelenkmodus (auch aus bleibt alles fest)

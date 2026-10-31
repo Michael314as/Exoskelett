@@ -14,7 +14,16 @@ build/teensy_host: test/teensy_host.cpp src/main_teensy.cpp src/exo_core.h src/e
 	mkdir -p build
 	$(CXX) $(CXXFLAGS) -DARDUINO -DEXO_HOST_TEST -Itest/stubs -Isrc test/teensy_host.cpp -o $@
 
+# Auswertung prüfen: Simulations-Log mit bekannten Werten → tools/auswertung.py muss sie wiederfinden
+ident: build/log_demo
+	./build/log_demo > build/log_demo.csv
+	python3 ../tools/auswertung.py build/log_demo.csv --erwartet 0.05,0.2,0.3,0.9
+
+build/log_demo: test/log_demo.cpp src/exo_core.h src/exo_app.h
+	mkdir -p build
+	$(CXX) $(CXXFLAGS) -Isrc test/log_demo.cpp -o $@
+
 clean:
 	rm -rf build
 
-.PHONY: test clean
+.PHONY: test ident clean

@@ -15,6 +15,7 @@ inline int analogRead(int) { return 512; }
 inline void analogWrite(int, int) {}
 inline void delayMicroseconds(int) {}
 inline uint32_t millis() { return 0; }
+inline uint32_t micros() { return 0; }
 struct IntervalTimer { template <class F> bool begin(F, int) { return true; } };
 #include <cstdio>
 #include <cstring>

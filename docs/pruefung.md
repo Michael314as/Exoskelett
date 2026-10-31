@@ -9,6 +9,7 @@ Die Firmware-Punkte F1–F3 laufen automatisch (`make -C firmware test`, GitHub-
 | F1 | Simulation und Abnahmetests | `make -C firmware test` | „ALLE TESTS BESTANDEN“ | ☐ |
 | F2 | Teensy-Build | `firmware/tools/build_teensy.sh …` | `exo.hex` entsteht, keine Warnung im eigenen Code | ☐ |
 | F3 | Fertigungsdateien | `python3 tools/fertigung.py` | keine FEHLER-Zeile | ☐ |
+| F4 | Auswertungsskript | `make -C firmware ident` | „alle innerhalb 20 %“ | ☐ |
 | P1 | Passform | 30 min gehen, Treppe, Hocke | keine Druckstelle, Manschetten rutschen < 1 cm | ☐ |
 | P2 | Gelenkachsen | Klebepunkte Körper vs. Exo von der Seite fotografieren | Abstand < 1,5 cm in Stand und Hocke | ☐ |
 | P3 | Freiheitsgrade | Bein abspreizen, Fußspitze drehen, unebener Boden | ±20° Abspreizen, ±15° Drehen ohne Anschlag im Normalgang | ☐ |
@@ -23,6 +24,7 @@ Die Firmware-Punkte F1–F3 laufen automatisch (`make -C firmware test`, GitHub-
 | P12 | Überlast | 20 kg an eine Manschette | Puffer liegt an, Zelle unbeschädigt, Wert nach Entlasten wieder 0 ± 1 N | ☐ |
 | P13 | Einschalten | kurz Ein, 2 s ruhig | Ring weiß, dann grün; kein Fehler | ☐ |
 | P14 | Sanftes Aufwachen | Kraftmesser an Manschette | volle Unterstützung erst nach ~3 s, kein Sprung | ☐ |
+| P14b | Parameter bestimmt | Prüfstand-Log, `tools/auswertung.py` | Modellgüte R² ≥ 0,8; Werte in Simulation und Firmware übernommen, F1 grün | ☐ |
 | P15 | Leichtgängigkeit | Holzarm im Prüfstand frei bewegen, Kraftmesser | Kraft mit Regelung < 60 % von ausgeschaltet | ☐ |
 | P16 | Verstärkung | 10 kg am Holzarm halten, Stufe 1/2/3 | gemessene Handkraft 67/50/33 % (±10 %) | ☐ |
 | P17 | Stabilität | Stufe 3, Arm anstoßen | kein Schwingen, Ruhe in < 0,5 s | ☐ |

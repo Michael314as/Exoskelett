@@ -251,6 +251,20 @@ int main() {
     check(!parseStatus("S,AKTIV,82").valid && !parseStatus("Unsinn").valid && !parseStatus("S,X,150,9,0,0,0,").valid, "kaputte Zeilen werden verworfen");
   }
 
+  std::printf("12) Prüfstand-Modus: nur Ellbogen rechts aktiv\n");
+  {
+    Settings c; static char out[96]; ConsoleIO io; io.print = [](const char* t) { std::snprintf(out, sizeof out, "%s", t); };
+    static bool logState = false; io.setLog = [](bool on) { logState = on; };
+    check(runCommand("pruefstand", c, io) && c.jointMask == (1u << ElR), "Konsole: pruefstand setzt nur Ellbogen rechts");
+    check(runCommand("log 1", c, io) && logState, "Konsole: Messdaten-Log an");
+    App app; app.jointMask = c.jointMask; Inputs in; Outputs o; const float dt = 0.005f;
+    auto run = [&](float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
+    in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);
+    in.joint[ShR].cuffN = 40.f; in.joint[ShR].q = 0.8f; in.joint[ElR].cuffN = 40.f; in.joint[ElR].q = 1.0f; run(1.f);
+    check(o.tau[ShR] == 0.f && std::fabs(o.tau[ElR]) > 3.f, "nur das Prüfstand-Gelenk bekommt Moment, die anderen bleiben stromlos");
+    check(runCommand("voll", c, io) && c.jointMask == 0x3F, "Konsole: voll schaltet alle Gelenke frei");
+  }
+
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);
   return fails ? 1 : 0;
 }

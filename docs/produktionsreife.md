@@ -16,7 +16,8 @@ noch die CE-Konformität dazu (siehe unten).
 | Druckteile | 12 STL | wasserdicht, passen in den A1 mini |
 | Stückliste, Verdrahtung | fertig | [stueckliste.md](stueckliste.md), [verdrahtung.md](verdrahtung.md) (Pinplan = Firmware) |
 | Montage, Kalibrierung | fertig | [montage.md](montage.md), Werkstatt-Konsole in der Firmware (`null`, `kal`, `speichern`) |
-| Abnahme | Protokoll fertig | [pruefung.md](pruefung.md): 33 Punkte mit messbaren Kriterien |
+| Abnahme | Protokoll fertig | [pruefung.md](pruefung.md): 35 Punkte mit messbaren Kriterien |
+| Prüfstand-Modus, Messdaten-Log, Parameterbestimmung | fertig | `tools/auswertung.py` findet bekannte Werte aus einem Simulations-Log auf 20 % genau (`make -C firmware ident`) |
 | Risikobeurteilung | fertig | [risikobeurteilung.md](risikobeurteilung.md) |
 | Wartung | fertig | [wartung.md](wartung.md), Hinweise aus den Betriebsstunden in der Firmware |
 
@@ -31,7 +32,7 @@ beim Einschalten, blockierendes E-Paper im Regeltakt, zu dünne Stege an fünf L
 | 1. Kaufteile bestellen; **Lochbild Flanschlager und Motor mit Datenblatt abgleichen**, Parameter in `tools/fertigung.py` anpassen | richtige DXF | 1 Woche |
 | 2. Prototyp-Satz Laserteile bestellen, drucken, montieren ([montage.md](montage.md)) | Exo Nr. 1 | 4–8 Wochen |
 | 3. Abnahme P1–P20 am Prüfstand | gemessene Werte | 1–2 Wochen |
-| 4. Gemessene Werte (Polsterhärte, Reibung, Trägheit) in die Simulation eintragen, Verstärkung und Filter neu einstellen | Firmware v1.0 | 1 Woche |
+| 4. Prüfstand-Log aufnehmen (`pruefstand`, `log 1`), mit `tools/auswertung.py` Trägheit, Reibung, Schwerkraft bestimmen, in Simulation und Firmware eintragen, Verstärkung neu einstellen | Firmware v1.0 | 1 Woche |
 | 5. Abnahme P21–P30 am Körper | Exo freigegeben | 1–2 Wochen |
 | 6. Eine Saison Einsatz, Mängelliste führen | Änderungsliste | 1 Saison |
 | 7. Änderungen einarbeiten, Zeichnungen einfrieren (Git-Tag „v1.0“), Exo Nr. 2 nur nach Repository bauen | **produktionsreif** | 4–8 Wochen |

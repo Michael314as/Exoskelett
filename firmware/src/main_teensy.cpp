@@ -58,7 +58,7 @@ static bool readMotors(JointInput* j) {
   bool ok = true;
   for (int i = 0; i < NJ; i++) {
     j[i].q = kTr[i].jointAngleFrom(motorState[i].pos - cfg.joint0[i]); j[i].qd = kTr[i].jointVelFrom(motorState[i].vel);
-    if (millis() - lastReplyMs[i] > 50) ok = false;
+    if (((cfg.jointMask >> i) & 1u) && millis() - lastReplyMs[i] > 50) ok = false;   // nur eingebaute Motoren prüfen
   }
   return powerOnTime < 0.6f ? true : ok;          // Motoren brauchen nach dem Schütz einen Moment zum Hochfahren
 }
@@ -147,6 +147,15 @@ static void sendStatus(const Outputs& o, float batteryV) {
   if (Serial1.availableForWrite() >= int(strlen(b))) Serial1.write(b);          // nie warten: lieber eine Zeile auslassen
 }
 
+// ---------- Messdaten-Log (Prüfstand): Grundlage für tools/auswertung.py ----------
+static bool logOn = false;
+static void setLog(bool on) { logOn = on; }
+static void logLine(const Outputs& o) {
+  char b[80];
+  snprintf(b, sizeof b, "%lu,%.5f,%.4f,%.2f,%.3f\n", (unsigned long)micros(), double(in.joint[ElR].q), double(in.joint[ElR].qd), double(in.joint[ElR].cuffN), double(o.tau[ElR]));
+  if (Serial.availableForWrite() >= int(strlen(b))) Serial.write(b);          // nie blockieren
+}
+
 // ---------- Einstellungen und Konsole ----------
 static bool saveSettings(const Settings& s) { EEPROM.put(0, s); Settings chk; EEPROM.get(0, chk); return valid(chk); }
 static void consolePrint(const char* t) { Serial.print(t); }
@@ -156,7 +165,7 @@ static void pollConsole() {
   while (Serial.available()) {
     const char ch = char(Serial.read());
     if (ch == '\n' || ch == '\r') {
-      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; runCommand(line, cfg, io); app.setLevel(cfg.level); }
+      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; io.setLog = setLog; runCommand(line, cfg, io); app.setLevel(cfg.level); app.jointMask = cfg.jointMask; }
                else Serial.print("Konsole nur, wenn das Exo aus ist\n"); }
       n = 0;
     } else if (n < sizeof line - 1) line[n++] = ch;
@@ -172,7 +181,7 @@ void setup() {
   Serial.begin(115200); Serial1.begin(115200);
   EEPROM.get(0, cfg);
   if (!valid(cfg)) cfg = Settings();                                            // ungültig oder neu: Werkseinstellungen
-  app.setLevel(cfg.level);
+  app.setLevel(cfg.level); app.jointMask = cfg.jointMask;
   can.begin(); can.setBaudRate(1000000);
   peripheralsBegin();
   ctlTimer.begin([] { tick = true; }, 5000);                                    // 200 Hz
@@ -204,7 +213,8 @@ void loop() {
   powerOnTime = power ? powerOnTime + dt : 0.f;
   if (power && !motorsOn && powerOnTime > 0.3f) motorsEnable(true);
   if (!power && motorsOn) motorsOn = false;                                     // ohne Strom sind sie ohnehin aus
-  if (motorsOn) for (int i = 0; i < NJ; i++) motorSendTorque(i, o.tau[i]);
+  if (motorsOn) for (int i = 0; i < NJ; i++) if ((cfg.jointMask >> i) & 1u) motorSendTorque(i, o.tau[i]);
+  if (logOn) logLine(o);
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
   digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate);
 

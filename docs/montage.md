@@ -41,7 +41,16 @@ Kabel: [verdrahtung.md](verdrahtung.md).
    - für jede Zelle wiederholen, dann `speichern`.
 3. **Prüfen P10–P12** (Vorzeichen jeder Zelle, Rauschen, Überlast).
 
-## 6. Erste Bewegung
-1. Stufe sanft: `stufe 0`, `speichern`.
-2. Prüfstand-Abnahme **P13–P20**, dann Körper-Abnahme **P21–P30** laut Prüfprotokoll.
+## 6. Prüfstand und Parameter
+1. Holzarm mit Scharnier, Seilscheibe Ellbogen, Bowdenzug-Paar, ein Motor (ID 6) und die Unterarm-Manschette (Zelle 7).
+2. Konsole: `pruefstand`, `stufe 0`, `speichern`. Dann sind nur Motor 6 und seine Manschette aktiv.
+3. `log 1`, Ausgabe mitschreiben, Exo einschalten, Holzarm 30 s an der Manschette führen (langsam und schnell).
+4. `python3 tools/auswertung.py log.csv`: Trägheit, Reibung und Schwerkraft des echten Gelenks. Die Werte in
+   `firmware/test/sim_test.cpp` (struct Plant) eintragen, `make -C firmware test` laufen lassen, Reibungsausgleich und
+   Schwerkraft in `firmware/src/exo_app.h` (defaultJoint) übernehmen, neu bauen und flashen.
+5. Prüfstand-Abnahme **P13–P20**.
+
+## 7. Erste Bewegung am Körper
+1. Konsole `voll`, Stufe sanft: `stufe 0`, `speichern`.
+2. Körper-Abnahme **P21–P30** laut Prüfprotokoll.
 3. Erst danach Stufe normal, dann leichte Bäume.

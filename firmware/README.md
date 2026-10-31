@@ -15,6 +15,7 @@ leicht, weich, ohne Zittern, mit spürbarer Verstärkung und sicherem Abschalten
 | `tools/build_teensy.sh` | baut `exo.hex` für den Teensy 4.1 mit ARM-GCC (ohne IDE) |
 | `test/teensy_host.cpp` | baut den Teensy-Code mit Platzhaltern auf dem PC und lässt 1000 Regeltakte laufen |
 | `test/sim_test.cpp` | Physik-Simulation (Mensch, Weichteile, Manschette, Wägezelle, Exo-Gelenk, Motor) und Abnahmetests |
+| `test/log_demo.cpp` | erzeugt ein Prüfstand-Log mit bekannten Werten; `make ident` prüft damit `tools/auswertung.py` |
 
 Starten auf dem PC (Linux/Mac, g++ oder clang++), führt Simulation, Treibertests und den Teensy-Testbuild aus:
 
@@ -71,6 +72,6 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 - **Auf echter Hardware laufen lassen:** `exo.hex` auf einen Teensy 4.1 flashen, Motoren und Sensoren anschließen,
   Prüfprotokoll [docs/pruefung.md](../docs/pruefung.md) P5–P20.
 - **ESP32-C3 bauen:** Der Code ist geschrieben, der ESP32-Build ist hier nicht gelaufen (kein ESP32-Compiler verfügbar).
-- **Abgleich mit echter Hardware:** Steifigkeit der Polster, Reibung der Bowdenzüge und Trägheit sind geschätzt.
-  Auf dem Prüfstand werden sie gemessen und hier eingetragen, danach wird die Verstärkung neu eingestellt.
+- **Abgleich mit echter Hardware:** Reibung, Trägheit und Schwerkraft sind geschätzt. Am Prüfstand (Konsole `pruefstand`,
+  `log 1`) aufnehmen und mit `python3 tools/auswertung.py log.csv` bestimmen, dann eintragen ([docs/montage.md](../docs/montage.md), Abschnitt 6).
 - Ob es sich wirklich gut anfühlt, entscheidest du am Prüfstand und beim Tragen.
