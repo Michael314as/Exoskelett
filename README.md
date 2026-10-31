@@ -67,7 +67,8 @@ Beide Seiten herunterladen und im Browser öffnen; sie brauchen Internet für [t
 **Ablauf:** [`visualisierung/use-case-christbaum.html`](visualisierung/use-case-christbaum.html)
 - Aufladen und Schleifen abspielen, anhalten oder an jede Stelle springen
 - Plateau-Höhe, Baumlänge, Baumgewicht, Anzahl Bäume, Körper- und Exo-Gewicht einstellen
-- Grobe Lastanzeige und Hinweise, wenn die Arme nicht reichen oder das Gleichgewicht kippt
+- Grobe Lastanzeige und Hinweise, wenn die Arme nicht reichen oder das Gleichgewicht kippt; bei Bedarf macht die Figur automatisch einen Ausfallschritt
+- Dämmerung in der verschneiten Plantage mit Arbeitslicht, LED-Ring und Baumzähler (oder Tag)
 
 ## Kräfte, kurz
 

@@ -81,9 +81,10 @@ h1{margin:2px 0 0;font:700 32px/1.02 var(--font-display);letter-spacing:.005em;t
 .cap-text{margin:0;font-size:13px;line-height:1.45}
 
 .views{position:absolute;top:12px;right:12px;display:flex;gap:2px;padding:3px}
-.views button{border:0;background:transparent;color:var(--muted);font:500 13px/1 var(--font-body);padding:8px 10px;border-radius:6px;cursor:pointer}
-.views button:hover{color:var(--fg)}
-.views button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.envsw{position:absolute;top:56px;right:12px;display:flex;gap:2px;padding:3px}
+.views button,.envsw button{border:0;background:transparent;color:var(--muted);font:500 13px/1 var(--font-body);padding:8px 10px;border-radius:6px;cursor:pointer}
+.views button:hover,.envsw button:hover{color:var(--fg)}
+.views button[aria-pressed="true"],.envsw button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
 
 .transport{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:10px;padding:7px 10px 7px 7px}
 .play{flex:none;width:38px;height:38px;border:0;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer}
@@ -100,7 +101,7 @@ h1{margin:2px 0 0;font:700 32px/1.02 var(--font-display);letter-spacing:.005em;t
 .seg.on b{color:var(--accent-ink)}
 #scrub{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
 
-.views button:focus-visible,.play:focus-visible,.steps button:focus-visible,.panel input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.views button:focus-visible,.envsw button:focus-visible,.play:focus-visible,.steps button:focus-visible,.panel input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
 .block{padding:14px 16px 16px}
@@ -132,6 +133,8 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 .switch{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;cursor:pointer}
 .switch input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
 
+.count{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.count b{font:600 20px/1 var(--font-display);color:var(--fg);margin-left:4px}
 .statuses{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:10px 0 2px}
 .status{display:inline-flex;align-items:baseline;gap:7px;margin:0;padding:5px 11px;border-radius:14px;background:var(--surface-2);font-size:13px;font-weight:500;line-height:1.35}
 .status[data-level="ok"]{color:var(--ok)}
@@ -166,6 +169,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
   .caption{position:static;max-width:none;padding:10px 12px}
   .cap-title{font-size:19px}
   .views{top:8px;right:8px}
+  .envsw{top:50px;right:8px}
   .transport{left:8px;right:8px;bottom:8px}
 }
 </style>
@@ -173,7 +177,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 <div class="app">
   <header class="top">
     <div>
-      <p class="kicker" id="kicker">Exoskelett · Entwurf 3.1 · Use Case 1</p>
+      <p class="kicker" id="kicker">Exoskelett · Entwurf 3.2 · Use Case 1</p>
       <h1 id="title">Christbaum aufladen</h1>
       <div class="scen" role="group" aria-label="Use Case">
         <button type="button" id="scLoad" aria-pressed="true">Aufladen</button>
@@ -191,6 +195,10 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
         <button type="button" id="viewOblique" data-view="oblique" aria-pressed="true">Schräg</button>
         <button type="button" id="viewSide" data-view="side" aria-pressed="false">Seite</button>
         <button type="button" id="viewFollow" data-view="follow" aria-pressed="false">Folgen</button>
+      </div>
+      <div class="envsw overlay" role="group" aria-label="Licht">
+        <button type="button" data-env="day" aria-pressed="false">Tag</button>
+        <button type="button" data-env="dusk" aria-pressed="true">Dämmerung</button>
       </div>
       <div class="transport overlay">
         <button type="button" class="play" id="play" aria-label="Pause">
@@ -282,6 +290,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 
       <section class="block">
         <h3>Last durch den Baum</h3>
+        <p class="count" aria-live="polite">Bäume heute <b id="count">0</b></p>
         <div class="statuses" id="statuses"></div>
         <div class="loads">
           <span class="h">Stelle</span><span class="h">jetzt</span><span class="h">max</span>
@@ -419,22 +428,33 @@ function gait(xa, xb, k, step) {
     const p = c + off, i = Math.floor(p), f = p - i, q = f >= 0.6 ? (f - 0.6) / 0.4 : 0;
     return { x: xa + stride * (i + smooth(0, 1, q)), lift: f >= 0.6 ? Math.sin(Math.PI * q) : 0 };
   };
-  return { x: xa + dist * k, feet: [foot(0), foot(0.5)] };
+  return { x: xa + dist * k, feet: [foot(0), foot(0.5)], c, n };
 }
 
+// Ausfallschritt aus dem Gehen heraus auflösen bzw. einnehmen: der Fuß wechselt seinen Versatz nur, während er
+// in der Luft ist (erster bzw. letzter eigener Schritt), so rutscht er nie am Boden
+function swingW(c, n, off, last) {
+  const i = last ? n - 1 : 0, a = i + 0.6 - off;
+  return smooth(0, 1, (c - a) / 0.4);
+}
 // Choreografie: wo stehen die Füße, wohin greifen die Hände, ist der Greifer zu?
 function choreo(P, TL, t) {
   const ph = TL.ph.find((p) => t < p.t1) || TL.ph[TL.ph.length - 1];
   const u = clamp((t - ph.t0) / (ph.t1 - ph.t0), 0, 1);
   const s = P.s, fz = 0.12 * s;
-  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, lean: 0, th: P.thLie, twoHand: 0, G: { x: P.G0.x, y: P.G0.y } };
-  let x = P.xSt0, feet = null;
-  const walk = (xa, xb, k, step) => { const g = gait(xa, xb, k, step); x = g.x; feet = g.feet; };
+  const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, lean: 0, th: P.thLie, twoHand: 0, G: { x: P.G0.x, y: P.G0.y }, lunge: 0 };
+  let x = P.xSt0, feet = null, gg = null;
+  const walk = (xa, xb, k, step) => { gg = gait(xa, xb, k, step); x = gg.x; feet = gg.feet; };
+  // Ausfallschritt (nur wenn die Gleichgewichtsanalyse ihn braucht): linker Fuß vor, Becken etwas mit
+  const LD = P.lungeD || 0;
+  let f0 = 0, l0 = 0, px = 0;
   switch (ph.id) {
     case 'grip':
       o.gb = ease(u / 0.8); o.jaw = smooth(0.72, 1, u); o.twoHand = 1;
+      if (LD) { const w = smooth(0, 0.3, u); f0 = LD * w; l0 = Math.sin(Math.PI * w); px = 0.5 * LD * w; o.lunge = w; }
       break;
     case 'raise':
+      f0 = LD; px = LD * lerp(0.5, 0.3, smooth(0.6, 1, u)); o.lunge = LD ? 1 : 0;
       // rechte Hand am Stumpf als Drehpunkt, linke Hand weit oben am Stamm: zurücklehnen und den Baum in die Senkrechte ziehen
       o.gb = 1; o.jaw = 1; o.carried = true; o.twoHand = 1;
       o.G = { x: P.G0.x, y: lerp(P.G0.y, P.yUp, ease(u)) };
@@ -445,11 +465,13 @@ function choreo(P, TL, t) {
       o.gb = 1; o.jaw = 1; o.carried = true; o.th = P.thUp; o.lean = -P.leanUp; o.twoHand = 1;
       walk(P.xSt0, P.xSt1, ease(u), 0.55 * s);
       o.G = { x: x + P.offUp, y: P.yUp };
+      f0 = LD; px = 0.3 * LD; o.lunge = LD ? 1 : 0;           // Nachstellschritte: der linke Fuß bleibt vorne
       break;
     case 'lift': {
       // fast lotrecht balancieren und hochheben (bzw. absenken), bis das Schnittende knapp über der Ladefläche ist
       o.gb = 1; o.jaw = 1; o.carried = true; x = P.xSt1; o.lean = -P.leanUp;
       o.twoHand = 1 - smooth(0, 0.4, u);      // zum Hochheben greift auch die linke Hand unten
+      f0 = LD; px = 0.3 * LD; o.lunge = LD ? 1 : 0;
       const k = ease(u);
       o.th = lerp(P.thUp, P.thLift, smooth(0, 0.5, u));
       const cx0 = P.xSt1 + P.offUp - P.xg * Math.cos(P.thUp);
@@ -461,6 +483,8 @@ function choreo(P, TL, t) {
       o.gb = 1; o.jaw = 1; o.carried = true; o.th = P.thLift; o.lean = -P.leanUp * lerp(1, 0.6, smooth(0, 0.5, u));
       const k = ease(smooth(0, 0.8, u));
       walk(P.xSt1, P.xSt2, k, 0.4 * s);
+      // den Ausfallschritt mit dem ersten Schritt des linken Fußes Richtung Kante auflösen
+      if (LD) { const w = swingW(gg.c, gg.n, 0, false); f0 = LD * (1 - w); px = 0.3 * LD * (1 - smooth(0, 1, Math.min(1, gg.c))); o.lunge = 1 - w; }
       o.G = P.gripOf(lerp(P.xe - P.dOff, P.cutSetX, k), lerp(P.cutLiftY, P.cutSetY, ease(smooth(0.78, 1, u))), P.thLift);
       break;
     }
@@ -491,8 +515,10 @@ function choreo(P, TL, t) {
     default: break;
   }
   const ft = feet || [{ x, lift: 0 }, { x, lift: 0 }];
-  o.xSt = x;
-  o.feet = [{ x: ft[0].x, lift: 0.06 * s * ft[0].lift, z: -fz }, { x: ft[1].x, lift: 0.06 * s * ft[1].lift, z: fz }];
+  o.xSt = x + px;
+  // vor der Ladefläche bleibt die Fußspitze vor der Kante
+  const xf0 = P.hp > 0.03 && f0 > 0 ? Math.min(ft[0].x + f0, Math.max(ft[0].x, P.xe - 0.22 * s - 0.01)) : ft[0].x + f0;
+  o.feet = [{ x: xf0, lift: 0.06 * s * Math.max(ft[0].lift, l0), z: -fz }, { x: ft[1].x, lift: 0.06 * s * ft[1].lift, z: fz }];
   return o;
 }
 
@@ -614,6 +640,10 @@ function loads(P, ch, pose, tr) {
 }
 
 function finalize(P, TL) {
+  // Ausfallschritt nur, wenn es beim Aufrichten ohne ihn nach vorne kippen würde
+  P.lungeD = 0;
+  P.tipNoLunge = tipScan(P, TL, ['raise', 'carry', 'lift', 'approach']);
+  if (P.tipNoLunge > 0.02) P.lungeD = 0.45 * P.B.leg;
   // tatsächliche Lage beim Absetzen: reichen die Arme nicht, steht das Schnittende tiefer bzw. vor der Kante
   const ch = choreo(P, TL, TL.byId.approach.t1 - 1e-6), pose = solve(P, ch), tr = treePose(P, ch, pose);
   const pivot = { x: tr.gx - P.xg * Math.cos(tr.th), y: tr.gy - P.xg * Math.sin(tr.th) };
@@ -631,22 +661,38 @@ function finalize(P, TL) {
   P.final = { pivot, loaded, thEnd, uc, cutY, G: P.gripOf(pivot.x, cutY(thOpen), thOpen), tree: { gx: gEnd.x, gy: gEnd.y, th: thEnd } };
 }
 
+// Gleichgewicht: gemeinsamer Schwerpunkt aus Körper und Baumlast muss über der Standfläche bleiben (bis zum Ballen des
+// vorderen Fußes; Steigbügel nur so lang wie der Schuh). > 0: so weit liegt er davor.
+function tipOf(P, pose, ld) {
+  const xUpper = pose.P.x + pose.dir.x * 0.45 * P.B.torso;
+  const xLegs = (pose.P.x + (pose.knees[0].x + pose.knees[1].x) / 2 + (pose.ankles[0].x + pose.ankles[1].x) / 2) / 3;
+  // Exo: Hälfte der Masse am Rücken (Akku, Steuerung), Hälfte an den Beinen
+  const xPack = pose.P.x + pose.dir.x * 0.6 * P.B.torso + pose.back.x * 0.205 * P.s;
+  const Wb = P.body * GRAV, We = P.exoKg * GRAV;
+  const xc = (Wb * (0.6 * xUpper + 0.4 * xLegs) + We * (0.5 * xPack + 0.5 * xLegs) + ld.F * pose.Gact.x + ld.M) / (Wb + We + ld.F);
+  return xc - (Math.max(pose.ankles[0].x, pose.ankles[1].x) + 0.15 * P.s + P.foot);
+}
+// größte Kippneigung in den angegebenen Abschnitten
+function tipScan(P, TL, ids, N = 240) {
+  let m = 0;
+  for (const id of ids) {
+    const ph = TL.byId[id];
+    for (let i = 0; i <= N; i++) {
+      const ch = choreo(P, TL, ph.t0 + (ph.t1 - ph.t0 - 1e-6) * i / N);
+      if (!ch.carried) continue;
+      const pose = solve(P, ch); m = Math.max(m, tipOf(P, pose, loads(P, ch, pose, treePose(P, ch, pose))));
+    }
+  }
+  return m;
+}
 function analyse(P, TL) {
-  const pk = { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, overLoad: false, overLight: false, Mcarry: 0, Mlift: 0, tip: 0, loaded: P.final.loaded };
+  const pk = { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0, gy: 0, gap: 0, overLoad: false, overLight: false, Mcarry: 0, Mlift: 0, tip: 0, loaded: P.final.loaded, lunge: P.lungeD > 0 };
   const N = 360;
   for (let i = 0; i <= N; i++) {
     const ch = choreo(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loads(P, ch, pose, treePose(P, ch, pose));
     for (const k of ['F', 'M', 'Fl', 'sh', 'hip', 'knee', 'elb']) pk[k] = Math.max(pk[k], ld[k]);
     if (ch.carried) {
-      // Gleichgewicht: gemeinsamer Schwerpunkt aus Körper und Baumlast muss über dem Fuß bleiben (bis zum Fußballen)
-      const xUpper = pose.P.x + pose.dir.x * 0.45 * P.B.torso;
-      const xLegs = (pose.P.x + (pose.knees[0].x + pose.knees[1].x) / 2 + (pose.ankles[0].x + pose.ankles[1].x) / 2) / 3;
-      // Exo: Hälfte der Masse am Rücken (Akku, Steuerung), Hälfte an den Beinen
-      const xPack = pose.P.x + pose.dir.x * 0.6 * P.B.torso + pose.back.x * 0.205 * P.s;
-      const Wb = P.body * GRAV, We = P.exoKg * GRAV;
-      const xc = (Wb * (0.6 * xUpper + 0.4 * xLegs) + We * (0.5 * xPack + 0.5 * xLegs) + ld.F * pose.Gact.x + ld.M) / (Wb + We + ld.F);
-      // Standfläche bis zum Fußballen (Steigbügel nur so lang wie der Schuh)
-      const tip = xc - (Math.max(pose.ankles[0].x, pose.ankles[1].x) + 0.15 * P.s + P.foot);
+      const tip = tipOf(P, pose, ld);
       if (tip > pk.tip) { pk.tip = tip; pk.tipAt = ch.id; }
       pk.gy = Math.max(pk.gy, pose.Gact.y);
       if (ch.gb > 0.99) pk.gap = Math.max(pk.gap, pose.gripGap);
@@ -732,12 +778,17 @@ function choreoDrag(P, TL, t) {
   const ph = TL.ph.find((p) => t < p.t1) || TL.ph[TL.ph.length - 1];
   const u = clamp((t - ph.t0) / (ph.t1 - ph.t0), 0, 1), s = P.s, fz = 0.12 * s;
   const o = { id: ph.id, u, gb: 0, jaw: 0, carried: false, lean: 0, th: 0, twoHand: 0, G: { x: P.G0.x, y: P.yStand }, clamp: 0, att: 0, lift: 0, walk: false, hang: HANG0, hw: 0 };
-  let x = P.dX0, feet = null;
-  const walk = (xa, xb, k, step) => { const g = gait(xa, xb, k, step); x = g.x; feet = g.feet; };
+  let x = P.dX0, feet = null, gg = null;
+  const walk = (xa, xb, k, step) => { gg = gait(xa, xb, k, step); x = gg.x; feet = gg.feet; };
+  // Ausfallschritt nach hinten (nur wenn die Gleichgewichtsanalyse ihn braucht): rechter Fuß zurück, Becken etwas mit
+  const LD = P.dLunge || 0;
+  let f1 = LD, l1 = 0, px = -0.3 * LD;
   switch (ph.id) {
+    case 'start': f1 = 0; px = 0; break;
     case 'dgrip': {
       const k = smooth(0, 0.75, u);
       o.yPel = lerp(P.yStand, P.dPelGrip, k); o.alpha = P.dAlphaGrip * k; o.hw = k; o.clamp = smooth(0.75, 1, u);
+      if (LD) { const w = smooth(0, 0.3, u); f1 = LD * w; l1 = Math.sin(Math.PI * w); px = -0.3 * LD * w; }
       break;
     }
     case 'drise': {
@@ -756,20 +807,31 @@ function choreoDrag(P, TL, t) {
       o.yPel = lerp(P.yStand, P.dPelGrip, down * (1 - up)); o.alpha = lerp(P.dLean, P.dAlphaGrip, down) * (1 - up);
       o.hang = lerp(P.dHang, HANG0, Math.max(down, up)); o.hw = down * (1 - up);
       o.clamp = 1 - smooth(0.4, 0.55, u); o.att = 1 - smooth(0.42, 0.5, u); o.lift = 1 - down;
-      if (u > 0.6) walk(x, x + 0.6 * s, smooth(0.6, 1, u), 0.6 * s);
+      if (u > 0.6) {
+        walk(x, x + 0.6 * s, smooth(0.6, 1, u), 0.6 * s);
+        // beim Weitergehen setzt der rechte Fuß wieder neben den linken
+        if (LD) { const w = swingW(gg.c, gg.n, 0.5, false); f1 = LD * (1 - w); px = -0.3 * LD * (1 - smooth(0.6, 1, u)); }
+      }
       break;
     }
-    case 'hold': x = P.dX0 + DRAG_D + 0.6 * s; break;
-    default: break;
+    case 'hold': x = P.dX0 + DRAG_D + 0.6 * s; f1 = 0; px = 0; break;
+    default: f1 = 0; px = 0; break;
   }
-  const ft = feet || [{ x, lift: 0 }, { x, lift: 0 }];
-  o.xSt = x;
+  if (!LD) { f1 = 0; px = 0; }
+  o.lunge = LD ? f1 / LD : 0;
+  const ft0 = feet || [{ x, lift: 0 }, { x, lift: 0 }];
+  const ft = [ft0[0], { x: ft0[1].x - f1, lift: Math.max(ft0[1].lift, l1) }];
+  o.xSt = x + px;
   if (o.hw > 0) o.handW = dragGround(P, ph.id === 'dgrip' || ph.id === 'drise' ? P.dX0 : P.dX0 + DRAG_D);
   o.feet = [{ x: ft[0].x, lift: 0.06 * s * ft[0].lift, z: -fz }, { x: ft[1].x, lift: 0.06 * s * ft[1].lift, z: fz }];
   return o;
 }
 // Liegeplätze der Stümpfe: am Anfang genau in den geschlossenen Schlaufen, am Ende dort, wo sie öffnen
 function finalizeDrag(P, TL) {
+  // Ausfallschritt nach hinten nur, wenn es ohne ihn nach hinten kippen würde
+  P.dLunge = 0;
+  P.tipNoLunge = analyseDrag(P, TL).tipB;
+  if (P.tipNoLunge > 0.02) P.dLunge = 0.45 * P.B.leg;
   const at = (id, u) => { const p = TL.byId[id]; const ch = choreoDrag(P, TL, p.t0 + (p.t1 - p.t0) * u); return dragHold(P, solve(P, ch)).centers; };
   P.dLie0 = at('dgrip', 0.999); P.dLie1 = at('drelease', 0.42);
 }
@@ -796,7 +858,7 @@ function loadsDrag(P, ch, pose) {
   return { F, M: 0, Fl: pull, sh: Math.abs(sh), hip: m(pose.P), knee: m(mix(pose.knees[0], pose.knees[1], 0.5)), elb: Math.abs(el) };
 }
 function analyseDrag(P, TL) {
-  const pk = { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0, tipB: 0, gy: 0 }, N = 300;
+  const pk = { F: 0, M: 0, Fl: 0, sh: 0, hip: 0, knee: 0, elb: 0, tipB: 0, gy: 0, lunge: P.dLunge > 0 }, N = 300;
   for (let i = 0; i <= N; i++) {
     const ch = choreoDrag(P, TL, TL.T * i / N), pose = solve(P, ch), ld = loadsDrag(P, ch, pose);
     for (const k of ['F', 'Fl', 'sh', 'hip', 'knee', 'elb']) pk[k] = Math.max(pk[k], ld[k]);
@@ -816,7 +878,7 @@ function analyseDrag(P, TL) {
 /* ================= Zustand ================= */
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 18, foot: 0,
-  labels: true, t: 0, playing: !reduced, view: 'oblique' };
+  labels: true, t: 0, playing: !reduced, view: 'oblique', env: 'dusk', trees: 0 };
 let P, TL, PK;
 
 /* ================= Szene ================= */
@@ -845,7 +907,9 @@ controls.maxDistance = 34;
 
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.4;
-scene.add(new THREE.HemisphereLight(0xF1F6F3, 0x56614F, 0.85));
+const hemi = new THREE.HemisphereLight(0xF1F6F3, 0x56614F, 0.85); scene.add(hemi);
+// Fülllicht von der Kamera aus (in der Dämmerung), damit das Exo gut zu sehen bleibt
+const fill = new THREE.DirectionalLight(0xDDE4FF, 0); scene.add(fill, fill.target);
 const sun = new THREE.DirectionalLight(0xFFF3E4, 2.6);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
@@ -885,7 +949,8 @@ hazardTex.wrapS = hazardTex.wrapT = THREE.RepeatWrapping;
 const MAT = {
   jacket: std(0x6A8092, 0.85), pants: std(0x4C5865, 0.9), boot: std(0x24292C, 0.8), glove: std(0x6B6F5E, 0.9),
   face: std(0xC4B6AA, 0.75), helmet: std(0xE9ECEA, 0.4),
-  steel: std(0xB4BCC2, 0.3, { metalness: 0.9 }), graphite: std(0x2A2F34, 0.45, { metalness: 0.5 }),
+  steel: std(0x7A838C, 0.38, { metalness: 0.75 }),      // Alu titangrau eloxiert
+  graphite: std(0x2A2F34, 0.45, { metalness: 0.5 }),
   strap: std(0x1C2023, 0.95, { side: THREE.DoubleSide }),
   motor: std(0xD4520E, 0.45, { emissive: 0xFF5A10, emissiveIntensity: 0 }),
   loop: std(0xD4520E, 0.6), cuff: std(0x3E7CB1, 0.55, { side: THREE.DoubleSide }),
@@ -896,6 +961,8 @@ const MAT = {
   trunk: std(0x6A4A30, 0.95), cut: std(0xFFFFFF, 0.9, { map: cutTex }),
   deck: std(0xFFFFFF, 0.85, { map: deckTex }), frame: std(0x4A535A, 0.5, { metalness: 0.6 }),
   hazard: std(0xFFFFFF, 0.6, { map: hazardTex }),
+  ledOff: std(0x1E2226, 0.5), lamp: std(0x2A2F34, 0.5, { metalness: 0.5 }), lens: std(0xFFFFFF, 0.2, { emissive: 0xFFF2D8, emissiveIntensity: 0 }),
+  snow: std(0xEEF2F7, 0.95), snowCap: std(0xF4F7FA, 0.9),
   bgFir: std(0x5A8069, 1, { flatShading: true }), bgTrunk: std(0x6B5640, 1),
   ground: std(0xCBD6CF, 1),
   ink: new THREE.LineBasicMaterial({ color: 0x15211C }),
@@ -921,6 +988,39 @@ function disposeGroup(g) {
     if (o.userData.cap) o.userData.cap.dispose();
   });
   g.removeFromParent();
+}
+
+// Dämmerung: Schneeboden mit Wellen außerhalb der Arbeitsfläche, Himmel-Verlauf, Schneefall
+const dusk = {};
+{
+  const g = new THREE.PlaneGeometry(90, 90, 180, 180); g.rotateX(-Math.PI / 2);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i);
+    const out = Math.max(0, -6 - x, x - 16, Math.abs(z) - 4.5), k = Math.min(1, out / 1.5);
+    pos.setY(i, k * (0.07 * (1 + Math.sin(x * 0.8) * Math.cos(z * 0.7)) + 0.02 * (1 + Math.sin(x * 2.3 + z * 1.9))));
+  }
+  g.computeVertexNormals();
+  dusk.ground = new THREE.Mesh(g, MAT.snow); dusk.ground.receiveShadow = true; scene.add(dusk.ground);
+  const c = document.createElement('canvas'); c.width = 4; c.height = 256;
+  const x = c.getContext('2d'), gr = x.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#1F2B4A'); gr.addColorStop(0.55, '#5D6787'); gr.addColorStop(0.8, '#C98E78'); gr.addColorStop(1, '#E9B48C');
+  x.fillStyle = gr; x.fillRect(0, 0, 4, 256);
+  dusk.sky = new THREE.CanvasTexture(c); dusk.sky.colorSpace = THREE.SRGBColorSpace;
+  const N = 2200, sp = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { sp[i * 3] = -10 + Math.random() * 30; sp[i * 3 + 1] = Math.random() * 7; sp[i * 3 + 2] = -10 + Math.random() * 18; }
+  dusk.flakeGeo = new THREE.BufferGeometry(); dusk.flakeGeo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+  dusk.flakes = new THREE.Points(dusk.flakeGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 2.2, sizeAttenuation: false, transparent: true, opacity: 0.85, depthWrite: false }));
+  scene.add(dusk.flakes);
+}
+function snowfall(dt, now) {
+  if (!dusk.flakes.visible || reduced) return;
+  const p = dusk.flakeGeo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    let y = p.getY(i) - dt * 0.5; if (y < 0) y += 7;
+    p.setY(i, y); p.setX(i, p.getX(i) + Math.sin(now / 1600 + i) * dt * 0.06);
+  }
+  p.needsUpdate = true;
 }
 
 // Boden, Raster, Christbaumkultur im Hintergrund
@@ -958,6 +1058,15 @@ function buildGrid(color) {
     }
   });
   scene.add(cones, stems);
+  // Schneehauben: oberer Teil jeder Astetage, etwas größer, nur in der Dämmerung sichtbar
+  const caps = new THREE.InstancedMesh(cone, MAT.snowCap, spots.length * 3);
+  spots.forEach((sp, i) => {
+    for (let j = 0; j < 3; j++) {
+      const r = sp.h * 0.3 * (1 - j * 0.27), hh = sp.h * (0.48 - j * 0.06), y0 = sp.h * (0.12 + j * 0.25), f = 0.42;
+      caps.setMatrixAt(i * 3 + j, m.compose(p.set(sp.x, y0 + hh * (1 - f) - 0.01, sp.z), q, sc.set(r * f * 1.08, hh * f * 1.04, r * f * 1.08)));
+    }
+  });
+  scene.add(caps); dusk.caps = caps;
 })();
 
 /* ---------- Christbaum ---------- */
@@ -1123,6 +1232,18 @@ function buildPerson(P) {
   o.switchBtn = mk(new THREE.CylinderGeometry(0.022 * s, 0.022 * s, 0.02 * s, 16), MAT.motor);
   const beltGeo = new THREE.TorusGeometry(0.16 * s, 0.02 * s, 8, 36); beltGeo.rotateX(Math.PI / 2);
   o.belt = mk(beltGeo, MAT.steel); o.belt.scale.set(0.8, 1, 1.18);
+  // Magnetschnalle vorne am Hüftgurt
+  o.buckle = mk(new THREE.BoxGeometry(0.03 * s, 0.045 * s, 0.07 * s), MAT.graphite);
+  // LED-Ring um den Not-Aus: Farbe = Zustand, Anzahl = Akku
+  o.leds = Array.from({ length: 12 }, () => mk(new THREE.SphereGeometry(0.0055 * s, 8, 6), std(0x1E2226, 0.4, { emissive: 0x000000 }), false));
+  // LED-Arbeitsstrahler auf den Schulterbügeln
+  o.lamps = [-1, 1].map(() => {
+    const house = mk(new THREE.BoxGeometry(0.045 * s, 0.035 * s, 0.05 * s), MAT.lamp);
+    const lens = mk(new THREE.CylinderGeometry(0.014 * s, 0.014 * s, 0.006 * s, 16), MAT.lens.clone(), false);
+    const light = new THREE.SpotLight(0xFFF1DC, 26, 16, deg(28), 0.6, 1.4); light.castShadow = false;
+    g.add(light, light.target);
+    return { house, lens, light };
+  });
   for (const side of [-1, 1]) {
     const q = { side };
     q.hip = ball(0.074 * s, MAT.pants); q.thigh = limb(0.054 * s, 0.07 * s, MAT.pants);
@@ -1262,6 +1383,17 @@ function posePerson(pose, ch, tr, ld) {
   seg(o.yokeBar, onBack(0.98, 0.1, -0.2), onBack(0.98, 0.1, 0.2));
   at(o.switchBtn, add(onBack(0.86, -0.12, -0.13), v3(0, 0, 0))); o.switchBtn.rotation.set(Math.PI / 2, 0, 0);
   at(o.belt, add(pose.P, v3(0, 0.05 * s, 0))); o.belt.rotation.set(0, 0, pa * 0.5);
+  const fwdT = v3(pose.dir.y, -pose.dir.x, 0);                    // vorne, senkrecht zum Rumpf
+  at(o.buckle, add(add(pose.P, v3(0, 0.05 * s, 0)), mul(v3(Math.cos(pa * 0.5), Math.sin(pa * 0.5), 0), 0.135 * s))); o.buckle.rotation.set(0, 0, pa * 0.5);
+  // LED-Ring: grün = bereit, blau = trägt bzw. schleift Last; leuchtende LEDs = Akkustand
+  const busy = ch.carried || (ch.att ?? 0) > 0.5, lit = clamp(12 - Math.floor(state.trees / 6), 2, 12), btn = o.switchBtn.position;
+  o.leds.forEach((m, i) => {
+    const a = i / 12 * Math.PI * 2;
+    at(m, add(add(v3(btn.x, btn.y, btn.z - 0.012 * s), mul(pose.dir, Math.cos(a) * 0.033 * s)), mul(fwdT, Math.sin(a) * 0.033 * s)));
+    const on = i < lit;
+    m.material.color.set(on ? (busy ? 0x3D8BFF : 0x2BD46B) : 0x1E2226);
+    m.material.emissive.set(on ? (busy ? 0x2E6BFF : 0x1FC25A) : 0x000000); m.material.emissiveIntensity = on ? 1.6 : 0;
+  });
   const drag = state.scen === 'drag';
   const glow = (v, p) => (p > 1 ? clamp(v / p, 0, 1) * smooth(5, 40, p) * 1.8 : 0);
   const gLeg = Math.max(glow(ld.hip, PK.hip), glow(ld.knee, PK.knee)), gS = glow(ld.sh, PK.sh), gE = glow(ld.elb, PK.elb);
@@ -1321,6 +1453,11 @@ function posePerson(pose, ch, tr, ld) {
     axis(q.cUpper, mix(sh, el, 0.5), sub(el, sh)); axis(q.cFore, mix(el, wr, 0.55), sub(wr, el));
     const swing = onBack(0.98, 0.1, side * 0.2);
     seg(q.yoke, swing, ms);
+    // Arbeitsstrahler auf dem Schulterbügel, leuchtet nach vorne und leicht nach unten
+    const lamp = o.lamps[k], lp = add(add(ms, mul(pose.dir, 0.075 * s)), v3(0, 0, -side * 0.01 * s)), aim = norm(add(fwdT, mul(pose.dir, -0.35)));
+    at(lamp.house, lp); lamp.house.rotation.set(0, 0, pa);
+    axis(lamp.lens, add(lp, mul(aim, 0.026 * s)), aim);
+    lamp.light.position.set(lp.x, lp.y, lp.z); lamp.light.target.position.set(lp.x + aim.x * 3, lp.y + aim.y * 3, lp.z + aim.z * 3);
     // Schulter: offenes Seilpaar, Umlenkrollen auf der Achse des seitlichen Schwenkgelenks, dann um die Seilscheibe
     const rS = 0.05 * s, up = pose.dir;
     [[1, up], [-1, pose.back]].forEach(([sg, pref], i) => {
@@ -1463,7 +1600,7 @@ const ui = {
   body: $('body'), bodyOut: $('bodyOut'), exoKg: $('exoKg'), exoKgOut: $('exoKgOut'),
   hpOut: $('hpOut'), lenOut: $('lenOut'), heightOut: $('heightOut'), statuses: $('statuses'), momentNote: $('momentNote'),
   stepsList: $('steps'), steps: [],
-  scLoad: $('scLoad'), scDrag: $('scDrag'), n: $('n'), nOut: $('nOut'), gGrass: $('gGrass'), gSnow: $('gSnow'),
+  count: $('count'), scLoad: $('scLoad'), scDrag: $('scDrag'), n: $('n'), nOut: $('nOut'), gGrass: $('gGrass'), gSnow: $('gSnow'),
   kicker: $('kicker'), title: $('title'), lede: $('lede'), labF: $('labF'), labM: $('labM'), labFl: $('labFl'), labSh: $('labSh'),
 };
 const ROWS = [['F', 'F', 'kg', GRAV], ['M', 'M', 'Nm', 1], ['Fl', 'Fl', 'kg', GRAV], ['sh', 'Sh', 'Nm', 1], ['hip', 'Hip', 'Nm', 1], ['knee', 'Knee', 'Nm', 1]]
@@ -1476,7 +1613,7 @@ function captionFor(id) {
     const n = state.n, trees = n > 1 ? `${n} Bäume` : 'Ein Baum', f = dragForces(P);
     switch (id) {
       case 'start': return ['Ausgangslage', 'Ausgangslage', `${trees} liegen am Boden, die Stümpfe zeigen nach vorne. Du stehst zwischen den Stümpfen, Blick in Laufrichtung.`];
-      case 'dgrip': return ['Schritt 1 von 4', 'Greifen', `In die Knie und vorbeugen, die Hände an die Stümpfe. Die offenen Schlaufen am Handgelenk über die Stümpfe schieben, auf Tastendruck zieht je eine kleine Winde ihre Schlaufe zu.${n > 2 ? ' Beim dritten Baum hält rechts jede der zwei Schlaufen einen eigenen Stumpf.' : ''}`];
+      case 'dgrip': return ['Schritt 1 von 4', 'Greifen', `${P.dLunge ? 'Die Last ist schwer: rechts einen halben Schritt zurück, dann i' : 'I'}n die Knie und vorbeugen, die Hände an die Stümpfe. Die offenen Schlaufen am Handgelenk über die Stümpfe schieben, auf Tastendruck zieht je eine kleine Winde ihre Schlaufe zu.${n > 2 ? ' Beim dritten Baum hält rechts jede der zwei Schlaufen einen eigenen Stumpf.' : ''}`];
       case 'drise': return ['Schritt 2 von 4', 'Aufrichten', 'Hochkommen, die Arme hängen lassen. Die Stümpfe heben sich mit, die Beinseile ziehen Hüfte und Knie in die Streckung.'];
       case 'dwalk': return ['Schritt 3 von 4', 'Vorwärts schleifen', `Leicht vorgebeugt vorwärts gehen, gezeigt sind 7 m, gedacht für bis zu 100 m. Das Gewicht hängt in den Schlaufen und geht über Arme, Schultergelenke und Rahmen in den Hüftgurt und die Beinschienen. Die Arme hängen leicht nach hinten, dort gleichen sich Gewicht und Zug fast aus.`];
       case 'drelease': return ['Schritt 4 von 4', 'Ablegen', 'In die Knie, Stümpfe absetzen, Schlaufen auf Tastendruck öffnen und weitergehen.'];
@@ -1485,9 +1622,9 @@ function captionFor(id) {
   }
   switch (id) {
     case 'start': return ['Ausgangslage', 'Ausgangslage', `Der geschnittene Christbaum liegt am Boden, das Plateau ist ${hp} hoch.`];
-    case 'grip': return ['Schritt 1 von 6', 'Greifen', 'In die Hocke gehen, die rechte Hand längs ans astfreie Stammende legen, Schnittende am Handgelenk, und die beiden rechten Schlaufen zuziehen.'];
+    case 'grip': return ['Schritt 1 von 6', 'Greifen', `${P.lungeD ? 'Weil der Baum schwer ist, zuerst mit links einen Ausfallschritt nach vorne. ' : ''}In die Hocke gehen, die rechte Hand längs ans astfreie Stammende legen, Schnittende am Handgelenk, und die beiden rechten Schlaufen zuziehen.`];
     case 'raise': return ['Schritt 2 von 6', 'Aufrichten bis fast senkrecht', 'Rechte Hand am Stumpf ist der Drehpunkt, die linke greift so weit Richtung Spitze wie möglich. Zurücklehnen und mit links in die Senkrechte ziehen.'];
-    case 'carry': return ['Schritt 3 von 6', 'Tragen', 'Fast senkrecht und leicht zurückgelehnt zum Plateau gehen. Die linke Hand stützt oben, der Hebel ist jetzt klein.'];
+    case 'carry': return ['Schritt 3 von 6', 'Tragen', `Fast senkrecht und leicht zurückgelehnt zum Plateau gehen${P.lungeD ? ', mit Nachstellschritten, der linke Fuß bleibt vorne' : ''}. Die linke Hand stützt oben, der Hebel ist jetzt klein.`];
     case 'lift': return ['Schritt 4 von 6', P.cutLiftY > P.cutCarryY ? 'Hochheben' : 'Absenken',
       `Den Baum fast lotrecht balancieren, bis das Schnittende auf Plateauhöhe (${hp}) ist.${P.clear ? '' : ' Dabei Abstand zur Kante halten, damit die Äste nicht anstoßen.'}`];
     case 'approach': return ['Schritt 4 von 6', 'An die Kante', 'Das Schnittende über die Kante führen und knapp dahinter auf der Ladefläche absetzen.'];
@@ -1583,10 +1720,12 @@ function updateStatic() {
   const where = { raise: 'beim Aufrichten', carry: 'beim Tragen', lift: 'beim Hochheben', approach: 'an der Kante' }[PK.tipAt] || '';
   const items = [];
   if (!PK.loaded) items.push(['bad', '✕', `Zu hoch für die Arme: das Schnittende kommt nicht auf die Ladefläche, es fehlen ${Math.round(Math.max(PK.gap, P.hp - P.final.pivot.y) * 100)}${NB}cm`]);
-  if (PK.tip > 0.08) items.push(['bad', '✕', `Kippgefahr ${where}: der gemeinsame Schwerpunkt liegt ${cm} vor der Standfläche. ${PK.tipAt === 'raise'
-    ? 'Weiter zurücklehnen und einen Ausfallschritt nach vorne machen. Sehr schwere Bäume besser wie eine Leiter von der Spitze her aufstellen'
-    : 'Ausfallschritt nach vorne, den Baum näher am Körper führen'}`]);
-  else if (PK.tip > 0.02) items.push(['warn', '▲', `Gleichgewicht knapp ${where}: ${cm} vor der Standfläche, ein Ausfallschritt nach vorne gleicht das aus`]);
+  const auch = PK.lunge ? ' auch mit Ausfallschritt' : '';
+  if (PK.tip > 0.08) items.push(['bad', '✕', `Kippgefahr ${where}${auch}: der gemeinsame Schwerpunkt liegt ${cm} vor dem vorderen Fuß. ${PK.tipAt === 'raise'
+    ? 'Solche Bäume besser wie eine Leiter von der Spitze her aufstellen'
+    : 'Den Baum näher am Körper führen oder die Leiter-Methode nutzen'}`]);
+  else if (PK.tip > 0.02) items.push(['warn', '▲', `Gleichgewicht knapp ${where}${auch}: ${cm} vor dem vorderen Fuß, weiter zurücklehnen`]);
+  else if (PK.lunge) items.push(['ok', '✓', 'Mit Ausfallschritt im Gleichgewicht: der linke Fuß steht beim Aufrichten und Tragen vorne']);
   if (PK.loaded && PK.gap > 0.02) items.push(['warn', '▲', `Gerade noch erreichbar: Schlaufen bis ${gy}`]);
   if (PK.overLoad) items.push(['warn', '▲', `Über Kopf mit vollem Gewicht: ${kg} bis ${gy}`]);
   else if (PK.overLight) items.push(['warn', '▲', `Kurz über Kopf (bis ${gy}), aber fast ohne Last`]);
@@ -1612,8 +1751,10 @@ function updateStaticDrag() {
   for (const r of ROWS) r.max.textContent = `${Math.round(PK[r.k] / r.div)}${NB}${r.unit}`;
   const f = dragForces(P), items = [];
   items.push(['ok', '✓', `${state.n} × ${state.mass} kg = ${state.n * state.mass} kg gesamt. In den Schlaufen ${Math.round(f.hold / GRAV)} kg, Zugkraft etwa ${Math.round(f.pullLift / GRAV)} kg`]);
-  if (PK.tipB > 0.08) items.push(['bad', '✕', `Kippgefahr nach hinten: ${Math.round(PK.tipB * 100)} cm hinter der Ferse. Stärker vorbeugen, kürzere Schritte oder weniger Bäume auf einmal`]);
-  else if (PK.tipB > 0.02) items.push(['warn', '▲', `Gleichgewicht nach hinten knapp (${Math.round(PK.tipB * 100)} cm), stärker vorbeugen`]);
+  const auch = PK.lunge ? ' auch mit Ausfallschritt' : '';
+  if (PK.tipB > 0.08) items.push(['bad', '✕', `Kippgefahr nach hinten${auch}: ${Math.round(PK.tipB * 100)} cm hinter der Ferse. Weniger Bäume auf einmal`]);
+  else if (PK.tipB > 0.02) items.push(['warn', '▲', `Gleichgewicht nach hinten knapp${auch} (${Math.round(PK.tipB * 100)} cm), stärker vorbeugen oder weniger Bäume`]);
+  else if (PK.lunge) items.push(['ok', '✓', 'Mit Ausfallschritt im Gleichgewicht: der rechte Fuß bleibt beim Schleifen eine halbe Schrittlänge hinten']);
   ui.statuses.replaceChildren(...items.map(([level, icon, text]) => {
     const p = document.createElement('p'); p.className = 'status'; p.dataset.level = level;
     const i = document.createElement('span'); i.className = 'ic'; i.setAttribute('aria-hidden', 'true'); i.textContent = icon;
@@ -1654,12 +1795,12 @@ function rebuild(parts) {
   const cx = P.scen === 'drag' ? DRAG_D / 2 - P.L / 2 : (P.xSt0 + P.xe + P.Lp) / 2;
   const half = P.scen === 'drag' ? (DRAG_D + P.L) / 2 + 2 : (P.xe + P.Lp - P.xSt0) / 2 + 1.5;
   sun.target.position.set(cx, 0, 0);
-  sun.position.set(cx - 3.5, 10, 7);
+  sun.position.set(cx - 3.5, state.env === 'dusk' ? 6 : 10, 7);
   Object.assign(sun.shadow.camera, { left: -half, right: half, top: half, bottom: -half });
   sun.shadow.camera.updateProjectionMatrix();
   if (parts.tree) { if (tree) disposeGroup(tree.group); tree = buildTree(P); scene.add(tree.group); }
   if (parts.platform) { disposePlatform(); plat = buildPlatform(P); scene.add(plat.group); }
-  if (parts.person) { if (person) disposeGroup(person.group); person = buildPerson(P); scene.add(person.group); }
+  if (parts.person) { if (person) disposeGroup(person.group); person = buildPerson(P); scene.add(person.group); applyEnv(); }
   if (parts.tree || parts.drag) buildDragTrees();
   tree.group.visible = plat.group.visible = P.scen !== 'drag';
   ui.scrub.max = TL.T.toFixed(2);
@@ -1697,7 +1838,7 @@ function setScen(scen) {
   state.scen = scen; state.t = 0;
   ui.scLoad.setAttribute('aria-pressed', String(scen === 'load')); ui.scDrag.setAttribute('aria-pressed', String(scen === 'drag'));
   document.querySelectorAll('[data-for]').forEach((el) => { el.hidden = el.dataset.for !== scen; });
-  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Entwurf 3.1 · Use Case 2' : 'Exoskelett · Entwurf 3.1 · Use Case 1';
+  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Entwurf 3.2 · Use Case 2' : 'Exoskelett · Entwurf 3.2 · Use Case 1';
   ui.title.textContent = scen === 'drag' ? 'Bäume schleifen' : 'Christbaum aufladen';
   ui.lede.textContent = scen === 'drag'
     ? 'Schlaufen am Handgelenk (rechts zwei, links eine) fassen ein bis drei Stümpfe, jede Schlaufe hat ihre eigene kleine Winde. Die Arme hängen, das Gewicht geht über Schultergelenke und Rahmen in den Hüftgurt, man geht vorwärts.'
@@ -1742,7 +1883,24 @@ function applyTheme() {
   const ink = token('--scene-ink', '#15211C');
   for (const m of INK) m.color.set(ink);
   MAT.cgDot.color.set(token('--accent', '#C24A0C'));
+  applyEnv();
 }
+// Tag oder Dämmerung in der verschneiten Plantage
+function applyEnv() {
+  const d = state.env === 'dusk';
+  ground.visible = !d; if (grid) grid.visible = !d;
+  dusk.ground.visible = dusk.flakes.visible = dusk.caps.visible = d;
+  if (d) { scene.background = dusk.sky; scene.fog.color.set(0x8B8AA2); scene.fog.near = 14; scene.fog.far = 55; }
+  else { scene.fog.near = 13; scene.fog.far = 38; }
+  scene.environmentIntensity = d ? 0.5 : 0.4;
+  sun.color.set(d ? 0xFFB486 : 0xFFF3E4); sun.intensity = d ? 1.2 : 2.6;
+  sun.position.y = d ? 6 : 10;
+  hemi.color.set(d ? 0xB9C8EF : 0xF1F6F3); hemi.groundColor.set(d ? 0x3E4659 : 0x56614F); hemi.intensity = d ? 1.2 : 0.85;
+  fill.intensity = d ? 0.9 : 0;
+  if (person) person.lamps.forEach((l) => { l.light.visible = d; l.lens.material.emissiveIntensity = d ? 2.4 : 0; });
+  for (const b of document.querySelectorAll('[data-env]')) b.setAttribute('aria-pressed', String(b.dataset.env === state.env));
+}
+for (const b of document.querySelectorAll('[data-env]')) b.addEventListener('click', () => { state.env = b.dataset.env; applyTheme(); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
 
@@ -1761,8 +1919,17 @@ let last = performance.now();
 function loop(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
-  if (state.playing) { state.t += dt; if (state.t > TL.T) state.t = 0; }
+  if (state.playing) {
+    const t0 = state.t; state.t += dt;
+    // Baumzähler: nach jedem abgeschlossenen Durchlauf (Umkippen bzw. Ablegen)
+    const done = state.scen === 'drag' ? TL.byId.drelease.t1 : TL.byId.topple.t1;
+    if (t0 < done && state.t >= done) { state.trees += state.scen === 'drag' ? state.n : (P.final.loaded ? 1 : 0); ui.count.textContent = state.trees; }
+    if (state.t > TL.T) state.t = 0;
+  }
   update();
+  snowfall(dt, now);
+  // Fülllicht schräg von oben neben der Kamera (nicht genau aus Blickrichtung, sonst glänzen flache Flächen weiß)
+  fill.position.copy(camera.position).sub(controls.target).applyAxisAngle(Y_AXIS, 0.6).add(controls.target); fill.position.y += 3; fill.target.position.copy(controls.target);
   if (tween) {
     const k = ease((now - tween.start) / tween.dur);
     camera.position.lerpVectors(tween.p0, tween.p1, k);
@@ -1782,11 +1949,11 @@ function loop(now) {
 
 function boot(data) {
   if (data && typeof data === 'object') {
-    for (const k of ['scen', 'n', 'mu', 'H', 'L', 'hp', 'mass', 'massManual', 'body', 'exoKg', 'labels', 't', 'playing', 'view']) if (k in data) state[k] = data[k];
+    for (const k of ['scen', 'n', 'mu', 'H', 'L', 'hp', 'mass', 'massManual', 'body', 'exoKg', 'labels', 't', 'playing', 'view', 'env', 'trees']) if (k in data) state[k] = data[k];
   }
   ui.hp.value = state.hp; ui.len.value = state.L; ui.height.value = state.H;
   ui.mass.value = state.mass; ui.body.value = state.body; ui.exoKg.value = state.exoKg;
-  state.n = clamp(Math.round(state.n), 1, 3);
+  state.n = clamp(Math.round(state.n), 1, 3); ui.count.textContent = state.trees;
   ui.labels.checked = state.labels; ui.n.value = state.n;
   applyTheme();
   rebuild({ tree: true, platform: true, person: true });
@@ -1803,7 +1970,7 @@ if (window.claude?.hot?.ready) window.claude.hot.ready(boot);
 else boot(window.claude?.hot?.data ?? {});
 
 // Testzugang für automatische Prüfungen der Kinematik (wird von der Seite selbst nicht benutzt)
-window.__exo = { camera, controls, choreoDrag, finalizeDrag, analyseDrag, dragTreePose, dragHold, dragSlots, loopCenter, derive, buildTimeline, choreo, solve, treePose, loads, finalize, analyse, state, get P() { return P; }, get TL() { return TL; }, get PK() { return PK; } };
+window.__exo = { scene, tipScan, camera, controls, choreoDrag, finalizeDrag, analyseDrag, dragTreePose, dragHold, dragSlots, loopCenter, derive, buildTimeline, choreo, solve, treePose, loads, finalize, analyse, state, get P() { return P; }, get TL() { return TL; }, get PK() { return PK; } };
 </script>
 </body>
 </html>
