@@ -1,8 +1,8 @@
 // ESP32-C3: zeigt den Status des Exos auf dem E-Paper und sendet ihn per Bluetooth (BLE) ans Handy.
 // Bauen mit Arduino-IDE oder PlatformIO (Board „ESP32C3 Dev Module“). Bibliotheken: GxEPD2, NimBLE-Arduino.
 // Verbindung: Teensy Pin 1 (TX) → ESP32-C3 GPIO 20 (RX), Masse verbinden. Kein Rückkanal nötig.
-// Hinweis: Diese Datei ist hier nicht kompiliert worden (kein ESP32-Compiler in der Testumgebung);
-// das Einlesen der Statuszeile (status.h) ist auf dem PC getestet.
+// Hinweis: Mit dem echten ESP32-Compiler ist diese Datei noch nicht gebaut worden. Auf dem PC wird sie mit
+// Platzhaltern für Kern, GxEPD2 und NimBLE kompiliert und getestet (test/esp32_host.cpp, Teil von make test).
 #include <GxEPD2_BW.h>
 #include <NimBLEDevice.h>
 #include "status.h"
@@ -43,7 +43,8 @@ void loop() {
       const ExoStatus s = parseStatus(line);
       if (!s.valid) continue;
       chr->setValue(line); chr->notify();                       // Handy bekommt die Zeile 1:1
-      const bool changed = std::strcmp(s.mode, last.mode) || s.batteryPct != last.batteryPct || s.level != last.level || s.treesToday != last.treesToday;
+      const bool changed = std::strcmp(s.mode, last.mode) || s.batteryPct != last.batteryPct || s.level != last.level || s.treesToday != last.treesToday
+                         || std::strcmp(s.reason, last.reason);
       if (changed) { draw(s); last = s; }                        // E-Paper nur bei Änderung (schont und spart Strom)
     } else if (n < sizeof line - 1) line[n++] = c;
   }

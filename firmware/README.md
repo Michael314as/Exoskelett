@@ -13,6 +13,7 @@ leicht, weich, ohne Zittern, mit spürbarer Verstärkung und sicherem Abschalten
 | `src/main_teensy.cpp` | Teensy 4.1: Pinplan, 200-Hz-Takt, Schütz, Motoren über CAN, 8 Wägezellen, Lagesensor, LED-Ring, Watchdog, Statuszeile an den ESP32-C3 |
 | `esp32/` | ESP32-C3: E-Paper-Anzeige und Bluetooth zum Handy |
 | `tools/build_teensy.sh` | baut `exo.hex` für den Teensy 4.1 mit ARM-GCC (ohne IDE) |
+| `test/esp32_host.cpp` | baut den ESP32-C3-Sketch mit Platzhaltern auf dem PC und prüft Anzeige und Bluetooth-Verhalten |
 | `test/teensy_host.cpp` | baut den Teensy-Code mit Platzhaltern auf dem PC und lässt 1000 Regeltakte laufen |
 | `test/sim_test.cpp` | Physik-Simulation (Mensch, Weichteile, Manschette, Wägezelle, Exo-Gelenk, Motor) und Abnahmetests |
 | `test/log_demo.cpp` | erzeugt ein Prüfstand-Log mit bekannten Werten; `make ident` prüft damit `tools/auswertung.py` |
@@ -56,6 +57,7 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (87 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern |
 | **Einstellungen, Konsole** | Prüfsumme erkennt kaputtes EEPROM, Kalibrierung mit Gewicht, Fehlbedienung abgewiesen |
 | **Statuszeile** | Teensy → ESP32-C3 im vereinbarten Format, kaputte Zeilen werden verworfen |
+| **ESP32-Sketch** | kompiliert auf dem PC mit Platzhaltern; jede gültige Zeile geht ans Handy, E-Paper zeichnet nur bei Änderung (auch bei neuem Fehlergrund), überlange Zeilen laufen nicht über |
 
 ## Was die Simulation gefunden hat
 
@@ -71,7 +73,8 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 
 - **Auf echter Hardware laufen lassen:** `exo.hex` auf einen Teensy 4.1 flashen, Motoren und Sensoren anschließen,
   Prüfprotokoll [docs/pruefung.md](../docs/pruefung.md) P5–P20.
-- **ESP32-C3 bauen:** Der Code ist geschrieben, der ESP32-Build ist hier nicht gelaufen (kein ESP32-Compiler verfügbar).
+- **ESP32-C3 bauen:** Der Sketch ist auf dem PC mit Platzhaltern kompiliert und getestet; der Build mit dem echten
+  ESP32-Compiler (Arduino-IDE, Board „ESP32C3 Dev Module“) ist hier nicht gelaufen.
 - **Abgleich mit echter Hardware:** Reibung, Trägheit und Schwerkraft sind geschätzt. Am Prüfstand (Konsole `pruefstand`,
   `log 1`) aufnehmen und mit `python3 tools/auswertung.py log.csv` bestimmen, dann eintragen ([docs/montage.md](../docs/montage.md), Abschnitt 6).
 - Ob es sich wirklich gut anfühlt, entscheidest du am Prüfstand und beim Tragen.
