@@ -101,7 +101,7 @@ Mehr Knöpfe gibt es nicht. Alles andere stellt man selten in der App ein.
 | Elektronik | fertige Module, Stecker crimpen, Platine als Lochraster oder bestellt (JLC-Klasse, wenige Euro) | Lötkolben, Crimpzange |
 | Polster, Gurte | Abstandsgewirke zuschneiden, Gurtband + Magnetschnallen nähen lassen oder mit Nieten | Schere, Nietzange |
 
-**Kein Schweißen, keine Drehbank, keine Fräse.** Was präzise sein muss (Bohrungen für Lager, Scheibenprofile), kommt
+**Kein Schweißen, keine Drehbank, keine Fräse.** Die vollständige Liste jedes Teils mit Herstellweg steht in [stueckliste.md](stueckliste.md). Was präzise sein muss (Bohrungen für Lager, Scheibenprofile), kommt
 vom Laser oder wird über gedruckte Schablonen gebohrt.
 
 ---
