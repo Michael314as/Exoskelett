@@ -10,7 +10,7 @@ noch die CE-Konformität dazu (siehe unten).
 |---|---|---|
 | Konzept, Kräfte, Steuerungskonzept | fertig | [konzept.md](konzept.md), [kraftverteilung.md](kraftverteilung.md), [steuerung.md](steuerung.md) |
 | Steuerung (Regler, Sicherheit, Bedienung) | fertig | Physik-Simulation, 50+ automatische Prüfungen (`make -C firmware test`) |
-| Firmware Teensy 4.1 | baut | ARM-GCC, `exo.hex` (86 KB), keine Warnung im eigenen Code (`firmware/tools/build_teensy.sh`) |
+| Firmware Teensy 4.1 | baut | ARM-GCC, `exo.hex` (87 KB), keine Warnung im eigenen Code (`firmware/tools/build_teensy.sh`) |
 | Firmware ESP32-C3 (Display, Handy) | geschrieben | Statuszeilen-Auswertung getestet; der ESP32-Build selbst ist noch nicht gelaufen |
 | Laserteile | 18 DXF | automatische Prüfung: geschlossene Konturen, Stege ≥ 4 mm je Bohrung ([fertigung/](../fertigung/)) |
 | Druckteile | 12 STL | wasserdicht, passen in den A1 mini |

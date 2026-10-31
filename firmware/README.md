@@ -53,7 +53,7 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Baumzähler** | zählt jeden Baum genau einmal |
 | **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Motorantwort richtig gelesen, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
 | **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: passt zum AK70-10 (25 Nm) |
-| **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (86 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern |
+| **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (87 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern |
 | **Einstellungen, Konsole** | Prüfsumme erkennt kaputtes EEPROM, Kalibrierung mit Gewicht, Fehlbedienung abgewiesen |
 | **Statuszeile** | Teensy → ESP32-C3 im vereinbarten Format, kaputte Zeilen werden verworfen |
 

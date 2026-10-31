@@ -2,7 +2,7 @@
 
 Jeder Punkt hat ein messbares Kriterium. Ein Exo gilt als abgenommen, wenn alle Punkte bestanden sind.
 Nach jeder Änderung an Mechanik oder Firmware die betroffenen Punkte wiederholen.
-Die Firmware-Punkte F1–F3 laufen automatisch (`make -C firmware test`, GitHub-Workflow).
+Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmware test`, `make -C firmware ident`, Teensy-Build); F3 mit `python3 tools/fertigung.py`.
 
 | Nr | Prüfung | Vorgehen | bestanden, wenn | ✓ |
 |---|---|---|---|---|
