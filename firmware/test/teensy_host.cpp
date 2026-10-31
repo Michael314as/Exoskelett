@@ -3,5 +3,12 @@
 #include "main_teensy.cpp"
 float readTrunkTiltRate(bool* still) { *still = true; return 0; }
 void showLed(exo::Led, int) {}
-void showDisplay(const exo::Outputs&, float) {}
-int main() { setup(); for (int i = 0; i < 1000; i++) { tick = true; loop(); } return 0; }
+int main() {
+  setup();
+  for (int i = 0; i < 1000; i++) { tick = true; loop(); }
+  // Statuszeile an den ESP32-C3 muss das vereinbarte Format haben
+  const char* st = Serial1.lastLine;
+  if (std::strncmp(st, "S,AUS,", 6) != 0) { std::printf("Statuszeile falsch: %s\n", st); return 1; }
+  std::printf("Statuszeile: %s", st);
+  return 0;
+}

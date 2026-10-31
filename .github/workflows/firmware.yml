@@ -13,3 +13,23 @@ jobs:
       - uses: actions/checkout@v4
       - name: Simulation und Abnahmetests
         run: make -C firmware test
+
+  teensy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ARM-Compiler
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+      - name: Teensy-Core und Bibliotheken
+        run: |
+          mkdir -p deps/libs
+          git clone --depth 1 https://github.com/PaulStoffregen/cores deps/cores
+          for r in tonton81/FlexCAN_T4 PaulStoffregen/Wire PaulStoffregen/SPI PaulStoffregen/EEPROM adafruit/Adafruit_NeoPixel adafruit/Adafruit_BNO08x adafruit/Adafruit_BusIO adafruit/Adafruit_Sensor; do
+            git clone --depth 1 https://github.com/$r deps/libs/$(basename $r)
+          done
+      - name: Firmware für Teensy 4.1 bauen
+        run: firmware/tools/build_teensy.sh deps/cores deps/libs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exo-firmware-teensy41
+          path: firmware/build/teensy/exo.hex

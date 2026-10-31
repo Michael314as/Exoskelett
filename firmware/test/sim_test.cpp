@@ -11,6 +11,7 @@
 #include <random>
 #include "exo_app.h"
 #include "drivers.h"
+#include "settings.h"
 
 using namespace exo;
 
@@ -218,6 +219,26 @@ int main() {
     check(got == want, "HX711: negativer 24-Bit-Wert richtig gelesen");
     CellCal cal; cal.offset = 1000; cal.nPerCount = 0.01f;
     check(std::fabs(cal.toNewton(3000) - 20.f) < 1e-3f && !cal.plausible(0x7FFFFF), "Kalibrierung und Erkennung „Sensor am Anschlag“");
+  }
+
+  std::printf("10) Einstellungen und Werkstatt-Konsole\n");
+  {
+    Settings s; seal(s);
+    check(valid(s), "Prüfsumme gültig nach dem Versiegeln");
+    s.level = 2; check(!valid(s), "Änderung ohne Versiegeln wird erkannt (kaputtes EEPROM → Werkseinstellungen)");
+    static int32_t fakeRaw = 1000; static Settings saved; static char lastOut[96];
+    ConsoleIO io; io.rawCell = [](int) { return fakeRaw; }; io.print = [](const char* t) { std::snprintf(lastOut, sizeof lastOut, "%s", t); };
+    io.save = [](const Settings& x) { saved = x; return valid(x); };
+    Settings c;
+    runCommand("null 4", c, io);
+    fakeRaw = 1000 + 4200 * 10;                                       // 10 kg-Gewicht: 42 000 Schritte
+    runCommand("kal 4 10000", c, io);
+    check(std::fabs(c.cell[4].toNewton(1000 + 4200 * 10) - 98.1f) < 0.1f, "Kalibrierung mit 10 kg ergibt 98,1 N");
+    fakeRaw = 1000; runCommand("null 5", c, io); fakeRaw = 1000 + 20; check(!runCommand("kal 5 10000", c, io), "kein Gewicht erkannt → Kalibrierung abgelehnt");
+    check(runCommand("stufe 0", c, io) && c.level == 0, "Stufe per Konsole");
+    check(runCommand("speichern", c, io) && valid(saved) && saved.level == 0, "Speichern versiegelt die Einstellungen");
+    check(!runCommand("quatsch", c, io), "unbekannter Befehl abgewiesen");
+    check(maintenanceDue(40.5f) != nullptr && maintenanceDue(12.f) == nullptr, "Wartungshinweis nach 40 Betriebsstunden");
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);
