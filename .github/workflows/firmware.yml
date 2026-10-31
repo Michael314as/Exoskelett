@@ -1,0 +1,15 @@
+name: Firmware-Tests
+
+on:
+  push:
+    paths: ['firmware/**', '.github/workflows/firmware.yml']
+  pull_request:
+    paths: ['firmware/**', '.github/workflows/firmware.yml']
+
+jobs:
+  sim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Simulation und Abnahmetests
+        run: make -C firmware test

@@ -17,6 +17,8 @@ Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnitte
 
 - **Bedienung und Komfort:** Parkstütze zum Einsteigen in unter 90 s, Arbeitslicht, LED-Ring und Display, Baumzähler, Handy-Anzeige, Heizgriffe, Magnet-Schnallen, in 3 Teile zerlegbar, eloxierte Oberfläche. Alles baubar ohne eigene Maschinen (Laserteile bestellen, 3D-Druck, Bohrständer).
 
+- **Steuerung als Code:** Firmware geschrieben und in einer Physik-Simulation getestet (leicht, weich, stabil, sicher): [firmware/README.md](firmware/README.md).
+
 Details: [docs/konzept.md](docs/konzept.md) · [docs/bedienung-und-features.md](docs/bedienung-und-features.md) · [docs/stueckliste.md](docs/stueckliste.md) · [docs/steuerung.md](docs/steuerung.md) ·
 [docs/kraftverteilung.md](docs/kraftverteilung.md) · [docs/entwicklungsplan.md](docs/entwicklungsplan.md)
 
@@ -115,6 +117,9 @@ docs/
   stueckliste.md             Jedes Teil mit Herstellweg (Kauf, Laser, Druck, Bohren), Druckgrößen, Werkzeug
   kraftverteilung.md         Lasten je Arbeitsschritt, Kraftfluss, was die Motoren schaffen
   entwicklungsplan.md        Grundwissen, Phasen, Tests, Werkzeug, Stolpersteine
+firmware/
+  src/                       Steuerung (Gelenkregler, Sicherheit, Bedienung, Teensy-Anbindung)
+  test/sim_test.cpp          Physik-Simulation und Abnahmetests: make -C firmware test
 tools/
   kraftverteilung.py         Rechnung zu kraftverteilung.md
 visualisierung/

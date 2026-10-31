@@ -53,15 +53,17 @@ etwas schwer wird. Das ist gewollt.
 Für jedes Gelenk, etwa 200-mal pro Sekunde:
 
 ```
-Motormoment = Schwerkraftausgleich + K × (Manschettenkraft × Hebelarm) − Dämpfung × Gelenkgeschwindigkeit
+Motormoment = Schwerkraftausgleich + K × (Manschettenkraft × Hebelarm) + Reibungsausgleich − kleine Dämpfung × Geschwindigkeit
 ```
 
 1. **Schwerkraftausgleich:** Die Steuerung kennt den Gelenkwinkel (Encoder) und weiß, wie schwer die Exo-Schiene ist.
    Sie hält das Eigengewicht, damit sich das Exo leer „schwerelos“ anfühlt.
 2. **Verstärkung K:** wie viel das Exo zu deiner Kraft dazugibt. K = 1 heißt doppelte Kraft. Start mit K = 0,5,
    langsam steigern, Obergrenze etwa 3.
-3. **Dämpfung:** bremst schnelle Bewegungen leicht ab. Das verhindert Aufschaukeln.
-4. **Totband:** Kräfte unter etwa 5 N werden ignoriert (Rauschen, Gurt sitzt etwas schief).
+3. **Reibungsausgleich und kleine Dämpfung:** Der Motor gleicht die Reibung in Lagern und Bowdenzügen aus, damit sich das
+   Exo leicht anfühlt. Eine kleine Dämpfung verhindert Aufschaukeln. Zu viel Dämpfung macht das Exo zäh: Das hat die
+   Simulation gezeigt (siehe [firmware/README.md](../firmware/README.md)).
+4. **Totband:** Kräfte unter etwa 2 N werden ignoriert (Rauschen der Wägezelle etwa 0,6 N).
 5. **Filter:** Sensorwerte werden geglättet (Tiefpass um 8 Hz). Deine Bewegungen sind langsamer, Vibrationen schneller.
 6. **Rampen:** Unterstützung wird über etwa 0,3 s ein- und ausgeblendet, nie schlagartig geschaltet.
 7. **Grenzen:** maximales Moment, maximale Geschwindigkeit und Winkelbereich je Gelenk, in der Software **und** mit
@@ -155,3 +157,9 @@ Die Motoren regeln ihren Strom selbst (eingebaut). Die Steuerung schickt nur das
 5. **Unter Last:** zuerst Sandsack in den Schlaufen, dann leichte Bäume, dann schwerere.
 
 Grundwissen dafür steht in [entwicklungsplan.md](entwicklungsplan.md).
+
+---
+
+## 9. Firmware
+
+Der Steuerungskern ist geschrieben und in einer Simulation getestet: [firmware/README.md](../firmware/README.md).

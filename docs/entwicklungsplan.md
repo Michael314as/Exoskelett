@@ -113,7 +113,9 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
 - **Ein** Motor mit Doppeltrommel, ein Bowdenzug-Paar, eine Seilscheibe an einem Holzarm mit Scharnier.
 - **Eine Sensor-Manschette** (Wägezelle + Verstärker) auf dem Holzarm. Mit der Hand führen: Das Exo
   soll folgen. Verstärkung K langsam steigern, Schwingungsgrenze finden (siehe [steuerung.md](steuerung.md)).
-- Steuerung: ESP32 oder Teensy, CAN-Transceiver, Not-Aus-Schütz, Sicherung, Akku-Adapter.
+- Steuerung: Teensy 4.1, CAN-Transceiver, Not-Aus-Schütz, Sicherung, Akku-Adapter. Der Steuerungskern ist fertig
+  und simuliert ([firmware/README.md](../firmware/README.md)); hier werden Treiber ergänzt und die geschätzten Werte
+  (Polster-Steifigkeit, Reibung) gemessen und eingetragen.
 - Lernen: Motor ansprechen, Strom/Moment vorgeben, Encoder auslesen, Seil spannen ohne zu
   ziehen („Leerlauf mit leichter Vorspannung“), Fehlerfälle.
 - **Tests:** Not-Aus trennt immer. Kabel ab → Motor stromlos. Software hängt → Watchdog
