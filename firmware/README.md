@@ -8,10 +8,12 @@ leicht, weich, ohne Zittern, mit spürbarer Verstärkung und sicherem Abschalten
 |---|---|
 | `src/exo_core.h` | Gelenkregler (Manschettenkraft → Moment), Taster-Erkennung, Schlaufenwinde, Sicherheits-Zustandsmaschine, Baumzähler |
 | `src/exo_app.h` | Gesamtsteuerung: 6 Gelenke, 3 Winden, Bedienung, LED-Ring, Licht, Vibration |
-| `src/main_teensy.cpp` | Anbindung an den Teensy 4.1: Pins, 200-Hz-Takt, Schütz; Motor- und Sensortreiber sind als Funktionen vorgesehen und werden nach Wahl der Motoren ausgefüllt |
+| `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (MIT-Modus, CubeMars AK70-10 oder baugleich), Wägezellen-Verstärker HX711, Kalibrierung, Seilübersetzung |
+| `src/main_teensy.cpp` | Teensy 4.1: Pins, 200-Hz-Takt, Schütz, Motoren über CAN, 8 Wägezellen |
+| `test/teensy_host.cpp` | baut den Teensy-Code mit Platzhaltern auf dem PC und lässt 1000 Regeltakte laufen |
 | `test/sim_test.cpp` | Physik-Simulation (Mensch, Weichteile, Manschette, Wägezelle, Exo-Gelenk, Motor) und Abnahmetests |
 
-Starten auf dem PC (Linux/Mac, g++ oder clang++):
+Starten auf dem PC (Linux/Mac, g++ oder clang++), führt Simulation, Treibertests und den Teensy-Testbuild aus:
 
 ```
 make -C firmware test
@@ -45,6 +47,9 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Parkstütze unten** | keine Unterstützung, Ring gelb |
 | **Bedienung** | kurz/lang/doppelt sicher erkannt; Doppeltipp = Licht; Schlaufe zieht bis zur Zugkraft zu und hält stromlos; Stufenwechsel |
 | **Baumzähler** | zählt jeden Baum genau einmal |
+| **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Motorantwort richtig gelesen, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
+| **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: passt zum AK70-10 (25 Nm) |
+| **Teensy-Code** | kompiliert und läuft auf dem PC mit Platzhaltern |
 
 ## Was die Simulation gefunden hat
 
@@ -53,11 +58,15 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 2. **Das Totband war zu groß.** Mit 5 N bekamen kleine Bewegungen gar keine Hilfe. Bei 0,6 N Sensorrauschen reichen 2 N.
 3. **Bedienfehler:** Beide rechten Daumentaster 2 s gedrückt (Stufenwechsel) wurde zugleich als „lang gedrückt“ erkannt
    und hätte die Schlaufen **geöffnet**, mit Baum in der Hand. Behoben und mit einem eigenen Test abgesichert.
+4. **Fehlendes `#include`:** Der Test-Build des Teensy-Codes hat einen Fehler gefunden, der auf dem PC zufällig nicht
+   auffiel und auf dem Teensy den Bau verhindert hätte. Behoben.
 
 ## Was noch fehlt
 
-- **Motor- und Sensortreiber** in `main_teensy.cpp` (`readCuffs`, `readMotors`, `motorSendTorque`, …). Sie hängen vom
-  gekauften Motortyp ab; die Bibliotheken dafür gibt es fertig.
+- **Kleinkram in `main_teensy.cpp`:** Lagesensor (`readTrunkTiltRate`), LED-Ring (`showLed`), E-Paper (`showDisplay`)
+  und der Hardware-Watchdog. Dafür gibt es fertige Bibliotheken, je wenige Zeilen.
+- **Mit echtem Teensy bauen** (PlatformIO, Bibliothek FlexCAN_T4). Hier ist nur der PC-Test mit Platzhaltern gelaufen.
+- **Kalibrierung** jeder Wägezelle mit einem bekannten Gewicht (`CellCal`).
 - **Abgleich mit echter Hardware:** Steifigkeit der Polster, Reibung der Bowdenzüge und Trägheit sind geschätzt.
   Auf dem Prüfstand (Entwicklungsplan, Phase 3) werden sie gemessen und hier eingetragen. Danach wird K neu eingestellt.
 - Die Simulation ersetzt nicht das Tragen: Ob es sich wirklich gut anfühlt, entscheidest du am Prüfstand.

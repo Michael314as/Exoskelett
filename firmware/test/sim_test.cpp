@@ -10,6 +10,7 @@
 #include <cmath>
 #include <random>
 #include "exo_app.h"
+#include "drivers.h"
 
 using namespace exo;
 
@@ -192,6 +193,31 @@ int main() {
     in.safety.estopOk = false; run(0.005f);
     bool allZero = true; for (int i = 0; i < NJ; i++) allZero &= o.tau[i] == 0.f;
     check(allZero && o.led == Led::Red, "Not-Aus: alle Momente sofort 0, Ring rot");
+  }
+
+  std::printf("9) Treiber: Motor-Protokoll (MIT) und Wägezellen-Verstärker\n");
+  {
+    MotorLimits L; uint8_t b[8];
+    packTorqueCommand(10.f, L, b);
+    const uint32_t t = (uint32_t(b[6] & 0xF) << 8) | b[7];
+    const float back = uintToFloat(t, -L.tMax, L.tMax, 12);
+    std::printf("     10 Nm verpackt und zurück: %.3f Nm\n", back);
+    check(std::fabs(back - 10.f) < 0.02f, "Momentbefehl: Auflösung besser als 0,02 Nm");
+    packTorqueCommand(99.f, L, b); const uint32_t tc = (uint32_t(b[6] & 0xF) << 8) | b[7];
+    check(tc == 4095, "zu großes Moment wird auf die Motorgrenze begrenzt");
+    // Antwort bauen: Position 1,0 rad, Geschwindigkeit -2 rad/s, Moment 3 Nm
+    const uint32_t p = floatToUint(1.f, -L.pMax, L.pMax, 16), v = floatToUint(-2.f, -L.vMax, L.vMax, 12), i = floatToUint(3.f, -L.tMax, L.tMax, 12);
+    const uint8_t r[6] = {3, uint8_t(p >> 8), uint8_t(p & 0xFF), uint8_t(v >> 4), uint8_t(((v & 0xF) << 4) | (i >> 8)), uint8_t(i & 0xFF)};
+    const MotorState ms = unpackReply(r, L);
+    check(ms.id == 3 && std::fabs(ms.pos - 1.f) < 0.001f && std::fabs(ms.vel + 2.f) < 0.03f && std::fabs(ms.torque - 3.f) < 0.02f, "Motorantwort richtig entpackt");
+    Transmission tr; tr.ratio = 4.67f; tr.eta = 0.88f;
+    std::printf("     100 Nm an der Schulter brauchen %.1f Nm am Motor (Grenze 25 Nm)\n", tr.motorTorqueFor(100.f));
+    check(tr.motorTorqueFor(100.f) <= L.tMax, "Schulter-Spitzenmoment liegt im Motorbereich");
+    int32_t want = -12345; uint32_t bits = uint32_t(want) & 0xFFFFFF; int k = 23;
+    const int32_t got = hx711ReadRaw([&] { return k >= 0 ? ((bits >> k--) & 1u) != 0 : false; });
+    check(got == want, "HX711: negativer 24-Bit-Wert richtig gelesen");
+    CellCal cal; cal.offset = 1000; cal.nPerCount = 0.01f;
+    check(std::fabs(cal.toNewton(3000) - 20.f) < 1e-3f && !cal.plausible(0x7FFFFF), "Kalibrierung und Erkennung „Sensor am Anschlag“");
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);

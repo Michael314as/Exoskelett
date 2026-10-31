@@ -91,7 +91,7 @@ class App {
     // Schlaufen: unabhängig vom Gelenkmodus (auch aus bleibt alles fest)
     bool anyClosed = false; float load = 0.f;
     for (int i = 0; i < NL; i++) { o.winch[i] = loop[i].step(in.loopCurrentA[i], in.loopOpenSwitch[i], dt); anyClosed |= loop[i].state == LoopState::Closed; }
-    for (int i : {ElL, ElR}) load = std::fmax(load, std::fabs(o.tau[i]) / 0.25f);
+    load = std::fmax(std::fabs(o.tau[ElL]), std::fabs(o.tau[ElR])) / 0.25f;   // grobe Last am Unterarm [N]
     trees.step(anyClosed, load);
     // Anzeige
     o.led = sup.led(s);
