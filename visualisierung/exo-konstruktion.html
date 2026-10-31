@@ -57,6 +57,10 @@ h1{margin:0;font:700 30px/1.05 var(--font-display)}
 .ctrl input[type=range]{width:100px;accent-color:var(--accent)}
 .ctrl input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
 .ctrl button{border:0;background:var(--accent);color:var(--accent-ink);font:600 13px/1 var(--font-body);padding:8px 12px;border-radius:7px;cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ctrl .seg button{background:var(--surface);color:var(--fg);border-radius:0;font-weight:500}
+.ctrl .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+#tour{background:var(--fg);color:var(--bg)}
 .ctrl button:focus-visible,.parts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0;display:flex;flex-direction:column}
 .block{padding:14px 16px}
@@ -87,9 +91,9 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
 
 <div class="app">
   <header>
-    <p class="kicker">Exoskelett · Konstruktion, Entwurf 3.1</p>
+    <p class="kicker">Exoskelett · Konstruktion, Entwurf 3.2</p>
     <h1>So ist das Exo aufgebaut</h1>
-    <p class="lede">Motoren und Akku sitzen hinten. Ein Seil pro Bein streckt Hüfte und Knie, Seilpaare bewegen Schultern und Ellbogen in beide Richtungen. Schlaufen am Handgelenk halten die Stämme, Kraftsensoren in den blauen Manschetten sagen dem Exo, wohin du willst. Nummer antippen oder in der Liste wählen; bei „Arm heben“ und „Ellbogen“ siehst du, wie das Exo deinem Arm folgt.</p>
+    <p class="lede">Motoren und Akku sitzen hinten. Ein Seil pro Bein streckt Hüfte und Knie, Seilpaare bewegen Schultern und Ellbogen in beide Richtungen. Schlaufen am Handgelenk halten die Stämme, Kraftsensoren in den blauen Manschetten sagen dem Exo, wohin du willst. Dazu Parkstütze zum Einsteigen, Arbeitslicht, LED-Ring mit Display und Schnellverschlüsse. Nummer antippen, „Rundgang“ starten oder mit den Reglern bewegen: Bei „Arm heben“ siehst du, wie das Exo deinem Arm folgt.</p>
   </header>
   <main class="work">
     <div class="left">
@@ -107,6 +111,11 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
         <label for="flow"><input type="checkbox" id="flow"> Kraftfluss</label>
         <label for="body"><input type="checkbox" id="body" checked> Körper</label>
         <label for="bench"><input type="checkbox" id="bench" checked> Werkbank</label>
+        <label for="stand"><input type="checkbox" id="stand"> Parkstütze</label>
+        <label for="light"><input type="checkbox" id="light" checked> Licht</label>
+        <label for="anod"><input type="checkbox" id="anod" checked> Eloxiert (Titangrau)</label>
+        <span class="seg" role="group" aria-label="Umgebung"><button type="button" data-env="farm" aria-pressed="true">Plantage</button><button type="button" data-env="work" aria-pressed="false">Werkstatt</button></span>
+        <button type="button" id="tour">Rundgang</button>
       </div>
     </div>
     <aside class="panel">
@@ -170,7 +179,7 @@ scene.environmentIntensity = 0.7;
 const camera = new THREE.PerspectiveCamera(35, 1, 0.02, 60);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.minDistance = 0.35; controls.maxDistance = 9;
-scene.add(new THREE.HemisphereLight(0xffffff, 0x667066, 0.8));
+const hemi = new THREE.HemisphereLight(0xffffff, 0x667066, 0.8); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff4e8, 2.2); sun.position.set(2, 5, 3); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -2.5, right: 2.5, top: 2.5, bottom: -2.5 }); sun.shadow.normalBias = 0.02;
 scene.add(sun);
@@ -180,12 +189,14 @@ const floor = new THREE.Mesh(new THREE.CircleGeometry(6, 48), floorMat); floor.r
 let grid;
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function theme() {
-  scene.background = new THREE.Color(css('--sky')); floorMat.color.set(css('--floor'));
+  floorMat.color.set(css('--floor'));
+  if (typeof applyEnv === 'function' && envReady) applyEnv(); else scene.background = new THREE.Color(css('--sky'));
   if (grid) grid.removeFromParent();
   grid = new THREE.GridHelper(8, 32, css('--grid'), css('--grid')); grid.position.y = 0.002; grid.material.transparent = true; grid.material.opacity = 0.5; scene.add(grid);
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', theme);
 new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+let envReady = false;
 theme();
 
 /* ================= Materialien ================= */
@@ -329,6 +340,26 @@ const PART_INFO = [
     how: 'An der Unterseite des Handgelenks sitzt ein kurzer Schlaufenkopf mit Zahnleiste. Die Schlaufen kommen dort nach unten heraus, der Stamm liegt längs als Verlängerung des Unterarms, das Schnittende direkt am Handgelenk. Jede Schlaufe ist Dyneema in einem Gummischlauch mit Federstahl-Einlage und bleibt offen wie ein Ring. Ein Ende hängt an einem Schnappschäkel, das andere läuft innen an der Schiene zu einer kleinen Winde mit Schneckengetriebe. Daumentaster: kurz = zuziehen, lang = öffnen. Regler „Schlaufen zu“ und „Stamm“ probieren.',
     parts: 'Schlaufenkopf aus Alu, Zahnleiste, 3 Schneckengetriebemotoren 24 V, Gummischlauch, Federstahldraht, Dyneema 4 mm, Schnappschäkel, Daumentaster.',
     care: 'Schneckengetriebe hält ohne Strom. Notöffnung: Lasche am Schnappschäkel ziehen. Schleifen: rechts zwei Stümpfe, links einer, also bis zu drei Bäume.' },
+  { key: 'stand', name: 'Parkstütze', dist: 1.2,
+    what: 'Das Exo steht allein: rückwärts hineinstellen, festschnallen, losgehen. Aussteigen genauso.',
+    how: 'Zwei Alu-Stützen hinten am Rahmen klappen nach unten und stützen das Exo mit gummierten Füßen schräg nach hinten ab. Ein Rastbolzen mit rotem Ring hält sie oben oder unten. Ziel: Einsteigen in unter 90 Sekunden, nichts liegt im Schnee. Schalter „Parkstütze“ probieren.',
+    parts: 'Alu-Rohr 20 × 20, Klappgelenk mit Rastbolzen (Kugelsperrbolzen), Gummifüße, etwa 40 €.',
+    care: 'Stützen nur im Stillstand ausklappen; die Steuerung schaltet die Unterstützung ab, solange sie unten sind (Endschalter).' },
+  { key: 'light', name: 'Licht, LED-Ring und Display', dist: 0.75,
+    what: 'Licht für die dunklen Dezembernachmittage und eine Anzeige, die immer sagt, was das Exo tut.',
+    how: 'Zwei 10-W-LED-Strahler auf den Schulterbügeln leuchten nach vorne, Doppeltipp auf den Ein/Aus-Taster schaltet sie. Um den Not-Aus sitzt ein Ring aus 12 farbigen LEDs: grün bereit, blau hilft, gelb Grenze, rot Fehler, die Zahl der LEDs zeigt den Akku. Am rechten Schultergurt ein E-Paper-Display (bei Kälte und Sonne lesbar): Akku, Restzeit, Bäume heute. Eine kurze Vibration bestätigt jede Schlaufe.',
+    parts: '2 LED-Strahler 12 V, WS2812-Ring, 1,5" E-Paper, Vibrationsmotor, BLE-Funkchip für die Handy-Anzeige, zusammen etwa 60 €.',
+    care: 'Licht und Display hängen an einer eigenen Sicherung; fällt etwas davon aus, läuft das Exo weiter.' },
+  { key: 'buckle', name: 'Schnellverschlüsse und Kupplungen', dist: 0.8,
+    what: 'Anziehen ohne Fummeln und Zerlegen für den Transport ohne Werkzeug.',
+    how: 'Hüftgurt und Brustgurt mit Magnet-Schnallen, die sich einhändig und mit Handschuh schließen. Manschetten mit breitem Klett. Rücken und Beine sind über Kugelsperrbolzen (rote Ringe) verbunden: Ring ziehen, Bein abnehmen. So passt das Exo in drei Teilen in jeden Kofferraum.',
+    parts: 'Magnet-Schnallen (Fidlock-Bauart), Gurtband, Abstandsgewirke-Polster, 6 Kugelsperrbolzen, etwa 90 €.',
+    care: 'Polster sind abnehmbar und waschbar. Bolzen mit Fangseil, damit sie im Schnee nicht verloren gehen.' },
+  { key: 'finish', name: 'Oberfläche und Abdeckungen', dist: 0.9,
+    what: 'Damit es sich anfühlt und aussieht wie ein Produkt: keine offenen Kabel, keine scharfen Kanten, ein Farbton.',
+    how: 'Alu-Teile werden gesammelt eloxiert oder pulverbeschichtet (Dienstleister, keine eigene Maschine). Über der Antriebsbox eine gedruckte Haube mit Lüftungsschlitzen, Kabel laufen im Gewebeschlauch innen an den Schienen. Alle Kanten entgratet und gerundet. Schalter „Eloxiert“ zeigt roh oder titangrau eloxiert.',
+    parts: 'Eloxieren als Sammelauftrag 80 bis 150 € oder Pulverbeschichten 60 bis 120 €, Gewebeschlauch, PETG matt für Hauben.',
+    care: 'Erst eloxieren, wenn alle Bohrungen sitzen (nach dem Prototyp). Gewindebohrungen vorher abdecken.' },
   { key: 'foot', name: 'Steigbügel mit Spikes', dist: 0.75,
     what: 'Leitet die Last in den Boden, auch in Schlamm, Schnee und unebenem Gelände.',
     how: 'Sohlenrahmen nur so groß wie der Schuh, offen, damit Schlamm durchfällt. Kurze Spikes greifen. Zehenkorb vorne, Fersenbügel hinten, ein Ratschenriemen, wie bei einem Steigeisen. Die Unterschenkelschiene geht über ein gummigedämpftes Sprunggelenk und einen seitlichen Bügel unter die Schuhmitte.',
@@ -647,7 +678,7 @@ SIDE.forEach((sd, k) => {
 
 /* ---------- Seile und Bowdenzüge (werden bei jeder Haltung neu gelegt) ---------- */
 const dyn = [];
-function dynTube(mat, r, key, fn, smooth = false) { const m = new THREE.Mesh(new THREE.BufferGeometry(), mat); m.castShadow = false; root.add(m); (parts[key] = parts[key] || []).push(m); m.userData.base = mat; dyn.push({ m, r, fn, smooth }); return dyn[dyn.length - 1]; }
+function dynTube(mat, r, key, fn, smooth = false) { const m = new THREE.Mesh(new THREE.BufferGeometry(), mat); m.castShadow = false; scene.add(m); (parts[key] = parts[key] || []).push(m); m.userData.base = mat; dyn.push({ m, r, fn, smooth }); return dyn[dyn.length - 1]; }
 const W = (g, x, y, z) => g.localToWorld(V(x, y, z));
 const arcPts = (c, R, a0, a1, n = 14) => { const out = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; out.push(V(c.x + Math.cos(a) * R, c.y + Math.sin(a) * R, c.z)); } return out; };
 const angOf = (g, dx, dy) => { const v = new THREE.Vector3(dx, dy, 0).transformDirection(g.matrixWorld); return Math.atan2(v.y, v.x); };
@@ -768,7 +799,7 @@ const FLOW_TEXT = [
   ['Steigbügel', 'Alles zusammen geht unter der Schuhmitte in den Boden: Mensch, Exo und Baum, etwa 1.300 N.'],
 ];
 const flowMarks = [];
-const flowArrow = new THREE.ArrowHelper(V(0, -1, 0), V(), 0.3, 0xD32F2F, 0.06, 0.04); flowArrow.visible = false; root.add(flowArrow);
+const flowArrow = new THREE.ArrowHelper(V(0, -1, 0), V(), 0.3, 0xD32F2F, 0.06, 0.04); flowArrow.visible = false; scene.add(flowArrow);
 {
   const add = (g, i, x, y, z) => { const el = document.createElement('div'); el.className = 'hot'; el.style.background = 'var(--flow)'; el.style.pointerEvents = 'none'; el.textContent = 'K' + (i + 1); el.style.width = 'auto'; el.style.padding = '0 5px'; el.style.borderRadius = '12px';
     const o = new CSS2DObject(el); o.position.set(x, y, z); o.visible = false; g.add(o); flowMarks.push(o); };
@@ -786,6 +817,147 @@ function showFlowText() {
   const dl = d.querySelector('dl');
   FLOW_TEXT.forEach(([t, x], i) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = `K${i + 1} ${t}`; dd.textContent = x; dl.append(dt, dd); });
 }
+
+/* ================= 14–17 Komfort-Features ================= */
+const feat = { standT: 0, standOn: false, light: true, akku: 0.82, trees: 37, loopWasClosed: false };
+// 14 Parkstütze: zwei Klappstützen hinten am Rahmen, ausgeklappt steht das Exo allein
+cur = 'stand';
+SIDE.forEach((sd) => {
+  box(G.torso, 0.034, 0.03, 0.03, M.aluDark, -0.175, -0.01, sd * 0.1);
+  put(G.torso, mesh(cyl(0.006, 0.006, 0.045, 10), M.steel), -0.175, -0.01, sd * 0.1, Math.PI / 2);
+  put(G.torso, mesh(new THREE.TorusGeometry(0.009, 0.002, 6, 14), M.red), -0.175, -0.01, sd * 0.126);   // Rastbolzen
+});
+hotspot('stand', G.torso, -0.24, -0.02, 0.17);
+const standFeet = SIDE.map(() => { const m = mesh(new THREE.SphereGeometry(0.02, 14, 10), M.tpu); m.scale.set(1.4, 0.6, 1.4); scene.add(m); return m; });
+SIDE.forEach((sd, k) => dynTube(M.alu, 0.011, 'stand', () => {
+  const h = W(G.torso, -0.175, -0.01, sd * 0.1), up = W(G.torso, -0.19, 0.38, sd * 0.1);
+  const down = V(h.x - 0.42, 0.012, h.z * 1.7), tip = up.lerp(down, feat.standT);
+  standFeet[k].position.copy(tip); return [h, tip];
+}));
+// 15 Licht und Anzeige
+cur = 'light';
+const spots = [];
+SIDE.forEach((sd) => {
+  const x = -0.035, y = D.torso + 0.13, z = sd * 0.215;
+  box(G.torso, 0.05, 0.042, 0.048, M.motorDark, x, y, z);
+  for (let i = 0; i < 4; i++) box(G.torso, 0.03, 0.002, 0.05, M.chip, x - 0.008, y + 0.022 + 0.001, z - 0.018 + i * 0.012);   // Kühlrippen
+  const lens = put(G.torso, mesh(cyl(0.017, 0.017, 0.006, 24), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfff1dd, emissiveIntensity: 2 })), x + 0.027, y, z, 0, 0, Math.PI / 2);
+  const sp = new THREE.SpotLight(0xfff1dd, 40, 14, 0.42, 0.55, 1.6); sp.position.set(x + 0.03, y, z); G.torso.add(sp);
+  const tg = new THREE.Object3D(); tg.position.set(3, -0.9, sd * 0.4); G.torso.add(tg); sp.target = tg;
+  spots.push({ sp, lens });
+});
+hotspot('light', G.torso, -0.03, D.torso + 0.19, 0.215);
+const ledMats = [];
+for (let i = 0; i < 12; i++) {                                                           // LED-Ring um den Not-Aus
+  const a = i / 12 * Math.PI * 2, m = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x00ff66, emissiveIntensity: 1.2 });
+  put(G.torso, mesh(new THREE.SphereGeometry(0.0042, 8, 6), m), 0.138, D.torso - 0.08 + Math.sin(a) * 0.031, -0.1 + Math.cos(a) * 0.031); ledMats.push(m);
+}
+const dispCanvas = document.createElement('canvas'); dispCanvas.width = 256; dispCanvas.height = 160;
+const dispTex = new THREE.CanvasTexture(dispCanvas); dispTex.colorSpace = THREE.SRGBColorSpace;
+box(G.torso, 0.012, 0.05, 0.068, M.motorDark, 0.128, D.torso - 0.11, 0.1);              // Display-Rahmen am rechten Schultergurt
+put(G.torso, mesh(new THREE.PlaneGeometry(0.058, 0.04), new THREE.MeshBasicMaterial({ map: dispTex })), 0.1345, D.torso - 0.11, 0.1, 0, Math.PI / 2, 0);
+function drawDisplay() {
+  const c = dispCanvas.getContext('2d');
+  c.fillStyle = '#E9E6DC'; c.fillRect(0, 0, 256, 160); c.fillStyle = '#1B1B1B';
+  c.font = '600 22px "IBM Plex Mono", monospace'; c.fillText('EXO  ' + (live.fUp ** 2 + live.fFo ** 2 > 4 ? 'HILFT' : 'BEREIT'), 14, 34);
+  c.fillRect(14, 48, 180, 22); c.fillStyle = '#E9E6DC'; c.fillRect(17, 51, 174 * (1 - feat.akku), 16); c.fillStyle = '#1B1B1B';
+  c.fillRect(196, 54, 6, 10);
+  c.font = '500 20px "IBM Plex Mono", monospace';
+  c.fillText(`${Math.round(feat.akku * 100)} %   ${Math.floor(feat.akku * 2.7)}:${String(Math.round((feat.akku * 2.7 % 1) * 60)).padStart(2, '0')} h`, 14, 100);
+  c.fillText(`Bäume heute  ${feat.trees}`, 14, 132);
+  dispTex.needsUpdate = true;
+}
+// 16 Schnellverschlüsse und Schnellkupplungen
+cur = 'buckle';
+for (const sd of SIDE) {
+  box(G.torso, 0.016, 0.03, 0.036, M.chip, 0.118, D.torso - 0.18, sd * 0.1);                 // Magnetschnalle Brustgurt
+  box(G.torso, 0.017, 0.012, 0.03, M.chrome, 0.12, D.torso - 0.165, sd * 0.1);
+  put(G.torso, mesh(cyl(0.006, 0.006, 0.05, 10), M.chrome), -0.09, 0.02, sd * 0.19, Math.PI / 2);   // Kugelsperrbolzen Hüfte
+  put(G.torso, mesh(new THREE.TorusGeometry(0.012, 0.0025, 6, 16), M.red), -0.09, 0.02, sd * 0.218);
+  put(G.torso, mesh(new THREE.TorusGeometry(0.012, 0.0025, 6, 16), M.red), -0.07, D.torso + 0.09, sd * 0.226);
+}
+hotspot('buckle', G.torso, 0.15, D.torso - 0.2, 0.15);
+box(G.torso, 0.03, 0.05, 0.06, M.chip, 0.16, 0.05, 0); box(G.torso, 0.032, 0.02, 0.05, M.chrome, 0.162, 0.05, 0);   // Magnetschnalle Hüftgurt
+// 17 Oberfläche und Abdeckungen
+cur = 'finish';
+hotspot('finish', G.torso, -0.25, 0.57, 0.15);
+const MC = new THREE.MeshPhysicalMaterial({ color: 0x2A2E33, roughness: 0.38, metalness: 0.1, clearcoat: 0.6, clearcoatRoughness: 0.35 });
+put(G.torso, mesh(rgeo(0.15, 0.05, 0.31, 0.02), MC), -0.25, 0.505, 0);                     // gedruckte Haube über der Box
+for (let i = 0; i < 6; i++) box(G.torso, 0.1, 0.003, 0.012, M.chip, -0.25, 0.531, -0.1 + i * 0.04);   // Lüftungsschlitze
+put(G.torso, mesh(rgeo(0.006, 0.34, 0.3, 0.003), MC), -0.318, 0.3, 0);                      // Rückwand
+SIDE.forEach((sd, k) => { for (const g of [G.thigh[k], G.shank[k]]) rod(g, V(-0.016, -0.03, sd * (D.exoHip + 0.016)), V(-0.016, g === G.thigh[k] ? -D.thigh + 0.06 : -D.shank + 0.08, sd * (D.exoHip + 0.016)), 0.004, M.housing); });   // Kabel im Gewebeschlauch
+cur = null;
+function setFinish(anod) {
+  M.alu.color.set(anod ? 0x7A838C : 0xC9D0D4); M.alu.roughness = anod ? 0.4 : 0.34; M.alu.metalness = anod ? 0.75 : 0.85;
+  M.aluDark.color.set(anod ? 0x4E555C : 0x9AA3A9);
+  glowCache.clear(); paint();
+}
+
+/* ================= Umgebung: verschneite Plantage in der Dämmerung ================= */
+const farm = new THREE.Group(); farm.visible = false; scene.add(farm);
+{
+  const g = new THREE.PlaneGeometry(70, 70, 90, 90); g.rotateX(-Math.PI / 2);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), z = pos.getZ(i), r = Math.hypot(x, z); pos.setY(i, r < 3 ? 0 : (Math.sin(x * 0.7) * Math.cos(z * 0.6) * 0.12 + Math.sin(x * 2.3 + z * 1.7) * 0.03) * Math.min(1, (r - 3) / 2)); }
+  g.computeVertexNormals();
+  const snow = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0xF2F5F9, roughness: 0.92 })); snow.receiveShadow = true; farm.add(snow);
+  // Baumreihen (instanziert): Krone, Schneehaube, Stamm
+  const spots_ = [];
+  for (let x = -16; x <= 16; x += 1.7) for (let z = -16; z <= 16; z += 1.7) {
+    const jx = x + Math.sin(x * 12.9 + z * 4.1) * 0.35, jz = z + Math.cos(x * 7.3 - z * 3.7) * 0.35;
+    if (Math.abs(jx) < 3.4 && Math.abs(jz) < 3.2) continue; if (jx > 1.5 && jx < 6.5 && jz < -1 && jz > -4.6) continue;
+    spots_.push([jx, jz, 0.7 + 0.8 * (0.5 + 0.5 * Math.sin(x * 3.1 + z * 5.7))]);
+  }
+  const crown = new THREE.InstancedMesh(new THREE.ConeGeometry(0.55, 1.7, 8), std(0x24513A, 0.9), spots_.length);
+  const cap = new THREE.InstancedMesh(new THREE.ConeGeometry(0.3, 0.5, 8), std(0xEEF3F7, 0.9), spots_.length);
+  const trk = new THREE.InstancedMesh(cyl(0.06, 0.08, 0.35, 6), M.bark, spots_.length);
+  const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
+  spots_.forEach(([x, z, s], i) => {
+    sc.setScalar(s); mtx.compose(V(x, 0.3 * s + 0.85 * s, z), q, sc); crown.setMatrixAt(i, mtx);
+    mtx.compose(V(x, 0.3 * s + 1.55 * s, z), q, sc); cap.setMatrixAt(i, mtx);
+    mtx.compose(V(x, 0.17 * s, z), q, sc); trk.setMatrixAt(i, mtx);
+  });
+  for (const m of [crown, cap, trk]) { m.castShadow = true; farm.add(m); }
+  // Anhänger mit aufgeladenen Bäumen (Plateau)
+  const tr = new THREE.Group(); tr.position.set(4, 0, -2.8); tr.rotation.y = -0.35; farm.add(tr);
+  const add = (geo, mat, x, y, z, rx = 0, ry = 0, rz = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; m.receiveShadow = true; tr.add(m); return m; };
+  add(rgeo(2.6, 0.08, 1.5, 0.02), std(0x7A5A3A, 0.85), 0, 0.62, 0);
+  for (const s of [-1, 1]) { add(rgeo(2.6, 0.25, 0.04, 0.01), std(0x5C6670, 0.5, 0.6), 0, 0.78, s * 0.75); add(cyl(0.3, 0.3, 0.18, 24), std(0x1B1E21, 0.8), 0.2, 0.3, s * 0.85, Math.PI / 2); }
+  add(rgeo(1.2, 0.06, 0.06, 0.02), std(0x5C6670, 0.5, 0.6), -1.85, 0.5, 0, 0, 0, 0.1);
+  for (let i = 0; i < 5; i++) { add(new THREE.ConeGeometry(0.32 + (i % 2) * 0.05, 1.9, 8), std(0x2C5E40, 0.9), -0.1 + (i % 2) * 0.2, 0.95 + Math.floor(i / 3) * 0.3, -0.5 + i * 0.25, 0, 0, Math.PI / 2 + 0.05); }
+  // Laternen-Pfosten mit warmem Licht
+  const lamp = new THREE.PointLight(0xffb36b, 6, 9, 1.6); lamp.position.set(-5.5, 2.4, -5.5); farm.add(lamp);
+  const post = new THREE.Mesh(cyl(0.04, 0.05, 2.4, 8), std(0x2a2a2a, 0.6)); post.position.set(-5.5, 1.2, -5.5); farm.add(post);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 10), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffc27d, emissiveIntensity: 3 })); bulb.position.set(-5.5, 2.45, -5.5); farm.add(bulb);
+}
+// Schneefall
+const SNOW_N = 1400, snowGeo = new THREE.BufferGeometry(), snowPos = new Float32Array(SNOW_N * 3);
+for (let i = 0; i < SNOW_N; i++) { snowPos[i * 3] = (Math.random() - 0.5) * 16; snowPos[i * 3 + 1] = Math.random() * 6; snowPos[i * 3 + 2] = (Math.random() - 0.5) * 16; }
+snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
+const snowPts = new THREE.Points(snowGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.025, transparent: true, opacity: 0.85, depthWrite: false })); farm.add(snowPts);
+const skyCanvas = document.createElement('canvas'); skyCanvas.width = 4; skyCanvas.height = 256;
+{ const c = skyCanvas.getContext('2d'), gr = c.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#1F2B4A'); gr.addColorStop(0.55, '#5D6787'); gr.addColorStop(0.8, '#C98E78'); gr.addColorStop(1, '#E9B48C'); c.fillStyle = gr; c.fillRect(0, 0, 4, 256); }
+const skyTex = new THREE.CanvasTexture(skyCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
+let envMode = 'farm';
+function applyEnv() {
+  const f = envMode === 'farm';
+  farm.visible = f; floor.visible = !f; if (grid) grid.visible = !f;
+  bench.visible = !f && $('bench').checked; $('bench').disabled = f;
+  scene.background = f ? skyTex : new THREE.Color(css('--sky'));
+  scene.fog = f ? new THREE.Fog(0x7E7F98, 7, 30) : null;
+  scene.environmentIntensity = f ? 0.75 : 0.7;
+  sun.color.set(f ? 0xffb486 : 0xfff4e8); sun.intensity = f ? 1.3 : 2.2; sun.position.set(f ? -3 : 2, f ? 2.4 : 5, f ? -2.5 : 3);
+  hemi.color.set(f ? 0xb9c8ef : 0xffffff); hemi.groundColor.set(f ? 0x3e4659 : 0x667066); hemi.intensity = f ? 1.2 : 0.8;
+  fill.intensity = f ? 2.0 : 0.6; fill.position.set(f ? 3 : -2, f ? 2.6 : 2, f ? 3 : -2);
+  for (const b of document.querySelectorAll('[data-env]')) b.setAttribute('aria-pressed', String(b.dataset.env === envMode));
+  setLight(feat.light);
+}
+function setLight(on) { feat.light = on; for (const s of spots) { s.sp.visible = on; s.lens.material.emissiveIntensity = on ? 2.2 : 0; } $('light').checked = on; }
+
+/* ---------- Rundgang durch alle Baugruppen ---------- */
+let tour = null;
+function tourStep() { if (!tour) return; select(PART_INFO[tour.i % PART_INFO.length].key); tour.i++; tour.t = setTimeout(tourStep, 4500); }
+function stopTour() { if (!tour) return; clearTimeout(tour.t); tour = null; $('tour').textContent = 'Rundgang'; }
 
 /* ================= Haltung ================= */
 const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0 };
@@ -861,7 +1033,7 @@ PART_INFO.forEach((p, i) => {
 });
 let tween = null, selKey = null, flowOn = false;
 const glowCache = new Map();
-function glow(base) { if (!glowCache.has(base)) { const c = base.clone(); c.emissive = new THREE.Color(0xFF7A2A); c.emissiveIntensity = 0.4; glowCache.set(base, c); } return glowCache.get(base); }
+function glow(base) { if (!base.isMeshStandardMaterial) return base; if (!glowCache.has(base)) { const c = base.clone(); c.emissive = new THREE.Color(0xFF7A2A); c.emissiveIntensity = 0.4; glowCache.set(base, c); } return glowCache.get(base); }
 function paint() {
   const flowStage = new Map(); if (flowOn) flowParts.forEach((arr, i) => arr && arr.forEach((m) => flowStage.set(m, i)));
   for (const [k, arr] of Object.entries(parts)) for (const m of arr) {
@@ -896,7 +1068,14 @@ const stopAnim = () => { animOn = false; $('anim').textContent = 'Bewegen'; };
 for (const id of sliders) $(id).addEventListener('input', () => { st[id] = Number($(id).value); stopAnim(); });
 $('anim').addEventListener('click', () => { animOn = !animOn; $('anim').textContent = animOn ? 'Anhalten' : 'Bewegen'; });
 $('body').addEventListener('change', () => bodyParts.forEach((m) => { m.visible = $('body').checked; }));
-$('bench').addEventListener('change', () => { bench.visible = $('bench').checked; });
+$('bench').addEventListener('change', () => { bench.visible = $('bench').checked && envMode === 'work'; });
+$('stand').addEventListener('change', () => { feat.standOn = $('stand').checked; });
+$('light').addEventListener('change', () => setLight($('light').checked));
+$('anod').addEventListener('change', () => setFinish($('anod').checked));
+for (const b of document.querySelectorAll('[data-env]')) b.addEventListener('click', () => { envMode = b.dataset.env; applyEnv(); });
+$('tour').addEventListener('click', () => { if (tour) { stopTour(); return; } tour = { i: 0 }; $('tour').textContent = 'Rundgang stoppen'; tourStep(); });
+controls.addEventListener('start', stopTour);
+list.addEventListener('click', (e) => { if (e.isTrusted) stopTour(); });
 $('log').addEventListener('change', () => { logs.forEach((l) => { l.visible = $('log').checked; }); });
 function setSlider(id, v) { st[id] = v; $(id).value = v; }
 $('flow').addEventListener('change', () => {
@@ -915,9 +1094,10 @@ $('flow').addEventListener('change', () => {
 
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); labelR.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(stage);
+envReady = true; applyEnv(); setFinish(true);
 resize(); pose(0.016); select('sensor', false);
 if (camera.aspect < 1) { camera.position.set(2.6, 1.6, 3.6); controls.target.set(0.1, 0.85, 0.1); }
-else { camera.position.set(2.3, 1.6, 2.9); controls.target.set(0.55, 0.85, -0.2); }
+else { camera.position.set(2.2, 1.45, 2.7); controls.target.set(0.2, 0.9, -0.1); }
 const fmt = (x, u) => `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(0)} ${u}`;
 function renderLive() {
   const dirA = Math.abs(live.fUp) < 1.5 ? 'ruhig' : live.fUp > 0 ? 'heben' : 'senken';
@@ -937,8 +1117,15 @@ renderer.setAnimationLoop((now) => {
     st.squat = 0.45 - 0.4 * Math.cos(animT * 1.0); st.arm = 0.4 - 0.35 * Math.cos(animT * 0.9); st.elb = 0.5 - 0.4 * Math.cos(animT * 1.3); st.loop = 0.5 - 0.5 * Math.cos(animT * 0.7); st.spread = 0.5 - 0.5 * Math.cos(animT * 0.6);
     for (const id of sliders) $(id).value = st[id];
   }
+  feat.standT += ((feat.standOn ? 1 : 0) - feat.standT) * Math.min(1, dt * 5);
   pose(dt);
-  if ((liveT += dt) > 0.1) { liveT = 0; renderLive(); }
+  if (farm.visible && !reduced) { const p = snowGeo.attributes.position; for (let i = 0; i < SNOW_N; i++) { let y = p.getY(i) - dt * 0.55; if (y < 0) y += 6; p.setY(i, y); p.setX(i, p.getX(i) + Math.sin(now / 1500 + i) * dt * 0.05); } p.needsUpdate = true; }
+  const closed = st.loop > 0.9 && logs.some((l) => l.visible);
+  if (closed && !feat.loopWasClosed) feat.trees++; feat.loopWasClosed = closed;
+  feat.akku = Math.max(0.05, feat.akku - dt * 0.00004 * (1 + Math.abs(live.mSh) + Math.abs(live.mEl)));
+  { const busy = Math.abs(live.fUp) > 1.5 || Math.abs(live.fFo) > 1.5, col = feat.standT > 0.5 ? 0xffc400 : busy ? 0x2f7dff : 0x10d060, n = Math.round(feat.akku * 12);
+    ledMats.forEach((m, i) => { m.emissive.setHex(col); m.emissiveIntensity = i < n ? 1.6 : 0.08; }); }
+  if ((liveT += dt) > 0.1) { liveT = 0; renderLive(); drawDisplay(); }
   if (tween) {
     const k = Math.min(1, (now - tween.t0) / 700), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
     camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.q0, tween.q1, e);

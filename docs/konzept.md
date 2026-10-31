@@ -1,4 +1,4 @@
-# Konzept: Christbaum-Exo (Entwurf 3.1)
+# Konzept: Christbaum-Exo (Entwurf 3.2)
 
 Ziel: ein umsetzbares, robustes Exoskelett für zwei Arbeiten: Bäume am Stamm greifen und **schleifen** (Use Case 2)
 und Bäume am Stumpf greifen, fast senkrecht **aufrichten und aufladen** (Use Case 1). Es unterstützt Beine,
@@ -20,7 +20,8 @@ Beinseil über eine Umlenkscheibe auf der Hüftachse und eine Kurvenscheibe am K
 mehr Hebel in der Hocke). Schulter mit offenem Seilpaar statt Bowdenzug (weniger Reibung).
 
 Dazu: [steuerung.md](steuerung.md) (wie das Exo merkt, was du willst), [kraftverteilung.md](kraftverteilung.md)
-(welche Kräfte wo auftreten), [entwicklungsplan.md](entwicklungsplan.md) (wie man es baut).
+(welche Kräfte wo auftreten), [entwicklungsplan.md](entwicklungsplan.md) (wie man es baut),
+[bedienung-und-features.md](bedienung-und-features.md) (Bedienung, Komfort-Features, Fertigung ohne Maschinen).
 
 ## 1. Grundidee in einem Satz
 

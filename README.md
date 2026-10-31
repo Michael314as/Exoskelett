@@ -2,7 +2,7 @@
 
 Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnittener Christbäume entlastet.
 
-> **Stand: Entwurf 3.1.** Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
+> **Stand: Entwurf 3.2.** Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt
@@ -15,7 +15,9 @@ Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnitte
 - **Steuerung:** Die blauen Manschetten sitzen auf Kraftsensoren. Drückst du gegen eine Manschette, bewegt das Exo das Gelenk mit.
 - **Füße:** Steigbügel mit Spikes nach dem Prinzip eines Steigeisens, für Schlamm, Schnee und unebenes Gelände.
 
-Details: [docs/konzept.md](docs/konzept.md) · [docs/steuerung.md](docs/steuerung.md) ·
+- **Bedienung und Komfort:** Parkstütze zum Einsteigen in unter 90 s, Arbeitslicht, LED-Ring und Display, Baumzähler, Handy-Anzeige, Heizgriffe, Magnet-Schnallen, in 3 Teile zerlegbar, eloxierte Oberfläche. Alles baubar ohne eigene Maschinen (Laserteile bestellen, 3D-Druck, Bohrständer).
+
+Details: [docs/konzept.md](docs/konzept.md) · [docs/bedienung-und-features.md](docs/bedienung-und-features.md) · [docs/steuerung.md](docs/steuerung.md) ·
 [docs/kraftverteilung.md](docs/kraftverteilung.md) · [docs/entwicklungsplan.md](docs/entwicklungsplan.md)
 
 ## Use Case 1: Christbaum aufladen
@@ -53,7 +55,10 @@ Schultergelenke und Rahmen in Hüftgurt und Exo-Beine statt in die Arme.
 Beide Seiten herunterladen und im Browser öffnen; sie brauchen Internet für [three.js](https://threejs.org) und die Schriften.
 
 **Konstruktion:** [`visualisierung/exo-konstruktion.html`](visualisierung/exo-konstruktion.html)
-- 13 Baugruppen zum Antippen: was sie tun, wie sie gebaut sind, welche Teile, worauf achten
+- 17 Baugruppen zum Antippen oder als automatischer **Rundgang**: was sie tun, wie sie gebaut sind, welche Teile, worauf achten
+- Umgebung: verschneite Plantage in der Dämmerung (mit Arbeitslicht und Schneefall) oder Werkstatt mit zerlegten Teilen
+- Parkstütze ausklappen, Licht schalten, Oberfläche roh oder eloxiert, Beine spreizen
+- LED-Ring und Display am Schultergurt zeigen live Zustand, Akku und gezählte Bäume
 - Arm heben/Ellbogen: Der Arm des Menschen führt, das Exo folgt; Pfeile an den Manschetten und eine Live-Anzeige zeigen, was die Sensoren messen
 - Schlaufen zuziehen, mit und ohne Stamm
 - **Kraftfluss:** zeigt farbig, wie die Last eines 3 m Baums vom Stamm bis in den Boden läuft
@@ -105,6 +110,7 @@ Der Weg vom Konzept zum tragbaren Exo steht in [`docs/entwicklungsplan.md`](docs
 docs/
   konzept.md                 Konzept Entwurf 3: Aufbau, Antriebe, Greifer, Füße, Kosten
   steuerung.md               Sensor-Manschetten, Regelung, Elektronik, Sicherheit
+  bedienung-und-features.md  Bedienung, Komfort-Features, Fertigung ohne Maschinen, Kosten
   kraftverteilung.md         Lasten je Arbeitsschritt, Kraftfluss, was die Motoren schaffen
   entwicklungsplan.md        Grundwissen, Phasen, Tests, Werkzeug, Stolpersteine
 tools/

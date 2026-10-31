@@ -134,6 +134,12 @@ merkt man früh, wenn etwas nicht funktioniert, und hat jederzeit etwas Nutzbare
 - **Tests:** Arme frei bewegen ohne Widerstand (Exo „schwerelos“); Sandsack in den Schlaufen heben und
   senken; Baum aufrichten; 2–4 Bäume schleifen.
 
+### Phase 5b – Komfort und Finish (2–4 Wochen, ~330–400 €)
+- Parkstütze, Arbeitslicht, LED-Ring, Display, Vibration, Magnet-Schnallen, Schnellkupplungen, Abdeckungen.
+- Wenn alle Bohrungen sitzen: Alu-Teile gesammelt eloxieren oder pulverbeschichten lassen.
+- **Tests:** Einsteigen in unter 90 Sekunden, mit Handschuhen. Alles im Dunkeln bedienbar? Ablesbar bei Kälte?
+  Details in [bedienung-und-features.md](bedienung-und-features.md).
+
 ### Phase 6 – Wetter und Dauer (1 Saison)
 - Abdichten, Kondenswasser, Frost an Gelenken, Seilverschleiß, Akkulaufzeit bei Kälte.
 - Wartungsliste führen: Was ist nach 10, 50, 100 Stunden verschlissen?
