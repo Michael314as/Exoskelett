@@ -35,7 +35,8 @@ inline bool valid(const Settings& s) {
 
 // Wartungshinweis aus den Betriebsstunden (Intervalle laut docs/wartung.md)
 inline const char* maintenanceDue(float hours) {
-  if (hours >= 200.f) return "Jahresinspektion fällig (200 h)";
+  if (hours >= 200.f && std::fmod(hours, 200.f) < 1.f) return "Inspektion fällig (alle 200 h)";
+  if (hours >= 100.f && std::fmod(hours, 100.f) < 1.f) return "Wägezellen prüfen und nachkalibrieren (alle 100 h)";
   if (hours >= 40.f && std::fmod(hours, 40.f) < 1.f) return "Seile und Bowdenzüge prüfen (alle 40 h)";
   return nullptr;
 }

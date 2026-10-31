@@ -2,7 +2,7 @@
 
 Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnittener Christbäume entlastet.
 
-> **Stand: Entwurf 3.2.** Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
+> **Stand: Entwurf 3.2, fertigungsreif bis zum Prototyp.** Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md). Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt
@@ -115,13 +115,24 @@ docs/
   steuerung.md               Sensor-Manschetten, Regelung, Elektronik, Sicherheit
   bedienung-und-features.md  Bedienung, Komfort-Features, Fertigung ohne Maschinen, Kosten
   stueckliste.md             Jedes Teil mit Herstellweg (Kauf, Laser, Druck, Bohren), Druckgrößen, Werkzeug
+  verdrahtung.md             Leistung, Sicherungen, Pinplan Teensy, CAN-IDs
+  montage.md                 Montage, Inbetriebnahme, Kalibrierung
+  pruefung.md                Prüf- und Abnahmeprotokoll (33 Punkte)
+  risikobeurteilung.md       Gefährdungen, Maßnahmen, Restrisiko, Normen
+  wartung.md                 Intervalle, Verschleißteile
+  produktionsreife.md        Stand, Nachweise, Weg zur Serie
   kraftverteilung.md         Lasten je Arbeitsschritt, Kraftfluss, was die Motoren schaffen
   entwicklungsplan.md        Grundwissen, Phasen, Tests, Werkzeug, Stolpersteine
+fertigung/
+  laser/*.dxf, druck/*.stl   18 Laserteile, 12 Druckteile (erzeugt mit tools/fertigung.py)
 firmware/
   src/                       Steuerung (Gelenkregler, Sicherheit, Bedienung, Teensy-Anbindung)
+  esp32/                     Display und Handy (ESP32-C3)
+  tools/build_teensy.sh      baut exo.hex für den Teensy 4.1
   test/sim_test.cpp          Physik-Simulation und Abnahmetests: make -C firmware test
 tools/
   kraftverteilung.py         Rechnung zu kraftverteilung.md
+  fertigung.py               erzeugt und prüft alle Fertigungsdateien
 visualisierung/
   exo-konstruktion.html      3D: Konstruktion im Detail, Baugruppen erklärt, Kraftfluss
   use-case-christbaum.html   3D: beide Use Cases (Aufladen, Schleifen) mit dem Exo laut Konzept

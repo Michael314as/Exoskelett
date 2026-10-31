@@ -12,6 +12,7 @@
 #include "exo_app.h"
 #include "drivers.h"
 #include "settings.h"
+#include "../esp32/status.h"
 
 using namespace exo;
 
@@ -239,6 +240,15 @@ int main() {
     check(runCommand("speichern", c, io) && valid(saved) && saved.level == 0, "Speichern versiegelt die Einstellungen");
     check(!runCommand("quatsch", c, io), "unbekannter Befehl abgewiesen");
     check(maintenanceDue(40.5f) != nullptr && maintenanceDue(12.f) == nullptr, "Wartungshinweis nach 40 Betriebsstunden");
+  }
+
+  std::printf("11) Statuszeile Teensy → ESP32-C3 (Display, Handy)\n");
+  {
+    ExoStatus st = parseStatus("S,AKTIV,82,2,37,1290,41.5,\n");
+    check(st.valid && !std::strcmp(st.mode, "AKTIV") && st.batteryPct == 82 && st.level == 2 && st.treesToday == 37 && st.treesTotal == 1290 && std::fabs(st.hours - 41.5f) < 0.01f, "gültige Zeile richtig gelesen");
+    ExoStatus f = parseStatus("S,FEHLER,40,1,3,10,2.0,Sensor-Manschette gestört\n");
+    check(f.valid && !std::strcmp(f.reason, "Sensor-Manschette gestört"), "Fehlergrund wird übertragen");
+    check(!parseStatus("S,AKTIV,82").valid && !parseStatus("Unsinn").valid && !parseStatus("S,X,150,9,0,0,0,").valid, "kaputte Zeilen werden verworfen");
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);
