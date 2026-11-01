@@ -118,6 +118,23 @@ einem guten Trekkingrucksack, angepasst an die Kräfte des Exos:
 Anziehen: rückwärts ins Exo auf der Parkstütze, Hüftgurt, Schultergurte, Lageverstellriemen, Brustgurt, Manschetten,
 Ristriemen. Der Not-Aus mit LED-Ring sitzt am linken Schultergurt.
 
+## 5a. Rucksack: zwei Akkus, Schutzbügel, Motoranordnung
+
+- **Zwei Stihl AP 500 S** links und rechts neben der Box in gedruckten Schächten, von hinten eingeschoben (Stihl-Rastung).
+  Ein Ideal-Dioden-Modul schaltet sie parallel: einzeln im Betrieb wechselbar, doppelte Laufzeit (etwa 4 bis 6 h).
+- **Schutzbügel** aus Alu-Rohr Ø 22 mit Gummipuffern hinten und seitlich um Box und Akkus. Bei einem Sturz nach hinten
+  oder seitlichem Anstoßen trifft zuerst der Bügel. Die Parkstütze klappt hinten am Bügel aus.
+- **Motoranordnung in der Box** nach dem Weg der Züge: Knie unten, Ellbogen Mitte, Schulter oben.
+- **Wetter:** Die Motoren dieser Klasse haben keine Schutzart gegen Wasser. Sie sitzen deshalb in der gedichteten Box
+  (IP54, Faltenbälge an den Zug-Durchführungen, Lüftung nach unten mit Labyrinth); die Hüftmotoren bekommen gedichtete Hauben.
+- **Festigkeit:** Rohrgrößen nach [festigkeit.md](festigkeit.md).
+
+## 5b. Schulter: seitlich heben
+
+Wie an der Hüfte sitzt das Gelenk fürs seitliche Heben hinter dir, die Achse zeigt nach vorne durch dein Schultergelenk.
+Die Schulterschwinge führt über die Schulter zum Schulterlager. Das Seilpaar läuft durch die hohle Achse und über zwei
+Rollen an der Schwinge auf die Scheibe: Seitliches Heben ändert die Seillänge nicht. Eine Feder trägt den Exo-Arm.
+
 ## 6a. Steuerung (kurz)
 
 Details: [steuerung.md](steuerung.md).
@@ -131,8 +148,13 @@ Details: [steuerung.md](steuerung.md).
 
 ## 6b. Greifer: Schlaufen am Handgelenk
 
-**Prinzip Fangschlinge:** Dyneema-Seil in einem Gummischlauch mit Federstahl-Einlage bleibt offen wie ein Ring. Ein Ende
-hängt am Schnappschäkel, das andere läuft zu einer kleinen Winde mit Schneckengetriebe (hält ohne Strom).
+**Prinzip Spannband (wie eine Schlauchschelle):** Die Schlaufe ist ein Edelstahl-Lochband 20 × 0,3 mm mit Gummi innen.
+Ein Ende ist am Kopf fest (Schnappschäkel), das andere läuft durch einen Schlitz im Kopf in einen Bandkanal zum Antrieb.
+Ein Stachelrad am Schneckengetriebemotor greift in die Lochung. **Zuziehen:** Das Band wird aus der Schlaufe gezogen,
+die Schlaufe wird kleiner (nichts wird zusammengedrückt); das freie Band (bis 25 cm) läuft in einen Speicherkanal an der
+Unterarmschiene. Stopp bei etwa 400 N (Motorstrom + Wägezelle). **Öffnen:** Das Stachelrad schiebt das Band zurück, der
+Federstahl drückt die Schlaufe rund auf (bis Ø 16 cm). Hält ohne Strom; Notöffnung über einen Freilaufhebel am Antrieb
+oder den Schnappschäkel.
 
 - **Schlaufenträger:** gebogenes Alu-Band von der Unterarmschiene außen um das Handgelenk herum nach unten.
 - **Rechts zwei Köpfe auf Höhe des Handgelenks:**
@@ -142,7 +164,11 @@ hängt am Schnappschäkel, das andere läuft zu einer kleinen Winde mit Schnecke
 - **Links ein Kopf unten.**
 - Jeder Kopf hat eine Zahnleiste (formschlüssiger Halt) und eine Wägezelle 50 kg (Baumgewicht für die Steuerung).
 - Der Stamm liegt längs als Verlängerung des Unterarms, das Schnittende am Handgelenk.
-- Daumentaster an der Hand: kurz = zu, lang = auf. Notöffnung: rote Lasche am Schnappschäkel, auch ohne Strom.
+- **Bedienteil an der Handschlaufe, Daumenseite:** je Schlaufe eine Wippe. Nach vorne tippen = zuziehen bis Haltekraft,
+  nach vorne halten = langsam nachziehen, nach hinten 1 s halten = öffnen (mit Last erst nach Vibrationswarnung).
+  Rechts gelb = unten, orange = außen, fühlbar verschieden geformt; beide nach vorne = beide zu. Links eine Wippe und eine
+  blaue Taste (kurz = Licht, lang = Stufe). Je Wippe eine LED: grün offen, gelb zieht, blau hält.
+  *Die Firmware nutzt noch die alte Tastenlogik und wird darauf umgestellt.*
 
 ## 6c. Anzeige am rechten Oberarm
 
