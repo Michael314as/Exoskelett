@@ -174,6 +174,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
         <label class="chk"><input type="checkbox" id="stand"> Parkstütze ausgeklappt</label>
         <label class="chk"><input type="checkbox" id="anod" checked> Eloxiert</label>
         <label class="chk"><input type="checkbox" id="bench"> Werkbank</label>
+        <label class="chk"><input type="checkbox" id="bat2" checked> Zweiter Akku (links)</label>
         <label class="sl" for="xray">Rahmen durchsichtig <input type="range" id="xray" min="0" max="1" step="0.05" value="0"></label>
         <span class="grp" role="group" aria-label="Umgebung"><em>Umgebung</em><button class="btn" data-env="work" aria-pressed="true">Werkstatt</button><button class="btn" data-env="farm" aria-pressed="false">Plantage</button></span>
       </div>
@@ -599,7 +600,7 @@ cur = 'drive';
   const rows = [['knee', by0 + 0.075, M.cable], ['el', by0 + 0.175, M.cable], ['sh', by0 + 0.275, M.rope]];   // Knie unten, Ellbogen Mitte, Schulter oben: jeder Zug nimmt den kürzesten Weg
   for (const [key, y, wmat] of rows) for (const [k, sd] of SIDE.entries()) {
     const z = sd * 0.07;
-    put(g, mesh(cyl(0.046, 0.046, 0.05, 32), M.motor), bx, y, z + sd * 0.035, Math.PI / 2);
+    put(g, mesh(cyl(0.0445, 0.0445, 0.05, 32), M.motor), bx, y, z + sd * 0.035, Math.PI / 2);
     put(g, mesh(cyl(0.036, 0.036, 0.004, 32), M.motorDark), bx, y, z + sd * 0.057, Math.PI / 2);
     for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; put(g, mesh(rgeo(0.004, 0.004, 0.036, 0.001), M.motorDark), bx + Math.cos(a) * 0.047, y + Math.sin(a) * 0.047, z + sd * 0.035); }
     box(g, 0.012, 0.012, 0.012, M.chip, bx - 0.03, y - 0.03, z + sd * 0.05);
@@ -625,7 +626,7 @@ cur = 'power';
     box(g, 0.11, 0.186, 0.006, M.print, bx, yb, zb + sd * 0.045);                                                  // Außenwand
     box(g, 0.006, 0.186, 0.09, M.print, bx + 0.055, yb, zb);                                                       // Stirnwand mit Kontakten
     for (const dy of [-0.06, 0.06]) box(g, 0.1, 0.004, 0.004, M.aluDark, bx - 0.005, yb + dy, zb - sd * 0.038);    // Führungsschienen
-    box(g, 0.1, 0.165, 0.072, M.stihl, bx - 0.002, yb, zb); box(g, 0.03, 0.167, 0.074, M.stihlGrey, bx + 0.036, yb, zb);   // Stihl AP 500 S
+    box(g, 0.116, 0.164, 0.07, M.stihl, bx - 0.003, yb, zb); box(g, 0.03, 0.166, 0.072, M.stihlGrey, bx + 0.042, yb, zb);   // Stihl AP 500 S
     box(g, 0.012, 0.03, 0.012, M.red, bx - 0.052, yb + 0.07, zb + sd * 0.02);                                      // Rastung (Entriegeln)
     for (const dy of [-0.015, 0, 0.015]) box(g, 0.004, 0.006, 0.01, M.chrome, bx + 0.052, yb + dy, zb);             // Kontakte
   }
@@ -685,7 +686,7 @@ SIDE.forEach((sd, k) => {
     box(g, 0.13, 0.11, 0.008, M.alu, -0.115, 0, sd * 0.222);                                       // Motorplatte
     box(g, 0.026, 0.026, 0.026, M.aluDark, XHUB, 0, sd * 0.207);
     for (const a of [0.5, 2.6, 4.7]) rod(g, V(XM + Math.cos(a) * 0.036, Math.sin(a) * 0.036, sd * 0.226), V(XM + Math.cos(a) * 0.036, Math.sin(a) * 0.036, sd * 0.262), 0.003, M.steel);
-    put(g, mesh(cyl(0.046, 0.046, 0.05, 32), M.motor), XM, 0, sd * 0.282, Math.PI / 2);
+    put(g, mesh(cyl(0.0445, 0.0445, 0.05, 32), M.motor), XM, 0, sd * 0.282, Math.PI / 2);
     put(g, mesh(cyl(0.036, 0.036, 0.004, 32), M.motorDark), XM, 0, sd * 0.304, Math.PI / 2);
     for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; put(g, mesh(rgeo(0.004, 0.004, 0.046, 0.001), M.motorDark), XM + Math.cos(a) * 0.047, Math.sin(a) * 0.047, sd * 0.282); }
     box(g, 0.012, 0.012, 0.012, M.chip, XM - 0.03, -0.03, sd * 0.295);
@@ -1018,7 +1019,7 @@ cur = null;
   for (const [x, z] of [[-0.2, -0.2], [0.8, -0.2], [-0.2, 0.2], [0.8, 0.2]]) box(bench, 0.04, 0.7, 0.04, M.bench, x, 0.35, z);
   // a) Arm-Antrieb: Motor, Doppeltrommel, zwei Hüllen mit Spannschrauben
   const a = new THREE.Group(); a.position.set(-0.02, 0.84, 0); a.scale.setScalar(1.8); bench.add(a);
-  put(a, mesh(cyl(0.046, 0.046, 0.05, 32), M.motor), 0, 0, -0.07, Math.PI / 2);
+  put(a, mesh(cyl(0.0445, 0.0445, 0.05, 32), M.motor), 0, 0, -0.07, Math.PI / 2);
   put(a, mesh(cyl(0.03, 0.03, 0.006, 24), M.steel), 0, 0, -0.035, Math.PI / 2);
   for (let i = 0; i < 6; i++) { const ang = i / 6 * Math.PI * 2; bolt(a, Math.cos(ang) * 0.022, Math.sin(ang) * 0.022, -0.022, 0.016, 0.0025); }
   put(a, mesh(cyl(R_DRUM, R_DRUM, 0.03, 24), M.alu), 0, 0, 0.01, Math.PI / 2);
@@ -1293,12 +1294,13 @@ function stopTour() { if (!tour) return; clearTimeout(tour.t); tour = null; $('t
 const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0, abd: 0 };
 // Gang: Phase 0 = Fersenaufsatz; Hüft- und Kniewinkel nach typischen Ganglinien (Hüfte −10…+25°, Knie bis 60° im Schwung)
 const gait = { on: false, ph: 0, stance: [true, true] };
+const bal = { extra: 0 };   // zusätzliche Rumpfvorneigung, mit der der Mensch den Rucksack ausbalanciert
 const gaitAng = (k) => { const ph = (gait.ph + k * 0.5) % 1; return { hip: deg(7.5 + 17.5 * Math.cos(2 * Math.PI * (ph - 0.88))), knee: deg(5 + 10 * Math.exp(-(((ph - 0.15) / 0.08) ** 2)) + 55 * Math.exp(-(((ph - 0.72) / 0.1) ** 2))), stance: ph < 0.6 }; };
 const ex = { psi: null, eps: null };                       // Winkel des Exo-Arms (folgt dem Menschen)
 const live = { fUp: 0, fFo: 0, mSh: 0, mEl: 0, fTh: 0, mHip: 0, mKn: 0, q0: null };
 const armAng = () => ({ psi: deg(5) + deg(110) * st.arm, eps: deg(8) + deg(100) * st.elb });
 function pose(dt) {
-  const q = st.squat, phS = deg(30) * q, th = deg(78) * q, lam = deg(36) * q;
+  const q = st.squat, phS = deg(30) * q, th = deg(78) * q, lam = deg(36) * q + bal.extra;
   const ab = deg(20) * st.spread;
   // Bein-Kette des Exos: Abspreizen (Achse nach vorne durchs Hüftgelenk) → Hüfte → Knie → Knöchel → Kippgelenk hinter der Ferse
   const mRx = (a) => new THREE.Matrix4().makeRotationX(a), mRy = (a) => new THREE.Matrix4().makeRotationY(a), mRz = (a) => new THREE.Matrix4().makeRotationZ(a);
@@ -1350,7 +1352,7 @@ function pose(dt) {
   }
   // Schlaufen: offen (Ring vor dem Kopf) → zu (um den Stamm, falls eingelegt, sonst klein am Kopf)
   for (const L of loops) {
-    const has = logs[L.k].visible, t = st.loop, rO = 0.08, zc = SIDE[L.k] * D.shHalf;
+    const has = logs[L.k].visible, t = st.loop, rO = 0.065, zc = SIDE[L.k] * D.shHalf;
     let c1, a1, b1, d1;
     if (has) { const v = V(XH - 0.004 - LR, L.y, zc).sub(L.head); v.y = 0; const dist = v.length(); d1 = v.normalize(); a1 = (dist + LR + 0.0085) / 2; b1 = LR + 0.0085; c1 = L.head.clone().addScaledVector(d1, a1); }
     else { d1 = L.d.clone(); a1 = b1 = 0.022; c1 = L.head.clone().addScaledVector(d1, 0.024); }
@@ -1367,9 +1369,10 @@ function pose(dt) {
 /* ================= Technische Ansicht ================= */
 let tween = null, flowOn = false;
 // ---------- Kaufteile und Antriebsdaten (Richtwerte; vor Bestellung mit dem Datenblatt abgleichen) ----------
-const MOTOR = { ref: 'CubeMars AK70-10 (KV 100, Planetengetriebe 10:1, CAN, Encoder)', d: 92, h: 50, kg: 0.52, tauN: 8.3, tauP: 24.8, w0: 37.7, tauS: 50 };
-// w0: Leerlaufdrehzahl am Abtrieb bei 36 V [rad/s] (100 U/min/V × 36 V / 10); tauS: gedachtes Stillstandsmoment der Kennlinie [Nm]
-const MOT = `${MOTOR.ref}; Ø ${MOTOR.d} × ${MOTOR.h} mm; ${MOTOR.kg} kg; Nennmoment ${MOTOR.tauN} Nm, Spitze ${MOTOR.tauP} Nm; Leerlauf am Abtrieb ≈ ${Math.round(MOTOR.w0 * 60 / 2 / Math.PI)} U/min bei 36 V`;
+const MOTOR = { ref: 'CubeMars AK70-10 KV100 (Planetengetriebe 10:1, CAN, Encoder)', d: 89, h: 50.25, kg: 0.521, tauN: 8.3, tauP: 24.8, w0: 360 * Math.PI / 30, wN: 229 * Math.PI / 30 };
+// Datenblatt: Leerlauf 240 / 480 U/min, Nenndrehzahl 148 / 310 U/min bei 8,3 Nm (24 / 48 V) → bei 36 V linear: Leerlauf 360, Nenn 229 U/min.
+// Kennlinie: ω(τ) = w0 − (w0 − wN) · τ / τN; das Spitzenmoment 24,8 Nm ist nur kurz und bei kleiner Drehzahl verfügbar.
+const MOT = `${MOTOR.ref}; Ø 89 × 50,25 mm; 521 g; Nennmoment 8,3 Nm, Spitze 24,8 Nm; Leerlauf 240 U/min (24 V) / 480 U/min (48 V), Nenndrehzahl 148 / 310 U/min → bei 36 V gerechnet 360 / 229 U/min`;
 const ASM = [
   ['RA', 'Rahmen und Schutz'], ['GU', 'Gurtsystem'], ['EN', 'Energie'], ['EL', 'Elektronik und Kabel'], ['AN', 'Antriebsbox'],
   ['HU', 'Hüfte'], ['BA', 'Beinantrieb'], ['BE', 'Bein, Knie, Fuß'], ['SE', 'Sensorik'], ['SC', 'Schulter'], ['AR', 'Arm und Ellbogen'],
@@ -1387,7 +1390,7 @@ const DB = [
   ['GU-01', 'Hüftgurt', 'Kauf', 'Hüftflossen eines Trekkingrucksacks (Ersatzteil), 100 mm', 'Magnet-Schnalle Fidlock; trägt kaum, führt das Exo', 0.45, 'RA-01 GU-02'],
   ['GU-02', 'Schultergurte und Polster', 'Kauf / Nähen', 'S-Schultergurte, Abstandsgewirke 10 mm', 'Rückenlänge über Lochleiste RA-03', 0.5, 'GU-01 GU-03 RA-03'],
   ['GU-03', 'Riemen und Schnallen', 'Kauf', 'Gurtband 20/25 mm, Leiterschnallen, Fidlock-Brustgurt', 'Lageverstellriemen, Brustgurt', 0.12, 'GU-02'],
-  ['EN-01', 'Akku', 'Kauf', 'Stihl AP 500 S (36 V, 337 Wh)', 'zwei Stück, parallel über EL-06; einzeln im Betrieb wechselbar', 1.8, 'EN-02 EL-06'],
+  ['EN-01', 'Akku', 'Kauf', 'Stihl AP 500 S (36 V, 337 Wh, IPX4, 70 × 116 × 164 mm)', '2,0 kg; bis 2 500 Ladezyklen; zweiter Akku optional (Darstellung), parallel über EL-06, einzeln im Betrieb wechselbar', 2.0, 'EN-02 EL-06'],
   ['EN-02', 'Akkuschacht', 'Druck + Halbzeug', 'PETG-CF, Führungsschienen Alu 4 × 4, Kontaktträger', 'Einschub von hinten, Stihl-Rastung', 0.25, 'EN-01 AN-01 RA-04'],
   ['EL-01', 'Hauptplatine', 'Kauf, bestückt', 'Teensy 4.1 (61 × 18 mm), CAN-Transceiver SN65HVD230, CR2032', '200-Hz-Regeltakt, Watchdog, Uhr', 0.08, 'EL-10 EL-07 KB-03 KB-02'],
   ['EL-02', 'Spannungswandler', 'Kauf', 'Mean Well DDR-60L-24 (36→24 V) + Pololu D36V28F5 (36→5 V)', 'mit Kühlrippen an der Rückwand', 0.25, 'EL-04 EL-01 EL-03'],
@@ -1418,7 +1421,7 @@ const DB = [
   ['BA-01', 'Hüftmotor', 'Kauf', MOT, 'sitzt auf der Hüftschwinge, spreizt mit', MOTOR.kg, 'BA-02 BA-03 KB-01'],
   ['BA-02', 'Motorplatte', 'Laser', 'Alu 4 mm, Distanzbolzen M5', '', 0.15, 'BA-01 HU-05'],
   ['BA-03', 'Trommel Ø 20', 'Halbzeug', 'Alu Ø 20, Bordscheiben Ø 32', 'Übersetzung 1:6 zu BA-05', 0.03, 'BA-01 BA-04'],
-  ['BA-04', 'Seilschleife Hüfte', 'Kauf', 'Liros D-Pro 3 mm (Dyneema SK78)', 'Bruchlast ≈ 8,5 kN; Spitze im Betrieb ≈ 2,5 kN', 0.01, 'BA-03 BA-05'],
+  ['BA-04', 'Seilschleife Hüfte', 'Kauf', 'Liros D-Pro 3 mm (Dyneema SK78)', 'Bruchlast 950 daN (9,5 kN), Dehnung < 1 %; Spitze im Betrieb ≈ 2,5 kN (Sicherheit 3,8)', 0.01, 'BA-03 BA-05'],
   ['BA-05', 'Seilscheibe Ø 120', 'Laser', '3 Lagen Alu 4 mm + 2 Zwischenlagen', 'zwei Rillen, Seilklemmen', 0.18, 'BA-04 HU-07'],
   ['BA-06', 'Hüllenanschlag Knie', 'Laser', 'Alu 4 mm', '', 0.03, 'BA-11 BE-01'],
   ['BA-07', 'Federpatrone', 'Kauf + Druck', 'Druckfeder 2 × 16 × 40 mit Hülse', 'begrenzt das Knie-Beugen auf ≈ 11 Nm', 0.05, 'BA-12 BA-06'],
@@ -1456,7 +1459,7 @@ const DB = [
   ['SC-08', 'Schulterschwinge', 'Halbzeug', '6082 Vierkant 30 × 30 × 3', 'über die Schulter zum Schulterlager', 0.35, 'SC-06 SC-09 SC-05'],
   ['SC-09', 'Schulterlager', 'Kauf', 'Flanschlager KFL001 (12 mm)', '', 0.12, 'SC-08 SC-10'],
   ['SC-10', 'Seilscheibe Schulter Ø 140', 'Laser', '3 Lagen Alu', 'Übersetzung 4,67 zur Trommel', 0.15, 'SC-11 AR-01'],
-  ['SC-11', 'Seilpaar Schulter', 'Kauf', 'Liros D-Pro 3 mm', 'oben heben, unten senken', 0.01, 'AN-S SC-04 SC-10'],
+  ['SC-11', 'Seilpaar Schulter', 'Kauf', 'Liros D-Pro 3 mm (Bruchlast 950 daN)', 'oben heben, unten senken; Spitze ≈ 1,7 kN', 0.01, 'AN-S SC-04 SC-10'],
   ['AR-01', 'Oberarmschiene', 'Halbzeug', '6082 Vierkant 25 × 25 × 3', '', 0.2, 'SC-10 AR-03 SE-01 BD-03'],
   ['AR-02', 'Unterarmschiene', 'Halbzeug', '6082 Vierkant 25 × 25 × 3', 'trägt den Schlaufenträger', 0.18, 'AR-03 SG-01 SE-01'],
   ['AR-03', 'Ellbogenlager, Anschlag', 'Kauf + Druck', 'Flanschlager KFL08, TPU', '', 0.08, 'AR-01 AR-02 AR-04'],
@@ -1467,9 +1470,9 @@ const DB = [
   ['SG-01', 'Schlaufenträger', 'Laser + Biegen', 'Alu 6 mm', 'außen um das Handgelenk', 0.12, 'AR-02 SG-02 SG-05'],
   ['SG-02', 'Schlaufenkopf', 'Halbzeug, gefräst', 'Alu-Block mit Bandschlitz, Zahnleiste TPU', '', 0.08, 'SG-01 SG-03 SG-04 SE-07'],
   ['SG-03', 'Schnappschäkel', 'Kauf', 'Wichard 2673 (Edelstahl)', 'Notöffnung am festen Bandende', 0.03, 'SG-02 SG-04'],
-  ['SG-04', 'Spannband', 'Fertigung', 'Edelstahl-Lochband 20 × 0,3 mm, Gummi 2 mm innen', 'Ø 16 cm offen; zieht bis ≈ 400 N', 0.06, 'SG-02 SG-05 SG-06'],
+  ['SG-04', 'Spannband', 'Fertigung', 'Edelstahl-Lochband 20 × 0,3 mm, Gummi 2 mm innen', 'Ø 13 cm offen, Stämme Ø 4–12 cm; schließt mit ≈ 275 N, hält selbsthemmend', 0.06, 'SG-02 SG-05 SG-06'],
   ['SG-05', 'Bandkanal und Speicher', 'Halbzeug', 'Alu-U 12 × 12 mit PTFE-Profil', 'nimmt bis 25 cm Band auf', 0.05, 'SG-04 SG-06 AR-02'],
-  ['SG-06', 'Bandantrieb', 'Kauf', 'Schneckengetriebemotor 24 V, 40 U/min (JGY-370) + Stachelrad Z12', 'Bandgeschwindigkeit ≈ 42 mm/s; hält ohne Strom; Freilaufhebel', 0.13, 'SG-05 EL-03 KB-03'],
+  ['SG-06', 'Bandantrieb', 'Kauf', 'Schneckengetriebemotor 5840-31ZY 24 V, 10 U/min (Nennmoment 45 kg·cm, Blockiermoment 80 kg·cm, Getriebe 58 × 40 mm, Wellen-Ø 8 mm) + Stachelrad r 16 mm', 'Bandzug 275 N (Nenn) bis 490 N (Blockieren); Band 16,8 mm/s → schließt Ø 13 → 9 cm in 7,5 s; selbsthemmend, Freilaufhebel. Der kleinere JGY-370 (0,9 Nm) wäre zu schwach (≈ 55 N).', 0.25, 'SG-05 EL-03 KB-03'],
   ['SG-07', 'Bedienteil Hand', 'Druck + Kauf', 'Wippschalter IP67, LED, Handschlaufe', 'vor = zu, zurück halten = auf', 0.05, 'SG-06 KB-03'],
   ['BD-01', 'Not-Aus mit LED-Ring', 'Kauf', 'Eaton M22-PVT/K11 + WS2812B-Ring 12 LEDs', 'linker Schultergurt', 0.09, 'EL-04 KB-04'],
   ['BD-02', 'Ein/Aus-Taster', 'Kauf', 'Drucktaster IP67', 'Doppeltipp: Licht', 0.02, 'EL-01'],
@@ -1479,6 +1482,11 @@ const DB = [
 // Stückzahl je Seite bzw. gesamt (Teile, die im Modell als ein Körper zusammengefasst sind)
 const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SC-04': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'AN-T': 3, 'BA-04': 2, 'AR-06': 2, 'AR-07': 2, 'BA-11': 2, 'BA-12': 2 };
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
+const SRC = {
+  'AN-K': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'AN-E': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'AN-S': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'BA-01': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'],
+  'EN-01': ['STIHL AP 500 S (Gewicht, Wh)', 'https://stihl.com.fj/en/p/batteries-chargers-ap-500-s-battery-124181'], 'BA-04': ['LIROS D-Pro 3 mm, 950 daN', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m'], 'SC-11': ['LIROS D-Pro 3 mm, 950 daN', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m'],
+  'SG-06': ['5840-31ZY 24 V 10 U/min', 'https://probots.co.in/pb-5840-31zy-24v-10-rpm-dc-worm-gear-reduction-motor.html'],
+};
 const PDB = {}; for (const [id, name, typ, ref, data, kg, links] of DB) PDB[id] = { id, name, typ, ref, data, kg, links: links ? links.split(' ') : [], asm: id.split('-')[0] === 'KB' ? 'EL' : id.split('-')[0] };
 // ---------- Jedem Mesh ein Bauteil zuordnen (ID + Seite) ----------
 const GROUPS = new Map([[G.torso, ['torso', -1]]]);
@@ -1603,6 +1611,7 @@ function paint() {
     const s = asm ? asmState[asm] || 0 : 0; if (s === 1) op = Math.min(op, 0.15); if (s === 2) op = 0;
     const isSel = selPid && m.userData.pid === selPid;
     if (isSel) op = Math.max(op, 1);
+    if (m.userData.off) op = 0;
     m.visible = op > 0.02;
     if (m.userData.cast === undefined) m.userData.cast = m.castShadow;
     m.castShadow = m.userData.cast && op > 0.9;
@@ -1646,7 +1655,7 @@ function insp() {
   const p = PIDS[selPid], d = PDB[p.base], info = PART_INFO.find((x) => x.key === ASM_TEXT[d.asm]);
   const links = d.links.map((id) => PIDS[`${id}-${p.side}`] ? `${id}-${p.side}` : PIDS[id] ? id : PIDS[`${id}-R`] ? `${id}-R` : null).filter(Boolean);
   const mult = p.meshes.length;
-  el.innerHTML = `<div class="ib"><span class="pid">${p.id}</span><h2></h2><dl class="kv"><dt>Baugruppe</dt><dd>${d.asm} · ${ASM.find((x) => x[0] === d.asm)[1]}</dd><dt>Herstellung</dt><dd>${d.typ}</dd><dt>Kaufteil / Halbzeug</dt><dd class="ref"></dd><dt>Kenndaten</dt><dd class="dat"></dd><dt>Masse</dt><dd>${(d.kg * 1000).toFixed(0)} g</dd><dt>Seite</dt><dd>${sideName[p.side] || 'Mitte'}</dd><dt>Modell</dt><dd>${mult} Körper</dd></dl></div>
+  el.innerHTML = `<div class="ib"><span class="pid">${p.id}</span><h2></h2><dl class="kv"><dt>Baugruppe</dt><dd>${d.asm} · ${ASM.find((x) => x[0] === d.asm)[1]}</dd><dt>Herstellung</dt><dd>${d.typ}</dd><dt>Kaufteil / Halbzeug</dt><dd class="ref"></dd><dt>Kenndaten</dt><dd class="dat"></dd><dt>Masse</dt><dd>${(d.kg * 1000).toFixed(0)} g</dd><dt>Quelle</dt><dd>${SRC[p.base] ? `<a href="${SRC[p.base][1]}" target="_blank" rel="noopener" style="color:var(--sel)">${SRC[p.base][0]}</a>` : d.typ.startsWith('Kauf') ? 'Normteil / Katalogteil' : 'eigene Konstruktion'}</dd><dt>Seite</dt><dd>${sideName[p.side] || 'Mitte'}</dd><dt>Modell</dt><dd>${mult} Körper</dd></dl></div>
     <div class="ib"><h3>Verbunden mit</h3><div class="chips">${links.map((id) => `<button class="chip" data-pid="${id}" title="">${id}</button>`).join('') || '<span class="note">–</span>'}</div></div>
     <div class="ib"><h3>Baugruppe ${d.asm}</h3><p class="w"></p><p class="h"></p></div>`;
   el.querySelector('h2').textContent = nameOf(p.id); el.querySelector('.ref').textContent = d.ref; el.querySelector('.dat').textContent = d.data || '–';
@@ -1684,7 +1693,7 @@ renderer.domElement.addEventListener('pointerleave', () => { tip.hidden = true; 
 // ---------- Bewegung: Wunschbewegung des Menschen, begrenzt durch die Motorkennlinie ----------
 const DRIVE = { hip: { i: 6.0, eta: 0.95 }, knee: { i: 3.33, eta: 0.7 }, sh: { i: 4.67, eta: 0.88 }, el: { i: 3.33, eta: 0.7 } };
 const kneeRatio = (qk) => kneeCam(deg(45) + qk) / 0.015;
-function wMax(j, tauJ, qk = 0) { const i = j === 'knee' ? kneeRatio(qk) : DRIVE[j].i, tm = Math.abs(tauJ) / (i * DRIVE[j].eta); return { w: Math.max(0, MOTOR.w0 * (1 - tm / MOTOR.tauS)) / i, i, tm }; }
+function wMax(j, tauJ, qk = 0) { const i = j === 'knee' ? kneeRatio(qk) : DRIVE[j].i, tm = Math.abs(tauJ) / (i * DRIVE[j].eta); return { w: Math.max(0.3, MOTOR.w0 - (MOTOR.w0 - MOTOR.wN) * tm / MOTOR.tauN) / i, i, tm }; }
 const SL = ['squat', 'arm', 'elb', 'abd', 'spread', 'loop'];
 const tgt = { ...st }; let mode = 'free', simT = 0, playing = true;
 const smooth = (x) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
@@ -1724,7 +1733,7 @@ function simStep(dt) {
   }
   const { qs, tau } = jointState();
   const wh = wMax('hip', tau.hip), wk = wMax('knee', tau.knee, qs.knee), ws = wMax('sh', tau.sh), we = wMax('el', tau.el);
-  const rate = { squat: Math.min(wh.w / deg(114), wk.w / deg(108)), arm: ws.w / deg(110), elb: we.w / deg(100), abd: 2.5 / deg(45), spread: 2.5 / deg(20), loop: 0.042 / 0.22 };
+  const rate = { squat: Math.min(wh.w / deg(114), wk.w / deg(108)), arm: ws.w / deg(110), elb: we.w / deg(100), abd: 2.5 / deg(45), spread: 2.5 / deg(20), loop: 0.0168 / 0.126 };
   const lim = {};
   for (const s of SL) { const d = tgt[s] - st[s], mx = rate[s] * sdt; lim[s] = Math.abs(d) > mx * 1.001 && Math.abs(d) > 0.002; st[s] += clamp(d, -mx, mx); }
   // Gelenkwerte für Tabelle und Anzeige
@@ -1745,7 +1754,7 @@ function renderJoints() {
 }
 const NOTES = { walk: 'Gehen: Beine abwechselnd nach typischen Ganglinien (Schritt 1,1 s bei Tempo 1). Standbein trägt, Schwungbein läuft frei; ist ein Motor zu langsam, verlangsamt sich der Schritt (Gelenke: „Motor am Limit“).', free: 'Frei: Die Regler geben deine Wunschhaltung vor; das Exo fährt mit der Geschwindigkeit hin, die seine Motoren bei der aktuellen Last schaffen.',
   squat: 'Kniebeuge im Wunschtempo. Hüfte und Knie werden von zwei getrennten Antrieben bewegt; begrenzt der langsamere, wartet die Bewegung auf ihn.',
-  armlift: 'Arm heben: Schultermotor über das offene Seilpaar (Übersetzung 4,67).', lift: 'Baum aufrichten (Use Case 1): in die Hocke, Schlaufen zu (Bandantrieb 42 mm/s), aufstehen und Arm heben mit 15 kg Stamm, ablegen.',
+  armlift: 'Arm heben: Schultermotor über das offene Seilpaar (Übersetzung 4,67).', lift: 'Baum aufrichten (Use Case 1): in die Hocke, Schlaufen zu (Bandantrieb 16,8 mm/s, 7,5 s), aufstehen und Arm heben mit 15 kg Stamm, ablegen.',
   side: 'Seitlich: Arme und Beine abspreizen. Diese Achsen sind frei (Federn), die Geschwindigkeit setzt hier der Mensch.', max: 'Höchsttempo: Die Wunschbewegung springt zwischen den Endlagen. Die Tabelle „Gelenke“ zeigt die erreichte Geschwindigkeit und welcher Motor begrenzt.' };
 
 // ---------- Schwerpunkt und Standfläche ----------
@@ -1763,7 +1772,7 @@ function convex(pts) { pts = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
 function cog() {
   const tot = V(), exo = V(); let m = 0, me = 0;
   for (const [g, p, f] of HUMAN) { const w = g.localToWorld(p.clone()); tot.addScaledVector(w, 75 * f); m += 75 * f; }
-  for (const p of Object.values(PIDS)) { const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
+  for (const p of Object.values(PIDS)) { if (p.id === 'EN-01-L' && !$('bat2').checked) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
   let logKg = 0; if (logs[1].visible) { logKg = 15; const c = logs[1].children[0].getWorldPosition(V()); tot.addScaledVector(c, 15); m += 15; }
   tot.multiplyScalar(1 / m); exo.multiplyScalar(1 / me);
   const fp = []; for (let k = 0; k < 2; k++) for (const [x, z] of [[-0.075, -0.055], [0.21, -0.055], [0.21, 0.055], [-0.075, 0.055]]) { const w = G.foot[k].localToWorld(V(x, -D.ankle, SIDE[k] * HH + z)); fp.push(new THREE.Vector2(w.x, w.z)); }
@@ -1779,9 +1788,10 @@ function cog() {
 function renderCg(c) {
   $('cgout').innerHTML = `<dl class="kv"><dt>Gesamtmasse</dt><dd>${c.m.toFixed(1)} kg (Mensch 75 kg, Exo ${c.me.toFixed(1)} kg${c.logKg ? ', Stamm 15 kg' : ''})</dd>
     <dt>Schwerpunkt gesamt</dt><dd>${(c.tot.y * 100).toFixed(0)} cm hoch, ${(c.fwd * 100).toFixed(1)} cm vor der Knöchelmitte (gelber Punkt)</dd>
+    <dt>Ausbalancieren</dt><dd>Rumpf ${(bal.extra * 180 / Math.PI).toFixed(0)}° zusätzlich vorgeneigt, damit das Lot ≈ 3 cm vor der Knöchelmitte liegt (so gleicht ein Mensch den Rucksack aus)</dd>
     <dt>Schwerpunkt Exo</dt><dd>${(c.exo.y * 100).toFixed(0)} cm hoch (blauer Punkt)</dd>
     <dt>Standsicherheit</dt><dd><span class="st ${c.inside && c.margin > 0.03 ? 'ok' : 'lim'}">${c.inside ? `Lot ${(c.margin * 100).toFixed(1)} cm innerhalb der Standfläche` : `Lot ${(-c.margin * 100).toFixed(1)} cm außerhalb: kippt ohne Ausfallschritt`}</span></dd></dl>
-    <p class="note">Standfläche (grüne Linie) = beide Schuhe mit Steigbügel. Massen aus der Bauteilliste und Körpersegmenten nach Winter (75 kg). Das Exo hat keinen Fußmotor: die Balance hältst du selbst über die Füße, das Exo läuft frei mit.</p>`;
+    <p class="note">Wohin das Gewicht geht: Die Exo-Beine leiten das Gewicht von Rahmen, Box und Akkus über die Steigbügel in den Boden (die Hüftmotoren tragen es im Stand mit). Auf Schultern und Hüfte lastet davon nur, was die Gurte zum Führen übertragen; spürbar bleibt die Trägheit beim Drehen und Bücken. Standfläche (grüne Linie) = beide Schuhe mit Steigbügel. Massen aus der Bauteilliste und Körpersegmenten nach Winter (75 kg). Das Exo hat keinen Fußmotor: die Balance hältst du selbst über die Füße, das Exo läuft frei mit.</p>`;
 }
 
 // ---------- Maße ----------
@@ -1831,6 +1841,7 @@ $('bench').addEventListener('change', () => setBench($('bench').checked && envMo
 $('stand').addEventListener('change', () => { feat.standOn = $('stand').checked; });
 $('light').addEventListener('change', () => setLight($('light').checked));
 $('anod').addEventListener('change', () => setFinishT($('anod').checked));
+$('bat2').addEventListener('change', () => { PIDS['EN-01-L'].meshes.forEach((m) => { m.userData.off = !$('bat2').checked; }); paint(); });
 $('log').addEventListener('change', () => { logs[1].visible = $('log').checked; logs[0].visible = false; });
 document.querySelectorAll('[data-env]').forEach((b) => b.addEventListener('click', () => { envMode = b.dataset.env; applyEnv(); }));
 for (const id of SL) $(id).addEventListener('input', () => { tgt[id] = Number($(id).value); if (mode !== 'free') setMode('free'); });
@@ -1876,7 +1887,7 @@ renderer.setAnimationLoop((now) => {
   { const busy = Math.abs(live.fUp) > 1.5 || Math.abs(live.fFo) > 1.5 || Math.abs(live.fTh) > 1.5, col = feat.standT > 0.5 ? 0xffc400 : busy ? 0x2f7dff : 0x10d060, n = Math.round(feat.akku * 12);
     ledMats.forEach((m, i) => { m.emissive.setHex(col); m.emissiveIntensity = i < n ? 1.6 : 0.08; }); }
   if ((slowT += dt) > 0.1) {
-    slowT = 0; drawDisplay(); renderJoints(); cgInfo = cog(); renderCg(cgInfo);
+    slowT = 0; drawDisplay(); renderJoints(); cgInfo = cog(); bal.extra = clamp(bal.extra + 2.0 * (0.03 - cgInfo.fwd), 0, deg(30)); renderCg(cgInfo);
     for (const id of SL) if (document.activeElement !== $(id)) $(id).value = st[id];
     const anyLim = Object.values(lim).some(Boolean) || Object.values(J).some((v) => v.lim);
     $('live').innerHTML = `<b>${mode === 'free' ? 'Frei' : NOTES[mode].split(':')[0]}</b>${gait.on ? ` · Standbein ${gait.stance[1] ? 'rechts' : 'links'}` : ''} · t ${simT.toFixed(1)} s · ${anyLim ? '<span style="color:var(--crit)">Motor am Limit</span>' : 'folgt'}<br>Schwerpunkt ${(cgInfo.fwd * 100).toFixed(1)} cm vor Knöchel · ${cgInfo.inside ? 'steht' : 'kippt'}${selPid ? `<br>Auswahl <b>${selPid}</b> ${nameOf(selPid)}` : ''}`;
