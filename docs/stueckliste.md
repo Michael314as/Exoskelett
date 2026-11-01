@@ -74,7 +74,7 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 | Schlaufenkopf | 2 | Alu 15 × 40 Flachprofil + Laserlaschen, TPU-Zahnleiste | Säge + Bohren, Laser, Druck | 20 € |
 | Schlaufen | 3 | Gummischlauch 12 mm, Federstahldraht 1,5 mm, Dyneema 4 mm | Kauf, zusammenstecken | 20 € |
 | Schnappschäkel mit Zuglasche | 3 | Edelstahl | Kauf | 30 € |
-| Schlaufenwinden | 3 | Schneckengetriebemotor 24 V (Bauform 5840) + Trommel | Kauf, Trommel Druck/Alu | 70 € |
+| Schlaufenantrieb | 3 | Schneckengetriebemotor 5840-31ZY 24 V 10 U/min (45 kg·cm) + Stachelrad r 16 mm | Kauf | 75 € |
 | Daumentaster-Griffe | 2 | PETG + IP67-Taster, Heizfolie | Druck + Kauf | 40 € |
 
 ## 4. Elektronik
@@ -85,7 +85,7 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 | ESP32-C3 (Funk zum Handy) | 1 | Kauf | 8 € |
 | Lagesensor (IMU, BNO085) | 1 | Kauf | 20 € |
 | Wägezellen 20 kg (Manschetten) / 50 kg (Schlaufenköpfe) + HX711 | 6 + 3 | Kauf | 45 € |
-| Drucksensoren FSR (Steigbügel), vergossen | 2 | Kauf | 15 € |
+| Fußkontakt: Halbbrücken-Wägezellen 50 kg (34 × 34 mm) + HX711 | 8 + 2 | Kauf | 20 € |
 | Knopfzelle CR2032 + Halter (Uhr) | 1 | Kauf | 3 € |
 | DC/DC 36→24 V, 36→5 V | 2 | Kauf | 30 € |
 | Motortreiber für Winden | 3 | Kauf | 15 € |

@@ -1392,8 +1392,8 @@ const DB = [
   ['GU-03', 'Riemen und Schnallen', 'Kauf', 'Gurtband 20/25 mm, Leiterschnallen, Fidlock-Brustgurt', 'Lageverstellriemen, Brustgurt', 0.12, 'GU-02'],
   ['EN-01', 'Akku', 'Kauf', 'Stihl AP 500 S (36 V, 337 Wh, IPX4, 70 × 116 × 164 mm)', '2,0 kg; bis 2 500 Ladezyklen; zweiter Akku optional (Darstellung), parallel über EL-06, einzeln im Betrieb wechselbar', 2.0, 'EN-02 EL-06'],
   ['EN-02', 'Akkuschacht', 'Druck + Halbzeug', 'PETG-CF, Führungsschienen Alu 4 × 4, Kontaktträger', 'Einschub von hinten, Stihl-Rastung', 0.25, 'EN-01 AN-01 RA-04'],
-  ['EL-01', 'Hauptplatine', 'Kauf, bestückt', 'Teensy 4.1 (61 × 18 mm), CAN-Transceiver SN65HVD230, CR2032', '200-Hz-Regeltakt, Watchdog, Uhr', 0.08, 'EL-10 EL-07 KB-03 KB-02'],
-  ['EL-02', 'Spannungswandler', 'Kauf', 'Mean Well DDR-60L-24 (36→24 V) + Pololu D36V28F5 (36→5 V)', 'mit Kühlrippen an der Rückwand', 0.25, 'EL-04 EL-01 EL-03'],
+  ['EL-01', 'Hauptplatine', 'Kauf, bestückt', 'PJRC Teensy 4.1 (2,4 × 0,7 Zoll = 61 × 18 mm, ≈ 9 g), CAN-Transceiver SN65HVD230, CR2032', '200-Hz-Regeltakt, Watchdog, Uhr', 0.08, 'EL-10 EL-07 KB-03 KB-02'],
+  ['EL-02', 'Spannungswandler', 'Kauf', 'Mean Well DDR-60L-24 (Eingang 18–75 V, 24 V / 2,5 A, 60 W, 92 %) + Pololu D36V28F5 (Eingang 5,3–50 V, 5 V / 3,2 A) + Pololu D36V28F12 für das Licht', '2,5 A reichen für eine Winde zur Zeit: die Steuerung schaltet die Winden nacheinander (Stillstrom 5840 ≈ 1,5 A). Größere DDR-120-Varianten passen nicht zum Akkubereich 30–42 V.', 0.25, 'EL-04 EL-01 EL-03'],
   ['EL-03', 'Windentreiber', 'Kauf', '3 × Pololu G2 18v17', 'je eine Schlaufenwinde SG-06', 0.03, 'SG-06 EL-02'],
   ['EL-04', 'Schütz, Hauptsicherung', 'Kauf', 'Lastrelais 24 V / 80 A, Midi-Sicherung 40 A', 'fällt bei Not-Aus und Watchdog ab', 0.2, 'BD-01 EL-08 EL-06'],
   ['EL-06', 'Ideal-Dioden-Modul', 'Kauf', '2 × LTC4359-Modul', 'Akkus parallel, kein Rückstrom', 0.03, 'EN-01 EL-04'],
@@ -1447,7 +1447,7 @@ const DB = [
   ['SE-02', 'Wägezelle Manschette', 'Kauf', 'Biegebalken YZC-133, 20 kg, 80 × 12,7 × 12,7 mm', 'misst nur quer zur Schiene', 0.03, 'SE-01 SE-03 SE-04'],
   ['SE-03', 'Messverstärker', 'Kauf', 'HX711-Modul 24 × 16 mm, vergossen (Ausbau: ADS1220)', '80 Messungen/s', 0.005, 'SE-02 KB-02 KB-03'],
   ['SE-04', 'Überlastpuffer, Halter', 'Druck + Laser', 'TPU, Alu', 'Spalt 1 mm', 0.02, 'SE-02'],
-  ['SE-06', 'Fußkontakt', 'Kauf', 'Interlink FSR 406 (44 × 44 mm), vergossen', 'Standbein / Schwungbein', 0.01, 'BE-11 KB-02'],
+  ['SE-06', 'Fußkontakt', 'Kauf', '4 × Halbbrücken-Wägezelle 50 kg (Personenwaagen-Bauform 34 × 34 × 8 mm, 1,0 mV/V, Grenzlast 150 %) je Steigbügel, als Vollbrücke an einem HX711', 'misst die Fußlast (bis 200 kg, Grenzlast 300 kg) → Standbein / Schwungbein. Ein FSR 406 (0,2–20 N) wäre unter dem Körpergewicht überlastet.', 0.15, 'BE-11 KB-02'],
   ['SE-07', 'Wägezelle Schlaufenkopf', 'Kauf', 'Biegebalken YZC-1B, 50 kg', 'Baumgewicht für die Vorsteuerung', 0.04, 'SG-02 KB-03'],
   ['SC-01', 'Schulterbügel', 'Halbzeug', '6082 Vierkant 30 × 30 × 3', 'Biegespannung Spitze 53 MPa', 0.3, 'RA-01 SC-02'],
   ['SC-02', 'Schultergabel', 'Laser', 'Alu 10 mm', 'Achse nach vorne durch das Schultergelenk', 0.12, 'SC-01 SC-03 SC-06'],
@@ -1483,6 +1483,7 @@ const DB = [
 const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SC-04': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'AN-T': 3, 'BA-04': 2, 'AR-06': 2, 'AR-07': 2, 'BA-11': 2, 'BA-12': 2 };
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const SRC = {
+  'EL-01': ['PJRC Teensy 4.1 (Maße)', 'https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4'], 'EL-02': ['Mean Well DDR-60L-24 / Pololu D36V28F5', 'https://www.pololu.com/product/3782'], 'SE-06': ['50-kg-Halbbrücken-Wägezelle', 'https://www.sparkfun.com/products/10245'],
   'AN-K': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'AN-E': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'AN-S': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'BA-01': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'],
   'EN-01': ['STIHL AP 500 S (Gewicht, Wh)', 'https://stihl.com.fj/en/p/batteries-chargers-ap-500-s-battery-124181'], 'BA-04': ['LIROS D-Pro 3 mm, 950 daN', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m'], 'SC-11': ['LIROS D-Pro 3 mm, 950 daN', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m'],
   'SG-06': ['5840-31ZY 24 V 10 U/min', 'https://probots.co.in/pb-5840-31zy-24v-10-rpm-dc-worm-gear-reduction-motor.html'],
