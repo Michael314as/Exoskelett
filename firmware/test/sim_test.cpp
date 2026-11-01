@@ -190,8 +190,9 @@ int main() {
     in.btnLoop[LoopR1] = in.btnLoop[LoopR2] = true; run(2.2f); in.btnLoop[LoopR1] = in.btnLoop[LoopR2] = false; run(0.6f);
     check(app.level == 2, "beide rechten Taster 2 s: Stufe kräftig");
     check(app.loop[LoopR1].state == LoopState::Closed, "Stufenwechsel öffnet keine Schlaufe (Baum bleibt fest)");
-    in.joint[LegR].cuffN = -50.f; in.joint[LegR].q = 1.0f; run(1.f);
-    check(o.tau[LegR] >= 0.f, "Bein bei Beugedruck: Seil nur leicht gespannt, nie drückend");
+    in.joint[HipR].cuffN = 50.f; in.joint[HipR].q = 1.0f; in.joint[KneeR].q = 1.0f; run(1.f);
+    check(o.tau[KneeR] <= 0.001f, "Standbein, Beugedruck am Oberschenkel: Knie beugt nie aktiv");
+    in.joint[HipR].cuffN = 0.f;
     in.safety.estopOk = false; run(0.005f);
     bool allZero = true; for (int i = 0; i < NJ; i++) allZero &= o.tau[i] == 0.f;
     check(allZero && o.led == Led::Red, "Not-Aus: alle Momente sofort 0, Ring rot");
@@ -239,14 +240,16 @@ int main() {
     check(runCommand("stufe 0", c, io) && c.level == 0, "Stufe per Konsole");
     check(runCommand("speichern", c, io) && valid(saved) && saved.level == 0, "Speichern versiegelt die Einstellungen");
     check(!runCommand("quatsch", c, io), "unbekannter Befehl abgewiesen");
+    static int clk = -1; io.setClock = [](int h, int m) { clk = h * 60 + m; };
+    check(runCommand("uhr 14 32", c, io) && clk == 14 * 60 + 32 && !runCommand("uhr 25 0", c, io), "Konsole: Uhr stellen, unsinnige Zeit abgewiesen");
     check(maintenanceDue(40.5f) != nullptr && maintenanceDue(12.f) == nullptr, "Wartungshinweis nach 40 Betriebsstunden");
   }
 
   std::printf("11) Statuszeile Teensy → ESP32-C3 (Display, Handy)\n");
   {
-    ExoStatus st = parseStatus("S,AKTIV,82,2,37,1290,41.5,\n");
-    check(st.valid && !std::strcmp(st.mode, "AKTIV") && st.batteryPct == 82 && st.level == 2 && st.treesToday == 37 && st.treesTotal == 1290 && std::fabs(st.hours - 41.5f) < 0.01f, "gültige Zeile richtig gelesen");
-    ExoStatus f = parseStatus("S,FEHLER,40,1,3,10,2.0,Sensor-Manschette gestört\n");
+    ExoStatus st = parseStatus("S,AKTIV,82,2,135,14:32,41.5,\n");
+    check(st.valid && !std::strcmp(st.mode, "AKTIV") && st.batteryPct == 82 && st.level == 2 && st.restMin == 135 && !std::strcmp(st.clock, "14:32") && std::fabs(st.hours - 41.5f) < 0.01f, "gültige Zeile richtig gelesen (Uhrzeit, Restzeit)");
+    ExoStatus f = parseStatus("S,FEHLER,40,1,60,09:05,2.0,Sensor-Manschette gestört\n");
     check(f.valid && !std::strcmp(f.reason, "Sensor-Manschette gestört"), "Fehlergrund wird übertragen");
     check(!parseStatus("S,AKTIV,82").valid && !parseStatus("Unsinn").valid && !parseStatus("S,X,150,9,0,0,0,").valid, "kaputte Zeilen werden verworfen");
   }
@@ -262,7 +265,48 @@ int main() {
     in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);
     in.joint[ShR].cuffN = 40.f; in.joint[ShR].q = 0.8f; in.joint[ElR].cuffN = 40.f; in.joint[ElR].q = 1.0f; run(1.f);
     check(o.tau[ShR] == 0.f && std::fabs(o.tau[ElR]) > 3.f, "nur das Prüfstand-Gelenk bekommt Moment, die anderen bleiben stromlos");
-    check(runCommand("voll", c, io) && c.jointMask == 0x3F, "Konsole: voll schaltet alle Gelenke frei");
+    check(runCommand("voll", c, io) && c.jointMask == 0xFF, "Konsole: voll schaltet alle 8 Gelenke frei");
+  }
+
+  std::printf("13) Entwurf 4: Kopplung der Manschetten, Baumlast, Standbein/Schwungbein\n");
+  {
+    const float dt = 0.005f;
+    auto ready = [&](App& app, Inputs& in, Outputs& o) { in.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o = app.step(in, dt); in.btnPower = false; for (float t = 0; t < 6.f; t += dt) o = app.step(in, dt); };
+    auto run = [&](App& app, Inputs& in, Outputs& o, float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
+    {
+      App app; Inputs in; Outputs o; ready(app, in, o);
+      in.joint[ShR].q = 0.6f; in.joint[ElR].q = 0.8f; run(app, in, o, 1.f); const float base = o.tau[ShR];
+      in.joint[ElR].cuffN = 40.f; run(app, in, o, 1.f);
+      std::printf("     Druck 40 N nur am Unterarm: Schulter %+.1f Nm (ohne Druck %+.1f Nm)\n", o.tau[ShR], base);
+      check(o.tau[ShR] - base > 4.f, "Druck am Unterarm hilft auch der Schulter (Hebel über den Oberarm)");
+    }
+    {
+      App app; Inputs in; Outputs o; ready(app, in, o);
+      in.joint[ShR].q = 0.8f; in.joint[ElR].q = 1.2f; run(app, in, o, 1.f); const float sh0 = o.tau[ShR], el0 = o.tau[ElR];
+      in.loopN[LoopR1] = 100.f; in.loopN[LoopR2] = 100.f; run(app, in, o, 1.f);
+      const float expEl = 0.67f * 200.f * 0.26f * std::sin(2.0f);
+      std::printf("     Baum 200 N in den Schlaufen, ohne Manschettendruck: Ellbogen %+.1f Nm (erwartet %+.1f), Schulter %+.1f Nm\n", o.tau[ElR] - el0, expEl, o.tau[ShR] - sh0);
+      check(std::fabs((o.tau[ElR] - el0) - expEl) < 2.f && o.tau[ShR] - sh0 > 30.f, "Baumlast: das Exo trägt seinen Anteil von selbst (Stufe normal: zwei Drittel)");
+      in.loopN[LoopR1] = in.loopN[LoopR2] = 400.f; run(app, in, o, 1.f);
+      check(o.tau[ElR] <= 58.f + 1e-3f, "sehr schwerer Baum: Ellbogen bleibt in seiner Momentgrenze");
+    }
+    {
+      App app; Inputs in; Outputs o; ready(app, in, o);
+      in.trunkPitch = 0.5f; in.joint[HipR].q = 1.0f; in.joint[KneeR].q = 1.2f; in.joint[HipL].q = 1.0f; in.joint[KneeL].q = 1.2f; run(app, in, o, 1.f);
+      const float hip0 = o.tau[HipR], knee0 = o.tau[KneeR];
+      in.loopN[LoopR1] = 300.f; run(app, in, o, 1.f);
+      std::printf("     Hocke im Stand: Hüfte %+.1f Nm, Knie %+.1f Nm; mit Baum 300 N: %+.1f / %+.1f Nm\n", hip0, knee0, o.tau[HipR], o.tau[KneeR]);
+      check(hip0 < -10.f && knee0 < -10.f, "Hocke im Stand: Hüfte und Knie strecken von selbst (tragen Exo und einen Teil des Oberkörpers)");
+      check(o.tau[KneeR] < knee0 - 5.f, "mit Baum tragen die Beine mehr");
+      in.loopN[LoopR1] = 0.f; in.footContact[1] = false; run(app, in, o, 0.5f);
+      check(std::fabs(o.ff[KneeR]) < 0.5f && o.stance[1] < 0.05f, "Schwungbein: keine Gewichtsvorsteuerung, Bein läuft frei");
+      check(o.tau[KneeL] < knee0 - 5.f, "das andere Bein übernimmt die ganze Last");
+      in.joint[HipR].cuffN = 60.f; run(app, in, o, 1.f);
+      std::printf("     Schwungbein, Bein anheben (60 N am Oberschenkel): Hüfte %+.1f Nm, Knie %+.1f Nm\n", o.tau[HipR], o.tau[KneeR]);
+      check(o.tau[HipR] > 8.f && o.tau[KneeR] > 0.5f && o.tau[KneeR] <= 10.f, "Schwungbein: Hüfte und Knie helfen beim Anheben, Knie-Beugen begrenzt auf 10 Nm");
+      in.footContact[1] = true; run(app, in, o, 0.5f);
+      check(o.tau[KneeR] <= 0.001f && o.tau[HipR] <= 35.f * 0.15f + 0.01f, "Fuß wieder belastet: kein aktives Beugen mehr am Knie, Hüfte nur wenig");
+    }
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);

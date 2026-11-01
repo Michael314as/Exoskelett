@@ -1,4 +1,4 @@
-# Bedienung, Features und Fertigung (Entwurf 3.2)
+# Bedienung, Features und Fertigung (Entwurf 4)
 
 Ziel: Das Exo soll sich anfühlen wie ein gutes Werkzeug von einem Profi-Hersteller: Man steigt in Sekunden ein,
 nichts klappert, nichts drückt, es reagiert weich und leise, man weiß jederzeit, was es tut. Und es lässt sich trotzdem
@@ -34,19 +34,17 @@ Baugruppen (14 bis 18) eingezeichnet. Mit „Umgebung“ wechselst du zwischen W
 - Kosten: etwa 40 €.
 
 ### 2.2 Licht und Anzeige
-- **Arbeitslicht:** zwei LED-Strahler (je 10 W, 12 V) auf den Schulterbügeln, leuchten dorthin, wohin du schaust.
-  Christbaum-Saison heißt: ab 16 Uhr dunkel. Doppeltipp auf den Ein/Aus-Taster schaltet das Licht. Etwa 30 €.
-- **LED-Ring** (12 farbige LEDs, WS2812) am linken Schultergurt, im Blickfeld:
-  grün = bereit, blau = unterstützt, gelb = Grenze nah, rot = Fehler, weiß pulsierend = Nullen läuft.
-  Der Ring zeigt außerdem den Akkustand (Anzahl LEDs). Etwa 5 €.
-- **Kleines Display** (1,5", E-Paper, im Sonnenlicht und bei Kälte lesbar) auf der Box-Klappe: Akku in %, Restzeit,
-  Bäume heute, Fehlertext. Etwa 15 €.
-- **Vibration** am Schultergurt: kurz = Schlaufe zu, lang = Schlaufe auf, dreimal = Achtung. Hören musst du nichts. 2 €.
 
-### 2.3 Baumzähler und Waage
-- Die Schlaufenwinden und Sensoren wissen, wann ein Baum hängt. Das Exo zählt die Bäume und schätzt aus den Motorströmen
-  das Gewicht (±10 %). Nützlich für Verkauf und Planung: „heute 63 Bäume, 1,9 t bewegt“.
-- Kostet nur Software.
+- Zwei 10-W-LED-Strahler auf den Schulterbügeln, Doppeltipp auf Ein/Aus schaltet sie.
+- LED-Ring um den Not-Aus am linken Schultergurt: grün bereit, blau hilft, gelb Grenze oder Parkstütze, rot Fehler; die
+  Zahl der LEDs zeigt den Akku.
+- **Anzeige am rechten Oberarm außen** (E-Paper 1,54"): groß die Uhrzeit, darunter Akku in Prozent mit Restzeit und die
+  Stufe, unten Fehler und Warnungen im Klartext. Keine Produktionsdaten. Etwa 20 €.
+
+### 2.3 Baumgewicht
+
+Die Wägezellen in den Schlaufenköpfen messen das Baumgewicht für die Steuerung (das Exo trägt seinen Anteil von selbst).
+Ein Baumzähler oder eine Waage für die Abrechnung ist für den Anfang bewusst **nicht** in der Anzeige.
 
 ### 2.4 Handy-App (ohne App-Store)
 - Ein kleiner ESP32-Funkchip (BLE) neben dem Teensy. Eine Webseite im Handy-Browser (Web Bluetooth) zeigt:

@@ -1,4 +1,4 @@
-// ESP32-C3: zeigt den Status des Exos auf dem E-Paper und sendet ihn per Bluetooth (BLE) ans Handy.
+// ESP32-C3: E-Paper am rechten Oberarm (Uhrzeit, Akku mit Restzeit, Stufe, Fehler) und Bluetooth (BLE) zum Handy.
 // Bauen mit Arduino-IDE oder PlatformIO (Board „ESP32C3 Dev Module“). Bibliotheken: GxEPD2, NimBLE-Arduino.
 // Verbindung: Teensy Pin 1 (TX) → ESP32-C3 GPIO 20 (RX), Masse verbinden. Kein Rückkanal nötig.
 // Hinweis: Mit dem echten ESP32-Compiler ist diese Datei noch nicht gebaut worden. Auf dem PC wird sie mit
@@ -16,12 +16,14 @@ static void draw(const ExoStatus& s) {
   epd.setPartialWindow(0, 0, epd.width(), epd.height());
   epd.firstPage();
   do {
-    epd.fillScreen(GxEPD_WHITE); epd.setTextColor(GxEPD_BLACK); epd.setTextSize(2);
-    epd.setCursor(6, 10); epd.print(s.mode);
-    epd.drawRect(6, 40, 150, 24, GxEPD_BLACK); epd.fillRect(8, 42, 146 * s.batteryPct / 100, 20, GxEPD_BLACK);
-    epd.setCursor(6, 76); epd.print(s.batteryPct); epd.print(" %  Stufe "); epd.print(s.level);
-    epd.setCursor(6, 106); epd.print("Baeume "); epd.print(s.treesToday);
-    epd.setTextSize(1); epd.setCursor(6, 140); epd.print(s.reason[0] ? s.reason : "");
+    epd.fillScreen(GxEPD_WHITE); epd.setTextColor(GxEPD_BLACK);
+    epd.setTextSize(5); epd.setCursor(16, 10); epd.print(s.clock);                       // groß: Uhrzeit
+    epd.drawRect(6, 70, 150, 24, GxEPD_BLACK); epd.fillRect(8, 72, 146 * s.batteryPct / 100, 20, GxEPD_BLACK);
+    epd.setTextSize(2); epd.setCursor(162, 74); epd.print(s.batteryPct); epd.print("%");
+    epd.setCursor(6, 106); epd.print("Rest "); epd.print(s.restMin / 60); epd.print(":"); if (s.restMin % 60 < 10) epd.print("0"); epd.print(s.restMin % 60);
+    epd.print("  Stufe "); epd.print(s.level);
+    epd.drawLine(0, 134, 200, 134, GxEPD_BLACK);
+    epd.setCursor(6, 150); epd.print(s.reason[0] ? s.reason : s.mode);                  // unten: Fehler im Klartext, sonst Modus
   } while (epd.nextPage());
 }
 
@@ -43,7 +45,7 @@ void loop() {
       const ExoStatus s = parseStatus(line);
       if (!s.valid) continue;
       chr->setValue(line); chr->notify();                       // Handy bekommt die Zeile 1:1
-      const bool changed = std::strcmp(s.mode, last.mode) || s.batteryPct != last.batteryPct || s.level != last.level || s.treesToday != last.treesToday
+      const bool changed = std::strcmp(s.mode, last.mode) || s.batteryPct != last.batteryPct || s.level != last.level || std::strcmp(s.clock, last.clock)
                          || std::strcmp(s.reason, last.reason);
       if (changed) { draw(s); last = s; }                        // E-Paper nur bei Änderung (schont und spart Strom)
     } else if (n < sizeof line - 1) line[n++] = c;

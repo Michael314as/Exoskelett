@@ -1,4 +1,4 @@
-# Kraftverteilung (Entwurf 3.1)
+# Kraftverteilung (Entwurf 4)
 
 Grobe statische Abschätzung: Welche Kräfte entstehen beim Aufladen und Schleifen, über welche
 Teile laufen sie in den Boden und wie viel davon kann das Exo übernehmen.
@@ -78,8 +78,26 @@ Motor-Klasse „Robotergelenk mittel“ (etwa 9 Nm dauernd, 25 Nm Spitze am Abtr
 | --- | --- | --- | --- |
 | Schulter | Seilscheibe Ø 14 cm, offenes Seilpaar | 37 | 103 |
 | Ellbogen | Seilscheibe Ø 10 cm, Bowdenzug-Paar | 21 | 58 |
-| Hüfte | Umlenkscheibe Ø 19 cm auf der Achse | 51 | 143 |
-| Knie | Kurvenscheibe, 8 cm Radius in der Hocke (5 cm gestreckt) | 43 | 120 |
+| Hüfte | eigener Motor an der Hüftschwinge, Seilgetriebe 1:6 (Trommel Ø 2 / Scheibe Ø 12 cm) | 47 | 140 |
+| Knie | Bowdenzug-Paar, Kurvenscheibe 5 cm gestreckt bis 8 cm in der Hocke | 21–31 | 58–95 (gestreckt) bis 115 (Hocke, Spitze) |
+
+### Entwurf 4: Mischweg an der Hüfte (gerechnet und entschieden)
+
+Bedarf je Seite in tiefer Hocke beim Aufrichten eines 3-m-Baums: Hüfte etwa 45 Nm (Körper) + 106 Nm (Baum) ≈ 150 Nm,
+Knie etwa 33 + 65 ≈ 100 Nm. Soll das Exo die Hälfte tragen: Hüfte ≈ 75 Nm, Knie ≈ 50 Nm.
+
+| | ein Seil pro Bein (Entwurf 3.2) | Mischweg (Entwurf 4) |
+|---|---|---|
+| Hüfte Spitze | ~140 Nm | ~140 Nm |
+| Knie Spitze | ~120 Nm | ~95–115 Nm |
+| Hüfte und Knie getrennt regelbar | nein (festes Verhältnis 1,2 : 1) | **ja** |
+| Spreizen | Seile durch hohle Achse, 4 Umlenkrollen | Motor spreizt mit, nur ein biegsamer Bowdenzug fürs Knie |
+| Motoren | 6 | 8 (+300 bis 1 000 €, +1,5 bis 2 kg nah am Schwerpunkt) |
+
+Entscheidend war nicht die Kraft (beide Wege reichen), sondern dass Hüfte und Knie in beide Richtungen getrennt geregelt
+werden können: Nur so läuft das Bein beim Gehen frei mit und das Exo-Bein lässt sich je Gelenk sauber ausgleichen.
+Ein Hüftmotor ohne Seilgetriebe reicht nicht (25 Nm); ein Motor mit großem Getriebe wäre stark genug, ließe sich aber
+nicht mehr leicht von Hand bewegen.
 
 Gegenüber Entwurf 3 bringt die neue Seilführung an der Schulter rund 25 % mehr (offenes Seil statt Bowdenzug) und
 am Knie in der Hocke rund 33 % mehr (Kurvenscheibe statt fester Rolle), ohne stärkere Motoren. Dazu kommt das Seil

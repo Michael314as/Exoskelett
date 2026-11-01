@@ -1,11 +1,11 @@
-// Steuerungskern des Christbaum-Exos (Entwurf 3.2).
+// Steuerungskern des Christbaum-Exos (Entwurf 4).
 //
 // Hardwareunabhängig: keine Arduino-Abhängigkeit, kein dynamischer Speicher. Läuft auf dem Teensy 4.1
 // (siehe main_teensy.cpp) und auf dem PC in der Simulation (siehe ../test/sim_test.cpp).
 //
 // Prinzip: Die blauen Manschetten sitzen auf Wägezellen. Gemessen wird die Kraft zwischen Mensch und Exo.
 // Jedes Gelenk gibt ein Motormoment aus:
-//   Moment = Schwerkraftausgleich + K · Manschettenkraft · Hebelarm − Dämpfung · Gelenkgeschwindigkeit
+//   Moment = Schwerkraftausgleich + Vorsteuerung + K · (Manschettenkraft · Hebelarm + Kopplung) − Dämpfung · Gelenkgeschwindigkeit
 // mit Reibungsausgleich, Totband, Tiefpass, weicher Ein-/Ausblendung, Grenzen und Sicherheitsüberwachung.
 #pragma once
 #include <cmath>
@@ -57,6 +57,11 @@ struct JointInput {
   float cuffN = 0.f;           // Manschettenkraft, positiv = Mensch drückt in +q-Richtung
   bool cuffValid = true;
   float q = 0.f, qd = 0.f;     // Gelenkwinkel und -geschwindigkeit (Motor-Encoder)
+  // von der Gesamtsteuerung (exo_app.h) gesetzt:
+  float crossNm = 0.f;         // Manschettendruck anderer Gelenke, über die Hebel umgerechnet [Nm], wird verstärkt wie der eigene
+  float ffNm = 0.f;            // Vorsteuerung: Baumlast, Körpergewicht im Stand [Nm], nicht verstärkt
+  float gravScale = 1.f;       // Anteil Schwerkraftausgleich der Schiene (Bein im Stand: 0)
+  float tauMaxNow = 1e9f;      // zusätzliche obere Grenze in diesem Takt (Standbein: nicht beugen)
 };
 
 class Joint {
@@ -69,18 +74,18 @@ class Joint {
     const float f = lp_.step(in.cuffValid ? in.cuffN : 0.f, dt, cfg.filterHz);
     lastForce = f;
     const float fUse = deadband(f, cfg.deadbandN);
-    float assist = cfg.gain * fUse * cfg.rCuff;
+    float assist = cfg.gain * (fUse * cfg.rCuff + in.crossNm);
     // weiche Wand vor den Endanschlägen: Unterstützung in Richtung Anschlag läuft aus, Rückstellmoment baut sich auf
     const float dLo = in.q - cfg.qMin, dHi = cfg.qMax - in.q;
     if (dHi < cfg.wallWidth && assist > 0.f) assist *= clampf(dHi / cfg.wallWidth, 0.f, 1.f);
     if (dLo < cfg.wallWidth && assist < 0.f) assist *= clampf(dLo / cfg.wallWidth, 0.f, 1.f);
     // zu schnell: Unterstützung in Bewegungsrichtung zurücknehmen
     if (std::fabs(in.qd) > cfg.velMax && signf(assist) == signf(in.qd)) assist *= clampf(2.f - std::fabs(in.qd) / cfg.velMax, 0.f, 1.f);
-    const float grav = cfg.gravCoef * std::sin(in.q + cfg.gravPhase);
+    const float grav = in.gravScale * cfg.gravCoef * std::sin(in.q + cfg.gravPhase);
     const float fric = cfg.frictionComp * std::tanh(in.qd / 0.05f);   // weich um den Stillstand, damit nichts zittert
-    float tau = scale * (grav + assist + fric - cfg.damping * in.qd);
+    float tau = scale * (grav + in.ffNm + assist + fric - cfg.damping * in.qd);
     if (cfg.pullOnly) tau = std::fmax(tau, cfg.pretension * scale);
-    tau = clampf(tau, cfg.pullOnly ? 0.f : cfg.tauMin, cfg.tauMax);
+    tau = clampf(tau, cfg.pullOnly ? 0.f : cfg.tauMin, std::fmin(cfg.tauMax, in.tauMaxNow));
     // Änderungsrate begrenzen
     const float maxStep = cfg.slew * dt;
     tau = clampf(tau, last_ - maxStep, last_ + maxStep);

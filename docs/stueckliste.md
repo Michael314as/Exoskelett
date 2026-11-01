@@ -1,4 +1,4 @@
-# Stückliste und Herstellweg (Entwurf 3.2)
+# Stückliste und Herstellweg (Entwurf 4)
 
 Jedes Teil des Exos mit Menge, Material, **wie es entsteht** und welches Werkzeug dafür nötig ist.
 Damit ist geprüft, dass nichts eine Drehbank, Fräse oder Schweißanlage braucht.
@@ -21,35 +21,38 @@ Preise sind grobe Richtwerte.
 | Rückenrahmen senkrecht | 2 | Alu-Vierkantrohr 25 × 25 × 2, je 60 cm | Säge + Bohren | 15 € |
 | Rückenrahmen quer | 3 | Alu-Vierkantrohr 20 × 20 × 2, je 22 cm | Säge + Bohren | 6 € |
 | Eck-Doppelplatten | 12 | Alu 4 mm, 60 × 60 | Laser | 25 € |
-| Hüftbügel | 4 | Alu-Vierkantrohr 25 × 25 × 2, je 15–20 cm | Säge + Bohren | 8 € |
-| Hüftgurt, Schultergurte | 1 Satz | aus Lastenkraxe oder Trekkingrucksack | Kauf | 40–80 € |
-| Abspreizgelenk (Scharnier) | 2 | Laschen Alu 6 mm + Passschraube M10, Gummipuffer | Laser + Kauf | 20 € |
+| Gurtsystem: Hüftgurt, S-Schultergurte, Lageverstellriemen, Brustgurt, Lenden- und Schulterblattpolster | 1 Satz | Trekkingrucksack-Ersatzteile oder genäht (Gurtband 50 mm, Abstandsgewirke), Magnet- und Leiterschnallen | Kauf / Nähen | 80–130 € |
+| Abspreizgelenk: Gabel | 2 | Alu 8 mm, 2 Platten + Steg | Laser | 25 € |
+| Abspreizgelenk: Nabe, Achsbolzen, Kugelsperrbolzen Ø 16 | 2 Satz | Alu-Block, 2 Gleitlager, Bolzen | Kauf + Bohren | 40 € |
+| Zentrierfedern + Gummipuffer | 4 + 4 | Druckfeder Ø 13, TPU | Kauf / Druck | 10 € |
+| Hüftschwinge | 2 | Alu-Vierkantrohr 25 × 25 × 2, je 2 Stücke + Eckplatten, Motorplatte Alu 4 mm | Säge + Bohren, Laser | 25 € |
 | Hüftlager | 2 | Flanschlager UCFL/KFL, 2RS | Kauf | 20 € |
-| Drehlager Oberschenkel | 2 | Axial-Rillenkugellager Ø 40 mit Laschen | Kauf + Laser | 20 € |
 | Ober-/Unterschenkelschienen außen | 4 | Alu 25 × 25 × 2 | Säge + Bohren (Lochraster per Schablone) | 15 € |
 | Ober-/Unterschenkelschienen innen | 4 | Alu 20 × 20 × 2 | Säge + Bohren | 10 € |
 | Kniegelenk-Platten | 4 | Alu 6 mm | Laser | 15 € |
 | Kniegelenk-Lager | 2 | Flanschlager klein, 2RS | Kauf | 14 € |
 | Passschrauben, Nylonmuttern | 1 Satz | M10/M12, Edelstahl | Kauf | 25 € |
 | Steckbolzen mit Federring | 8 | Ø 6 mm | Kauf | 15 € |
-| Steigbügel-Sohlenrahmen | 2 | Edelstahl 4 mm, offen | Laser | 40 € |
-| Spikes | 20 | Schraubspikes (Schuhketten-Ersatz) | Kauf | 15 € |
-| Zehenkorb, Fersenbügel, Riemen | 2 Satz | Steigeisen-Ersatzteile | Kauf | 40 € |
-| Sprunggelenk-Laschen, Gummipuffer | 2 Satz | Alu 6 mm, Gummi | Laser + Kauf | 15 € |
+| Steigbügel unter der Sohlenmitte | 2 | Edelstahl 4 mm (Bügel + Seitenwangen) | Laser + Biegen | 30 € |
+| Spikes | 12 | Schraubspikes | Kauf | 10 € |
+| Fersenschale, Ratschen-Ristriemen | 2 Satz | PETG / Steigeisen-Ersatzteil | Druck + Kauf | 30 € |
+| Knöchellager (Flanschlager klein) | 2 | 2RS | Kauf | 14 € |
+| Fersenbügel mit Kippgelenk hinter der Ferse | 2 Satz | Alu-Rohr 16 mm gebogen oder Laser-Laschen, Bolzen mit Gummibuchsen | Laser + Kauf | 25 € |
 
 ## 2. Antrieb und Seile
 
 | Teil | Menge | Material, Maß | Herstellweg | etwa |
 |---|---|---|---|---|
-| Robotergelenk-Motoren (CAN, 24–48 V) | 6 | QDD-Klasse, ~9 Nm dauernd / 25 Nm Spitze | Kauf | 900–3.000 € |
-| Seiltrommeln | 6 | Alu-Rohr Ø 30 + 2–3 Bordscheiben | Säge + Bohren, Bordscheiben Laser | 30 € |
+| Robotergelenk-Motoren (CAN, 24–48 V) | 8 | QDD-Klasse, ~9 Nm dauernd / 25 Nm Spitze (2 an den Hüften, 6 in der Box) | Kauf | 1.200–4.000 € |
+| Seiltrommeln | 6 + 2 | Alu-Rohr Ø 30 (Box) bzw. Ø 20 (Hüfte) + Bordscheiben | Säge + Bohren, Bordscheiben Laser | 35 € |
 | Montageplatte Box | 1 | Alu 4 mm | Laser | 20 € |
-| Umlenkscheibe Hüfte Ø 19 cm | 2 | Alu 10 mm, mit Rille aus zwei Scheiben verschraubt | Laser (2 Lagen + Zwischenlage) | 30 € |
-| Kurvenscheibe Knie | 2 | Alu 10 mm, Profil 5→8 cm | Laser (2 Lagen + Zwischenlage) | 20 € |
+| Seilscheibe Hüftmotor Ø 12 cm, zwei Rillen | 2 | Alu, 3 Lagen + 2 Zwischenlagen | Laser | 25 € |
+| Kurvenscheibe Knie (strecken) und Beugescheibe Ø 9 cm | 2 + 2 | Alu 10 mm, Profil 5→8 cm | Laser (2 Lagen + Zwischenlage) | 30 € |
+| Federpatrone Knie-Beugezug | 2 | Druckfeder ~250 N mit Hülse und Anschlag | Kauf + Druck | 15 € |
 | Seilscheibe Schulter Ø 14 / Ellbogen Ø 10 | 4 | Alu 10 mm | Laser (2 Lagen + Zwischenlage) | 30 € |
-| Seilrollen mit Kugellager | 10 | Ø 30–40 mm | Kauf | 30 € |
+| Seilrollen mit Kugellager | 4 | Ø 30–40 mm (nur noch Schulter) | Kauf | 12 € |
 | Dyneema-Seil 3 mm | 15 m | SK78 | Kauf | 20 € |
-| Bowdenhülle + Innenzug | 2 Paar | kompressionsarm, PTFE-Liner | Kauf | 30 € |
+| Bowdenhülle + Innenzug | 4 Paar | kompressionsarm, PTFE-Liner (Ellbogen, Knie) | Kauf | 60 € |
 | Spannschrauben, Seilklemmen, Kauschen | 1 Satz | Edelstahl | Kauf | 20 € |
 
 *Seilrille ohne Drehbank:* Zwei gelaserte Scheiben mit vollem Durchmesser und eine dünnere Zwischenscheibe mit kleinerem
@@ -80,14 +83,18 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 |---|---|---|---|
 | Teensy 4.1 + CAN-Transceiver | 1 | Kauf | 50 € |
 | ESP32-C3 (Funk zum Handy) | 1 | Kauf | 8 € |
-| Lagesensoren (IMU) | 3 | Kauf | 15 € |
+| Lagesensor (IMU, BNO085) | 1 | Kauf | 20 € |
+| Wägezellen 20 kg (Manschetten) / 50 kg (Schlaufenköpfe) + HX711 | 6 + 3 | Kauf | 45 € |
+| Drucksensoren FSR (Steigbügel), vergossen | 2 | Kauf | 15 € |
+| Knopfzelle CR2032 + Halter (Uhr) | 1 | Kauf | 3 € |
 | DC/DC 36→24 V, 36→5 V | 2 | Kauf | 30 € |
 | Motortreiber für Winden | 3 | Kauf | 15 € |
 | Hauptsicherung, Schütz, Pilz-Not-Aus | 1 Satz | Kauf | 50 € |
 | Stihl-Akku-Adapter | 1 | Druck oder Kauf | 20–80 € |
 | Stecker IP67, Kabel, Gewebeschlauch | 1 Satz | Kauf, crimpen | 60 € |
 | Platine | 1 | Lochraster oder bestellt | 10 € |
-| LED-Ring, E-Paper 1,5", Vibrationsmotor, Summer | 1 Satz | Kauf | 25 € |
+| LED-Ring, Vibrationsmotor, Summer | 1 Satz | Kauf | 15 € |
+| Anzeige rechter Oberarm: E-Paper 1,54" + Gehäuse mit Scheibe | 1 | Kauf + Druck | 20 € |
 | LED-Arbeitsstrahler 10 W | 2 | Kauf | 30 € |
 
 ## 5. Komfort und Finish

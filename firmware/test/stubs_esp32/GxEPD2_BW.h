@@ -25,6 +25,7 @@ struct GxEPD2_BW {
   void setTextSize(int) {}
   void setCursor(int, int) { text += '|'; }
   void drawRect(int, int, int, int, uint16_t) {}
+  void drawLine(int, int, int, int, uint16_t) {}
   void fillRect(int, int, int w, int, uint16_t) { lastBarWidth = w; }
   void print(const char* s) { text += s; }
   void print(int v) { text += std::to_string(v); }

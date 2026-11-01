@@ -6,8 +6,8 @@ leicht, weich, ohne Zittern, mit spürbarer Verstärkung und sicherem Abschalten
 
 | Datei | Inhalt |
 |---|---|
-| `src/exo_core.h` | Gelenkregler (Manschettenkraft → Moment), Taster-Erkennung, Schlaufenwinde, Sicherheits-Zustandsmaschine, Baumzähler |
-| `src/exo_app.h` | Gesamtsteuerung: 6 Gelenke, 3 Winden, Bedienung, LED-Ring, Licht, Vibration |
+| `src/exo_core.h` | Gelenkregler (Manschettenkraft → Moment), Taster-Erkennung, Schlaufenwinde, Sicherheits-Zustandsmaschine |
+| `src/exo_app.h` | Gesamtsteuerung: 8 Gelenke, Kopplung der Manschetten über die Hebel, Vorsteuerung aus Baumlast und Körpergewicht, Standbein/Schwungbein, 3 Winden, Bedienung, LED-Ring |
 | `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (MIT-Modus, CubeMars AK70-10 oder baugleich), Wägezellen-Verstärker HX711, Kalibrierung, Seilübersetzung |
 | `src/settings.h` | Einstellungen und Kalibrierung im EEPROM (mit Prüfsumme), Werkstatt-Konsole, Wartungshinweise |
 | `src/main_teensy.cpp` | Teensy 4.1: Pinplan, 200-Hz-Takt, Schütz, Motoren über CAN, 8 Wägezellen, Lagesensor, LED-Ring, Watchdog, Statuszeile an den ESP32-C3 |
@@ -51,12 +51,15 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Sturz** | Motoren in 0,1 s weich aus |
 | **Parkstütze unten** | keine Unterstützung, Ring gelb |
 | **Bedienung** | kurz/lang/doppelt sicher erkannt; Doppeltipp = Licht; Schlaufe zieht bis zur Zugkraft zu und hält stromlos; Stufenwechsel |
-| **Baumzähler** | zählt jeden Baum genau einmal |
+| **Kopplung** | 40 N nur am Unterarm: Schulter hilft mit +14 Nm (vorher 0) |
+| **Baumlast-Vorsteuerung** | 200 N in den Schlaufen: Ellbogen trägt genau zwei Drittel (31,7 Nm), ohne Drücken; schwerer Baum bleibt in der Momentgrenze |
+| **Beine im Stand** | Hocke: Hüfte −14 Nm, Knie −20 Nm von selbst; mit Baum 300 N: −29 / −40 Nm |
+| **Schwungbein** | keine Gewichtsvorsteuerung, Bein anheben: Hüfte +10 Nm, Knie +5 Nm (Beugen begrenzt 10 Nm); Standbein beugt nie aktiv |
 | **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Motorantwort richtig gelesen, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
 | **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: passt zum AK70-10 (25 Nm) |
 | **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (87 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern |
 | **Einstellungen, Konsole** | Prüfsumme erkennt kaputtes EEPROM, Kalibrierung mit Gewicht, Fehlbedienung abgewiesen |
-| **Statuszeile** | Teensy → ESP32-C3 im vereinbarten Format, kaputte Zeilen werden verworfen |
+| **Statuszeile** | Teensy → ESP32-C3: Modus, Akku, Stufe, Restzeit, Uhrzeit, Stunden, Grund; kaputte Zeilen werden verworfen |
 | **ESP32-Sketch** | kompiliert auf dem PC mit Platzhaltern; jede gültige Zeile geht ans Handy, E-Paper zeichnet nur bei Änderung (auch bei neuem Fehlergrund), überlange Zeilen laufen nicht über |
 
 ## Was die Simulation gefunden hat

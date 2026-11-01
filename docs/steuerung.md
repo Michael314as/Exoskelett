@@ -1,165 +1,159 @@
-# Steuerung: die Manschetten als Schnittstelle
+# Steuerung: so merkt das Exo, was du willst (Entwurf 4)
 
-**Idee:** Die blauen Manschetten, die das Exo mit deinem Körper verbinden, sind gleichzeitig die Bedienung.
-Hebst du den Arm, drückt dein Oberarm von unten gegen die Manschette. Ein Kraftsensor misst diesen Druck und das Exo
-bewegt das Schultergelenk in dieselbe Richtung. Je stärker du drückst, desto mehr hilft es. Hörst du auf zu drücken,
-bleibt es stehen. Das Exo folgt dir, du führst.
+Das wichtigste Gefühl beim Tragen: **Du bewegst dich, das Exo folgt, und schwere Lasten werden leichter.** Kein
+Joystick, keine Knöpfe zum Bewegen. Dafür braucht das Exo drei Arten von Information:
 
-Das ist das Prinzip der großen Verstärker-Exoskelette aus der Forschung, hier in einer Form, die eine Person mit
-Bastelwerkzeug, Teilen für ein paar Euro und einem Mikrocontroller bauen kann.
+| Frage | Sensor | Wofür |
+|---|---|---|
+| Wohin willst du? | **Sensor-Manschetten** (Wägezellen) an Oberarm, Unterarm, Oberschenkel | Bewegung: Das Exo folgt deinem Druck |
+| Was muss es tragen? | **Wägezellen in den Schlaufenköpfen**, Gelenkwinkel, Rumpfneigung | Last: Das Exo trägt seinen Anteil von selbst |
+| Welches Bein steht? | **Drucksensor im Steigbügel** | Standbein trägt, Schwungbein läuft frei |
+
+Die Antwort darauf rechnet der Teensy 200-mal pro Sekunde und schickt jedem der 8 Motoren ein Moment.
 
 ---
 
 ## 1. Die Sensor-Manschette
 
 ```
-      Schiene (Alu)                    Manschette (PETG + Polster + Klett)
-   ┌──────────────┐                ┌───────────────────────┐
-   │  Halter      │═══ Wägezelle ══│  Schale               │   ← dein Arm liegt hier
-   │  (fest)      │   (Biegebalken)│                       │
-   └──────────────┘                └───────────────────────┘
-          ▲  Überlast-Puffer (TPU), 1 mm Spalt  ▲
+   Arm / Bein (Polster)
+        │
+   ┌────┴──────┐   blaue PETG-Schale, umschließt das Glied vorne, Klettgurt hinten
+   │  Schale   │
+   └────┬──────┘
+        │  Steg
+   ╔════╧════╗    Wägezelle (Biegebalken 20 kg), misst nur quer zur Schiene
+   ╚════╤════╝    zwei TPU-Puffer mit 1 mm Spalt: Überlastschutz
+        │
+   Halter an der Schiene
 ```
 
-- **Wägezelle:** Einpunkt-Biegebalken aus Alu, 10 oder 20 kg, etwa 80 × 13 × 13 mm, wie sie in Küchen- und
-  Paketwaagen stecken. 3–8 € das Stück, als IP65-Ausführung etwas teurer. Sie misst Kraft in **einer** Richtung, und
-  zwar quer zur Schiene in der Bewegungsebene (Arm vor/zurück bzw. Bein vor/zurück). Kräfte in anderen Richtungen und
-  außermittige Lasten stören sie kaum, dafür ist diese Bauform gemacht.
-- **Einbau:** Ein Ende an einen gedruckten oder gefrästen Halter an der Schiene, das andere Ende an die Manschettenschale.
-  Die Manschette „schwimmt“ also einen Hauch auf der Zelle.
-- **Überlastschutz:** Zwei TPU-Puffer mit etwa 1 mm Spalt. Bei mehr als etwa 15 kg liegen sie an und die Kraft geht an der
-  Zelle vorbei. Stürzt du oder stößt irgendwo an, geht die Zelle nicht kaputt.
-- **Verstärker:** je Zelle ein kleiner Wägezellen-Verstärker (HX711 im 80-Hz-Modus, 2–3 €; besser NAU7802 mit bis zu
-  320 Messungen pro Sekunde) in einem vergossenen Gehäuschen direkt an der Manschette. Vier dünne Adern zur Steuerung.
-- **Wo:** 8 Stück.
+- **Gemessen wird nur die Kraft quer zur Schiene**, in der Bewegungsrichtung des Gelenks. Gurtzug längs und Verdrehen
+  sieht die Zelle nicht.
+- **Straff, dünn gepolstert:** Jeder Millimeter Weichteil zwischen dir und der Zelle macht die Regelung schwammiger.
+  Polster 5–6 mm, Schale eng.
+- **Wo die Manschetten sitzen:** Oberarm (Schulter), Unterarm kurz vor dem Handgelenk (Ellbogen), Oberschenkel über dem
+  Knie (Hüfte und Knie). Am Unterschenkel sitzt nur eine einfache Schale **ohne** Sensor: Dort misst eine Zelle beim
+  Gehen hauptsächlich das Schwingen des Exo-Beins, nicht deine Absicht.
+- **Die Baumlast geht nicht durch die Manschetten**, sondern über die Schlaufen direkt in die Unterarmschiene. Sonst
+  würde das Exo jeden Baum als „du willst nach unten“ deuten.
 
-| Manschette | steuert | Richtung |
+## 2. Das Regelgesetz
+
+Für jedes Gelenk:
+
+```
+Moment = Schwerkraft der Exo-Schiene                    (das Exo trägt sich selbst)
+       + Vorsteuerung: Baumlast, Körpergewicht im Stand  (das Exo trägt seinen Anteil, ohne dass du drückst)
+       + K · Druck an den Manschetten · Hebel            (das Exo folgt dir, verstärkt)
+       + Reibungsausgleich − kleine Dämpfung             (leichtgängig, aber ruhig)
+```
+
+**a) Druck → Moment, für alle Gelenke, die ihn bewegen können.** Eine Kraft an der Unterarm-Manschette wirkt
+physikalisch an Ellbogen **und** Schulter. Die Steuerung rechnet sie deshalb über die Hebel auf beide Gelenke um
+(Hebel an der Schulter = Abstand Manschette zum Ellbogen + Oberarmlänge × cos Ellbogenwinkel). Ergebnis: Hebst du den
+ganzen Arm nur über den Unterarm, hilft die Schulter mit; vorher hätte nur der Ellbogen reagiert. Gleich am Bein:
+Druck am Oberschenkel geht an die Hüfte und mit 60 % ans Knie, weil Aufstehen und Hinsetzen immer beide Gelenke sind.
+
+**b) Vorsteuerung aus der Baumlast.** Jeder Schlaufenkopf sitzt auf einer kleinen Wägezelle. Die Steuerung kennt damit
+das Gewicht am Handgelenk und die Armhaltung und gibt Schulter und Ellbogen das Moment, das diese Last braucht, mal einem
+Anteil je Stufe (sanft 50 %, normal 67 %, kräftig 80 %). Den Rest spürst du: So bleibt das Gefühl für den Baum
+erhalten, und das Exo kann nie „mehr wollen“ als die Last.
+
+**c) Vorsteuerung im Stand (Beine).** Am belasteten Bein tragen Hüfte und Knie automatisch:
+Exo-Oberteil (≈ 11 kg) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
+die Vorneigung des Rumpfs aus (Lagesensor), das Knie die Beugung. Stehen beide Füße, teilen sich die Beine die Last.
+
+**d) Standbein und Schwungbein.** Der Drucksensor im Steigbügel entscheidet (geglättet über 80 ms, damit beim Aufsetzen
+nichts springt):
+
+| | Standbein | Schwungbein |
 |---|---|---|
-| Oberarm links/rechts | Schulter | heben **und** senken |
-| Unterarm links/rechts | Ellbogen | beugen **und** strecken |
-| Oberschenkel links/rechts | Beinseil (Hüfte) | nur strecken |
-| Unterschenkel links/rechts | Beinseil (Knie) | nur strecken |
+| Gewicht tragen (Vorsteuerung) | ja | nein |
+| Schwerkraft der Exo-Beinschiene ausgleichen | nein (der Boden trägt) | ja |
+| Folgen bei Druck am Oberschenkel | strecken voll, beugen kaum | beide Richtungen |
+| Knie aktiv beugen | **nie** | bis 10 Nm |
+| Hüfte aktiv beugen | höchstens 5 Nm | bis 35 Nm |
 
-**Warum die Baumlast die Messung nicht stört:** Der Stamm hängt in den Schlaufen am Schlaufenkopf, und der ist fest mit
-der Unterarmschiene verschraubt. Die Last geht über die Schienen in den Rahmen. Durch die Manschette geht nur, was **dein
-Körper** gegen das Exo drückt. Wenn das Exo unter der Baumlast etwas nachgibt, drückt die Manschette auf deinen Arm, du
-hältst dagegen, die Zelle misst das und das Exo drückt stärker. Du spürst dadurch einen Teil der Last und merkst, wenn
-etwas schwer wird. Das ist gewollt.
+So läuft das Bein beim Gehen frei mit, hilft beim Anheben aus Matsch und Schnee, und am belasteten Bein kann das Exo
+das Knie nie einknicken lassen. Zusätzlich begrenzt die **Federpatrone** im Knie-Beugezug die Beugekraft mechanisch auf
+etwa 11 Nm, auch wenn die Software versagt.
 
----
+**e) Feinheiten, die das Gefühl ausmachen** (in der Simulation getestet, [firmware/README.md](../firmware/README.md)):
 
-## 2. Regelung in einfachen Worten
-
-Für jedes Gelenk, etwa 200-mal pro Sekunde:
-
-```
-Motormoment = Schwerkraftausgleich + K × (Manschettenkraft × Hebelarm) + Reibungsausgleich − kleine Dämpfung × Geschwindigkeit
-```
-
-1. **Schwerkraftausgleich:** Die Steuerung kennt den Gelenkwinkel (Encoder) und weiß, wie schwer die Exo-Schiene ist.
-   Sie hält das Eigengewicht, damit sich das Exo leer „schwerelos“ anfühlt.
-2. **Verstärkung K:** wie viel das Exo zu deiner Kraft dazugibt. K = 1 heißt doppelte Kraft. Start mit K = 0,5,
-   langsam steigern, Obergrenze etwa 3.
-3. **Reibungsausgleich und kleine Dämpfung:** Der Motor gleicht die Reibung in Lagern und Bowdenzügen aus, damit sich das
-   Exo leicht anfühlt. Eine kleine Dämpfung verhindert Aufschaukeln. Zu viel Dämpfung macht das Exo zäh: Das hat die
-   Simulation gezeigt (siehe [firmware/README.md](../firmware/README.md)).
-4. **Totband:** Kräfte unter etwa 2 N werden ignoriert (Rauschen der Wägezelle etwa 0,6 N).
-5. **Filter:** Sensorwerte werden geglättet (Tiefpass um 8 Hz). Deine Bewegungen sind langsamer, Vibrationen schneller.
-6. **Rampen:** Unterstützung wird über etwa 0,3 s ein- und ausgeblendet, nie schlagartig geschaltet.
-7. **Grenzen:** maximales Moment, maximale Geschwindigkeit und Winkelbereich je Gelenk, in der Software **und** mit
-   mechanischen Anschlägen.
-
-**Beine (Seil zieht nur):** Zeigt die Manschettenkraft „strecken“, zieht der Motor. Zeigt sie „beugen“, gibt er Seil nach
-und hält nur eine kleine Vorspannung (10–20 N), damit das Seil nicht von den Rollen springt. Hüfte und Knie hängen an
-einem Seil: Die Steuerung nimmt den größeren der beiden Wünsche (Oberschenkel- oder Unterschenkel-Manschette).
-Beim normalen Gehen (Knie fast gestreckt, Rumpf aufrecht) bleiben die Beine durchsichtig und unterstützen nicht, erst ab
-einer Kniebeugung von etwa 25° oder beim Vorwärtsdrücken unter Last.
-
-**Arme (beide Richtungen):** Das Seilpaar kann in beide Richtungen ziehen. Heben, Senken, Beugen und Strecken werden gleich
-behandelt. Senken unter Last heißt dabei „kontrolliert nachgeben“: Das Exo hält gegen und lässt so schnell nach, wie du
-nach unten drückst.
-
----
+| Baustein | Wert | Warum |
+|---|---|---|
+| Totband | 2 N | Rauschen (≈ 0,6 N) löst nichts aus; darüber setzt die Hilfe stetig ein, ohne Sprung |
+| Tiefpass | 8 Hz | ruhig, aber schnell genug für Armbewegungen |
+| Reibungsausgleich | 0,25 Nm (Knie 0,4) | Lager und Bowdenzüge verschwinden fast; weich um den Stillstand, damit nichts zittert |
+| Dämpfung | 0,3 Nm·s/rad | klein: mehr machte das Exo in der Simulation zäh |
+| Momentänderung | höchstens 400–600 Nm/s | nichts ruckt |
+| Weiche Wände | 0,15 rad vor jedem Anschlag | Hilfe läuft vor dem Anschlag aus |
+| Geschwindigkeitsgrenze | 4 rad/s | schnelle Bewegung wird nicht weiter verstärkt |
+| Aufwachen | 2 s nullen, 3 s Rampe | nichts springt beim Einschalten |
+| Verstärkung K | 0,5 / 1 / 2 (Stufen) | stabil bis K ≈ 5,5 mit HX711: große Reserve |
 
 ## 3. Weitere Sensoren
 
-- **Motor-Encoder:** Gelenkwinkel, Geschwindigkeit, Motorstrom (eingebaut).
-- **Lagesensoren (IMU)** am Rücken und an den Oberschenkeln: Wie geneigt ist der Rumpf? Gehst du, hockst du, stehst du?
-  Sie entscheiden, ob die Beine unterstützen, und erkennen Stürze.
-- **Schlaufenwinden:** Motorstrom = Zugkraft der Schlaufe, Endschalter für „ganz offen“.
-
----
+- **Motor-Encoder:** Gelenkwinkel und -geschwindigkeit (eingebaut).
+- **Lagesensor am Rücken (BNO085):** Vorneigung des Rumpfs für die Hüfte, Kippgeschwindigkeit für die Sturzerkennung.
+- **Schlaufenwinden:** Motorstrom = Zuziehkraft, Endschalter „ganz offen“.
 
 ## 4. Bedienung
 
 | Element | Ort | Funktion |
 |---|---|---|
-| Ein/Aus (Kippschalter mit Schutzkappe) | linker Schultergurt | Aus: alles stromlos, Exo läuft frei mit |
-| Not-Aus (Pilz) | linker Schultergurt, mit beiden Händen erreichbar | trennt Motoren hart vom Akku |
-| Daumentaster: rechts 2, links 1 | Handschlaufe am Unterarm | je Schlaufe: kurz = zuziehen, lang = öffnen |
-| Summer + Vibration | Schultergurt | Bereit, Grenze erreicht, Akku schwach, Fehler |
-
-Die Verstärkung K wird nicht im Feld verstellt, sondern einmal am Laptop oder Handy eingestellt.
-
----
+| Ein/Aus | linker Schultergurt | kurz: ein/aus. Doppeltipp: Arbeitslicht |
+| Not-Aus (Pilz) mit LED-Ring | linker Schultergurt | trennt Motoren hart vom Akku; Ring zeigt Zustand und Akku |
+| Daumentaster: rechts 2, links 1 | an der Hand | je Schlaufe: kurz = zu, lang = auf. Beide rechten 2 s: Stufe wechseln |
+| Anzeige | rechter Oberarm außen | Uhrzeit, Akku mit Restzeit, Stufe, Fehler im Klartext |
+| Vibration | Box | bestätigt Schlaufe und Stufenwechsel |
 
 ## 5. Zustände
 
 ```
-AUS ──Ein──▶ NULLEN (2 s ruhig stehen, Sensoren auf null) ──▶ BEREIT (nur Schwerkraftausgleich)
-                                                              │ ▲
-                                    Manschettenkraft > Totband ▼ │ Kraft weg
-                                                          UNTERSTÜTZEN
-Jeder Fehler ──▶ FEHLER: Gelenkmotoren stromlos, Schlaufen halten, Summer
+AUS ──Ein──▶ NULLEN (2 s ruhig stehen) ──▶ AKTIV (3 s sanft hochfahren) ──Aus──▶ AUSLAUF ──▶ AUS
+                                              │
+Not-Aus, Sensor- oder Motorfehler, Akku leer ─┴──▶ FEHLER: Gelenkmotoren stromlos, Schlaufen halten, Ring rot
+Sturz erkannt ──▶ AUSLAUF in 0,1 s     Parkstütze unten ──▶ keine Unterstützung, Ring gelb
 ```
-
-Fehler sind zum Beispiel: Sensor liefert keinen Wert oder klebt am Anschlag, Gelenkwinkel außerhalb des Bereichs,
-Motor meldet Übertemperatur, CAN-Nachricht fehlt, Akkuspannung zu niedrig, Sturz erkannt.
-
----
 
 ## 6. Elektronik
 
 ```
-Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 6 Gelenkmotoren (CAN-Bus)
+Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 8 Gelenkmotoren (CAN-Bus): 2 an den Hüften, 6 in der Box
                                                                ├── DC/DC 24 V ── 3 Motortreiber ── 3 Schlaufenwinden
-                                                               └── DC/DC 5 V ── Steuerung
-Steuerung: Teensy 4.1 (oder ESP32-S3) + CAN-Transceiver
-           ├── 8 Wägezellen-Verstärker
-           ├── 3 IMUs
-           ├── 3 Daumentaster, Ein/Aus, Summer, Vibrationsmotor
-           └── Watchdog: hängt die Software, fällt das Schütz ab
+                                                               └── DC/DC 5 V ── Steuerung, Display
+Teensy 4.1 + CAN-Transceiver + Knopfzelle (Uhr)
+   ├── 9 Wägezellen-Verstärker (6 Manschetten, 3 Schlaufenköpfe)
+   ├── 2 Drucksensoren in den Steigbügeln
+   ├── Lagesensor am Rücken
+   ├── Taster, LED-Ring, Vibration, Licht
+   ├── Statuszeile → ESP32-C3 mit E-Paper am rechten Oberarm (und Bluetooth zum Handy)
+   └── Watchdog: hängt die Software, fällt das Schütz ab
 ```
 
-Die Motoren regeln ihren Strom selbst (eingebaut). Die Steuerung schickt nur das gewünschte Moment über CAN.
-
----
+Pinplan: [verdrahtung.md](verdrahtung.md).
 
 ## 7. Was schiefgehen kann, und was dagegen hilft
 
 | Problem | Ursache | Abhilfe |
 |---|---|---|
-| Exo zittert oder schaukelt auf | K zu hoch, Polster zu weich, Filter zu langsam | K senken, Dämpfung erhöhen, Manschetten straffer und dünner gepolstert |
-| Exo „läuft weg“ | Sensor-Nullpunkt verschoben (Kälte, Gurt nachgezogen) | Nullen bei jedem Einschalten, Nullpunkt-Nachführung im Stillstand |
-| Exo reagiert träge | Verstärker zu langsam, Bowden-Reibung | NAU7802 statt HX711, Reibung im Modell ausgleichen |
-| Arm wird beim Bücken mitgezogen | Manschette zu eng, Gurt drückt schief | Manschetten mit etwas Spiel, Sensor nur quer zur Schiene |
-| Bein streckt beim Gehen ungewollt | Gehen nicht erkannt | Beinunterstützung erst ab Kniebeugung, IMU-Gangerkennung |
-
----
+| Exo zittert oder schaukelt | K zu hoch, Polster zu weich | Stufe senken, Manschetten straffer, dünner gepolstert |
+| Exo „läuft weg“ | Nullpunkt verschoben (Kälte, Gurt nachgezogen) | Nullen bei jedem Einschalten |
+| Baum fühlt sich zu leicht oder zu schwer an | Lastanteil der Stufe | Stufe wechseln (beide rechten Taster 2 s) |
+| Bein streckt beim Gehen | Fußsensor meldet falsch | Schwelle am Prüfstand einstellen, Sensor prüfen |
+| Bein knickt beim Aufsetzen | Standbein zu spät erkannt | Glättung verkürzen; Federpatrone begrenzt ohnehin |
+| Schulter hilft beim Hebeln zu viel | Kopplung vom Unterarm | Hebel im Abgleich prüfen (Oberarmlänge) |
 
 ## 8. So baut man es auf
 
-1. **Am Tisch:** eine Wägezelle mit Verstärker an den Mikrocontroller, mit Gewichten kalibrieren, Rauschen anschauen.
-2. **Sensor-Manschette** drucken, auf eine Holzlatte schrauben, mit der Hand drücken und die Werte beobachten.
-3. **Prüfstand Ellbogen:** Holzarm mit Scharnier, Seilscheibe, Bowdenzug-Paar, ein Motor. Mit der Hand an der Manschette
-   führen. Erst K = 0,3, dann steigern, Schwingungsgrenze suchen.
-4. **Am Körper:** erst ein Arm, nur Ellbogen, mit Not-Aus in der anderen Hand. Dann Schulter, dann Beine.
-5. **Unter Last:** zuerst Sandsack in den Schlaufen, dann leichte Bäume, dann schwerere.
-
-Grundwissen dafür steht in [entwicklungsplan.md](entwicklungsplan.md).
-
----
+1. **Am Tisch:** eine Wägezelle an den Teensy, mit Gewichten kalibrieren, Rauschen anschauen.
+2. **Prüfstand Ellbogen:** Holzarm, Seilscheibe, Bowdenzug-Paar, ein Motor, eine Manschette ([montage.md](montage.md), Abschnitt 6).
+3. **Am Körper:** erst ein Arm, dann Schulter, dann Hüfte im Stand (Fußsensor), dann Knie, zuletzt Gehen.
+4. **Unter Last:** Sandsack in den Schlaufen (prüft die Last-Vorsteuerung), dann leichte, dann schwerere Bäume.
 
 ## 9. Firmware
 
-Der Steuerungskern ist geschrieben und in einer Simulation getestet: [firmware/README.md](../firmware/README.md).
+Umgesetzt und in der Simulation getestet: [firmware/README.md](../firmware/README.md). Die Kopplung der Gelenke, die
+Vorsteuerung und die Standbein-Logik stehen in `firmware/src/exo_app.h`, der Gelenkregler in `firmware/src/exo_core.h`.

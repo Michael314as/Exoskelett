@@ -12,7 +12,7 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | F4 | Auswertungsskript | `make -C firmware ident` | „alle innerhalb 20 %“ | ☐ |
 | P1 | Passform | 30 min gehen, Treppe, Hocke | keine Druckstelle, Manschetten rutschen < 1 cm | ☐ |
 | P2 | Gelenkachsen | Klebepunkte Körper vs. Exo von der Seite fotografieren | Abstand < 1,5 cm in Stand und Hocke | ☐ |
-| P3 | Freiheitsgrade | Bein abspreizen, Fußspitze drehen, unebener Boden | ±20° Abspreizen, ±15° Drehen ohne Anschlag im Normalgang | ☐ |
+| P3 | Freiheitsgrade | Beine spreizen, Fuß seitlich kippen, Hocke | ±20° Abspreizen ohne Berührung Hüftgurt/Schwinge, Fuß kippt mit, Zentrierfeder holt das Bein zurück | ☐ |
 | P4 | Aussteigen | Schnallen auf, mit Helfer rückwärts auf Matte setzen | in < 20 s frei, ohne Werkzeug | ☐ |
 | P5 | Isolation | Multimeter Akku+ / Akku− gegen Rahmen | > 1 MΩ | ☐ |
 | P6 | Not-Aus | Exo aktiv, Not-Aus drücken | Schütz offen, Ring rot, Motoren stromlos (Multimeter) | ☐ |
@@ -30,6 +30,8 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | P17 | Stabilität | Stufe 3, Arm anstoßen | kein Schwingen, Ruhe in < 0,5 s | ☐ |
 | P18 | Grenzen | Gelenk Richtung Anschlag führen | Unterstützung läuft vor dem Anschlag aus | ☐ |
 | P19 | Sensorfehler | Wägezellenstecker ziehen | sofort stromlos, Ring rot, Grund in der Statuszeile | ☐ |
+| P20b | Fußkontakt | auf einem Bein stehen, dann das andere | Standbein wird erkannt; Schwungbein läuft frei, Standbein beugt nicht aktiv | ☐ |
+| P20c | Last-Vorsteuerung | 10 kg Sandsack in Schlaufe R1, Arm ruhig halten | gemessene Handkraft ≈ ein Drittel (Stufe normal), ohne Drücken an der Manschette | ☐ |
 | P20 | Schlaufen | Taster kurz/lang, 20 kg Sandsack | zu in < 6 s, hält stromlos 10 min, öffnet; Notöffnung von Hand | ☐ |
 | P21 | Körper, leer | Gehen 10 min, Hocke 20× | nichts zieht oder bremst spürbar | ☐ |
 | P22 | Arme | heben, senken, beugen, strecken | Exo folgt ohne Verzögerung, die man merkt | ☐ |

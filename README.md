@@ -2,7 +2,7 @@
 
 Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnittener Christbäume entlastet.
 
-> **Stand: Entwurf 3.2, fertigungsreif bis zum Prototyp.** Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md). Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
+> **Stand: Entwurf 4** (Hüfte mit Abspreizgelenk und eigenem Hüftmotor, Beine in beide Richtungen, Gurtsystem, Schlaufen unten + außen, Anzeige am Oberarm). Die Fertigungsdateien in `fertigung/` sind noch auf Entwurf 3.2 und werden für Entwurf 4 neu erzeugt. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md). Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt
@@ -15,7 +15,7 @@ Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnitte
 - **Steuerung:** Die blauen Manschetten sitzen auf Kraftsensoren. Drückst du gegen eine Manschette, bewegt das Exo das Gelenk mit.
 - **Füße:** Steigbügel mit Spikes nach dem Prinzip eines Steigeisens, für Schlamm, Schnee und unebenes Gelände.
 
-- **Bedienung und Komfort:** Parkstütze zum Einsteigen in unter 90 s, Arbeitslicht, LED-Ring und Display, Baumzähler, Handy-Anzeige, Heizgriffe, Magnet-Schnallen, in 3 Teile zerlegbar, eloxierte Oberfläche. Alles baubar ohne eigene Maschinen (Laserteile bestellen, 3D-Druck, Bohrständer).
+- **Bedienung und Komfort:** Parkstütze zum Einsteigen in unter 90 s, Arbeitslicht, LED-Ring, Anzeige am rechten Oberarm (Uhrzeit, Akku, Stufe, Fehler), Handy-Anzeige, Heizgriffe, Magnet-Schnallen, in 3 Teile zerlegbar, eloxierte Oberfläche. Alles baubar ohne eigene Maschinen (Laserteile bestellen, 3D-Druck, Bohrständer).
 
 - **Steuerung als Code:** Firmware geschrieben und in einer Physik-Simulation getestet (leicht, weich, stabil, sicher): [firmware/README.md](firmware/README.md).
 
@@ -70,7 +70,7 @@ Beide Seiten herunterladen und im Browser öffnen; sie brauchen Internet für [t
 - Aufladen und Schleifen abspielen, anhalten oder an jede Stelle springen
 - Plateau-Höhe, Baumlänge, Baumgewicht, Anzahl Bäume, Körper- und Exo-Gewicht einstellen
 - Grobe Lastanzeige und Hinweise, wenn die Arme nicht reichen oder das Gleichgewicht kippt; bei Bedarf macht die Figur automatisch einen Ausfallschritt
-- Dämmerung in der verschneiten Plantage mit Arbeitslicht, LED-Ring und Baumzähler (oder Tag)
+- Dämmerung in der verschneiten Plantage mit Arbeitslicht und LED-Ring (oder Tag)
 
 ## Kräfte, kurz
 

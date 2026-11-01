@@ -1,8 +1,9 @@
 // Teensy 4.1: liest die Hardware, ruft App::step() 200-mal pro Sekunde auf und schreibt die Ausgänge.
 // Bauen: pio run (siehe platformio.ini). Pinbelegung: docs/verdrahtung.md (muss mit PIN_* unten übereinstimmen).
 //
-// Motoren: CubeMars AK70-10 (oder baugleich) im MIT-Modus über CAN1, 1 Mbit/s. Wägezellen: 8 × HX711.
-// Lagesensor: BNO085 (I2C). LED-Ring: 12 × WS2812. Watchdog: WDOG1 des i.MX RT1062 (direkt über Register, 0,5 s).
+// Motoren: 8 × CubeMars AK70-10 (oder baugleich) im MIT-Modus über CAN1, 1 Mbit/s: 2 Hüftmotoren an der Hüftschwinge,
+// 6 in der Box (Knie, Schulter, Ellbogen). Wägezellen: 9 × HX711 (6 Manschetten, 3 Schlaufenköpfe). Fußkontakt: 2 × FSR.
+// Lagesensor: BNO085 (I2C), liefert Kippgeschwindigkeit (Sturz) und Vorneigung des Rumpfs. Uhr: RTC des Teensy mit Knopfzelle. LED-Ring: 12 × WS2812. Watchdog: WDOG1 des i.MX RT1062 (direkt über Register, 0,5 s).
 // Anzeige und Handy-Funk macht ein ESP32-C3 an Serial1: Der Teensy schickt ihm jede Sekunde eine Statuszeile.
 // (Ein E-Paper-Update blockiert mehrere 100 ms und darf deshalb nicht im Regeltakt laufen.)
 #ifdef ARDUINO
@@ -21,12 +22,13 @@ using namespace exo;
 
 // ---------- Pins (Teensy 4.1) ----------
 constexpr int PIN_BTN_POWER = 2,              /* Serial1 zum ESP32-C3: 0 RX, 1 TX */ PIN_BTN_LOOP[NL] = {3, 4, 5};
-constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8};                                   // 10–13 frei (SPI) für Erweiterungen
+constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8};                                   // 13 frei
 constexpr int PIN_LOOP_CUR[NL] = {14, 15, 16}, PIN_VBAT = 17;                  // analog A0–A3; I2C: 18 SDA, 19 SCL
 constexpr int PIN_LED_RING = 20, PIN_VIBE = 21;                                // CAN1: 22 TX, 23 RX
 constexpr int PIN_LOOP_DIR[NL] = {24, 25, 26}, PIN_LOOP_END[NL] = {27, 28, 29};
 constexpr int PIN_ESTOP_SENSE = 30, PIN_CONTACTOR = 31, PIN_STAND = 32, PIN_LIGHT = 33, PIN_HX_SCK = 34;
-constexpr int PIN_HX_DOUT[8] = {9, 35, 36, 37, 38, 39, 40, 41};               // 0/1 Oberschenkel L/R, 2/3 Unterschenkel, 4/5 Oberarm, 6/7 Unterarm
+constexpr int PIN_HX_DOUT[kCells] = {9, 35, 36, 37, 40, 41, 10, 11, 12};      // 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1
+constexpr int PIN_FOOT[2] = {38, 39};                                          // FSR im Steigbügel L/R (analog A14/A15, 10 kΩ nach Masse)
 
 static App app;
 static Inputs in;
@@ -37,8 +39,9 @@ static volatile bool tick = false;
 // ---------- Motoren ----------
 static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can;
 static const MotorLimits kLim;                                                  // AK70-10
-static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6};                          // LegL, LegR, ShL, ShR, ElL, ElR
-static const Transmission kTr[NJ] = {{6.3f, 0.9f}, {6.3f, 0.9f}, {4.67f, 0.88f}, {4.67f, 0.88f}, {3.33f, 0.7f}, {3.33f, 0.7f}};
+static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8};                    // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR
+// Übersetzung Gelenk : Motor und Wirkungsgrad. Hüfte: Seilgetriebe 1:6. Knie: Kurvenscheibe 5 cm (gestreckt) / Trommel 1,5 cm, Bowdenzug.
+static const Transmission kTr[NJ] = {{6.f, 0.95f}, {6.f, 0.95f}, {3.33f, 0.7f}, {3.33f, 0.7f}, {4.67f, 0.88f}, {4.67f, 0.88f}, {3.33f, 0.7f}, {3.33f, 0.7f}};
 static MotorState motorState[NJ];
 static uint32_t lastReplyMs[NJ];
 static float powerOnTime = 0.f;                                                 // Zeit seit Schütz zu
@@ -69,22 +72,23 @@ static void motorSendTorque(int id, float tauJoint) {
 }
 
 // ---------- Wägezellen ----------
-static float cellN[8];
-static int32_t cellRaw[8];
+static float cellN[kCells];
+static int32_t cellRaw[kCells];
 static int32_t readCellRaw(int c) {
   return hx711ReadRaw([c] { digitalWrite(PIN_HX_SCK, HIGH); delayMicroseconds(1); const bool b = digitalRead(PIN_HX_DOUT[c]);
                             digitalWrite(PIN_HX_SCK, LOW); delayMicroseconds(1); return b; });
 }
 static bool readCuffs(JointInput* j) {
   bool ok = true;
-  for (int c = 0; c < 8; c++) {
+  for (int c = 0; c < kCells; c++) {
     if (digitalRead(PIN_HX_DOUT[c]) == HIGH) continue;                          // noch kein neuer Wert (80 Hz)
     cellRaw[c] = readCellRaw(c);
     if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; continue; }
     cellN[c] = cfg.cell[c].toNewton(cellRaw[c]);
   }
-  j[LegL].cuffN = fmaxf(cellN[0], cellN[2]); j[LegR].cuffN = fmaxf(cellN[1], cellN[3]);   // ein Seil: stärkerer Streckwunsch
-  j[ShL].cuffN = cellN[4]; j[ShR].cuffN = cellN[5]; j[ElL].cuffN = cellN[6]; j[ElR].cuffN = cellN[7];
+  j[HipL].cuffN = cellN[0]; j[HipR].cuffN = cellN[1];                          // Knie: keine eigene Manschette (Kopplung in exo_app.h)
+  j[ShL].cuffN = cellN[2]; j[ShR].cuffN = cellN[3]; j[ElL].cuffN = cellN[4]; j[ElR].cuffN = cellN[5];
+  for (int i = 0; i < NL; i++) in.loopN[i] = fmaxf(0.f, cellN[6 + i]);
   return ok;
 }
 
@@ -94,10 +98,16 @@ static Adafruit_BNO08x imu(-1);
 static Adafruit_NeoPixel ring(12, PIN_LED_RING, NEO_GRB + NEO_KHZ800);
 static bool imuOk = false;
 
+static float trunkPitch = 0.f;                                                  // Vorneigung aus dem Rotationsvektor
 static float readTrunkTiltRate(bool* still) {
   static float rate = 0.f, quiet = 0.f;
   sh2_SensorValue_t v;
   while (imuOk && imu.getSensorEvent(&v)) {
+    if (v.sensorId == SH2_GAME_ROTATION_VECTOR) {
+      const float qr = v.un.gameRotationVector.real, qi = v.un.gameRotationVector.i, qj = v.un.gameRotationVector.j, qk = v.un.gameRotationVector.k;
+      trunkPitch = atan2f(2.f * (qr * qk + qi * qj), 1.f - 2.f * (qj * qj + qk * qk));   // Drehung um die Querachse (z), wie bei der Kippgeschwindigkeit
+      continue;
+    }
     if (v.sensorId != SH2_GYROSCOPE_CALIBRATED) continue;
     rate = v.un.gyroscope.z;                                                    // Achse quer zur Laufrichtung (Einbaulage: Platine senkrecht am Rücken)
     const float mag = sqrtf(v.un.gyroscope.x * v.un.gyroscope.x + v.un.gyroscope.y * v.un.gyroscope.y + rate * rate);
@@ -122,7 +132,7 @@ static void showLed(Led led, int count) {
 }
 static void peripheralsBegin() {
   Wire.begin();
-  imuOk = imu.begin_I2C() && imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000);
+  imuOk = imu.begin_I2C() && imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000) && imu.enableReport(SH2_GAME_ROTATION_VECTOR, 10000);
   ring.begin(); ring.setBrightness(80); ring.show();
   // Hardware-Watchdog: 0,5 s ohne Lebenszeichen → Neustart; dabei fällt das Schütz ab (Pin wird beim Reset Eingang)
   CCM_CCGR3 |= CCM_CCGR3_WDOG1(CCM_CCGR_ON);
@@ -132,18 +142,24 @@ static void peripheralsBegin() {
 static void watchdogFeed() { WDOG1_WSR = 0x5555; WDOG1_WSR = 0xAAAA; }
 #else
 float readTrunkTiltRate(bool* still);
+static float trunkPitch = 0.f;
+static unsigned long rtcNow = 14 * 3600 + 32 * 60;
+static unsigned long rtc_get() { return rtcNow; }
+static void rtc_set(unsigned long t) { rtcNow = t; }
 void showLed(Led led, int count);
 static void peripheralsBegin() {}
 static void watchdogFeed() {}
 #endif
 
 // ---------- Statuszeile an den ESP32-C3 (Display, Handy) ----------
-// Format: S,<Modus>,<Akku %>,<Stufe 1–3>,<Bäume heute>,<Bäume gesamt>,<Stunden>,<Grund>\n
-static void sendStatus(const Outputs& o, float batteryV) {
+// Format: S,<Modus>,<Akku %>,<Stufe 1–3>,<Restzeit min>,<hh:mm>,<Stunden>,<Grund>\n
+// Restzeit: Akkustand mal typische Laufzeit (≈ 2 h 45 min bei voller Ladung, am echten Exo nachmessen).
+static void sendStatus(const Outputs&, float batteryV) {
   static const char* kMode[] = {"AUS", "NULLEN", "AKTIV", "AUSLAUF", "FEHLER"};
   const int pct = int(constrain((batteryV - 30.f) / 11.f * 100.f, 0.f, 100.f));
+  const unsigned long t = rtc_get() % 86400UL;
   char b[96];
-  snprintf(b, sizeof b, "S,%s,%d,%d,%d,%lu,%.1f,%s\n", kMode[int(app.sup.mode)], pct, cfg.level + 1, o.trees, (unsigned long)cfg.treesTotal, double(cfg.hours), app.sup.reason);
+  snprintf(b, sizeof b, "S,%s,%d,%d,%d,%02lu:%02lu,%.1f,%s\n", kMode[int(app.sup.mode)], pct, cfg.level + 1, pct * 165 / 100, t / 3600, (t / 60) % 60, double(cfg.hours), app.sup.reason);
   if (Serial1.availableForWrite() >= int(strlen(b))) Serial1.write(b);          // nie warten: lieber eine Zeile auslassen
 }
 
@@ -159,13 +175,14 @@ static void logLine(const Outputs& o) {
 // ---------- Einstellungen und Konsole ----------
 static bool saveSettings(const Settings& s) { EEPROM.put(0, s); Settings chk; EEPROM.get(0, chk); return valid(chk); }
 static void consolePrint(const char* t) { Serial.print(t); }
+static void setClock(int h, int m) { const unsigned long day = rtc_get() / 86400UL * 86400UL; rtc_set(day + h * 3600UL + m * 60UL); }
 static int32_t consoleRaw(int c) { int64_t sum = 0; for (int i = 0; i < 16; i++) { while (digitalRead(PIN_HX_DOUT[c]) == HIGH) watchdogFeed(); sum += readCellRaw(c); } return int32_t(sum / 16); }
 static void pollConsole() {
   static char line[48]; static size_t n = 0;
   while (Serial.available()) {
     const char ch = char(Serial.read());
     if (ch == '\n' || ch == '\r') {
-      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; io.setLog = setLog; runCommand(line, cfg, io); app.setLevel(cfg.level); app.jointMask = cfg.jointMask; }
+      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; io.setLog = setLog; io.setClock = setClock; runCommand(line, cfg, io); app.setLevel(cfg.level); app.jointMask = cfg.jointMask; }
                else Serial.print("Konsole nur, wenn das Exo aus ist\n"); }
       n = 0;
     } else if (n < sizeof line - 1) line[n++] = ch;
@@ -177,7 +194,7 @@ void setup() {
   for (int i = 0; i < NL; i++) { pinMode(PIN_BTN_LOOP[i], INPUT_PULLUP); pinMode(PIN_LOOP_PWM[i], OUTPUT); pinMode(PIN_LOOP_DIR[i], OUTPUT); pinMode(PIN_LOOP_END[i], INPUT_PULLUP); }
   pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
   digitalWrite(PIN_CONTACTOR, LOW);                                             // Schütz erst mit dem Einschalten
-  pinMode(PIN_HX_SCK, OUTPUT); for (int c = 0; c < 8; c++) pinMode(PIN_HX_DOUT[c], INPUT);
+  pinMode(PIN_HX_SCK, OUTPUT); for (int c = 0; c < kCells; c++) pinMode(PIN_HX_DOUT[c], INPUT);
   Serial.begin(115200); Serial1.begin(115200);
   EEPROM.get(0, cfg);
   if (!valid(cfg)) cfg = Settings();                                            // ungültig oder neu: Werkseinstellungen
@@ -204,6 +221,8 @@ void loop() {
   in.safety.parkStandDown = !digitalRead(PIN_STAND);
   in.safety.batteryV = analogRead(PIN_VBAT) * (3.3f / 1023.f) * 15.f;          // Spannungsteiler 1:15
   in.safety.trunkTiltRate = readTrunkTiltRate(&in.standingStill);
+  in.trunkPitch = trunkPitch;
+  for (int k = 0; k < 2; k++) in.footContact[k] = analogRead(PIN_FOOT[k]) > 300;   // ≈ 5 kg auf dem Steigbügel (am Prüfstand einstellen)
 
   const Outputs o = app.step(in, dt);
 
@@ -218,10 +237,9 @@ void loop() {
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
   digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate);
 
-  // Betriebsstunden und Bäume: gespeichert wird nur, wenn das Exo aus ist (Flash-Schreiben kann den Regeltakt stören)
-  static bool dirty = false; static int treesSeen = 0;
+  // Betriebsstunden: gespeichert wird nur, wenn das Exo aus ist (Flash-Schreiben kann den Regeltakt stören)
+  static bool dirty = false;
   if (app.sup.mode == Mode::Active) { cfg.hours += dt / 3600.f; dirty = true; }
-  if (o.trees > treesSeen) { cfg.treesTotal += uint32_t(o.trees - treesSeen); treesSeen = o.trees; dirty = true; }
   if (dirty && app.sup.mode == Mode::Off) { dirty = false; seal(cfg); saveSettings(cfg); }
 
   static int div = 0;

@@ -11,15 +11,16 @@
 
 namespace exo {
 
+constexpr int kCells = 9;
+
 struct Settings {
   uint32_t magic = 0x45584F33;   // "EXO3"
-  uint16_t version = 2;
+  uint16_t version = 3;
   uint8_t level = 1;             // Unterstützungsstufe 0/1/2
-  uint8_t jointMask = 0x3F;      // aktive Gelenke (Bit = JointId); Prüfstand: nur Ellbogen rechts
-  CellCal cell[8];               // Wägezellen
-  float joint0[6] = {};          // Motorwinkel bei gestreckter Grundstellung (Nullpunkt)
+  uint8_t jointMask = 0xFF;      // aktive Gelenke (Bit = JointId); Prüfstand: nur Ellbogen rechts
+  CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1
+  float joint0[8] = {};          // Motorwinkel bei gestreckter Grundstellung (Nullpunkt)
   float hours = 0.f;             // Betriebsstunden (für Wartungshinweise)
-  uint32_t treesTotal = 0;
   uint32_t crc = 0;
 };
 
@@ -30,7 +31,7 @@ inline uint32_t crc32(const uint8_t* d, size_t n) {
 }
 inline void seal(Settings& s) { s.crc = crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc)); }
 inline bool valid(const Settings& s) {
-  return s.magic == 0x45584F33 && s.version == 2 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
+  return s.magic == 0x45584F33 && s.version == 3 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
 }
 
 // Wartungshinweis aus den Betriebsstunden (Intervalle laut docs/wartung.md)
@@ -44,12 +45,13 @@ inline const char* maintenanceDue(float hours) {
 /* ------------------------------------------------------------- Konsole ------ */
 // Befehle (eine Zeile, Leerzeichen getrennt):
 //   status                      Zustand, Akku, Stufe, Stunden
-//   roh <zelle>                 Rohwert einer Wägezelle (0–7)
+//   roh <zelle>                 Rohwert einer Wägezelle (0–8)
 //   null <zelle>                aktuellen Rohwert als Nullpunkt übernehmen (Manschette unbelastet)
 //   kal <zelle> <gramm>         mit angehängtem Gewicht kalibrieren
 //   stufe <0|1|2>               Unterstützungsstufe
-//   pruefstand / voll           nur Ellbogen rechts aktiv (Prüfstand) / alle 6 Gelenke
+//   pruefstand / voll           nur Ellbogen rechts aktiv (Prüfstand) / alle 8 Gelenke
 //   log <0|1>                   Messdaten über USB (t, q, qd, Kraft, Moment des Prüfstand-Gelenks)
+//   uhr <hh> <mm>               Uhrzeit für die Anzeige stellen (läuft mit Knopfzelle weiter)
 //   speichern                   ins EEPROM schreiben
 //   werks                       Werkseinstellungen
 struct ConsoleIO {
@@ -57,6 +59,7 @@ struct ConsoleIO {
   void (*print)(const char*) = nullptr;
   bool (*save)(const Settings&) = nullptr;
   void (*setLog)(bool) = nullptr;
+  void (*setClock)(int h, int m) = nullptr;
 };
 
 inline bool runCommand(const char* line, Settings& s, const ConsoleIO& io) {
@@ -65,22 +68,23 @@ inline bool runCommand(const char* line, Settings& s, const ConsoleIO& io) {
   char out[96];
   auto say = [&](const char* t) { if (io.print) io.print(t); };
   if (n < 1) return false;
-  if (!std::strcmp(cmd, "roh") && n >= 2 && a >= 0 && a < 8) { std::snprintf(out, sizeof out, "Zelle %d: %ld\n", a, long(io.rawCell(a))); say(out); return true; }
-  if (!std::strcmp(cmd, "null") && n >= 2 && a >= 0 && a < 8) { s.cell[a].offset = float(io.rawCell(a)); std::snprintf(out, sizeof out, "Zelle %d genullt\n", a); say(out); return true; }
-  if (!std::strcmp(cmd, "kal") && n >= 3 && a >= 0 && a < 8 && b > 50.f) {
+  if (!std::strcmp(cmd, "roh") && n >= 2 && a >= 0 && a < kCells) { std::snprintf(out, sizeof out, "Zelle %d: %ld\n", a, long(io.rawCell(a))); say(out); return true; }
+  if (!std::strcmp(cmd, "null") && n >= 2 && a >= 0 && a < kCells) { s.cell[a].offset = float(io.rawCell(a)); std::snprintf(out, sizeof out, "Zelle %d genullt\n", a); say(out); return true; }
+  if (!std::strcmp(cmd, "kal") && n >= 3 && a >= 0 && a < kCells && b > 50.f) {
     const float counts = float(io.rawCell(a)) - s.cell[a].offset;
     if (std::fabs(counts) < 100.f) { say("Fehler: kein Gewicht erkannt\n"); return false; }
     s.cell[a].nPerCount = (b / 1000.f * 9.81f) / counts;
     std::snprintf(out, sizeof out, "Zelle %d: %.6f N/Schritt\n", a, double(s.cell[a].nPerCount)); say(out); return true;
   }
-  if (!std::strcmp(cmd, "pruefstand")) { s.jointMask = 1u << 5; say("Prüfstand: nur Ellbogen rechts (Motor-ID 6)\n"); return true; }
-  if (!std::strcmp(cmd, "voll")) { s.jointMask = 0x3F; say("alle 6 Gelenke aktiv\n"); return true; }
+  if (!std::strcmp(cmd, "pruefstand")) { s.jointMask = 1u << 7; say("Prüfstand: nur Ellbogen rechts (Motor-ID 8)\n"); return true; }
+  if (!std::strcmp(cmd, "voll")) { s.jointMask = 0xFF; say("alle 8 Gelenke aktiv\n"); return true; }
   if (!std::strcmp(cmd, "log") && n >= 2 && (a == 0 || a == 1)) { if (io.setLog) io.setLog(a == 1); say(a ? "Log an: t,q,qd,kraft,moment\n" : "Log aus\n"); return true; }
   if (!std::strcmp(cmd, "stufe") && n >= 2 && a >= 0 && a <= 2) { s.level = uint8_t(a); say("Stufe gesetzt\n"); return true; }
+  if (!std::strcmp(cmd, "uhr") && n >= 3 && a >= 0 && a < 24 && b >= 0.f && b < 60.f) { if (io.setClock) io.setClock(a, int(b)); say("Uhr gestellt\n"); return true; }
   if (!std::strcmp(cmd, "speichern")) { seal(s); const bool ok = io.save && io.save(s); say(ok ? "gespeichert\n" : "Fehler beim Speichern\n"); return ok; }
   if (!std::strcmp(cmd, "werks")) { s = Settings(); say("Werkseinstellungen (noch nicht gespeichert)\n"); return true; }
   if (!std::strcmp(cmd, "status")) {
-    std::snprintf(out, sizeof out, "Stufe %d, %.1f h, %lu Bäume gesamt\n", s.level, double(s.hours), (unsigned long)s.treesTotal); say(out);
+    std::snprintf(out, sizeof out, "Stufe %d, %.1f Betriebsstunden\n", s.level, double(s.hours)); say(out);
     if (const char* m = maintenanceDue(s.hours)) { say(m); say("\n"); }
     return true;
   }

@@ -5,14 +5,14 @@
 
 struct ExoStatus {
   char mode[10] = "?";
-  int batteryPct = 0, level = 0, treesToday = 0;
-  unsigned long treesTotal = 0;
+  int batteryPct = 0, level = 0, restMin = 0;   // Akku, Stufe 1–3, Restzeit in Minuten
+  char clock[6] = "--:--";                     // Uhrzeit vom Teensy (Uhr mit Knopfzelle)
   float hours = 0.f;
   char reason[40] = "";
   bool valid = false;
 };
 
-// "S,AKTIV,82,2,37,1290,41.5,\n" → ExoStatus. Unvollständige oder fremde Zeilen ergeben valid = false.
+// "S,AKTIV,82,2,135,14:32,41.5,\n" → ExoStatus. Unvollständige oder fremde Zeilen ergeben valid = false.
 inline ExoStatus parseStatus(const char* line) {
   ExoStatus s;
   if (!line || line[0] != 'S' || line[1] != ',') return s;
@@ -22,8 +22,8 @@ inline ExoStatus parseStatus(const char* line) {
   while (n < 7) { f[n++] = p; char* c = std::strchr(p, ','); if (!c) break; *c = 0; p = c + 1; }
   if (n < 6) return s;
   std::strncpy(s.mode, f[0], sizeof s.mode - 1);
-  s.batteryPct = std::atoi(f[1]); s.level = std::atoi(f[2]); s.treesToday = std::atoi(f[3]);
-  s.treesTotal = std::strtoul(f[4], nullptr, 10); s.hours = float(std::atof(f[5]));
+  s.batteryPct = std::atoi(f[1]); s.level = std::atoi(f[2]); s.restMin = std::atoi(f[3]);
+  std::strncpy(s.clock, f[4], sizeof s.clock - 1); s.hours = float(std::atof(f[5]));
   if (n == 7) std::strncpy(s.reason, f[6], sizeof s.reason - 1);
   s.valid = s.batteryPct >= 0 && s.batteryPct <= 100 && s.level >= 1 && s.level <= 3;
   return s;

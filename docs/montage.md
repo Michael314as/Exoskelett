@@ -13,8 +13,8 @@ Kabel: [verdrahtung.md](verdrahtung.md).
 ## 2. Rahmen und Beine (passiv)
 1. Rückenrahmen mit Eck-Doppelplatten verschrauben (M6, Sicherungsmutter, 8 Nm).
 2. Hüftgurt und Schultergurte montieren, Magnet-Schnallen anbringen.
-3. Hüftbügel, Abspreizgelenk (Gummipuffer einstellen: ±20°), Hüftlager (Passschraube M10, 20 Nm), Drehlager.
-4. Ober- und Unterschenkelschienen, Kniegelenk mit Anschlag, Steigbügel mit Seitenbügel.
+3. Gabel des Abspreizgelenks unten am Rahmen, Nabe mit Hüftschwinge einsetzen, vorne Kugelsperrbolzen. Die Achse muss von hinten genau auf die Mitte deines Hüftgelenks zeigen (Klebepunkt). Zentrierfedern und Gummipuffer (±20°). Hüftlager an der Schwinge (Passschraube M10, 20 Nm).
+4. Ober- und Unterschenkelschienen (laufen schräg nach innen zum Knie und Knöchel), Kniegelenk mit Anschlag, Knöchellager, Fersenbügel mit Kippgelenk hinter der Ferse, Steigbügel mit Fersenschale und Ristriemen.
 5. Länge über Steckbolzen so einstellen, dass Exo-Achsen und Körperachsen fluchten (Klebepunkte).
 6. **Prüfen P1–P4** (Passform, Gehen, Hocke, Aussteigen bei Sturz).
 
@@ -27,8 +27,8 @@ Kabel: [verdrahtung.md](verdrahtung.md).
 
 ## 4. Seile und Seilpaare
 1. Seilscheiben aus Lagen verschrauben (M4), Seilklemmen einsetzen.
-2. Beinseil: Box → Rolle Becken → hinten um die Hüftscheibe → Rollen Oberschenkel → vorne um die Knie-Kurvenscheibe → Klemme.
-   Vorspannung von Hand so, dass das Seil gerade nicht durchhängt.
+2. Hüfte: Hüftmotor auf die Motorplatte der Schwinge, offene Seilschleife Trommel → Scheibe Ø 12 cm (oben und unten je ein Seil, an beiden Enden geklemmt), Spannschraube bis kein Spiel mehr fühlbar ist.
+   Knie: Bowdenzug-Paar von der Box über Abspreizgelenk und Schwinge hinten am Oberschenkel entlang (Radius ≥ 15 cm), Streckzug über die Kurvenscheibe nach vorne, Beugezug durch die Federpatrone unter der Beugescheibe nach vorne, beide klemmen.
 3. Schulter: offenes Seilpaar über die Rollen auf der Schwenkachse; Ellbogen: Bowdenzug-Paar. Spannschrauben stellen
    die Vorspannung ein, bis kein Spiel mehr fühlbar ist.
 4. **Prüfen P8–P9** (Seilwege frei, kein Kontakt zu Gelenken in voller Hocke und voller Armbewegung).
@@ -36,14 +36,16 @@ Kabel: [verdrahtung.md](verdrahtung.md).
 ## 5. Sensor-Manschetten und Kalibrierung
 1. Wägezellen in die Halter (M3), Überlastpuffer mit 1 mm Spalt (Fühlerlehre).
 2. USB anschließen, Exo **aus**, Konsole 115200 Baud:
-   - `null <zelle>` mit unbelasteter Manschette (Zellen 0–7),
+   - `null <zelle>` mit unbelasteter Manschette bzw. leerem Schlaufenkopf (Zellen 0–8),
    - Manschette waagrecht halten, bekanntes Gewicht (z. B. 5 kg Hantelscheibe) anhängen: `kal <zelle> 5000`,
    - für jede Zelle wiederholen, dann `speichern`.
-3. **Prüfen P10–P12** (Vorzeichen jeder Zelle, Rauschen, Überlast).
+3. Fußsensoren: Multimeter an Pin 38/39 gegen Masse. Unbelastet unter 0,5 V, auf diesem Bein stehend über 1 V (Schwelle 300 ≈ 1 V; bei Bedarf in `main_teensy.cpp` anpassen).
+4. Uhr stellen: `uhr <stunde> <minute>`.
+5. **Prüfen P10–P12** (Vorzeichen jeder Zelle, Rauschen, Überlast).
 
 ## 6. Prüfstand und Parameter
-1. Holzarm mit Scharnier, Seilscheibe Ellbogen, Bowdenzug-Paar, ein Motor (ID 6) und die Unterarm-Manschette (Zelle 7).
-2. Konsole: `pruefstand`, `stufe 0`, `speichern`. Dann sind nur Motor 6 und seine Manschette aktiv.
+1. Holzarm mit Scharnier, Seilscheibe Ellbogen, Bowdenzug-Paar, ein Motor (ID 8) und die Unterarm-Manschette (Zelle 5).
+2. Konsole: `pruefstand`, `stufe 0`, `speichern`. Dann sind nur Motor 8 und seine Manschette aktiv.
 3. `log 1`, Ausgabe mitschreiben, Exo einschalten, Holzarm 30 s an der Manschette führen (langsam und schnell).
 4. `python3 tools/auswertung.py log.csv`: Trägheit, Reibung und Schwerkraft des echten Gelenks. Die Werte in
    `firmware/test/sim_test.cpp` (struct Plant) eintragen, `make -C firmware test` laufen lassen, Reibungsausgleich und
