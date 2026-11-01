@@ -77,6 +77,10 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
 .detail dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;font-size:14px}
 .detail dt{font-weight:600}
 .detail dd{margin:0}
+.perf{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px}
+.perf th,.perf td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}
+.perf th{font:600 11px/1.3 var(--font-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.note{margin:0;font-size:13px;color:var(--muted)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid var(--line)}
 @media (min-width:980px){
@@ -91,7 +95,7 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
 
 <div class="app">
   <header>
-    <p class="kicker">Exoskelett · Konstruktion, Entwurf 4</p>
+    <p class="kicker">Exoskelett · Konstruktion, Entwurf 4 · Ansichten: Komplett, Mechanik, Antrieb, Elektronik</p>
     <h1>So ist das Exo aufgebaut</h1>
     <p class="lede">Hüfte und Knie haben eigene Antriebe und helfen in beide Richtungen: Ein Hüftmotor sitzt auf der Hüftschwinge, Knie, Schultern und Ellbogen werden über Seile von hinten bewegt. Die Beine lassen sich seitlich abspreizen, der Fuß kippt mit. Blaue Sensor-Manschetten sagen dem Exo, wohin du willst; Fußsensoren und Wägezellen in den Schlaufen sagen ihm, was es tragen muss. Gurte wie bei einem guten Rucksack, Anzeige am rechten Oberarm. Nummer antippen, „Rundgang“ starten oder mit den Reglern bewegen.</p>
   </header>
@@ -114,6 +118,10 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
         <label for="stand"><input type="checkbox" id="stand"> Parkstütze</label>
         <label for="light"><input type="checkbox" id="light" checked> Licht</label>
         <label for="anod"><input type="checkbox" id="anod" checked> Eloxiert (Titangrau)</label>
+        <span class="seg" role="group" aria-label="Ansicht"><button type="button" data-view="all" aria-pressed="true">Komplett</button><button type="button" data-view="mech" aria-pressed="false">Mechanik</button><button type="button" data-view="drive" aria-pressed="false">Antrieb</button><button type="button" data-view="elec" aria-pressed="false">Elektronik</button></span>
+        <label for="xray">Rahmen durchsichtig <input type="range" id="xray" min="0" max="1" step="0.05" value="0"></label>
+        <label for="straps"><input type="checkbox" id="straps" checked> Gurte</label>
+        <label for="covers"><input type="checkbox" id="covers"> Hauben</label>
         <span class="seg" role="group" aria-label="Umgebung"><button type="button" data-env="farm" aria-pressed="true">Plantage</button><button type="button" data-env="work" aria-pressed="false">Werkstatt</button></span>
         <button type="button" id="tour">Rundgang</button>
       </div>
@@ -125,12 +133,26 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
       </section>
       <section class="block detail" id="detail" aria-live="polite"></section>
       <section class="block">
+        <h3>Leistung und Gefühl (gerechnet)</h3>
+        <table class="perf">
+          <thead><tr><th>Gelenk</th><th>Moment Spitze</th><th>schnellste Bewegung</th><th>feinste Stufe</th></tr></thead>
+          <tbody>
+            <tr><td>Hüfte</td><td>140 Nm</td><td>4,2 rad/s (240°/s)</td><td>0,07 Nm</td></tr>
+            <tr><td>Knie</td><td>95–115 Nm</td><td>4,7–7,5 rad/s</td><td>0,05 Nm</td></tr>
+            <tr><td>Schulter</td><td>100 Nm</td><td>5,4 rad/s (310°/s)</td><td>0,06 Nm</td></tr>
+            <tr><td>Ellbogen</td><td>58 Nm</td><td>7,5 rad/s (430°/s)</td><td>0,04 Nm</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Gehen braucht an der Hüfte etwa 3,5 rad/s, am Knie im Schwung etwa 6 rad/s; Greifbewegungen 2–4 rad/s. Reaktionszeit vom Druck an der Manschette bis zum Motor etwa 35 ms (mit schnellerem Wägezellen-Wandler etwa 15 ms). Ohne Strom laufen alle Gelenke frei mit; die Balance hältst du selbst über deine Füße, das Exo hat bewusst keinen Fußmotor. Der Rucksack verschiebt den Schwerpunkt um etwa 3 cm nach hinten, ein Baum vorne gleicht das aus.</p>
+      </section>
+      <section class="block">
         <h3>Farben</h3>
         <div class="legend">
           <span><i style="background:#C9D0D4"></i>Aluminium</span><span><i style="background:#5A6268"></i>Stahl, Lager, Schrauben</span>
           <span><i style="background:#3E7CB1"></i>3D-Druck (PETG)</span><span><i style="background:#2B3138"></i>TPU, Gummi, Polster</span>
           <span><i style="background:#E8C547"></i>Dyneema-Seil</span><span><i style="background:#AEB6BB"></i>Bowden-Innenzug</span><span><i style="background:#151A1E"></i>Bowdenhülle, Gurte</span>
           <span><i style="background:#D4520E"></i>Motor</span><span><i style="background:#2E7D4F"></i>Elektronik, Sensoren</span>
+          <span><i style="background:#C4501A"></i>Kabelbaum Leistung + CAN</span><span><i style="background:#2D5C8A"></i>Kabelbaum Sensoren, Taster</span><span><i style="background:#B3261E"></i>Akkuleitung</span>
         </div>
       </section>
     </aside>
@@ -215,6 +237,8 @@ const M = {
   glass: new THREE.MeshStandardMaterial({ color: 0x9FB3BF, roughness: 0.2, metalness: 0.1, transparent: true, opacity: 0.16, depthWrite: false }),
   body: new THREE.MeshStandardMaterial({ color: 0x9AA8B2, roughness: 0.8, transparent: true, opacity: 0.3, depthWrite: false }),
   bench: std(0x8A6A48, 0.8),
+  harnP: std(0xC4501A, 0.75), harnS: std(0x2D5C8A, 0.75), wireR: std(0xB3261E, 0.5), wireB: std(0x1A1A1A, 0.5), can: std(0x3C8D40, 0.5),
+  copper: std(0xC7773A, 0.3, 0.9), header: std(0xEDEDE6, 0.5), conn: std(0x30353A, 0.45, 0.4), fuse: std(0xE8B400, 0.4),
 };
 const FLOW_MAT = [0xE53935, 0xE8572F, 0xEB7529, 0xEE9323, 0xF0AF1E, 0xF2C919, 0xF4DF14].map((c) => std(c, 0.45, 0.3, { emissive: c, emissiveIntensity: 0.35 }));
 
@@ -222,7 +246,8 @@ const FLOW_MAT = [0xE53935, 0xE8572F, 0xEB7529, 0xEE9323, 0xF0AF1E, 0xF2C919, 0x
 const parts = {};            // Schlüssel → Meshes zum Hervorheben
 const flowParts = [];        // Kraftfluss-Stufe → Meshes
 let cur = null, fl = null;   // aktuell zugeordnetes Bauteil / Kraftfluss-Stufe beim Bauen
-function tag(m) { if (cur) (parts[cur] = parts[cur] || []).push(m); if (fl !== null) (flowParts[fl] = flowParts[fl] || []).push(m); m.userData.base = m.material; return m; }
+let catNow = null;           // Kategorie für die Ansichten (sonst aus dem Bauteil)
+function tag(m) { if (cur) (parts[cur] = parts[cur] || []).push(m); if (fl !== null) (flowParts[fl] = flowParts[fl] || []).push(m); m.userData.base = m.material; if (catNow) m.userData.cat = catNow; return m; }
 function mesh(geo, mat, cast = true) { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = true; return tag(m); }
 function put(g, m, x, y, z, rx = 0, ry = 0, rz = 0) { m.position.set(x, y, z); m.rotation.set(rx, ry, rz); g.add(m); return m; }
 const rgeo = (w, h, d, r = 0.0025) => new RoundedBoxGeometry(w, h, d, 2, Math.max(0.0002, Math.min(r, Math.min(w, h, d) / 2 - 0.0002)));
@@ -246,6 +271,45 @@ function flangeBearing(g, x, y, z, s = 1, dir = 1) {
   put(g, mesh(new THREE.TorusGeometry(0.016 * s, 0.004 * s, 8, 24), M.chrome), x, y, z + dir * 0.023);
   for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) bolt(g, x + dx * f * 0.36, y + dy * f * 0.36, z + dir * 0.007, 0.02, 0.0035, dir);
 }
+// Umlenkrolle im Rollenbock an beliebiger Achse n: Rille, Kugellager, Achsbolzen, zwei Wangen, Steg zur Befestigung (Richtung mount)
+function pulleyAt(g, c, n, r, w, mount) {
+  const prev = catNow; catNow = 'drive';
+  const y = n.clone().normalize(), x = mount.clone().addScaledVector(y, -mount.dot(y)).normalize(), z = new THREE.Vector3().crossVectors(x, y);
+  const grp = new THREE.Group(); grp.position.copy(c); grp.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z)); g.add(grp);
+  const pts = [[0.0035, -w / 2], [r + 0.0012, -w / 2], [r + 0.0012, -w * 0.18], [r - 0.0012, 0], [r + 0.0012, w * 0.18], [r + 0.0012, w / 2], [0.0035, w / 2]].map(([a, b]) => new THREE.Vector2(a, b));
+  grp.add(mesh(new THREE.LatheGeometry(pts, 28), M.alu));
+  grp.add(mesh(cyl(0.0042, 0.0042, w + 0.001, 14), M.chrome));                                         // Kugellager
+  const ax = mesh(cyl(0.0022, 0.0022, w + 0.012, 8), M.steel); grp.add(ax);
+  for (const s of [-1, 1]) {
+    const cheek = mesh(rgeo(r * 1.15 + 0.012, 0.0025, r * 1.3, 0.001), M.aluDark); cheek.position.set((r * 1.15 + 0.012) / 2 - r * 0.15, s * (w / 2 + 0.0022), 0); grp.add(cheek);
+    const nut = mesh(cyl(0.0042, 0.0042, 0.003, 6), M.steel); nut.position.set(0, s * (w / 2 + 0.005), 0); grp.add(nut);
+  }
+  const stem = mesh(rgeo(0.014, w + 0.009, 0.01, 0.002), M.aluDark); stem.position.set(r + 0.012, 0, 0); grp.add(stem);
+  catNow = prev; return grp;
+}
+// Seilweg über Umlenkrollen: An jeder Ecke sitzt eine Rolle, deren Achse senkrecht auf der Ebene aus ein- und auslaufendem
+// Seil steht, das Seil liegt tangential an. Ecken in lokalen Koordinaten von g; Rückgabe: Seilpunkte (lokal).
+function routeStatic(g, pts, r = 0.012, w = 0.01, mounts = []) {
+  const out = [pts[0].clone()];
+  for (let i = 1; i < pts.length - 1; i++) {
+    const P = pts[i], u = pts[i - 1].clone().sub(P).normalize(), v = pts[i + 1].clone().sub(P).normalize();
+    const th = Math.acos(clamp(u.dot(v), -1, 1)); if (th > Math.PI - 0.03) { out.push(P.clone()); continue; }
+    const half = th / 2, bis = u.clone().add(v).normalize(), C = P.clone().addScaledVector(bis, r / Math.sin(half));
+    const T1 = P.clone().addScaledVector(u, r / Math.tan(half)), T2 = P.clone().addScaledVector(v, r / Math.tan(half));
+    const a = T1.clone().sub(C), b = T2.clone().sub(C), ax = a.clone().cross(b).normalize(), ang = a.angleTo(b), q = new THREE.Quaternion();
+    for (let j = 0; j <= 10; j++) { q.setFromAxisAngle(ax, ang * j / 10); out.push(C.clone().add(a.clone().applyQuaternion(q))); }
+    const grp = pulleyAt(g, C, u.clone().cross(v), r - 0.0016, w, bis.clone().negate());
+    const mp = mounts[i - 1];
+    if (mp) { const end = C.clone().add(V(r + 0.016, 0, 0).applyQuaternion(grp.quaternion)); const prev = catNow; catNow = 'struct'; tube(g, end, mp, 0.008, M.aluDark); put(g, mesh(new THREE.SphereGeometry(0.006, 8, 6), M.aluDark), mp.x, mp.y, mp.z); catNow = prev; }
+  }
+  out.push(pts[pts.length - 1].clone()); return out;
+}
+// Seil als Rohr entlang lokaler Punkte (fest in einer Baugruppe)
+function ropeStatic(g, pts, rr = 0.0016, mat = M.rope) {
+  const prev = catNow; catNow = 'drive';
+  const c = new THREE.CurvePath(); for (let i = 1; i < pts.length; i++) if (pts[i].distanceToSquared(pts[i - 1]) > 1e-10) c.add(new THREE.LineCurve3(pts[i - 1], pts[i]));
+  const m = mesh(new THREE.TubeGeometry(c, pts.length * 4, rr, 6, false), mat); m.castShadow = false; g.add(m); catNow = prev; return m;
+}
 // Seilrolle mit Rille (Achse z)
 function pulley(g, x, y, z, r, w = 0.016, mat = M.alu) {
   const pts = [[0.004, -w / 2], [r, -w / 2], [r, -w * 0.15], [r * 0.82, 0], [r, w * 0.15], [r, w / 2], [0.004, w / 2]].map(([a, b]) => new THREE.Vector2(a, b));
@@ -255,12 +319,14 @@ function pulley(g, x, y, z, r, w = 0.016, mat = M.alu) {
 }
 // Seilscheibe mit zwei Rillen und Erleichterungslöchern (Achse z)
 function sheave(g, x, y, z, R, t = 0.012, gz = 0.003) {
+  const prev = catNow; catNow = 'drive';
   const s = new THREE.Shape(); s.absarc(0, 0, R, 0, Math.PI * 2, false);
   for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + Math.PI / 4, h = new THREE.Path(); h.absarc(Math.cos(a) * R * 0.55, Math.sin(a) * R * 0.55, R * 0.22, 0, Math.PI * 2, true); s.holes.push(h); }
   const geo = new THREE.ExtrudeGeometry(s, { depth: t, bevelEnabled: true, bevelThickness: 0.0012, bevelSize: 0.0012, bevelSegments: 1, curveSegments: 40 }); geo.translate(0, 0, -t / 2);
   put(g, mesh(geo, M.alu), x, y, z);
   for (const dz of [-gz, gz]) put(g, mesh(new THREE.TorusGeometry(R - 0.0012, 0.0014, 6, 48), M.aluDark), x, y, z + dz);
   put(g, mesh(cyl(0.012, 0.012, t + 0.008, 6), M.steel), x, y, z, Math.PI / 2);
+  catNow = prev;
 }
 // Schraubenfeder entlang y
 function spring(g, x, y, z, r, len, turns, wire, mat = M.steel) {
@@ -364,6 +430,11 @@ const PART_INFO = [
     how: '1,54"-E-Paper außen am rechten Oberarm, bei Kälte, Nässe und Sonne lesbar und stromsparend. Groß die Uhrzeit, darunter Akku in Prozent mit Restzeit und die Stufe. Gibt es eine Warnung oder einen Fehler (Akku schwach, Sensor, Motor warm), steht er in der untersten Zeile im Klartext.',
     parts: 'E-Paper 1,54" mit ESP32-C3 im gedruckten Gehäuse mit Scheibe, Kabel im Gewebeschlauch zur Box, etwa 30 €.',
     care: 'Gehäuse gedichtet, Scheibe kratzfest. Das Display hat eine eigene Sicherung; fällt es aus, läuft das Exo weiter.' },
+  { key: 'wiring', name: 'Elektronik und Kabelbäume', dist: 0.7,
+    what: 'Alles, was Strom und Signale führt: Steuerung in der Box, Verteilung zu den 8 Motoren, Kabelbäume zu Armen, Beinen, Not-Aus und Anzeige.',
+    how: 'In der Box an der Rückwand: Hauptplatine mit Teensy 4.1 und CAN-Transceiver, 3 Windentreiber, zwei Spannungswandler (24 V, 5 V) mit Kühlrippen. Unten Hauptsicherung, Schütz und eine Kupferschiene mit einer Sicherung je Motor. Ein CAN-Bus (grün) läuft als Kette von Motor zu Motor. Unten und seitlich an der Box sitzen dichte Rundstecker. Orange Kabelbäume: Leistung und CAN zu den Hüftmotoren. Blaue Kabelbäume: Manschetten-Verstärker, Fußsensoren, Schlaufen (Winde, Wägezelle, Taster) und Anzeige. Jeder Baum läuft im Gewebeschlauch an der Schiene, über jedes Gelenk mit einer Schlaufe, damit nichts knickt. Ansicht „Elektronik“ zeigt nur diese Teile.',
+    parts: 'Teensy 4.1, CAN-Transceiver SN65HVD230, 9 HX711 (an den Sensoren vergossen), 2 DC/DC-Wandler, 3 Motortreiber, Schütz, Midi-Sicherung 40 A, 8 Flachsicherungen 15 A, Kupferschiene, 7 Rundstecker IP67, Kabel 4 mm² / 1,5 mm² / geschirmt, Gewebeschlauch, etwa 250 €.',
+    care: 'Kabel nie über eine Kante ziehen, über Gelenke immer mit Schlaufe. Stecker nach unten, damit kein Wasser hineinläuft. CAN-Bus an beiden Enden mit 120 Ω abschließen.' },
   { key: 'light', name: 'Licht und LED-Ring', dist: 0.75,
     what: 'Licht für die dunklen Dezembernachmittage und ein Ring, der immer zeigt, was das Exo tut.',
     how: 'Zwei 10-W-LED-Strahler auf den Schulterbügeln leuchten nach vorne, Doppeltipp auf den Ein/Aus-Taster schaltet sie. Um den Not-Aus sitzt ein Ring aus 12 LEDs: grün bereit, blau hilft, gelb Grenze oder Parkstütze, rot Fehler, die Zahl der LEDs zeigt den Akku. Eine kurze Vibration bestätigt jede Schlaufe.',
@@ -376,7 +447,7 @@ const PART_INFO = [
     care: 'Bolzen mit Fangseil, damit sie im Schnee nicht verloren gehen.' },
   { key: 'finish', name: 'Oberfläche und Abdeckungen', dist: 0.9,
     what: 'Damit es sich anfühlt und aussieht wie ein Produkt: keine offenen Kabel, keine scharfen Kanten, ein Farbton.',
-    how: 'Alu-Teile werden gesammelt eloxiert oder pulverbeschichtet (Dienstleister, keine eigene Maschine). Über der Antriebsbox und den Hüftmotoren gedruckte Hauben, Kabel laufen im Gewebeschlauch innen an den Schienen. Alle Kanten entgratet und gerundet. Schalter „Eloxiert“ zeigt roh oder titangrau.',
+    how: 'Alu-Teile werden gesammelt eloxiert oder pulverbeschichtet (Dienstleister, keine eigene Maschine). Über der Antriebsbox und den Hüftmotoren gedruckte Hauben, Kabel laufen im Gewebeschlauch an den Schienen. Alle Kanten entgratet und gerundet. Schalter „Hauben“ zeigt sie (sonst sieht man hinein), „Eloxiert“ zeigt roh oder titangrau.',
     parts: 'Eloxieren als Sammelauftrag 80 bis 150 € oder Pulverbeschichten 60 bis 120 €, Gewebeschlauch, PETG matt für Hauben.',
     care: 'Erst eloxieren, wenn alle Bohrungen sitzen (nach dem Prototyp). Gewindebohrungen vorher abdecken.' },
 ];
@@ -516,9 +587,6 @@ cur = 'power';
   put(g, mesh(rgeo(0.085, 0.012, 0.19, 0.004), M.print), ba, 0.004, 0);
   box(g, 0.075, 0.1, 0.165, M.stihl, ba, 0.059, 0); box(g, 0.077, 0.025, 0.167, M.stihlGrey, ba, 0.119, 0);
   for (const z of [-0.03, 0, 0.03]) box(g, 0.01, 0.004, 0.006, M.chrome, ba + 0.03, 0.011, z);
-  box(g, 0.003, 0.09, 0.12, M.pcb, bx - 0.055, 0.42, 0);
-  box(g, 0.006, 0.06, 0.018, M.chip, bx - 0.059, 0.43, -0.03);
-  for (let i = 0; i < 4; i++) box(g, 0.005, 0.012, 0.012, M.chip, bx - 0.059, 0.405, 0.0 + i * 0.016);
   put(g, mesh(cyl(0.006, 0.006, 0.003, 16), std(0xC0C4C8, 0.3, 0.9)), bx - 0.0585, 0.455, 0.035, 0, 0, Math.PI / 2);   // Knopfzelle für die Uhr
   box(g, 0.03, 0.04, 0.03, std(0x333a40, 0.5), bx - 0.03, 0.17, 0.1);
   box(g, 0.02, 0.03, 0.015, M.red, bx - 0.035, 0.17, -0.1);
@@ -690,6 +758,7 @@ SIDE.forEach((sd, k) => {
 
 /* ---------- 9 Schulter, 10 Ellbogen, Arme mit Seilscheiben ---------- */
 const ZS = (sd) => sd * D.exoSh;
+const shRoute = [];
 SIDE.forEach((sd, k) => {
   const zs = ZS(sd), zUp = zs + sd * 0.036, zFo = zs + sd * 0.014, zDisc = zs + sd * 0.054;
   cur = 'shoulder'; fl = k === 1 ? 3 : null;
@@ -701,13 +770,17 @@ SIDE.forEach((sd, k) => {
     box(g, 0.07, 0.07, 0.008, M.alu, 0, D.torso, zs);
     flangeBearing(g, 0, D.torso, zs + sd * 0.006, 0.8, sd);
     fl = null;
-    cur = 'bowden';
-    // Umlenkrollen für das offene Schulter-Seilpaar: zwei auf der Achse des seitlichen Schwenkgelenks, zwei hinter der Seilscheibe
+    // Offenes Seilpaar: Trommel → senkrecht aus der Box → Rolle über der Box → Rolle auf der Achse des Schwenkgelenks
+    // (Schwenken ändert die Seillänge nicht) → Rolle hinter der Seilscheibe → waagrecht auf die Scheibe (oben heben, unten senken)
     cur = 'shoulder';
-    box(g, 0.012, 2 * R_SH + 0.05, 0.01, M.aluDark, -0.13, D.torso, zDisc + sd * 0.012);
-    tube(g, V(-0.13, D.torso - 0.02, zDisc + sd * 0.012), V(-0.05, D.torso + 0.06, zs + sd * 0.004), 0.012, M.aluDark);
-    for (const s of [1, -1]) pulley(g, -0.13, D.torso + s * (R_SH + 0.012), zDisc, 0.012, 0.01);
-    for (const x of [-0.105, -0.135]) pulley(g, x, D.torso + 0.1, sd * 0.2, 0.012, 0.01);
+    box(g, 0.012, 2 * R_SH + 0.06, 0.01, M.aluDark, -0.172, D.torso, zDisc + sd * 0.014);                // Rollenträger hinter der Scheibe
+    tube(g, V(-0.172, D.torso + 0.02, zDisc + sd * 0.014), V(-0.07, D.torso + 0.09, sd * 0.2), 0.012, M.aluDark);
+    tube(g, V(-0.172, D.torso - 0.05, zDisc + sd * 0.014), V(-0.155, D.torso + 0.0, sd * 0.09), 0.012, M.aluDark);
+    shRoute[k] = [1, -1].map((s) => {
+      const zD = sd * 0.058 + s * sd * 0.008, zP = zDisc + s * 0.0035 * sd, yT = D.torso + s * R_SH;
+      return routeStatic(g, [V(-0.235, 0.31, zD), V(-0.235, D.torso + 0.075 + (s < 0 ? 0.02 : 0), zD), V(-0.125 - (s < 0 ? 0.022 : 0), D.torso + 0.09, sd * 0.2), V(-0.16, yT, zP), V(0, yT, zP)], 0.012, 0.009,
+        [V(-0.1545, D.torso + 0.1 + (s < 0 ? 0.02 : 0), sd * 0.085), V(-0.1, D.torso + 0.078, sd * 0.17), V(-0.172, yT + s * 0.02, zDisc + sd * 0.014)]);
+    });
     if (k === 1) hotspot('shoulder', g, 0.03, D.torso + R_SH + 0.03, zDisc + sd * 0.03);
   }
   {
@@ -770,8 +843,8 @@ SIDE.forEach((sd, k) => {
     loops.push({ ring, rg, head: h.p.clone(), d: h.d.clone(), k, y: h.p.y });
     // Zugseil von der Winde an der Unterarmschiene über den Träger zum Kopf
     const yW = -0.05 - i * 0.055;
-    rod(g, V(-0.02, yW, zFo + sd * 0.03), V(-0.012, yw + 0.06, zFo + sd * 0.012), 0.0018, M.rope);
-    rod(g, V(-0.012, yw + 0.06, zFo + sd * 0.012), h.p.clone().add(V(0.014, 0.012, 0)), 0.0018, M.rope);
+    ropeStatic(g, routeStatic(g, [V(-0.022, yW, zFo + sd * 0.023), V(-0.022, yw + 0.085 - i * 0.004, zFo + sd * 0.023), V(-0.006, yw + 0.052, zc + sd * 0.084), V(-0.048, yw + 0.03 - i * 0.004, zc + sd * 0.066), h.p.clone().add(V(0.012, 0.01, i ? -sd * 0.01 : sd * 0.014))], 0.006, 0.006,
+      [V(0, yw + 0.085 - i * 0.004, zFo), V(-0.008, yw + 0.045, zc + sd * 0.074), V(-0.044, yw + 0.03, zc + sd * 0.06)]), 0.0018);
     // Winde: Schneckengetriebemotor + Trommel außen an der Unterarmschiene
     box(g, 0.034, 0.046, 0.03, M.motorDark, 0.0, yW, zFo + sd * 0.03);
     put(g, mesh(cyl(0.012, 0.012, 0.05, 18), M.steel), 0.026, yW, zFo + sd * 0.03, 0, 0, Math.PI / 2);
@@ -802,16 +875,16 @@ SIDE.forEach((sd, k) => {
   // Schulter: offenes Seilpaar von der Box über die Umlenkrollen auf die Seilscheibe
   dynTube(M.rope, 0.0016, 'shoulder', () => {      // heben: oben, wickelt nach vorne ab
     const c = W(G.upper[k], 0, 0, zDisc + 0.003 * sd), at = angOf(G.torso, 0, 1), aa = angOf(G.upper[k], Math.cos(deg(-70)), Math.sin(deg(-70)));
-    return [W(G.torso, -0.25, 0.48, sd * 0.1), W(G.torso, -0.105, D.torso + 0.112, sd * 0.2), W(G.torso, -0.13, D.torso + R_SH + 0.024, zDisc + 0.003 * sd), W(G.torso, -0.115, D.torso + R_SH, zDisc + 0.003 * sd), ...arcPts(c, R_SH, at, Math.min(aa, at))];
+    return [...shRoute[k][0].slice(0, -1).map((p) => G.torso.localToWorld(p.clone())), ...arcPts(c, R_SH, at, Math.min(aa, at))];
   });
   dynTube(M.rope, 0.0016, 'shoulder', () => {      // senken: unten
     const c = W(G.upper[k], 0, 0, zDisc - 0.003 * sd), ab = angOf(G.torso, 0, -1), aa = angOf(G.upper[k], Math.cos(deg(-90)), Math.sin(deg(-90)));
     let a1 = aa; while (a1 < ab) a1 += Math.PI * 2; if (a1 - ab > Math.PI * 1.6) a1 = ab;
-    return [W(G.torso, -0.24, 0.48, sd * 0.08), W(G.torso, -0.135, D.torso + 0.112, sd * 0.2), W(G.torso, -0.142, D.torso - R_SH - 0.012, zDisc - 0.003 * sd), W(G.torso, -0.115, D.torso - R_SH, zDisc - 0.003 * sd), ...arcPts(c, R_SH, ab, a1)];
+    return [...shRoute[k][1].slice(0, -1).map((p) => G.torso.localToWorld(p.clone())), ...arcPts(c, R_SH, ab, a1)];
   });
   // Ellbogen: Hüllen von der Box über die Schulter am Oberarm entlang
   for (const s of [1, -1]) {
-    dynTube(M.housing, 0.0042, 'bowden', () => [W(G.torso, -0.25, 0.4 + s * 0.01, sd * 0.1), W(G.torso, -0.2, D.torso - 0.02, sd * 0.16), W(G.torso, -0.1, D.torso + 0.13, zs + sd * 0.07),
+    dynTube(M.housing, 0.003, 'bowden', () => [W(G.torso, -0.25, 0.4 + s * 0.01, sd * 0.1), W(G.torso, -0.2, D.torso - 0.02, sd * 0.16), W(G.torso, -0.1, D.torso + 0.13, zs + sd * 0.07),
       W(G.upper[k], 0.0 + s * 0.012, 0.06, zDisc + sd * 0.016), W(G.upper[k], s * 0.03, -0.12, zDisc + sd * 0.01), W(G.upper[k], s * R_EL, -D.upper + 0.13, zDisc)], true);
   }
   dynTube(M.cable, 0.0016, 'bowden', () => {      // beugen: vorne
@@ -906,7 +979,8 @@ cur = null;
   box(w, 0.2, 0.004, 0.05, M.alu, -0.12, 0.13, 0.0);
   for (let i = 0; i < 7; i++) put(w, mesh(new THREE.ConeGeometry(0.005, 0.01, 4), M.tpu), -0.2 + i * 0.026, 0.123, 0, Math.PI);
 }
-const benchLabel = (t, x, y, z) => tagLabel(bench, t, x, y, z);
+const benchLabels = [], benchLabel = (t, x, y, z) => benchLabels.push(tagLabel(bench, t, x, y, z));
+const setBench = (on) => { bench.visible = on; benchLabels.forEach((l) => { l.visible = on; }); };
 benchLabel('Arm-Antrieb zerlegt', -0.02, 1.02, 0); benchLabel('Sensor-Manschette', 0.33, 1.14, 0); benchLabel('Schlaufenwinde', 0.62, 1.0, 0);
 
 /* ---------- Kraftfluss (Beispiel: 3 m Baum fast senkrecht tragen) ---------- */
@@ -938,6 +1012,67 @@ function showFlowText() {
   const dl = d.querySelector('dl');
   FLOW_TEXT.forEach(([t, x], i) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = `K${i + 1} ${t}`; dd.textContent = x; dl.append(dt, dd); });
 }
+
+/* ---------- Elektronik in der Box, Stecker und Kabelbäume ---------- */
+cur = 'wiring';
+{
+  const g = G.torso, bx = -0.25, xw = -0.309;
+  // Rückwand innen: Hauptplatine mit Teensy, CAN-Transceiver, Stiftleisten; Windentreiber; Spannungswandler
+  box(g, 0.002, 0.1, 0.17, M.pcb, xw, 0.43, 0);
+  box(g, 0.004, 0.061, 0.018, M.pcb, xw + 0.004, 0.44, -0.045); box(g, 0.003, 0.012, 0.012, M.chip, xw + 0.0065, 0.44, -0.045);   // Teensy 4.1
+  box(g, 0.004, 0.008, 0.007, M.chrome, xw + 0.004, 0.473, -0.045);                                                                  // USB
+  box(g, 0.003, 0.01, 0.006, M.chip, xw + 0.004, 0.41, -0.012);                                                                      // CAN-Transceiver
+  for (let i = 0; i < 4; i++) box(g, 0.006, 0.008, 0.02, M.header, xw + 0.005, 0.395, 0.015 + i * 0.022);                         // Schraubklemmen
+  for (let i = 0; i < 3; i++) { box(g, 0.003, 0.03, 0.028, std(0xA02020, 0.5), xw + 0.002, 0.345, -0.05 + i * 0.035); box(g, 0.008, 0.016, 0.02, M.aluDark, xw + 0.007, 0.345, -0.05 + i * 0.035); }   // Windentreiber
+  for (const [y, z] of [[0.25, -0.06], [0.25, 0.06]]) { box(g, 0.016, 0.05, 0.08, M.aluDark, xw + 0.007, y, z); for (let i = 0; i < 6; i++) box(g, 0.006, 0.05, 0.002, M.alu, xw + 0.018, y, z - 0.035 + i * 0.014); }   // DC/DC 24 V und 5 V
+  // Leistung: Kupferschiene mit einer Sicherung je Motor, Leitungen zu den Motoren, CAN-Kette
+  box(g, 0.006, 0.006, 0.25, M.copper, bx + 0.04, 0.15, 0);
+  const mot = [];
+  for (const [y, z] of [[0.21, -1], [0.21, 1], [0.31, -1], [0.31, 1], [0.41, -1], [0.41, 1]]) mot.push(V(bx - 0.03, y - 0.03, z * 0.12));
+  mot.forEach((m, i) => {
+    box(g, 0.006, 0.012, 0.004, M.fuse, bx + 0.04, 0.16, -0.1 + i * 0.04);
+    rod(g, V(bx + 0.04, 0.163, -0.1 + i * 0.04), V(bx + 0.02, m.y, m.z * 0.9), 0.0016, M.wireR);
+    rod(g, V(bx + 0.035, 0.163, -0.1 + i * 0.04 + 0.006), V(bx + 0.015, m.y, m.z * 0.9 + 0.006), 0.0016, M.wireB);
+  });
+  const canPts = [V(xw + 0.006, 0.41, -0.012), ...mot.map((m) => V(m.x, m.y, m.z)), V(bx - 0.03, 0.13, 0.135)];
+  for (let i = 1; i < canPts.length; i++) rod(g, canPts[i - 1], canPts[i], 0.0012, M.can);
+  // Akkuleitung: Akku → Hauptsicherung → (Not-Aus am Schultergurt) → Schütz → Kupferschiene
+  for (const [dz, mat] of [[0, M.wireR], [0.01, M.wireB]]) { rod(g, V(-0.27, 0.14, -0.03 + dz), V(-0.282, 0.165, -0.095 + dz), 0.0025, mat); rod(g, V(-0.282, 0.165, -0.095 + dz), V(-0.28, 0.17, 0.09 + dz), 0.0022, mat); }
+  rod(g, V(-0.28, 0.17, 0.1), V(bx + 0.04, 0.15, 0.12), 0.0022, M.wireR);
+  // Rundstecker IP67: unten Hüftmotor (Leistung + CAN) und Bein-Sensoren, seitlich Arme, links Not-Aus/Taster, rechts Anzeige
+  const plug = (x, y, z, rx, rz, ring) => { put(g, mesh(cyl(0.008, 0.008, 0.016, 16), M.conn), x, y, z, rx, 0, rz); put(g, mesh(new THREE.TorusGeometry(0.0085, 0.0015, 6, 16), ring), x, y, z, rx + Math.PI / 2, 0, rz); };
+  for (const sd of SIDE) { plug(-0.25, 0.127, sd * 0.125, 0, 0, M.harnP); plug(-0.272, 0.127, sd * 0.095, 0, 0, M.harnS); plug(-0.27, 0.45, sd * 0.153, Math.PI / 2, 0, M.harnS); }
+  plug(-0.27, 0.475, -0.153, Math.PI / 2, 0, M.red); plug(-0.27, 0.475, 0.153, Math.PI / 2, 0, M.harnS);
+  // Träger der Rollen über der Box
+  cur = 'wiring';
+  hotspot('wiring', g, -0.33, 0.3, 0.1);
+}
+// Kabelbäume (über die Gelenke mit Schlaufe, werden bei jeder Haltung neu gelegt)
+SIDE.forEach((sd, k) => {
+  const zs = ZS(sd), zUp = zs + sd * 0.036, zFo = zs + sd * 0.014, zc = sd * D.shHalf, yw = -D.fore;
+  const T = G.thigh[k], Sh = G.shank[k], Sw = G.swing[k], U = G.upper[k], Fo = G.fore[k];
+  dynTube(M.harnP, 0.0045, 'wiring', () => [W(G.torso, -0.25, 0.12, sd * 0.125), W(G.torso, -0.245, 0.06, sd * 0.14), W(G.torso, -0.215, 0.0, sd * 0.145),
+    W(Sw, -0.172, -0.03, sd * 0.19), W(Sw, -0.165, -0.05, sd * 0.25), W(Sw, XM - 0.03, -0.047, sd * 0.292)], true);                 // Hüftmotor: Leistung + CAN
+  dynTube(M.harnS, 0.003, 'wiring', () => [W(G.torso, -0.272, 0.12, sd * 0.095), W(G.torso, -0.255, 0.04, sd * 0.118), W(G.torso, -0.225, -0.035, sd * 0.155),
+    W(Sw, -0.178, -0.042, sd * 0.208), W(Sw, -0.1, -0.078, sd * 0.216), W(T, -0.015, -0.1, sd * (zRail(-0.1) + 0.017)), W(T, 0.016, -0.17, sd * (zRail(-0.17) + 0.017)),
+    W(T, 0.016, -D.thigh + 0.05, sd * (Z.kn + 0.02)), W(Sh, 0.02, -0.04, sd * (zShank(-0.04) + 0.018)), W(Sh, 0.016, -D.shank + 0.06, sd * (zShank(-D.shank + 0.06) + 0.016)),
+    W(G.foot[k], 0.03, -D.ankle + 0.012, sd * (HH + 0.07))], true);                                                                  // Oberschenkel-Verstärker, Fußsensor
+  dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.45, sd * 0.16), W(G.torso, -0.23, D.torso + 0.02, sd * 0.17), W(G.torso, -0.14, D.torso + 0.105, sd * 0.215),
+    W(G.torso, -0.06, D.torso + 0.075, zs + sd * 0.005), W(U, -0.022, -0.03, zUp + sd * 0.016), W(U, -0.022, -0.16, zUp + sd * 0.016), W(U, -0.022, -D.upper + 0.04, zUp + sd * 0.016),
+    W(Fo, -0.024, -0.03, zFo + sd * 0.016), W(Fo, -0.03, -0.09, zFo + sd * 0.045), W(Fo, -0.03, -0.15, zFo + sd * 0.045), W(Fo, -0.012, yw + 0.07, zFo + sd * 0.02), W(Fo, 0.03, -D.fore - 0.02, zc + sd * 0.024)], true);   // Arm: Manschetten, Winden, Schlaufen-Wägezellen, Taster
+  dynTube(M.harnS, 0.0022, 'wiring', () => [W(G.torso, -0.14, D.torso + 0.105, sd * 0.215), W(G.torso, -0.1, D.torso + 0.13, sd * 0.215), W(G.torso, -0.06, D.torso + 0.13, sd * 0.215)], true);   // Arbeitslicht
+  if (k === 1) dynTube(M.harnS, 0.0025, 'wiring', () => [W(U, -0.022, -0.1, zUp + sd * 0.016), W(U, -0.02, -0.13, zUp + sd * 0.035), W(U, 0, -0.15, zs + sd * 0.082)], true);   // Anzeige
+});
+dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.475, -0.16), W(G.torso, -0.2, D.torso + 0.04, -0.11), W(G.torso, -0.1, D.torso + 0.058, -0.075),
+  W(G.torso, -0.01, D.torso + 0.098, -0.095), W(G.torso, 0.093, D.torso + 0.045, -0.1), W(G.torso, 0.134, D.torso - 0.05, -0.1)], true);   // Not-Aus, Ein/Aus, LED-Ring
+// Hauben (Schalter „Hauben“): Hüftmotor mit Seilgetriebe
+cur = 'finish';
+SIDE.forEach((sd, k) => {
+  const sh = mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.052, 36, 1, false), null); sh.material = null;
+  const cov = new THREE.MeshPhysicalMaterial({ color: 0x2A2E33, roughness: 0.38, metalness: 0.1, clearcoat: 0.6, clearcoatRoughness: 0.35 });
+  sh.material = cov; sh.userData.base = cov; put(G.swing[k], sh, XM, 0, sd * 0.284, Math.PI / 2);
+  box(G.swing[k], 0.15, 0.14, 0.03, cov, -0.05, 0, sd * 0.255);
+});
 
 /* ================= 14–17 Komfort-Features ================= */
 const feat = { standT: 0, standOn: false, light: true, akku: 0.82 };
@@ -1008,12 +1143,11 @@ const MC = new THREE.MeshPhysicalMaterial({ color: 0x2A2E33, roughness: 0.38, me
 put(G.torso, mesh(rgeo(0.15, 0.05, 0.31, 0.02), MC), -0.25, 0.505, 0);                     // gedruckte Haube über der Box
 for (let i = 0; i < 6; i++) box(G.torso, 0.1, 0.003, 0.012, M.chip, -0.25, 0.531, -0.1 + i * 0.04);   // Lüftungsschlitze
 put(G.torso, mesh(rgeo(0.006, 0.34, 0.3, 0.003), MC), -0.318, 0.3, 0);                      // Rückwand
-SIDE.forEach((sd, k) => { rod(G.thigh[k], V(0.016, -0.04, sd * (zRail(-0.04) + 0.014)), V(0.016, -D.thigh + 0.06, sd * (zRail(-D.thigh + 0.06) + 0.014)), 0.004, M.housing); rod(G.shank[k], V(0.016, -0.04, sd * (zShank(-0.04) + 0.014)), V(0.016, -D.shank + 0.06, sd * (zShank(-D.shank + 0.06) + 0.014)), 0.004, M.housing); });   // Kabel im Gewebeschlauch
 cur = null;
 function setFinish(anod) {
   M.alu.color.set(anod ? 0x7A838C : 0xC9D0D4); M.alu.roughness = anod ? 0.4 : 0.34; M.alu.metalness = anod ? 0.75 : 0.85;
   M.aluDark.color.set(anod ? 0x4E555C : 0x9AA3A9);
-  glowCache.clear(); paint();
+  glowCache.clear(); fadeCache.clear(); paint();
 }
 
 /* ================= Umgebung: verschneite Plantage in der Dämmerung ================= */
@@ -1065,7 +1199,7 @@ let envMode = 'farm';
 function applyEnv() {
   const f = envMode === 'farm';
   farm.visible = f; floor.visible = !f; if (grid) grid.visible = !f;
-  bench.visible = !f && $('bench').checked; $('bench').disabled = f;
+  setBench(!f && $('bench').checked); $('bench').disabled = f;
   scene.background = f ? skyTex : new THREE.Color(css('--sky'));
   scene.fog = f ? new THREE.Fog(0x7E7F98, 7, 30) : null;
   scene.environmentIntensity = f ? 0.75 : 0.7;
@@ -1160,14 +1294,46 @@ PART_INFO.forEach((p, i) => {
 let tween = null, selKey = null, flowOn = false;
 const glowCache = new Map();
 function glow(base) { if (!base.isMeshStandardMaterial) return base; if (!glowCache.has(base)) { const c = base.clone(); c.emissive = new THREE.Color(0xFF7A2A); c.emissiveIntensity = 0.4; glowCache.set(base, c); } return glowCache.get(base); }
+// Ansichten: jede Baugruppe gehört zu einer Kategorie; je Ansicht wird sie normal, durchsichtig oder ausgeblendet gezeigt
+const PART_CAT = { frame: 'struct', hip: 'struct', leg: 'struct', knee: 'struct', foot: 'struct', stand: 'struct', shoulder: 'struct', elbow: 'struct', buckle: 'struct',
+  loop: 'grip', drive: 'drive', rope: 'drive', bowden: 'drive', power: 'elec', sensor: 'elec', display: 'elec', light: 'elec', wiring: 'elec', straps: 'straps', finish: 'covers' };
+const VIEW = {   // Deckkraft je Kategorie (0 = ausgeblendet)
+  all: { struct: 1, grip: 1, drive: 1, elec: 1, straps: 1, covers: 1 },
+  mech: { struct: 1, grip: 1, drive: 1, elec: 0.25, straps: 0, covers: 0 },
+  drive: { struct: 0.12, grip: 0.12, drive: 1, elec: 0.08, straps: 0, covers: 0 },
+  elec: { struct: 0.1, grip: 0.1, drive: 0.1, elec: 1, straps: 0, covers: 0 },
+};
+let viewMode = 'all';
+const fadeCache = new Map();
+function faded(base, op) {
+  if (!base || base === M.glass) return base;
+  const key = Math.round(op * 20); let mp = fadeCache.get(base); if (!mp) fadeCache.set(base, mp = new Map());
+  if (!mp.has(key)) { const c = base.clone(); c.transparent = true; c.opacity = op; c.depthWrite = false; mp.set(key, c); }
+  return mp.get(key);
+}
+function catOf(m, k) {
+  if (m.userData.cat) return m.userData.cat;
+  const c = PART_CAT[k] || 'struct', b = m.userData.base;
+  if (b === M.rope || b === M.cable || b === M.housing || b === M.motor) return 'drive';
+  return c === 'elec' && (b === M.print || b === M.foam || b === M.strap) ? 'struct' : c;   // Manschetten-Schalen gehören zur Mechanik
+}
 function paint() {
   const flowStage = new Map(); if (flowOn) flowParts.forEach((arr, i) => arr && arr.forEach((m) => flowStage.set(m, i)));
+  const xr = Number($('xray').value), showStraps = $('straps').checked, showCovers = $('covers').checked;
   for (const [k, arr] of Object.entries(parts)) for (const m of arr) {
-    const base = m.userData.base || m.material;
+    const base = m.userData.base || m.material, c = catOf(m, k);
+    let op = VIEW[viewMode][c];
+    if (c === 'straps' && !showStraps) op = 0;
+    if (c === 'covers') op = showCovers && viewMode === 'all' ? 1 : 0;
+    if (c === 'struct' && viewMode !== 'elec' && viewMode !== 'drive') op = Math.min(op, 1 - 0.85 * xr);
+    m.visible = op > 0.02;
+    if (m.userData.cast === undefined) m.userData.cast = m.castShadow;
+    m.castShadow = m.userData.cast && op > 0.9;
     if (flowStage.has(m)) m.material = FLOW_MAT[flowStage.get(m)];
-    else if (k === selKey && base !== M.glass) m.material = glow(base);
-    else m.material = base;
+    else if (k === selKey && base !== M.glass && op > 0.9) m.material = glow(base);
+    else m.material = op > 0.98 ? base : faded(base, op);
   }
+  for (const b of document.querySelectorAll('[data-view]')) b.setAttribute('aria-pressed', String(b.dataset.view === viewMode));
 }
 function select(key, move = true) {
   selKey = key;
@@ -1194,10 +1360,12 @@ const stopAnim = () => { animOn = false; $('anim').textContent = 'Bewegen'; };
 for (const id of sliders) $(id).addEventListener('input', () => { st[id] = Number($(id).value); stopAnim(); });
 $('anim').addEventListener('click', () => { animOn = !animOn; $('anim').textContent = animOn ? 'Anhalten' : 'Bewegen'; });
 $('body').addEventListener('change', () => bodyParts.forEach((m) => { m.visible = $('body').checked; }));
-$('bench').addEventListener('change', () => { bench.visible = $('bench').checked && envMode === 'work'; });
+$('bench').addEventListener('change', () => setBench($('bench').checked && envMode === 'work'));
 $('stand').addEventListener('change', () => { feat.standOn = $('stand').checked; });
 $('light').addEventListener('change', () => setLight($('light').checked));
 $('anod').addEventListener('change', () => setFinish($('anod').checked));
+for (const b of document.querySelectorAll('[data-view]')) b.addEventListener('click', () => { viewMode = b.dataset.view; paint(); });
+for (const id of ['xray', 'straps', 'covers']) $(id).addEventListener('input', paint);
 for (const b of document.querySelectorAll('[data-env]')) b.addEventListener('click', () => { envMode = b.dataset.env; applyEnv(); });
 $('tour').addEventListener('click', () => { if (tour) { stopTour(); return; } tour = { i: 0 }; $('tour').textContent = 'Rundgang stoppen'; tourStep(); });
 controls.addEventListener('start', stopTour);
@@ -1263,7 +1431,7 @@ renderer.setAnimationLoop((now) => {
   }
   controls.update(); renderer.render(scene, camera); labelR.render(scene, camera);
 });
-window.__konst = { st, ex, live, select, pose, camera, controls, setSlider };
+window.__konst = { st, ex, live, select, pose, camera, controls, setSlider, setView: (v) => { viewMode = v; paint(); } };
 </script>
 </body>
 </html>
