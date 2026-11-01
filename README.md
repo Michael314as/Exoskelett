@@ -2,6 +2,8 @@
 
 Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnittener Christbäume entlastet.
 
+> **3D:** `visualisierung/exo-konstruktion.html` (Konzeptzeichnung) und `visualisierung/exo-technik.html` (technische Ansicht mit Bauteil-IDs, realen Kaufteilen, Bewegung nach Motorkennlinie, Schwerpunkt, Maßen).
+
 > **Stand: Entwurf 4** (Hüfte mit Abspreizgelenk und eigenem Hüftmotor, Beine in beide Richtungen, Gurtsystem, Schlaufen unten + außen, Anzeige am Oberarm). Die Fertigungsdateien in `fertigung/` sind noch auf Entwurf 3.2 und werden für Entwurf 4 neu erzeugt. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md). Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
 > Gebaut ist noch nichts.
 
