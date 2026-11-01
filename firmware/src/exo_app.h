@@ -121,7 +121,12 @@ class App {
       o.ff[i] = ji[i].ffNm;
     }
     // Schlaufen: unabhängig vom Gelenkmodus (auch aus bleibt alles fest)
-    for (int i = 0; i < NL; i++) o.winch[i] = loop[i].step(in.loopCurrentA[i], in.loopOpenSwitch[i], dt);
+    // Immer nur eine Winde zur Zeit: der 24-V-Wandler (Mean Well DDR-60L-24) liefert 2,5 A, ein Bandantrieb zieht bis ≈ 1,5 A.
+    // Wartende Winden behalten ihren Befehl und starten, sobald die laufende fertig ist (ihre Zeitüberwachung läuft erst dann).
+    if (activeWinch_ >= 0 && !loop[activeWinch_].moving()) activeWinch_ = -1;
+    for (int i = 0; i < NL && activeWinch_ < 0; i++) if (loop[i].moving()) activeWinch_ = i;
+    for (int i = 0; i < NL; i++) o.winch[i] = (i == activeWinch_) ? loop[i].step(in.loopCurrentA[i], in.loopOpenSwitch[i], dt) : 0.f;
+    if (activeWinch_ >= 0 && !loop[activeWinch_].moving()) activeWinch_ = -1;
     // Anzeige
     o.led = sup.led(s);
     o.ledCount = int(std::round(12.f * exo::clampf((in.safety.batteryV - 30.f) / (41.f - 30.f), 0.f, 1.f)));
@@ -132,6 +137,7 @@ class App {
 
  private:
   float both_ = 0.f, vibe_ = 0.f, stance_[2] = {1.f, 1.f};
+  int activeWinch_ = -1;
   bool levelSent_ = false, comboActive_ = false, comboRelease_ = false;
 
   // Gefilterte Manschettenkraft eines Gelenks (aus dem letzten Takt) ohne Totband-Anteil

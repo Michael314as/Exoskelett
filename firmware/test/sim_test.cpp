@@ -309,6 +309,19 @@ int main() {
     }
   }
 
+  std::printf("14) Schlaufenwinden laufen nacheinander (24-V-Wandler 2,5 A)\n");
+  {
+    App app; Inputs in; Outputs o; const float dt = 0.005f;
+    auto run = [&](float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
+    in.btnLoop[LoopR1] = true; in.btnLoop[LoopL1] = true; run(0.12f); in.btnLoop[LoopR1] = false; in.btnLoop[LoopL1] = false; run(0.5f);
+    int active = 0; for (int i = 0; i < NL; i++) active += o.winch[i] != 0.f;
+    check(active == 1 && o.winch[LoopR1] > 0.f && app.loop[LoopL1].state == LoopState::Closing, "zwei Schlaufen gleichzeitig befohlen: nur eine Winde läuft, die andere wartet");
+    in.loopCurrentA[LoopR1] = 2.5f; run(0.3f); in.loopCurrentA[LoopR1] = 0.f; run(0.5f);
+    check(app.loop[LoopR1].state == LoopState::Closed && o.winch[LoopL1] > 0.f, "erste Schlaufe zu: jetzt läuft die zweite");
+    run(9.f);
+    check(app.loop[LoopL1].state == LoopState::Closing, "Wartezeit zählt nicht zur Zeitüberwachung (12 s ab Start)");
+  }
+
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);
   return fails ? 1 : 0;
 }

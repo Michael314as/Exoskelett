@@ -136,8 +136,9 @@ enum class LoopState : uint8_t { Open, Closing, Closed, Opening, Fault };
 class LoopWinch {
  public:
   float closeCurrentA = 2.2f;  // Zugkraft-Grenze über den Motorstrom
-  float timeout = 8.f;
+  float timeout = 12.f;           // Bandantrieb 5840-31ZY: Schließen ≈ 7,5 s
   LoopState state = LoopState::Open;
+  bool moving() const { return state == LoopState::Closing || state == LoopState::Opening; }
   void command(Press p) {
     if (p == Press::Short && (state == LoopState::Open || state == LoopState::Fault)) { state = LoopState::Closing; t_ = 0.f; }
     if (p == Press::Long && state != LoopState::Open) { state = LoopState::Opening; t_ = 0.f; }
