@@ -33,7 +33,7 @@ body{background:var(--bg);color:var(--fg);font:400 14px/1.4 var(--font-ui)}
 .brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
 .brand b{font:700 16px/1 var(--font-ui);letter-spacing:.02em}
 .brand span{font:500 11px/1 var(--font-mono);color:var(--muted)}
-.grp{display:inline-flex;align-items:center;gap:4px}
+.grp{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px}
 .grp>em{font:500 10px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-style:normal;margin-right:2px}
 button,select,input{font:inherit;color:inherit}
 .btn{border:1px solid var(--line);background:var(--panel-2);color:var(--fg);padding:5px 9px;border-radius:4px;cursor:pointer;font:500 12px/1 var(--font-ui)}
@@ -78,7 +78,8 @@ input[type=range]{width:96px}
 .ib p{margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--fg)}
 .ib h3{margin:0 0 6px;font:600 10.5px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .dock{grid-area:dock;display:flex;flex-direction:column}
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{flex:none}
 .tabs button{border:0;border-right:1px solid var(--line);background:none;padding:7px 12px;font:600 11px/1 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer}
 .tabs button[aria-selected="true"]{color:var(--fg);background:var(--panel-2);box-shadow:inset 0 -2px 0 var(--accent)}
 .pane{flex:1;overflow:auto;padding:10px 12px}
@@ -94,6 +95,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
 .st{display:inline-block;padding:1px 6px;border-radius:3px;font:600 10.5px/1.5 var(--font-mono)}
 .st.ok{background:color-mix(in srgb,var(--ok) 25%,transparent);color:var(--ok)}
 .st.lim{background:color-mix(in srgb,var(--crit) 25%,transparent);color:var(--crit)}
+#bomt th:nth-child(2),#bomt th:nth-child(3),#bomt th:nth-child(4){text-align:left}
 .note{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 0;max-width:90ch}
 @media (max-width:1100px){
   .ide{height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 60vh auto auto auto;grid-template-areas:"top" "view" "dock" "insp" "tree"}
@@ -133,12 +135,13 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
       <button role="tab" data-tab="sim" aria-selected="true">Bewegung</button>
       <button role="tab" data-tab="joints" aria-selected="false">Gelenke</button>
       <button role="tab" data-tab="cg" aria-selected="false">Schwerpunkt</button>
+      <button role="tab" data-tab="bom" aria-selected="false">Stückliste</button>
       <button role="tab" data-tab="disp" aria-selected="false">Darstellung</button>
     </div>
     <div class="pane" data-pane="sim">
       <div class="row">
         <span class="grp" role="group" aria-label="Bewegungsmodus"><em>Ablauf</em>
-          <button class="btn" data-mode="free" aria-pressed="true">Frei</button><button class="btn" data-mode="squat">Kniebeuge</button><button class="btn" data-mode="armlift">Arm heben</button><button class="btn" data-mode="lift">Baum aufrichten</button><button class="btn" data-mode="side">Seitlich</button><button class="btn" data-mode="max">Höchsttempo</button></span>
+          <button class="btn" data-mode="free" aria-pressed="true">Frei</button><button class="btn" data-mode="squat">Kniebeuge</button><button class="btn" data-mode="armlift">Arm heben</button><button class="btn" data-mode="lift">Baum aufrichten</button><button class="btn" data-mode="walk">Gehen</button><button class="btn" data-mode="side">Seitlich</button><button class="btn" data-mode="max">Höchsttempo</button></span>
         <button class="btn" id="play">Pause</button>
         <label class="sl" for="tempo">Wunschtempo <input type="range" id="tempo" min="0.25" max="2.5" step="0.05" value="1"><output id="tempoV">1,00×</output></label>
         <label class="sl" for="slow">Zeitlupe <input type="range" id="slow" min="0.1" max="1" step="0.05" value="1"><output id="slowV">1,00×</output></label>
@@ -159,6 +162,9 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
       <p class="note">ω max aus der Kennlinie des Motors (Leerlauf am Abtrieb bei 36 V, linear fallend mit dem Moment) geteilt durch die Übersetzung des Gelenks. Knie: Übersetzung wächst mit der Kurvenscheibe von 3,3 (gestreckt) auf 5,3 (Hocke). Richtwerte, vor Bestellung mit dem Datenblatt abgleichen.</p>
     </div>
     <div class="pane" data-pane="cg" hidden><div id="cgout"></div></div>
+    <div class="pane" data-pane="bom" hidden>
+      <table class="jt" id="bomt"><thead><tr><th>ID</th><th>Benennung</th><th>Herstellung</th><th>Kaufteil / Halbzeug</th><th>Stück</th><th>je</th><th>gesamt</th></tr></thead><tbody></tbody><tfoot></tfoot></table>
+    </div>
     <div class="pane" data-pane="disp" hidden>
       <div class="row">
         <label class="chk"><input type="checkbox" id="body" checked> Körper</label>
@@ -1285,6 +1291,9 @@ function stopTour() { if (!tour) return; clearTimeout(tour.t); tour = null; $('t
 
 /* ================= Haltung ================= */
 const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0, abd: 0 };
+// Gang: Phase 0 = Fersenaufsatz; Hüft- und Kniewinkel nach typischen Ganglinien (Hüfte −10…+25°, Knie bis 60° im Schwung)
+const gait = { on: false, ph: 0, stance: [true, true] };
+const gaitAng = (k) => { const ph = (gait.ph + k * 0.5) % 1; return { hip: deg(7.5 + 17.5 * Math.cos(2 * Math.PI * (ph - 0.88))), knee: deg(5 + 10 * Math.exp(-(((ph - 0.15) / 0.08) ** 2)) + 55 * Math.exp(-(((ph - 0.72) / 0.1) ** 2))), stance: ph < 0.6 }; };
 const ex = { psi: null, eps: null };                       // Winkel des Exo-Arms (folgt dem Menschen)
 const live = { fUp: 0, fFo: 0, mSh: 0, mEl: 0, fTh: 0, mHip: 0, mKn: 0, q0: null };
 const armAng = () => ({ psi: deg(5) + deg(110) * st.arm, eps: deg(8) + deg(100) * st.elb });
@@ -1295,12 +1304,14 @@ function pose(dt) {
   const mRx = (a) => new THREE.Matrix4().makeRotationX(a), mRy = (a) => new THREE.Matrix4().makeRotationY(a), mRz = (a) => new THREE.Matrix4().makeRotationZ(a);
   const Rto = mRz(-lam), legs = [];
   for (let k = 0; k < 2; k++) {
-    const sd = SIDE[k], Rsw = Rto.clone().multiply(mRx(-sd * ab)), Rth = Rsw.clone().multiply(mRz(th + lam)), Rsh = Rth.clone().multiply(mRz(-(th + phS)));
+    let hk = th + lam, kk = th + phS; if (gait.on) { const a = gaitAng(k); hk = a.hip; kk = a.knee; gait.stance[k] = a.stance; }
+    const sd = SIDE[k], Rsw = Rto.clone().multiply(mRx(-sd * ab)), Rth = Rsw.clone().multiply(mRz(hk)), Rsh = Rth.clone().multiply(mRz(-kk));
     const e = new THREE.Euler().setFromRotationMatrix(Rsh, 'YXZ'), Rbr = Rsh.clone().multiply(mRz(-e.z)), Rft = mRy(e.y);
     const Hp = V(0, 0, sd * HH), Kp = Hp.clone().add(V(0, -D.thigh, 0).applyMatrix4(Rth)), Ap = Kp.clone().add(V(0, -D.shank, 0).applyMatrix4(Rsh));
     legs.push({ sd, Rsw, Rth, Rsh, Rbr, Rft, Hp, Kp, Ap });
   }
-  const off = V(-legs[1].Ap.x, D.ankle - legs[1].Ap.y, 0);
+  const lo = gait.on ? (legs[0].Ap.y < legs[1].Ap.y ? 0 : 1) : 1;
+  const off = gait.on ? V(-(legs[0].Ap.x + legs[1].Ap.x) / 2, D.ankle - legs[lo].Ap.y, 0) : V(-legs[1].Ap.x, D.ankle - legs[1].Ap.y, 0);
   const place = (g, R, at, sd) => { g.quaternion.setFromRotationMatrix(R); g.position.copy(at).add(off).sub(V(0, 0, sd * HH).applyMatrix4(R)); };
   legs.forEach((L, k) => { place(G.swing[k], L.Rsw, L.Hp, L.sd); place(G.thigh[k], L.Rth, L.Hp, L.sd); place(G.shank[k], L.Rsh, L.Kp, L.sd); place(G.brace[k], L.Rbr, L.Ap, L.sd); place(G.foot[k], L.Rft, L.Ap, L.sd); });
   G.torso.position.copy(off); G.torso.rotation.set(0, 0, -lam);
@@ -1465,6 +1476,9 @@ const DB = [
   ['BD-03', 'Anzeige Oberarm', 'Kauf + Druck', 'Waveshare 1,54" E-Paper + ESP32-C3 SuperMini', 'Uhrzeit, Akku, Stufe, Fehler', 0.06, 'AR-01 KB-04'],
   ['BD-04', 'Arbeitslicht', 'Kauf', 'LED-Strahler 10 W, 12 V', 'zwei Stück am Rahmen', 0.12, 'RA-01 KB-04'],
 ];
+// Stückzahl je Seite bzw. gesamt (Teile, die im Modell als ein Körper zusammengefasst sind)
+const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SC-04': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'AN-T': 3, 'BA-04': 2, 'AR-06': 2, 'AR-07': 2, 'BA-11': 2, 'BA-12': 2 };
+const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const PDB = {}; for (const [id, name, typ, ref, data, kg, links] of DB) PDB[id] = { id, name, typ, ref, data, kg, links: links ? links.split(' ') : [], asm: id.split('-')[0] === 'KB' ? 'EL' : id.split('-')[0] };
 // ---------- Jedem Mesh ein Bauteil zuordnen (ID + Seite) ----------
 const GROUPS = new Map([[G.torso, ['torso', -1]]]);
@@ -1476,7 +1490,9 @@ function ctx(m) {
   const [g, k] = o ? GROUPS.get(o) : ['scene', -1];
   const box = new THREE.Box3().setFromObject(m), c = box.getCenter(V()), sz = box.getSize(V());
   const ref = o || G.torso, lp = ref.worldToLocal(c.clone()), tl = G.torso.worldToLocal(c.clone());
-  return { g, k, lp, tl, sz, inSpool, inDrum, inHead, inPulley, big: Math.max(sz.x, sz.y, sz.z) };
+  if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
+  const gsz = m.geometry.boundingBox.getSize(V()).multiply(m.scale);
+  return { g, k, lp, tl, sz, gsz, inSpool, inDrum, inHead, inPulley, big: Math.max(sz.x, sz.y, sz.z) };
 }
 function classify(m, key, c) {
   const b = m.userData.base, is = (...a) => a.includes(b), geo = m.geometry.type, hx = b && b.color ? b.color.getHex() : 0, g = c.g, yw = -D.fore;
@@ -1528,7 +1544,7 @@ function classify(m, key, c) {
       if (is(M.print, M.foam, M.strap)) return 'SE-01'; return 'SE-04';
     case 'shoulder':
       if (c.inPulley) return 'SC-04';
-      if (g === 'torso') { if (is(M.aluDark)) return 'SC-05'; if (is(M.steel, M.red)) return 'SC-03'; return Math.min(c.sz.x, c.sz.y, c.sz.z) < 0.016 ? 'SC-02' : 'SC-01'; }
+      if (g === 'torso') { if (is(M.aluDark)) return 'SC-05'; if (is(M.steel, M.red)) return 'SC-03'; return Math.min(c.gsz.x, c.gsz.y, c.gsz.z) < 0.016 ? 'SC-02' : 'SC-01'; }
       if (g === 'shsw') { if (geo === 'TubeGeometry') return 'SC-07'; if (is(M.aluDark)) return 'SC-05'; if (is(M.steel, M.chrome)) return 'SC-09'; if (c.big < 0.06 && c.lp.x < -0.13) return 'SC-06'; if (c.big < 0.08) return 'SC-09'; return 'SC-08'; }
       if (g === 'upper') return c.big < 0.07 && is(M.alu) && geo !== 'ExtrudeGeometry' ? 'SC-09' : 'SC-10';
       return 'SC-11';
@@ -1607,7 +1623,7 @@ function buildTree() {
     const vis = ids.filter((id) => !q || `${id} ${nameOf(id)} ${PDB[PIDS[id].base].ref}`.toLowerCase().includes(q));
     if (!vis.length) continue;
     n += vis.length;
-    const kg = ids.reduce((s, id) => s + PDB[PIDS[id].base].kg, 0);
+    const kg = ids.reduce((s, id) => s + PDB[PIDS[id].base].kg * multOf(PIDS[id].base, PIDS[id].side), 0);
     const d = document.createElement('div'); d.className = 'asm';
     d.innerHTML = `<div class="asmh"><button class="eye" title="sichtbar / durchsichtig / aus" data-a="${a}" data-s="${asmState[a] || 0}">${'SDA'[asmState[a] || 0]}</button><button class="nm" data-a="${a}">${a} · ${an}</button><span class="mass">${kg.toFixed(1)} kg</span></div><ul></ul>`;
     const ul = d.querySelector('ul');
@@ -1681,6 +1697,7 @@ function wish(t, f) {
   if (mode === 'armlift') return { arm: 0.05 + 0.9 * P(3), elb: 0.3 };
   if (mode === 'lift') return keyframes(((t * f) / 10) % 1, LIFT);
   if (mode === 'side') return { abd: P(4), spread: P(5) };
+  if (mode === 'walk') return { squat: 0, arm: 0.12 + 0.08 * Math.sin(2 * Math.PI * gait.ph), elb: 0.3, abd: 0, spread: 0 };
   if (mode === 'max') { const hi = Math.floor(t * f / 1.6) % 2 === 1; return { squat: hi ? 0.9 : 0.05, arm: hi ? 0.95 : 0.05, elb: hi ? 0.95 : 0.1 }; }
   return null;
 }
@@ -1689,6 +1706,7 @@ let prevQ = null;
 function jointState() {
   const q = st.squat, th = deg(78) * q, phS = deg(30) * q, lam = deg(36) * q;
   const qs = { hip: th + lam, knee: th + phS, sh: deg(5) + deg(110) * st.arm, el: deg(8) + deg(100) * st.elb };
+  if (gait.on) { const a = gaitAng(1); qs.hip = a.hip; qs.knee = a.knee; }
   const log = logs[1].visible && st.loop > 0.9 ? 15 : 0, g = 9.81, carry = 11 + 0.2 * 45 + 0.67 * log;
   const tau = { hip: carry * g * 0.3 * Math.sin(lam) / 2, knee: carry * g * 0.5 * 0.43 * Math.sin(qs.knee) / 2,
     sh: 2.4 * Math.sin(qs.sh) + 0.67 * log * g * (0.33 * Math.sin(qs.sh) + 0.26 * Math.sin(qs.sh + qs.el)), el: 0.9 * Math.sin(qs.sh + qs.el) + 0.67 * log * g * 0.26 * Math.sin(qs.sh + qs.el) };
@@ -1697,6 +1715,13 @@ function jointState() {
 function simStep(dt) {
   const f = Number($('tempo').value), slow = Number($('slow').value), sdt = dt * slow;
   if (playing && mode !== 'free') { simT += sdt; Object.assign(tgt, wish(simT, f) || {}); if (mode === 'lift') { logs[1].visible = st.loop > 0.05 || tgt.loop > 0; logs[0].visible = false; } }
+  gait.on = mode === 'walk'; let gaitLim = false;
+  if (gait.on && playing) {   // Schrittdauer 1,1 s bei Wunschtempo 1; Phase läuft nur so schnell, wie die Motoren folgen können
+    const T = 1.1 / f, a0 = gaitAng(1), ph0 = gait.ph; gait.ph = (gait.ph + 0.002) % 1; const a1 = gaitAng(1); gait.ph = ph0;
+    const wHipNeed = Math.abs(a1.hip - a0.hip) / 0.002 / T, wKneeNeed = Math.abs(a1.knee - a0.knee) / 0.002 / T, js = jointState();
+    const sc = Math.min(1, wMax('hip', js.tau.hip).w / Math.max(1e-6, wHipNeed), wMax('knee', js.tau.knee, a0.knee).w / Math.max(1e-6, wKneeNeed));
+    gaitLim = sc < 0.999; gait.ph = (gait.ph + sdt / T * sc) % 1;
+  }
   const { qs, tau } = jointState();
   const wh = wMax('hip', tau.hip), wk = wMax('knee', tau.knee, qs.knee), ws = wMax('sh', tau.sh), we = wMax('el', tau.el);
   const rate = { squat: Math.min(wh.w / deg(114), wk.w / deg(108)), arm: ws.w / deg(110), elb: we.w / deg(100), abd: 2.5 / deg(45), spread: 2.5 / deg(20), loop: 0.042 / 0.22 };
@@ -1707,7 +1732,7 @@ function simStep(dt) {
   for (const [j, w] of [['hip', wh], ['knee', wk], ['sh', ws], ['el', we]]) {
     const om = prevQ && sdt > 0 ? (now.qs[j] - prevQ[j]) / sdt : 0;
     J[j].q = now.qs[j]; J[j].w = J[j].w === undefined ? om : J[j].w + (om - J[j].w) * 0.3; J[j].wmax = w.w; J[j].tau = now.tau[j]; J[j].i = w.i; J[j].tm = w.tm;
-    J[j].lim = j === 'hip' || j === 'knee' ? lim.squat : j === 'sh' ? lim.arm : lim.elb;
+    J[j].lim = j === 'hip' || j === 'knee' ? lim.squat || gaitLim : j === 'sh' ? lim.arm : lim.elb;
   }
   prevQ = now.qs;
   return lim;
@@ -1718,7 +1743,7 @@ function renderJoints() {
   $('jtb').innerHTML = Object.entries(J).map(([j, v]) => { const pct = Math.min(100, (v.tm || 0) / MOTOR.tauP * 100), rpm = Math.abs(v.w || 0) * v.i * 60 / (2 * Math.PI);
     return `<tr><td>${names[j]}</td><td>${r(v.q || 0)}°</td><td>${r(v.w || 0)}°/s</td><td>${r(v.wmax || 0)}°/s</td><td>${(v.tau || 0).toFixed(1)} Nm</td><td>${(v.tm || 0).toFixed(1)} Nm<span class="bar"><i style="width:${pct.toFixed(0)}%;background:${pct > 80 ? 'var(--crit)' : pct > 34 ? 'var(--warn)' : 'var(--ok)'}"></i></span></td><td>${rpm.toFixed(0)} U/min</td><td><span class="st ${v.lim ? 'lim' : 'ok'}">${v.lim ? 'Motor am Limit' : 'folgt'}</span></td></tr>`; }).join('');
 }
-const NOTES = { free: 'Frei: Die Regler geben deine Wunschhaltung vor; das Exo fährt mit der Geschwindigkeit hin, die seine Motoren bei der aktuellen Last schaffen.',
+const NOTES = { walk: 'Gehen: Beine abwechselnd nach typischen Ganglinien (Schritt 1,1 s bei Tempo 1). Standbein trägt, Schwungbein läuft frei; ist ein Motor zu langsam, verlangsamt sich der Schritt (Gelenke: „Motor am Limit“).', free: 'Frei: Die Regler geben deine Wunschhaltung vor; das Exo fährt mit der Geschwindigkeit hin, die seine Motoren bei der aktuellen Last schaffen.',
   squat: 'Kniebeuge im Wunschtempo. Hüfte und Knie werden von zwei getrennten Antrieben bewegt; begrenzt der langsamere, wartet die Bewegung auf ihn.',
   armlift: 'Arm heben: Schultermotor über das offene Seilpaar (Übersetzung 4,67).', lift: 'Baum aufrichten (Use Case 1): in die Hocke, Schlaufen zu (Bandantrieb 42 mm/s), aufstehen und Arm heben mit 15 kg Stamm, ablegen.',
   side: 'Seitlich: Arme und Beine abspreizen. Diese Achsen sind frei (Federn), die Geschwindigkeit setzt hier der Mensch.', max: 'Höchsttempo: Die Wunschbewegung springt zwischen den Endlagen. Die Tabelle „Gelenke“ zeigt die erreichte Geschwindigkeit und welcher Motor begrenzt.' };
@@ -1738,7 +1763,7 @@ function convex(pts) { pts = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
 function cog() {
   const tot = V(), exo = V(); let m = 0, me = 0;
   for (const [g, p, f] of HUMAN) { const w = g.localToWorld(p.clone()); tot.addScaledVector(w, 75 * f); m += 75 * f; }
-  for (const p of Object.values(PIDS)) { const kg = PDB[p.base].kg; const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
+  for (const p of Object.values(PIDS)) { const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
   let logKg = 0; if (logs[1].visible) { logKg = 15; const c = logs[1].children[0].getWorldPosition(V()); tot.addScaledVector(c, 15); m += 15; }
   tot.multiplyScalar(1 / m); exo.multiplyScalar(1 / me);
   const fp = []; for (let k = 0; k < 2; k++) for (const [x, z] of [[-0.075, -0.055], [0.21, -0.055], [0.21, 0.055], [-0.075, 0.055]]) { const w = G.foot[k].localToWorld(V(x, -D.ankle, SIDE[k] * HH + z)); fp.push(new THREE.Vector2(w.x, w.z)); }
@@ -1748,12 +1773,12 @@ function cog() {
   for (let i = 0; i < h.length; i++) { const a = h[i], b = h[(i + 1) % h.length], e = b.clone().sub(a), n = new THREE.Vector2(e.y, -e.x).normalize(), d = P.clone().sub(a).dot(n); if (d > 0) inside = false; const t = clamp(P.clone().sub(a).dot(e) / e.lengthSq(), 0, 1), q = a.clone().add(e.multiplyScalar(t)); dmin = Math.min(dmin, q.distanceTo(P)); }
   cgDot.position.copy(tot); cgExo.position.copy(exo); cgGround.position.set(tot.x, y, tot.z);
   cgLine.geometry.setFromPoints([tot, V(tot.x, y, tot.z)]); cgLine.computeLineDistances();
-  const ank = G.foot[1].localToWorld(V(0, 0, HH));
+  const ank = G.foot[0].localToWorld(V(0, 0, -HH)).add(G.foot[1].localToWorld(V(0, 0, HH))).multiplyScalar(0.5);
   return { m, me, logKg, tot, exo, inside, margin: inside ? dmin : -dmin, fwd: tot.x - ank.x };
 }
 function renderCg(c) {
   $('cgout').innerHTML = `<dl class="kv"><dt>Gesamtmasse</dt><dd>${c.m.toFixed(1)} kg (Mensch 75 kg, Exo ${c.me.toFixed(1)} kg${c.logKg ? ', Stamm 15 kg' : ''})</dd>
-    <dt>Schwerpunkt gesamt</dt><dd>${(c.tot.y * 100).toFixed(0)} cm hoch, ${(c.fwd * 100).toFixed(1)} cm vor dem Knöchel (gelber Punkt)</dd>
+    <dt>Schwerpunkt gesamt</dt><dd>${(c.tot.y * 100).toFixed(0)} cm hoch, ${(c.fwd * 100).toFixed(1)} cm vor der Knöchelmitte (gelber Punkt)</dd>
     <dt>Schwerpunkt Exo</dt><dd>${(c.exo.y * 100).toFixed(0)} cm hoch (blauer Punkt)</dd>
     <dt>Standsicherheit</dt><dd><span class="st ${c.inside && c.margin > 0.03 ? 'ok' : 'lim'}">${c.inside ? `Lot ${(c.margin * 100).toFixed(1)} cm innerhalb der Standfläche` : `Lot ${(-c.margin * 100).toFixed(1)} cm außerhalb: kippt ohne Ausfallschritt`}</span></dd></dl>
     <p class="note">Standfläche (grüne Linie) = beide Schuhe mit Steigbügel. Massen aus der Bauteilliste und Körpersegmenten nach Winter (75 kg). Das Exo hat keinen Fußmotor: die Balance hältst du selbst über die Füße, das Exo läuft frei mit.</p>`;
@@ -1825,7 +1850,20 @@ document.querySelectorAll('[data-tab]').forEach((t) => t.addEventListener('click
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); labelR.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(stage);
 envMode = 'work'; envReady = true; applyEnv(); setFinishT(true); setBench(false);
-resize(); buildTree(); insp(); setMode('free');
+function buildBom() {
+  const rows = [], tot = {}; let all = 0, n = 0;
+  for (const [a, an] of ASM) {
+    const bases = [...new Set(Object.values(PIDS).filter((p) => PDB[p.base].asm === a).map((p) => p.base))].sort();
+    let sa = 0; const body = [];
+    for (const b of bases) { const ps = Object.values(PIDS).filter((p) => p.base === b), cnt = ps.reduce((s, p) => s + multOf(b, p.side), 0), d = PDB[b], kg = d.kg * cnt; sa += kg; n += cnt;
+      body.push(`<tr data-pid="${ps.find((p) => p.side === 'R')?.id || ps[0].id}" style="cursor:pointer"><td style="color:var(--accent)">${b}</td><td style="text-align:left">${d.name}</td><td style="text-align:left">${d.typ}</td><td style="text-align:left;white-space:normal;max-width:360px">${d.ref.split(';')[0]}</td><td>${cnt}</td><td>${(d.kg * 1000).toFixed(0)} g</td><td>${kg.toFixed(2)} kg</td></tr>`); }
+    all += sa; rows.push(`<tr><td colspan="6" style="text-align:left;color:var(--muted);padding-top:10px">${a} · ${an}</td><td style="color:var(--muted);padding-top:10px">${sa.toFixed(2)} kg</td></tr>`, ...body);
+  }
+  $('bomt').querySelector('tbody').innerHTML = rows.join('');
+  $('bomt').querySelector('tfoot').innerHTML = `<tr><td colspan="4" style="text-align:left;font-weight:600">Exo gesamt (${n} Stück)</td><td></td><td></td><td style="font-weight:600">${all.toFixed(1)} kg</td></tr>`;
+}
+$('bomt').addEventListener('click', (e) => { const r = e.target.closest('[data-pid]'); if (r) select(r.dataset.pid, true); });
+resize(); buildTree(); buildBom(); insp(); setMode('free');
 camera.position.copy(CAMS.iso); controls.target.set(0, 0.95, 0);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let last = performance.now(), slowT = 0, cgInfo = null;
@@ -1840,13 +1878,14 @@ renderer.setAnimationLoop((now) => {
   if ((slowT += dt) > 0.1) {
     slowT = 0; drawDisplay(); renderJoints(); cgInfo = cog(); renderCg(cgInfo);
     for (const id of SL) if (document.activeElement !== $(id)) $(id).value = st[id];
-    const anyLim = Object.values(lim).some(Boolean);
-    $('live').innerHTML = `<b>${mode === 'free' ? 'Frei' : NOTES[mode].split(':')[0]}</b> · t ${simT.toFixed(1)} s · ${anyLim ? '<span style="color:var(--crit)">Motor am Limit</span>' : 'folgt'}<br>Schwerpunkt ${(cgInfo.fwd * 100).toFixed(1)} cm vor Knöchel · ${cgInfo.inside ? 'steht' : 'kippt'}${selPid ? `<br>Auswahl <b>${selPid}</b> ${nameOf(selPid)}` : ''}`;
+    const anyLim = Object.values(lim).some(Boolean) || Object.values(J).some((v) => v.lim);
+    $('live').innerHTML = `<b>${mode === 'free' ? 'Frei' : NOTES[mode].split(':')[0]}</b>${gait.on ? ` · Standbein ${gait.stance[1] ? 'rechts' : 'links'}` : ''} · t ${simT.toFixed(1)} s · ${anyLim ? '<span style="color:var(--crit)">Motor am Limit</span>' : 'folgt'}<br>Schwerpunkt ${(cgInfo.fwd * 100).toFixed(1)} cm vor Knöchel · ${cgInfo.inside ? 'steht' : 'kippt'}${selPid ? `<br>Auswahl <b>${selPid}</b> ${nameOf(selPid)}` : ''}`;
   }
   if (tween) { const k = Math.min(1, (now - tween.t0) / 600), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.q0, tween.q1, e); if (k >= 1) tween = null; }
   controls.update(); renderer.render(scene, camera); labelR.render(scene, camera);
 });
-window.__tech = { st, tgt, PIDS, select, setMode, setCam, J, camera, controls, setView: (v) => { viewMode = v; paint(); } };
+window.__tech = { st, tgt, PIDS, select, setMode, setCam, J, camera, controls, setView: (v) => { viewMode = v; paint(); },
+  audit: () => { const un = {}; for (const [k, arr] of Object.entries(parts)) for (const m of arr) if (m.isMesh && !m.userData.pid) un[k] = (un[k] || 0) + 1; const unused = Object.keys(PDB).filter((id) => !Object.values(PIDS).some((p) => p.base === id)); return { un, unused }; } };
 </script>
 </body>
 </html>
