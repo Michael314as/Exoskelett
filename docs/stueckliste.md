@@ -101,7 +101,8 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 
 | Teil | Menge | Herstellweg | etwa |
 |---|---|---|---|
-| Parkstütze (Alu 20 × 20, Klappgelenk, Kugelsperrbolzen, Gummifüße) | 2 | Säge + Bohren, Kauf | 40 € |
+| Parkstütze, abnehmbar (Alu 20 × 20, Steckaufnahme mit Kugelsperrbolzen, Gummifüße): bleibt am Fahrzeug | 2 | Säge + Bohren, Kauf | 40 € |
+| Schutzbügel CFK-Rundrohr Ø 22 × 1,5, Alu-Eckverbinder geklebt, Gummipuffer | 1 Satz | Kauf + Kleben | 45 € |
 | Magnet-Schnallen | 3 | Kauf | 40 € |
 | Kugelsperrbolzen für Transport | 6 | Kauf | 30 € |
 | Haube über der Box, Abdeckungen | 1 Satz | Druck (Haube in 2 Teilen, je < 18 cm) | 10 € |

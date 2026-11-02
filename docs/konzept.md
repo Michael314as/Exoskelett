@@ -206,15 +206,19 @@ Exo läuft frei mit, warnt aber bei Rückneigung und dämpft die Beine bei einem
 
 ## 8. Gewicht
 
-**Ehrliche Zahl aus der Bauteilliste der technischen Ansicht: etwa 34 kg mit einem Akku** (jedes Teil mit Stückzahl,
+**Ehrliche Zahl aus der Bauteilliste der technischen Ansicht: vorher etwa 34 kg mit einem Akku** (jedes Teil mit Stückzahl,
 Gurte, Kabel, Hauben, Schutzbügel und Parkstütze eingerechnet; der zweite Akku bringt weitere 2 kg). Die früher genannten
 17–20 kg waren ohne Kleinteile, Schutz und Komfortgelenke gerechnet.
 
 Was das für dich heißt: Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden, im Stand tragen es die
 Hüftmotoren mit (Vorsteuerung „Exo-Oberteil“). Spürbar bleibt die **Trägheit** beim Drehen, Bücken und beim ersten Schritt.
-Sparpotenzial, wenn es sich am Körper zu schwer anfühlt: Parkstütze weglassen (−0,7 kg), Schutzbügel aus CFK-Rohr
-(−0,4 kg), Hauben aus dünnerem Druck (−0,2 kg), Box aus Alu-Blech 1,5 mm statt Profil (−0,3 kg), Schienen nach
-der Erprobung abspecken (Festigkeitsrechnung zeigt Reserven an Unterschenkel und Unterarm). Die zwei Hüftmotoren sitzen
+**Umgesetzt (ohne Abstrich an Sicherheit oder Funktion), jetzt 32,5 kg:** Parkstütze abnehmbar, sie bleibt am Fahrzeug
+und wird nur zum Abstellen eingesteckt (−0,7 kg beim Tragen), Schutzbügel aus CFK-Rohr Ø 22 × 1,5 (−0,25 kg), Hauben mit
+1,2 mm Wand und Rippen (−0,15 kg), Boxgehäuse aus 1,5 mm Alu, die Motorplatte trägt (−0,15 kg).
+**Bewusst nicht gespart:** Die tragenden Rohre liegen bei etwa 60 MPa Spitze gegen 125 MPa zulässig, also Sicherheit ≈ 2
+([festigkeit.md](festigkeit.md)). Dünner erst, wenn Messungen am Prototyp kleinere Lasten zeigen. Weitere große Schritte
+gingen nur über weniger Funktion: zweiter Akkuschacht (−0,5 kg), Schutzbügel ganz weg (−0,35 kg), Lendengelenk und
+Gasfedern weg (−0,7 kg), Motoren der Klasse AK60 an den Ellbogen (−0,4 kg, aber weniger Kraft). Die zwei Hüftmotoren sitzen
 nah am Schwerpunkt und schwingen nicht mit.
 
 ## 9. Wetterfestigkeit

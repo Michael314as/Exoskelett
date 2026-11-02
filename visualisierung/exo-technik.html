@@ -1420,10 +1420,10 @@ const DB = [
   ['RA-09', 'Lendengelenk mit Sperre', 'Laser + Kauf', 'Scharnier Alu 8 mm, Elastomerfeder Ø 24 (Shore 70), Bolzen Ø 10, Hubmagnet 24 V mit Sperrbolzen', 'Rumpf beugen ±25° und seitlich ±10°; sperrt automatisch, sobald ein Baum > 5 kg in den Schlaufen hängt (Firmware), von Hand per Hebel', 0.45, 'RA-01 GU-01 GU-02'],
   ['RA-10', 'Gasfeder Lendengelenk', 'Kauf', 'Gasfeder 150 N, Hub 50 mm, Ø 15/6 mm, Kugelpfannen M6 (Katalogteil)', 'zwei Stück; tragen das Exo-Oberteil beim Bücken (≈ 36 Nm um das Lendengelenk)', 0.12, 'RA-09 RA-01'],
   ['RA-11', 'Fingerschutz Seilscheiben', 'Druck', 'Polycarbonat 1,5 mm, durchsichtig, geschraubt', 'über Hüft-, Knie-, Schulter- und Ellbogenscheiben: nichts kann eingezogen werden', 0.05, 'BA-05 BA-09 SC-10 AR-04'],
-  ['RA-04', 'Schutzbügel', 'Halbzeug, gebogen', 'Alu-Rundrohr Ø 22 × 2 (EN AW-6060)', 'Biegeradius ≥ 60 mm; trifft bei Sturz nach hinten zuerst auf', 0.6, 'RA-01 RA-05 RA-07'],
+  ['RA-04', 'Schutzbügel', 'Halbzeug + Kauf', 'CFK-Rundrohr Ø 22 × 1,5 (gewickelt), Alu-Eckverbinder geklebt', 'trifft bei Sturz nach hinten zuerst auf; CFK statt Alu spart 0,25 kg', 0.35, 'RA-01 RA-05 RA-07'],
   ['RA-05', 'Gummipuffer', 'Kauf', 'Gummipuffer Typ A Ø 40 × 30, M8', 'Shore 55', 0.03, 'RA-04'],
-  ['RA-07', 'Parkstütze', 'Halbzeug + Kauf', 'Vierkant 20 × 20 × 2, Kugelsperrbolzen GN 113 Ø 6', 'Endschalter meldet „unten“ an die Steuerung', 0.35, 'RA-04 EL-01'],
-  ['RA-08', 'Hauben', 'Druck', 'PETG matt, Wand 2 mm, Dichtung EPDM', 'Box IP54, Hüftmotor mit Labyrinth', 0.4, 'AN-01 BA-01'],
+  ['RA-07', 'Parkstütze', 'Halbzeug + Kauf', 'Vierkant 20 × 20 × 2, Kugelsperrbolzen GN 113 Ø 6', 'abnehmbar: bleibt am Fahrzeug und wird nur zum Abstellen eingesteckt (beim Tragen nicht mitgerechnet); Endschalter meldet „unten“', 0.35, 'RA-04 EL-01'],
+  ['RA-08', 'Hauben', 'Druck', 'PETG matt, Wand 1,2 mm mit Rippen, Dichtung EPDM', 'Box IP54, Hüftmotor mit Labyrinth', 0.25, 'AN-01 BA-01'],
   ['GU-01', 'Hüftgurt', 'Kauf', 'Hüftflossen eines Trekkingrucksacks (Ersatzteil), 100 mm', 'Magnet-Schnalle Fidlock; trägt kaum, führt das Exo', 0.45, 'RA-01 GU-02'],
   ['GU-02', 'Schultergurte und Polster', 'Kauf / Nähen', 'S-Schultergurte, Abstandsgewirke 10 mm', 'Rückenlänge über Lochleiste RA-03', 0.5, 'GU-01 GU-03 RA-03'],
   ['GU-03', 'Riemen und Schnallen', 'Kauf', 'Gurtband 20/25 mm, Leiterschnallen, Fidlock-Brustgurt', 'Lageverstellriemen, Brustgurt', 0.12, 'GU-02'],
@@ -1443,7 +1443,7 @@ const DB = [
   ['KB-02', 'Kabelbaum Bein', 'Fertigung', '6-adrig geschirmt', 'Oberschenkel-Verstärker, Fußkontakt', 0.1, 'SE-03 SE-06 EL-11'],
   ['KB-03', 'Kabelbaum Arm', 'Fertigung', '12-adrig, Gewebeschlauch', 'Manschetten, Winden, Schlaufen-Wägezellen, Bedienteil', 0.15, 'SG-06 SG-07 SE-07 EL-11'],
   ['KB-04', 'Kabel Licht, Anzeige, Not-Aus', 'Fertigung', 'LiYCY 4 × 0,25 mm²', '', 0.05, 'BD-01 BD-03 BD-04'],
-  ['AN-01', 'Boxgehäuse', 'Laser + Druck', 'Alu 2 mm, PETG-Deckel', 'IP54, Faltenbälge an den Zugdurchführungen', 0.8, 'RA-01 EN-02'],
+  ['AN-01', 'Boxgehäuse', 'Laser + Druck', 'Alu 1,5 mm gekantet (Motorplatte trägt), PETG-Deckel', 'IP54, Faltenbälge an den Zugdurchführungen', 0.65, 'RA-01 EN-02'],
   ['AN-K', 'Kniemotor', 'Kauf', MOT, 'untere Reihe: Züge gehen nach unten', MOTOR.kg, 'AN-T BA-11 EL-10'],
   ['AN-E', 'Ellbogenmotor', 'Kauf', MOT, 'mittlere Reihe', MOTOR.kg, 'AN-T AR-06 EL-10'],
   ['AN-S', 'Schultermotor', 'Kauf', MOT, 'obere Reihe: Seile gehen nach oben', MOTOR.kg, 'AN-T SC-04 SC-11 EL-10'],
@@ -1828,7 +1828,7 @@ function convex(pts) { pts = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
 function cog() {
   const tot = V(), exo = V(); let m = 0, me = 0;
   for (const [g, p, f] of HUMAN) { const w = g.localToWorld(p.clone()); tot.addScaledVector(w, 75 * f); m += 75 * f; }
-  for (const p of Object.values(PIDS)) { if (p.id === 'EN-01-L' && !$('bat2').checked) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
+  for (const p of Object.values(PIDS)) { if (p.id === 'EN-01-L' && !$('bat2').checked) continue; if (p.base === 'RA-07' && !$('stand').checked) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
   let logKg = 0; if (logs[1].visible) { logKg = 15; const c = logs[1].children[0].getWorldPosition(V()); tot.addScaledVector(c, 15); m += 15; }
   tot.multiplyScalar(1 / m); exo.multiplyScalar(1 / me);
   const fp = []; for (let k = 0; k < 2; k++) for (const [x, z] of [[-0.075, -0.055], [0.21, -0.055], [0.21, 0.055], [-0.075, 0.055]]) { const w = G.foot[k].localToWorld(V(x, -D.ankle, SIDE[k] * HH + z)); fp.push(new THREE.Vector2(w.x, w.z)); }
@@ -1894,7 +1894,7 @@ $('dims').addEventListener('change', () => dimObjs.forEach((o) => { o.visible = 
 $('cog').addEventListener('change', () => { for (const o of [cgDot, cgExo, cgLine, hull, cgGround]) o.visible = $('cog').checked; });
 $('body').addEventListener('change', () => bodyParts.forEach((m) => { m.visible = $('body').checked; }));
 $('bench').addEventListener('change', () => setBench($('bench').checked && envMode === 'work'));
-$('stand').addEventListener('change', () => { feat.standOn = $('stand').checked; });
+$('stand').addEventListener('change', () => { feat.standOn = $('stand').checked; paint(); });
 $('light').addEventListener('change', () => setLight($('light').checked));
 $('anod').addEventListener('change', () => setFinishT($('anod').checked));
 $('bat2').addEventListener('change', () => { PIDS['EN-01-L'].meshes.forEach((m) => { m.userData.off = !$('bat2').checked; }); paint(); });
