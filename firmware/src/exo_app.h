@@ -19,8 +19,8 @@ struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 22.1f;                   // Exo-Oberteil: Rahmen, Box, 6 Motoren, Akku, Arme, Gurte (technische Ansicht, Bauteilliste)
-  float exoComUp = 0.22f, exoComBack = 0.08f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m] (Rucksack zieht nach hinten)
+  float exoUpperKg = 22.2f;                   // Exo-Oberteil (Entwurf 5): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
+  float exoComUp = 0.24f, exoComBack = 0.02f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
 
