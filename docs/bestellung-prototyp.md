@@ -9,7 +9,7 @@ Erzeugt aus der Bauteilliste der technischen Ansicht ([exo-technik.html](../visu
 | Stufe | Bestellen | Damit prüfst du |
 |---|---|---|
 | 1 Prüfstand | 1 Motor AK70-10, Teensy 4.1 + CAN-Transceiver, 1 Wägezelle + HX711, 1 Manschette (Druck), Seilscheibe Ellbogen (Laser), Dyneema, 1 Bowdenzug-Paar, Not-Aus, Netzteil 36 V oder Akku-Adapter | Regelgefühl, Reaktionszeit, Rauschen, Wärme (P10–P17, P33 am Holzarm) |
-| 2 Schlaufe | 1 Bandantrieb 5840-31ZY + Treiber, Lochband, Schlaufenkopf, Wägezelle 50 kg | Haltekraft mit 20-kg-Sandsack (P20) — klärt die geschätzten 100 N |
+| 2 Schlaufe | 1 Bandantrieb 5840-31ZY + Treiber, Lochband, Schlaufenkopf, Wägezelle 50 kg | Haltekraft mit 20-kg-Sandsack (P20) — prüft die Schätzung ≈ 150–200 N Schließkraft und > 400 N Haltekraft ([schaetzwerte.md](schaetzwerte.md)) |
 | 3 Rahmen passiv | Halbzeug, Laserteile Rahmen/Hüfte/Beine/Fuß, Lager, Gurte | Passform, Achsen, Lendengelenk (P1–P4, P31, P34) |
 | 4 Beine aktiv | 4 Motoren (Hüfte, Knie), Fußkontakt-Wägezellen, Bowdenzüge | Aufstehen, Gehen (P20b, P21, P23) |
 | 5 Arme aktiv | 4 Motoren (Schulter, Ellbogen), restliche Manschetten, Schlaufen | Bäume (P22, P27, P28) |
