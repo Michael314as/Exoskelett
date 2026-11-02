@@ -123,17 +123,7 @@ laser('zentrierfeder_halter', P(rrect(28, 30, 4)) - circ(M4 / 2, 0, 7) - circ(6.
       'Edelstahl 1.4301', 3, 4, 'Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder')
 
 # ---------- Gelenkkapseln (Entwurf 5) ----------
-# Motorträger-Deckel: liegt auf der Rückseite des Motors (Lochbild des Gehäuses), Taschen zum Erleichtern, Mitte frei für Stecker und Druckausgleich
-def motortraeger(m, R, taschen):
-    p = lochkreis(P(circ(R)) - circ(14), m['lk'], m['n'], m['loch'], dreh=18)
-    for i in range(taschen):
-        a = math.radians(360.0 / taschen * i)
-        p = p - slot(16, 9, (R * 0.55) * math.cos(a), (R * 0.55) * math.sin(a), math.degrees(a) + 90)
-    for x in (-R + 9, R - 9):                                                    # Anschluss an die Wangen
-        p = p - circ(M6 / 2, x, 0)
-    return p
-laser('motortraeger_rs04', motortraeger(RS04, 64.0, 6), 'Alu 6082 T6', 6, 6, 'Motorträger AN-04 für RS04 (Hüfte, Knie, Schulter): 10 × M4 auf Ø 106')
-laser('motortraeger_rs03', motortraeger(RS03, 58.0, 6), 'Alu 6082 T6', 5, 2, 'Motorträger AN-04 für RS03 (Ellbogen): 8 × M4 auf Ø 98')
+# Motorträger: Der gekaufte Stiftkühlkörper ist zugleich der Deckel (Lochbild nach Bohrschablone); die Wangen verbinden ihn mit Schiene bzw. Schwinge
 laser('motortraeger_wange', P(rrect(40, 120, 6)) - circ(M6 / 2, 0, 50) - circ(M6 / 2, 0, -50) - slot(24, M6, 0, 0, 90) - circ(M6 / 2, -10, -30) - circ(M6 / 2, 10, -30),
       'Alu 6082 T6', 8, 12, 'Wangen zwischen Schiene bzw. Schwinge und Motorträger (2 je Kapsel an Knie und Ellbogen, 1 je Kapsel an Hüfte und Schulter); Langloch zum Ausrichten')
 # Abtriebsflansche: Oberschenkel (Hüfte) und Oberarm (Schulter) am Abtrieb des RS04; Stiftlöcher Ø 6 nach dem Motor bohren (Steg)
@@ -310,20 +300,34 @@ def fingerschutz(R, breite, name, n, bogen=200):
 fingerschutz(78, 18, 'kurbelschutz_knie', 2, bogen=200)
 fingerschutz(66, 16, 'kurbelschutz_ellbogen', 2, bogen=200)
 
-def kapselhaube(r_motor, laenge, name, n):
-    """Haube der Gelenkkapsel (AN-02): Topf aus PETG-CF, Wand 2 mm, 5 mm Raum für Dämmung, Nut für O-Ring am offenen Rand,
-    unten Bohrung M16 für die Kabelverschraubung und M12 für das Druckausgleichselement, innen vier Rippen."""
-    ri = r_motor + 5.0 + 1.0; t = 2.0; h = laenge + 12.0
-    m = Manifold.cylinder(h, ri + t, ri + t, 96) - Manifold.cylinder(h, ri, ri, 96).translate((0, 0, t))
-    m = m - (Manifold.cylinder(2.0, ri + 1.2, ri + 1.2, 96) - Manifold.cylinder(2.0, ri - 0.2, ri - 0.2, 96)).translate((0, 0, h - 2.0))   # O-Ring-Nut
-    m = m - Manifold.cylinder(t + 2, 8.1, 8.1, 32).translate((0, -ri * 0.55, -1))                     # M16 Kabelverschraubung
-    m = m - Manifold.cylinder(t + 2, 6.1, 6.1, 32).translate((ri * 0.5, -ri * 0.45, -1))             # M12 Druckausgleich
-    for i in range(4):
-        a = math.radians(45 + 90 * i)
-        m = m + Manifold.cube((6, 2, h - t - 3), True).rotate((0, 0, math.degrees(a))).translate(((ri - 1) * math.cos(a), (ri - 1) * math.sin(a), t + (h - t - 3) / 2))
-    druck(name, m, 'PETG-CF', n, f'Kapselhaube AN-02 für Motor Ø {2 * r_motor:.0f}: O-Ring-Nut, M16 Kabel, M12 Druckausgleich; innen 5 mm Dämmung und Heizfolie einkleben')
-kapselhaube(60.0, 52.0, 'kapselhaube_rs04', 6)
-kapselhaube(49.0, 54.0, 'kapselhaube_rs03', 2)
+def kapselmantel(r_motor, laenge, name, n):
+    """Mantel der Gelenkkapsel (AN-02): offener Ring aus PETG-CF, Wand 2 mm, an beiden Enden eine O-Ring-Nut (gegen Kühlkörper
+    bzw. Motorträger), seitlich M16 für die Kabelverschraubung und M12 für das Druckausgleichselement. Keine Dämmung: Die Wärme
+    soll über den Kühlkörper hinaus."""
+    ri = r_motor + 3.0; t = 2.4; h = laenge + 4.0
+    m = Manifold.cylinder(h, ri + t, ri + t, 96) - Manifold.cylinder(h + 2, ri, ri, 96).translate((0, 0, -1))
+    for z in (0.0, h - 2.0):                                                                          # O-Ring-Nuten an den Stirnseiten
+        m = m - (Manifold.cylinder(2.0, ri + 1.6, ri + 1.6, 96) - Manifold.cylinder(2.0, ri + 0.4, ri + 0.4, 96)).translate((0, 0, z))
+    m = m - Manifold.cylinder(t * 4, 8.1, 8.1, 32).rotate((90, 0, 0)).translate((0, -(ri - t), h / 2))   # M16 Kabel (unten)
+    m = m - Manifold.cylinder(t * 4, 6.1, 6.1, 32).rotate((90, 0, 0)).rotate((0, 0, 40)).translate(((ri - t) * math.sin(math.radians(40)), -(ri - t) * math.cos(math.radians(40)), h / 2))   # M12 Druckausgleich
+    druck(name, m, 'PETG-CF', n, f'Kapselmantel AN-02 für Motor Ø {2 * r_motor:.0f}: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten')
+kapselmantel(60.0, 52.0, 'kapselmantel_rs04', 6)
+kapselmantel(49.0, 54.0, 'kapselmantel_rs03', 2)
+
+def bohrschablone_kuehlkoerper(m, r_kk, name):
+    """Aufsteckschablone für den gekauften Stiftkühlkörper: Lochbild des Motorgehäuses + 2 Löcher für die Wangen, mit Bohrbuchsen."""
+    t = 6.0
+    s0 = Manifold.cylinder(t, r_kk + 3, r_kk + 3, 96) - Manifold.cylinder(t, 12, 12, 48)
+    rand = Manifold.cylinder(8.0, r_kk + 3, r_kk + 3, 96) - Manifold.cylinder(8.0, r_kk + 0.3, r_kk + 0.3, 96)   # Kragen umgreift den Kühlkörper
+    s0 = s0 + rand.translate((0, 0, t))
+    for k in range(m['n']):
+        a = math.radians(18 + 360.0 / m['n'] * k)
+        s0 = s0 - Manifold.cylinder(t + 2, 1.65, 1.65, 24).translate((m['lk'] / 2 * math.cos(a), m['lk'] / 2 * math.sin(a), -1))   # Ø 3,3 vorbohren, dann M4 schneiden
+    for x in (-(r_kk - 9), r_kk - 9):
+        s0 = s0 - Manifold.cylinder(t + 2, 2.5, 2.5, 24).translate((x, 0, -1))                                                     # Ø 5 für M6-Kernloch der Wangen
+    druck(name, s0, 'PETG', 1, f'Bohrschablone für den Stiftkühlkörper (Lochkreis Ø {m["lk"]:.0f}, Motorgehäuse); Pad zwischen Motor und Kühlkörper')
+bohrschablone_kuehlkoerper(RS04, 70.0, 'bohrschablone_kuehlkoerper_rs04')
+bohrschablone_kuehlkoerper(RS03, 60.0, 'bohrschablone_kuehlkoerper_rs03')
 
 def akkuschacht_wand():
     """Seitenwand Akkuschacht EN-02 (Stihl AP 500 S 70 × 116 × 164): Einschub von hinten, Nut für Alu-Führungsschiene 4 × 4."""

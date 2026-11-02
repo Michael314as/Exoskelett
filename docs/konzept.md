@@ -19,10 +19,10 @@ vereisen, sich dehnen und reißen konnten (Zugkräfte bis 2,4 kN, Bowdenzug-Wirk
 | Knie | RS06 in der Box, Bowdenzug-Paar, Kurvenscheibe | **RS04 oben am Oberschenkel, Schubstange 1:1** zum Kniehebel, Federpaket begrenzt das Beugen |
 | Schulter | RS06 in der Box, offenes Seilpaar über 4 Rollen | **RS04 direkt auf der Schulterachse** |
 | Ellbogen | RS06 in der Box, Bowdenzug-Paar | **RS03 oben am Oberarm, Schubstange 1:1** |
-| Wetter | Seile und Rollen können vereisen | Kapsel mit O-Ring, V-Ring, Druckausgleich, Heizfolie 4 W (Firmware schaltet sie) |
+| Wetter | Seile und Rollen können vereisen | Kapsel mit Stiftkühlkörper, O-Ringen, V-Ring, Druckausgleich, Heizband 4 W für Pausen |
 | Rücken | Box mit 6 Motoren | flache Elektronikbox, Schwerpunkt des Oberteils fast über der Hüfte |
-| Gewicht | 31,9 kg | **37,2 kg** (Motoren schwerer, Kapseln) |
-| Material | 3.800–4.400 € | ≈ 4.700–5.600 € |
+| Gewicht | 31,9 kg | **38,7 kg** (Motoren schwerer, Kapseln mit Kühlkörpern) |
+| Material | 3.800–4.400 € | ≈ 4.900–5.900 € |
 
 **Entwurf 4 im Vergleich zu Entwurf 3** (zur Nachverfolgung):
 
@@ -117,10 +117,36 @@ es tragen muss.**
 arbeitet im Bereich ±55° um die Querlage, die Stange kommt nie in eine Strecklage. Größte Stangenkraft ≈ 3,7 kN (Knie, 110 Nm
 bei 60° Hebelstellung); Stahlrohr Ø 12 × 2 knickt erst bei ≈ 16 kN. Die Gelenkköpfe M8 gleichen 8° Schräglauf aus.
 
-**Die Kapsel:** Haube aus PETG-CF (Wand 2 mm) mit O-Ring am Motorträger, V-Ring auf dem drehenden Abtrieb, Druckausgleichs-
-element M12 gegen Kondenswasser beim Abkühlen, 5 mm Dämmung, Heizfolie 4 W. Die Firmware heizt eine Gruppe (Beine oder
-Arme), wenn die kälteste gemessene Wicklung unter +3 °C fällt und die Motoren kaum arbeiten; über +8 °C aus. Unter Last heizt
-der Motor sich selbst. Bei −10 °C sind das im Schnitt ≈ 10–15 W, rund 4 % Akku pro Stunde.
+**Die Kapsel:** außen ein gekaufter Stiftkühlkörper direkt auf dem Motorgehäuse, seitlich ein dünner Mantel aus PETG-CF mit
+zwei O-Ringen, am drehenden Abtrieb ein V-Ring, unten ein Druckausgleichselement M12 gegen Kondenswasser. An der
+Abtriebsseite ein Heizband 4 W für Pausen bei Frost. Das Wärmemanagement steht in Abschnitt 5c.
+
+### 5c. Wärmemanagement
+
+Langes Halten unter Last kostet bei jedem Elektromotor dauernd Strom, und die Wärme wächst mit dem Quadrat des Moments.
+Entscheidend ist deshalb, wie gut die Wärme aus der Kapsel herauskommt.
+
+| Weg | Lösung | Warum |
+|---|---|---|
+| Wicklung → Gehäuse | im Motor (Thermistor, Firmware liest die Temperatur in jedem Takt) | – |
+| Gehäuse → Kühlkörper | Wärmeleitpad 1 mm (6 W/mK), Kühlkörper mit 10 × M4 direkt aufs Gehäuse | kein Kunststoff, keine Dämmung im Wärmeweg |
+| Kühlkörper → Luft | **Fischer ICK S R 140** (Stifte auf 30 mm gekürzt; RS03: Ø 120): 1,85 K/W ruhend, 0,4 K/W bei Luftstrom (ungekürzt) | Stifte statt Rippen: kühlen in jeder Gelenklage gleich; Schnee schmilzt ab und läuft weg |
+| Umgebung | −10 … +5 °C im Winter | kältere Luft = mehr Reserve als im Datenblatt (dort 25 °C) |
+| Pausen bei Frost | Heizband 4 W an der Abtriebsseite (V-Ring, Lager), nicht am Kühlkörper | die Kühlkörperseite soll kühlen, nur die Dichtung muss eisfrei bleiben |
+
+**Ergebnis (Schätzung, Prüfstand P33 misst es):** Dauermoment in der Kapsel ≈ 28 Nm (RS04) bzw. 16 Nm (RS03) statt 25 / 14 Nm
+mit der gedämmten Haube.
+
+| Situation | Moment | volle Kraft für |
+|---|---|---|
+| Baum aufrichten, Schulter | 100 Nm | ≈ 13–15 s, danach wird die Hilfe weich schwächer (nicht aus) |
+| Ellbogen am Anschlag | 56 Nm | ≈ 15 s |
+| Hocke mit Last halten, Knie | ≈ 38 Nm | ≈ 2,5 min |
+| Schleifen, Gehen, Stehen | 2–30 Nm | dauerhaft |
+
+Die Firmware schützt doppelt: ein Wärmemodell (Zeitkonstante 3 min) und die gemessene Wicklungstemperatur ab 100 °C.
+Der Motor selbst schaltet erst bei 135–145 °C ab. Eine Haltesperre ist damit nicht nötig.
+**Heizen in Pausen:** an unter +3 °C, wenn die Gruppe kaum arbeitet, aus über +8 °C; bei −10 °C im Schnitt ≈ 10–15 W.
 
 **Warum nicht wasserdichte Motoren?** Von RobStride gibt es nur das kleine RS02 als IP67 (17 Nm), zu schwach. Die stärkeren
 Modelle haben keine Schutzart. Industriemotoren mit IP65/67 kosten mehrere tausend Euro je Gelenk. Also dichtet die Kapsel
@@ -232,14 +258,14 @@ Exo läuft frei mit, warnt aber bei Rückneigung und dämpft die Beine bei einem
 
 ## 8. Gewicht
 
-**Bauteilliste der technischen Ansicht: 37,2 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
-wiegen 10,3 kg (6 × RS04 je 1,42 kg, 2 × RS03 je 0,88 kg) statt 5,0 kg; Kapselhauben, Dichtungen und Motorträger kommen dazu.
+**Bauteilliste der technischen Ansicht: 38,7 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
+wiegen 10,3 kg (6 × RS04 je 1,42 kg, 2 × RS03 je 0,88 kg) statt 5,0 kg; Kühlkörper (8 × ≈ 0,28 kg), Mäntel, Dichtungen und Wangen kommen dazu.
 Seile, Rollen, Scheiben, Bowdenzüge und die Motorbox fallen weg.
 
 Was das für dich heißt:
-- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **22,2 kg
-  Exo-Oberteil**, dessen Schwerpunkt jetzt fast über der Hüfte liegt (25 cm darüber, 1 cm dahinter): Der Rucksack zieht
-  nicht mehr nach hinten.
+- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **24,4 kg
+  Exo-Oberteil**, dessen Schwerpunkt fast über der Hüfte liegt (36 cm darüber, 3 cm dahinter): Der Rucksack zieht
+  kaum nach hinten.
 - Mehr Masse sitzt an den Gliedern: je Bein 1,4 kg Kniemotor oben am Oberschenkel, je Arm 1,4 kg an der Schulter und
   0,9 kg oben am Oberarm. Beim schnellen Schwingen spürst du das; im Stand gleicht die Steuerung das Eigengewicht aus.
 - **Sparmöglichkeiten:** Kniemotor RS03 statt RS04 (−1,1 kg, aber nur 57 Nm am Knie: reicht für Gehen und leichtes Heben,
@@ -265,7 +291,7 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 | Posten | etwa |
 |---|---|
 | 6 × RobStride RS04 (≈ 295–320 $) + 2 × RS03 (≈ 225–245 $), mit Versand, Einfuhrumsatzsteuer, Zoll | 2 600 bis 2 900 € |
-| Kapseln: Motorträger, Kurbeln, Hebel (Laser), Hauben (Druck), V-Ringe, O-Ringe, Druckausgleich, Heizfolien, Schubstangen, Gelenkköpfe | 300 bis 380 € |
+| Kapseln: 8 Stiftkühlkörper, Wangen, Kurbeln, Hebel (Laser), Mäntel (Druck), Wärmeleitpads, V-Ringe, O-Ringe, Druckausgleich, Heizbänder, Schubstangen, Gelenkköpfe | 520 bis 640 € |
 | 3 Schlaufenantriebe 5840-31ZY + 3 Treiber Pololu G2 | 180 bis 220 € |
 | Steuerung, CAN, 11 Wägezellen + Verstärker, Not-Aus, Relais, Stecker, Kabel, Anzeige, Licht | 400 bis 500 € |
 | Akku-Adapter für Stihl AP (Akku vorhanden) | 20 bis 80 € |
@@ -273,7 +299,7 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 | Lendengelenk, Gasfedern, Hubmagnet, Drehteller, Drehring, Schulterschlitten | 190 bis 220 € |
 | Steigbügel, Fersenbügel, Spikes, Gurtsystem, Manschetten, Polster | 300 bis 380 € |
 | Schutzbügel, Parkstütze, Haube Elektronikbox, Eloxieren, Filament | 230 bis 360 € |
-| **Summe Material** | **etwa 4 700 bis 5 600 €** (dazu Werkzeug einmalig 280 bis 500 €) |
+| **Summe Material** | **etwa 4 900 bis 5 900 €** (dazu Werkzeug einmalig 280 bis 500 €) |
 
 Über einen Einkaufsagenten direkt aus China (RS04 ¥ 1.199, RS03 ¥ 999) wären die Motoren etwa 1.000 € billiger;
 Gewährleistung und Lieferung sind dann schwieriger.

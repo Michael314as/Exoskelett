@@ -19,8 +19,8 @@ struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 22.2f;                   // Exo-Oberteil (Entwurf 5): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
-  float exoComUp = 0.24f, exoComBack = 0.02f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
+  float exoUpperKg = 24.4f;                   // Exo-Oberteil (Entwurf 5): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
+  float exoComUp = 0.36f, exoComBack = 0.03f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
 
@@ -60,16 +60,16 @@ inline JointConfig defaultJoint(JointId id) {
     // Schubstange 1:1 (Parallelogramm). Ellbogen: RS03 oben am Oberarm, Schubstange 1:1. Keine Seile, keine Bowdenzüge.
     case HipL: case HipR:   // stark strecken, schwach beugen; RS04 120 Nm Spitze · 0,97
       c.name = "Hüfte"; c.rCuff = 0.15f; c.tauMin = -110.f; c.tauMax = 35.f; c.qMin = -0.35f; c.qMax = 2.0f;
-      c.gravCoef = 2.0f; c.slew = 600.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 25.f; break;
+      c.gravCoef = 2.0f; c.slew = 600.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 28.f; break;
     case KneeL: case KneeR: // Beugen zusätzlich mechanisch begrenzt: Federpaket in der Schubstange gibt ab ≈ 11 Nm nach
       c.name = "Knie"; c.rCuff = 0.f; c.tauMin = -110.f; c.tauMax = 10.f; c.qMin = 0.05f; c.qMax = 2.0f;
-      c.gravCoef = 0.f; c.frictionComp = 0.2f; c.slew = 600.f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 25.f; break;
+      c.gravCoef = 0.f; c.frictionComp = 0.2f; c.slew = 600.f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 28.f; break;
     case ShL: case ShR:     // RS04 direkt
       c.name = "Schulter"; c.rCuff = 0.17f; c.tauMax = 100.f; c.tauMin = -100.f; c.frictionComp = 0.15f;
-      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 25.f; break;   // Exo-Arm ~2,3 kg mit Ellbogenmotor
+      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 28.f; break;   // Exo-Arm ~2,3 kg mit Ellbogenmotor
     default:                // RS03 über Schubstange, 60 Nm Spitze · 0,95
       c.name = "Ellbogen"; c.rCuff = 0.15f; c.tauMax = 56.f; c.tauMin = -56.f; c.frictionComp = 0.15f;
-      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 14.f; break;
+      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 16.f; break;
   }
   return c;
 }

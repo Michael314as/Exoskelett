@@ -4,7 +4,7 @@ Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnitte
 
 > **3D:** `visualisierung/exo-konstruktion.html` (Konzeptzeichnung) und `visualisierung/exo-technik.html` (technische Ansicht mit Bauteil-IDs, realen Kaufteilen, Bewegung nach Motorkennlinie, Schwerpunkt, Maßen).
 
-> **Stand: Entwurf 5 – Gelenkkapseln.** Die Motoren (RobStride RS04 an Hüfte, Knie, Schulter; RS03 am Ellbogen) sitzen direkt an den Gelenken in dichten, beheizten Kapseln; Knie und Ellbogen werden über starre Schubstangen angetrieben. Keine Seile, Bowdenzüge oder Umlenkrollen mehr, die vereisen oder reißen können. Gewicht laut Bauteilliste 37,2 kg, Material ≈ 4.700–5.600 €. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md).
+> **Stand: Entwurf 5 – Gelenkkapseln.** Die Motoren (RobStride RS04 an Hüfte, Knie, Schulter; RS03 am Ellbogen) sitzen direkt an den Gelenken in dichten, beheizten Kapseln; Knie und Ellbogen werden über starre Schubstangen angetrieben. Keine Seile, Bowdenzüge oder Umlenkrollen mehr, die vereisen oder reißen können. Gewicht laut Bauteilliste 38,7 kg, Material ≈ 4.900–5.900 €. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md).
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt

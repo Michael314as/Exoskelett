@@ -320,7 +320,7 @@ int main() {
     {
       App app; Inputs in; Outputs o; ready(app, in, o);
       in.trunkPitch = 0.f; run(app, in, o, 1.f);
-      const float exp = 0.5f * 22.2f * 9.81f * 0.02f;
+      const float exp = 0.5f * 24.4f * 9.81f * 0.03f;
       std::printf("     aufrecht im Stand: Hüfte %+.1f Nm je Seite (erwartet %+.1f: Rucksack hinter der Hüftachse)\n", o.ff[HipR], exp);
       check(std::fabs(o.ff[HipR] - exp) < 1.f && std::fabs(o.ff[HipL] - exp) < 1.f, "aufrecht: Hüftmotoren halten den Rucksack, der nach hinten kippen will");
       const float up0 = o.ff[HipR];
@@ -364,7 +364,9 @@ int main() {
     in.safety.trunkTiltRate = 0.f;
     App hot; Inputs hi; Outputs ho; hi.btnPower = true; for (float t = 0; t < 0.15f; t += dt) ho = hot.step(hi, dt); hi.btnPower = false; for (float t = 0; t < 6.f; t += dt) ho = hot.step(hi, dt);
     hi.joint[ShR].cuffN = 700.f; hi.joint[ShR].q = 0.8f; for (float t = 0; t < 2.f; t += dt) ho = hot.step(hi, dt); const float t0 = ho.tau[ShR];
-    for (float t = 0; t < 600.f; t += dt) ho = hot.step(hi, dt);
+    float tFull = 0.f; for (float t = 0; t < 600.f; t += dt) { ho = hot.step(hi, dt); if (ho.tau[ShR] >= 0.95f * t0) tFull = t; }
+    std::printf("     Schulter hält %.0f Nm mit voller Kraft für %.0f s (Kühlkörper-Kapsel)\n", t0, tFull);
+    check(tFull >= 12.f, "Kühlkörper-Kapsel: Schulter hält 100 Nm mindestens 12 s mit voller Kraft");
     std::printf("     Schulter Dauerlast: anfangs %.0f Nm, nach 10 min %.0f Nm (Wärme %.2f)\n", t0, ho.tau[ShR], ho.heat[ShR]);
     check(ho.heat[ShR] > 1.f && ho.tau[ShR] < t0 * 0.95f && ho.tau[ShR] >= 0.4f * 100.f - 1.f, "warmer Motor: Moment wird zurückgenommen, nicht abgeschaltet");
     App hot2; Inputs h2; Outputs o2; h2.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o2 = hot2.step(h2, dt); h2.btnPower = false; for (float t = 0; t < 6.f; t += dt) o2 = hot2.step(h2, dt);

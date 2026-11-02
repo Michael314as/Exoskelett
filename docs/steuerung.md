@@ -157,8 +157,8 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 | Funktion | Wie |
 |---|---|
 | Motoren | RobStride RS04 (Hüfte, Knie, Schulter), RS03 (Ellbogen), Übersetzung 1:1 (direkt bzw. Schubstange); Wertebereiche des CAN-Protokolls je Modell |
-| Wärmeschutz | wie 6a, mit dem Dauermoment in der Kapsel (RS04 25 Nm, RS03 14 Nm) statt dem Datenblattwert |
-| Frostschutz | Heizfolien je Gruppe (Pin 42 Beine, Pin 43 Arme): an, wenn die kälteste gemessene Wicklung unter +3 °C fällt und die Gruppe kaum arbeitet; aus über +8 °C |
+| Wärmeschutz | wie 6a, mit dem Dauermoment in der Kühlkörper-Kapsel (RS04 28 Nm, RS03 16 Nm) statt dem Datenblattwert; Schulter hält 100 Nm ≈ 13 s mit voller Kraft, dann weich weniger |
+| Frostschutz | Heizbänder an der Abtriebsseite je Gruppe (Pin 42 Beine, Pin 43 Arme): an, wenn die kälteste gemessene Wicklung unter +3 °C fällt und die Gruppe kaum arbeitet; aus über +8 °C |
 | Knie beugen | Software begrenzt auf 10 Nm, zusätzlich gibt das Federpaket in der Schubstange ab ≈ 11 Nm mechanisch nach |
 
 ## 7. Was schiefgehen kann, und was dagegen hilft

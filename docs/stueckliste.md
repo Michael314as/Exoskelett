@@ -12,7 +12,7 @@ Herstellweg:
 
 Preise sind Richtwerte (Stand November 2026). Motoren nach recherchierten Händlerpreisen, siehe [bestellung-prototyp.md](bestellung-prototyp.md).
 
-**Gesamt Material, ein Exo:** etwa **4.700–5.600 €**, davon Motoren (6 × RobStride RS04, 2 × RS03) 2.600–2.900 €, alles andere ≈ 2.100–2.700 €.
+**Gesamt Material, ein Exo:** etwa **4.900–5.900 €**, davon Motoren (6 × RobStride RS04, 2 × RS03) 2.600–2.900 €, alles andere ≈ 2.100–2.700 €.
 Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand (eine Kapsel) + Schlaufe ≈ 600 €.
 
 ---
@@ -49,12 +49,14 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Robotergelenk-Motor RobStride RS04 (Hüfte, Knie, Schulter) | 6 | 40 Nm Nenn / 120 Nm Spitze, 1,42 kg, Ø 120 × 52; ≈ 295–320 $ (China ¥ 1.199) | Kauf | 1.950–2.200 € |
 | Robotergelenk-Motor RobStride RS03 (Ellbogen) | 2 | 20 Nm Nenn / 60 Nm Spitze, 0,88 kg; ≈ 225–245 $ (China ¥ 999) | Kauf | 500–560 € |
 | (beides inkl. Versand, Einfuhrumsatzsteuer 19 %, Zoll ≈ 2,7 %) | | | | |
-| Motorträger RS04 / RS03 + Wangen | 8 + 12 | Alu 6082, 5–8 mm | Laser | 90 € |
+| Stiftkühlkörper Fischer ICK S R 140 (RS04) / Ø 120 (RS03), Stifte auf 30 mm kürzen, nach Bohrschablone bohren | 6 + 2 | Alu schwarz eloxiert | Kauf + Bohren | 200–260 € |
+| Wärmeleitpads 1 mm, 6 W/mK | 8 | | Kauf | 25 € |
+| Wangen (Motorträger) | 12 | Alu 6082, 8 mm | Laser | 40 € |
 | Abtriebsflansch RS04 (Oberschenkel, Oberarm) | 4 | Alu 8 mm | Laser | 20 € |
-| Kapselhauben | 8 | PETG-CF, Wand 2 mm, O-Ring-Nut | Druck | 25 € |
+| Kapselmäntel | 8 | PETG-CF, Wand 2,4 mm, zwei O-Ring-Nuten | Druck | 15 € |
 | V-Ringe, O-Ringe, Kabelverschraubungen M16 | 8 Satz | NBR, Messing vernickelt | Kauf | 40 € |
 | Druckausgleichselemente M12 | 8 | Membran (z. B. GORE) | Kauf | 50 € |
-| Heizfolien Silikon 12 V 4 W mit NTC, Dämmung 5 mm | 8 | | Kauf | 60 € |
+| Heizbänder Silikon 12 V 4 W (Abtriebsseite) | 8 | | Kauf | 50 € |
 | Kurbeln Knie (r 60) / Ellbogen (r 50), Hebel Knie / Ellbogen | 2 + 2 + 2 + 2 | Alu 6082, 8–10 mm | Laser | 30 € |
 | Schubstangen | 2 + 2 | Stahlrohr Ø 12 × 2 (Knie), Ø 10 × 1,5 (Ellbogen), Gewinde M8 / M6 | Säge + Kleben/Löten | 15 € |
 | Gelenkköpfe Edelstahl, DIN ISO 12240-4 | 4 × M8 + 4 × M6 | wartungsfrei (z. B. SKF SIKAC 8 M / 6 M) | Kauf | 70 € |

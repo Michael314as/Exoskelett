@@ -8,7 +8,7 @@ Erzeugt aus der Bauteilliste der technischen Ansicht ([exo-technik.html](../visu
 
 | Stufe | Bestellen | Damit prüfst du |
 |---|---|---|
-| 1 Prüfstand | 1 × RobStride RS04 + CAN-USB-Adapter, Kapselteile (Motorträger, Haube, V-Ring, Druckausgleich, Heizfolie), Kurbel, Schubstange mit Gelenkköpfen, Kniehebel, Teensy 4.1 + CAN-Transceiver, 1 Wägezelle + HX711, Not-Aus, Bremswiderstand | Kapsel dicht und eisfrei (P35, P36), Regelgefühl, Reaktionszeit, Wärme (P10–P17, P33) |
+| 1 Prüfstand | 1 × RobStride RS04 + CAN-USB-Adapter, Kapselteile (Stiftkühlkörper, Wärmeleitpad, Mantel, V-Ring, O-Ringe, Druckausgleich, Heizband), Kurbel, Schubstange mit Gelenkköpfen, Kniehebel, Teensy 4.1 + CAN-Transceiver, 1 Wägezelle + HX711, Not-Aus, Bremswiderstand | Kapsel dicht und eisfrei (P35, P36), Regelgefühl, Reaktionszeit, Wärme (P10–P17, P33) |
 | 2 Schlaufe | 1 Bandantrieb 5840-31ZY + Treiber, Lochband, Schlaufenkopf, Wägezelle 50 kg | Haltekraft mit 20-kg-Sandsack (P20) |
 | 3 Rahmen passiv | Halbzeug, Laserteile Rahmen/Hüfte/Beine/Fuß, Lager, Gurte | Passform, Achsen, Lendengelenk (P1–P4, P31, P34) |
 | 4 Beine aktiv | 3 weitere RS04 (Hüften, zweites Knie), Fußkontakt-Wägezellen | Aufstehen, Gehen (P20b, P21, P23) |
@@ -23,10 +23,10 @@ Recherchierte Preise mit Quelle, sonst Erfahrungswerte (≈). Verbindlich ist de
 | RobStride RS04 (120 Nm Spitze, CAN) | 1 | ≈ 300–400 € inkl. Versand und Einfuhr | [RS04-Handbuch](https://github.com/RobStride/Product_Information), [Händler](https://www.roboticscenter.ai/store/product/robstride-04) |
 | CAN-USB-Adapter (zum Setzen der Motor-ID) | 1 | ≈ 15 € | Elektronik-Händler |
 | PJRC Teensy 4.1 + CAN-Transceiver SN65HVD230 | 1 | ≈ 47 € | [Geizhals](https://geizhals.at/teensy-4-1-a2738866.html) |
-| Kapselteile: Motorträger + Wangen (Laser), Haube (Druck), V-Ring, O-Ring, Druckausgleich M12, Heizfolie 4 W, Kabelverschraubung | 1 Satz | ≈ 45 € | Laserdienst, Handel |
+| Kapselteile: Stiftkühlkörper Fischer ICK S R 140 × 50, Wärmeleitpad, Wangen (Laser), Mantel (Druck), V-Ring, O-Ringe, Druckausgleich M12, Heizband 4 W, Kabelverschraubung | 1 Satz | ≈ 75 € | [Kühlkörper (DigiKey)](https://www.digikey.de/en/products/detail/fischer-elektronik/ICK-S-R-140-x-50/26281855), Laserdienst, Handel |
 | Kurbel, Kniehebel (Laser), Stahlrohr Ø 12 × 2, 2 Gelenkköpfe M8, Federpaket | 1 Satz | ≈ 45 € | Laserdienst, Handel |
 | Wägezelle 20 kg + HX711, Not-Aus, Lastrelais, Sicherung, Bremswiderstand | 1 Satz | ≈ 75 € | Elektronik-Händler |
-| **Stufe 1 gesamt** | | **≈ 530–630 €** | |
+| **Stufe 1 gesamt** | | **≈ 560–660 €** | |
 | Schneckengetriebemotor 5840-31ZY 24 V, **27 U/min** | 1 | ≈ 18,50 $ | [RobotShop 27 U/min](https://www.robotshop.com/es/products/dyna-engine-high-torque-24v-27rpm-double-axis-worm-gear-motor-5840-31zy) |
 | Motortreiber Pololu G2 18v17 | 1 | ≈ 40 € | [Pololu #2991](https://www.pololu.com/product/2991) |
 | Edelstahl-Lochband 20 × 0,3, Gummi, Schnappschäkel, Wägezelle 50 kg | 1 Satz | ≈ 45 € | Handel |

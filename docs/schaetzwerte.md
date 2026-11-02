@@ -23,8 +23,9 @@ Stämme bis 12 cm. Risiko: Die Werte stammen von Händlern, nicht vom Hersteller
 
 | Größe | Wert | Quelle |
 |---|---|---|
-| RobStride RS04 (Hüfte, Knie, Schulter): Nennmoment | 40 Nm mit Kühlplatte 345 × 345 mm, 35 Nm mit 220 × 200 mm; **in der Kapsel angesetzt 25 Nm** | [RobStride-Handbücher](https://github.com/RobStride/Product_Information) |
-| RobStride RS03 (Ellbogen) | 20 Nm Nenn, 60 Nm Spitze; in der Kapsel 14 Nm | dito |
+| RobStride RS04 (Hüfte, Knie, Schulter): Nennmoment | 40 Nm mit Kühlplatte 345 × 345 mm, 35 Nm mit 220 × 200 mm; **in der Kühlkörper-Kapsel angesetzt 28 Nm** | [RobStride-Handbücher](https://github.com/RobStride/Product_Information) |
+| RobStride RS03 (Ellbogen) | 20 Nm Nenn, 60 Nm Spitze; in der Kühlkörper-Kapsel 16 Nm | dito |
+| Kühlkörper Fischer ICK S R 140 × 50 | 1,85 K/W ruhend, 0,4 K/W mit Luftstrom | [DigiKey](https://www.digikey.de/en/products/detail/fischer-elektronik/ICK-S-R-140-x-50/26281855) |
 | Spitze RS04 | 120 Nm / 90 A Phasenstrom | RS04-Handbuch |
 | Wicklung, Schutz | Isolationsklasse B, Grenze 145 °C, Thermistor; die Temperatur kommt in jeder CAN-Rückmeldung, die Firmware regelt ab 100 °C zurück | RS06-Handbuch |
 
@@ -32,13 +33,13 @@ Was das für die Arbeit heißt (Gelenkmoment = Motormoment, Übersetzung 1:1; W�
 
 | Situation | Motor | Last | Einschätzung |
 |---|---|---|---|
-| Hocke halten, Exo + 20 % Oberkörper | Knie (RS04) | ≈ 38 Nm ≈ 1,5 × Kapsel-Dauermoment | knapp 2 min voll, dann wird die Hilfe weicher; zum Halten besser kurz aufrichten |
+| Hocke halten, Exo + 20 % Oberkörper | Knie (RS04) | ≈ 38 Nm ≈ 1,36 × Kapsel-Dauermoment | ≈ 2,5 min voll, dann wird die Hilfe weicher |
 | aufrecht stehen | Hüfte (RS04) | ≈ 2 Nm | kalt |
-| Baum 15 kg aufrichten, 5 s | Schulter (RS04) | bis 100 Nm ≈ 4 × Dauermoment | kurz ok; das Modell erlaubt etwa 10 s, dann sinkt die Hilfe |
+| Baum 15 kg aufrichten, 5 s | Schulter (RS04) | bis 100 Nm ≈ 3,6 × Dauermoment | ok; volle Kraft ≈ 13–15 s (Firmware-Test: 13 s), dann sinkt die Hilfe weich |
 | Baum 100 m schleifen | Schulter | ≈ 20–30 Nm | dauerhaft |
 
-Das Dauermoment in der Kapsel (25 Nm) ist eine vorsichtige Annahme: Die Kapsel hat weniger Kühlfläche als die Prüfplatte
-des Herstellers. Am Prüfstand messen (P33), dann in der Firmware anpassen (`motorRatedNm` in `firmware/src/exo_app.h`).
+Das Dauermoment in der Kühlkörper-Kapsel (28 Nm) ist eine Schätzung: Stiftkühlkörper Ø 140 mit 1,85 K/W (ruhend) statt der
+Prüfplatte 345 × 345 mm des Herstellers, dafür kalte Winterluft. Am Prüfstand messen (P33), dann in der Firmware anpassen (`motorRatedNm` in `firmware/src/exo_app.h`).
 Kälte hilft: jedes Kelvin weniger Umgebung ist Reserve.
 
 ## 3. Reaktionszeit
@@ -58,7 +59,7 @@ erst zeigt, ob es nötig ist (Kosten ≈ 5 × 8 €, Firmware-Treiber nötig).
 
 | Größe | Wert | Quelle |
 |---|---|---|
-| Exo gesamt | 37,2 kg, davon 22,2 kg Oberteil, ≈ 7,5 kg je Bein (mit Hüft- und Kniekapsel) | Bauteilliste der technischen Ansicht |
+| Exo gesamt | 38,7 kg, davon 24,4 kg Oberteil, ≈ 7,2 kg je Bein (mit Hüft- und Kniekapsel) | Bauteilliste der technischen Ansicht |
 | Gewicht auf dem Körper | im Stand fast null: Exo-Beine und Motoren tragen es in den Boden | Firmware-Vorsteuerung |
 | Mehraufwand beim Gehen, falls nicht getragen | steigt etwa linear mit der Last (Rucksack) | [Legg & Ramsey](https://www.tandfonline.com/doi/abs/10.1080/00140139208967382), [Army LCDA-Modell](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8919998/) |
 | Masse am Bein | kostet pro kg deutlich mehr als am Rücken; ein Knöchel-Exo mit 2,1 kg Beinmasse brauchte gute Unterstützung, um überhaupt zu sparen | [Mooney et al.](https://link.springer.com/article/10.1186/1743-0003-11-80) |

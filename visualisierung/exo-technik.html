@@ -380,7 +380,7 @@ function capsuleMotor(g, x, y, z, sd, geo, tag3) {
   for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; const r = put(g, mesh(rgeo(0.004, 0.004, geo.len * 0.8, 0.001), M.motorDark), x + Math.cos(a) * (geo.r + 0.0015), y + Math.sin(a) * (geo.r + 0.0015), z); r.userData.cap = tag3; }
   const o = put(g, mesh(cyl(geo.r * 0.45, geo.r * 0.45, 0.006, 28), M.steel), x, y, z - sd * (geo.len / 2 + 0.003), Math.PI / 2); o.userData.cap = tag3;   // Abtrieb
   const v = put(g, mesh(new THREE.TorusGeometry(geo.r * 0.48, 0.0025, 6, 28), M.tpu), x, y, z - sd * (geo.len / 2 + 0.004)); v.userData.seal = true;                 // V-Ring
-  const h = put(g, mesh(cyl(geo.r * 0.7, geo.r * 0.7, 0.0015, 28), M.heat), x, y, z + sd * (geo.len / 2 + 0.001), Math.PI / 2); h.userData.heat = true;          // Heizfolie 4 W
+  const h = put(g, mesh(new THREE.TorusGeometry(geo.r * 0.72, 0.003, 6, 36), M.heat), x, y, z - sd * (geo.len / 2 - 0.006)); h.userData.heat = true;                   // Heizband 4 W an der Abtriebsseite: hält V-Ring und Lager in Pausen eisfrei (die Kühlkörperseite soll kühlen)
   const vent = put(g, mesh(cyl(0.006, 0.006, 0.01, 12), M.chip), x - geo.r * 0.6, y - geo.r * 0.6, z + sd * (geo.len / 2 + 0.004), Math.PI / 2); vent.userData.vent = true;   // Druckausgleich
   cur = prev; return m;
 }
@@ -406,8 +406,8 @@ const PART_INFO = [
     care: 'Anziehen: Hüftgurt, Schultergurte, Lageverstellriemen, Brustgurt. Schultergurte nur anliegend, sie tragen fast nichts. Polster abnehmbar und waschbar.' },
   { key: 'drive', name: 'Gelenkkapseln: 8 Motoren an den Gelenken', dist: 0.75,
     what: 'Die Motoren sitzen direkt an den Gelenken, jeder in einer dichten, beheizten Kapsel. Es gibt keine Seile, keine Bowdenzüge und keine Umlenkrollen mehr, die vereisen oder reißen können. Am Rücken bleibt nur eine flache Box mit Steuerung und Wandlern.',
-    how: 'Hüfte und Schulter: RobStride RS04 (120 Nm Spitze) direkt auf der Gelenkachse; das Gehäuse hängt über einen Motorträger an der Schwinge, der Abtrieb ist mit Oberschenkel bzw. Oberarm verschraubt. Knie: RS04 oben am Oberschenkel, Ellbogen: RS03 (60 Nm) oben am Oberarm, beide über Schubstangen (Nummer 6 und 7). Jede Kapsel: Haube aus PETG-CF mit O-Ring, V-Ring am drehenden Abtrieb, Druckausgleichsmembran gegen Kondenswasser, Heizfolie 4 W. Die Firmware heizt nur, wenn die gemessene Wicklungstemperatur unter +3 °C fällt und der Motor kaum arbeitet; unter Last wärmt er sich selbst.',
-    parts: '6 × RobStride RS04, 2 × RobStride RS03, 8 Kapselhauben (Druck PETG-CF), 8 Motorträger (Alu-Laserteile), V-Ringe, O-Ringe, Druckausgleichselemente M12, Heizfolien 12 V 4 W, Kabelverschraubungen.',
+    how: 'Hüfte und Schulter: RobStride RS04 (120 Nm Spitze) direkt auf der Gelenkachse; das Gehäuse hängt über einen Motorträger an der Schwinge, der Abtrieb ist mit Oberschenkel bzw. Oberarm verschraubt. Knie: RS04 oben am Oberschenkel, Ellbogen: RS03 (60 Nm) oben am Oberarm, beide über Schubstangen (Nummer 6 und 7). Jede Kapsel: außen ein Stiftkühlkörper (Fischer ICK S R 140) direkt auf dem Motorgehäuse mit Wärmeleitpad: Die Wärme geht auf kurzem Weg nach draußen, bei Frost ist die Kühlung besser als im Datenblatt. Seitlich ein dünner Mantel aus PETG-CF mit zwei O-Ringen, am drehenden Abtrieb ein V-Ring, ein Druckausgleichselement gegen Kondenswasser. An der Abtriebsseite ein Heizband 4 W: In Pausen bei Frost hält es Dichtung und Lager eisfrei; unter Last heizt der Motor sich selbst. Dauermoment in der Kapsel ≈ 28 Nm (RS04): Die Schulter hält 100 Nm etwa 13–15 s mit voller Kraft, danach wird die Hilfe weich schwächer statt abzuschalten.',
+    parts: '6 × RobStride RS04, 2 × RobStride RS03, 8 Stiftkühlkörper, 8 Kapselmäntel (Druck PETG-CF), Motorträger und Wangen (Alu-Laserteile), Wärmeleitpads, V-Ringe, O-Ringe, Druckausgleichselemente M12, Heizbänder 12 V 4 W, Kabelverschraubungen.',
     care: 'Die Motoren selbst sind nicht wasserdicht (nur das kleine RS02 gibt es als IP67): die Kapsel dichtet. Vor dem Bau eine Kapsel am Prüfstand testen: 10 min Gartenschlauch, eine Nacht im Gefrierschrank, danach muss das Gelenk sofort leicht laufen.' },
   { key: 'power', name: 'Akku und Elektronik', dist: 0.8,
     what: 'Strom, Steuerung und Sicherheit: Stihl AP 500 S, Mikrocontroller, Sensor-Verstärker, Not-Aus.',
@@ -696,7 +696,6 @@ SIDE.forEach((sd, k) => {
     capsules.push({ g, x: 0, y: 0, z: zc, r: RS04G.r + 0.012, len: RS04G.len + 0.018, sd });
     { const prev = cur; cur = 'drive';
       box(g, 0.01, 0.05, Math.abs(zc) + RS04G.len / 2 + 0.006 - 0.185, M.aluDark, -0.072, 0, sd * (0.185 + Math.abs(zc) + RS04G.len / 2 + 0.006) / 2);   // Motorträger: Wange von der Schwinge nach außen
-      put(g, mesh(cyl(0.064, 0.064, 0.006, 40), M.aluDark), 0, 0, sd * (Math.abs(zc) + RS04G.len / 2 + 0.003), Math.PI / 2);                              // Deckelplatte, 10 × M4 auf Ø 106
       box(g, 0.02, 0.03, 0.006, M.aluDark, -0.066, 0, sd * (Math.abs(zc) + RS04G.len / 2 + 0.003));
       cur = prev; }
     if (k === 1) hotspot('rope', g, 0, 0.075, zc + sd * 0.04);
@@ -726,7 +725,6 @@ SIDE.forEach((sd, k) => {
     capsules.push({ g, x: 0, y: Y_KM, z: zKm(sd), r: RS04G.r + 0.012, len: RS04G.len + 0.018, sd });
     { const prev = cur; cur = 'drive';
       for (const x of [-0.074, 0.074]) box(g, 0.01, 0.04, zKm(sd) * sd + RS04G.len / 2 + 0.006 - zRail(Y_KM), M.aluDark, x, Y_KM, sd * (zRail(Y_KM) + zKm(sd) * sd + RS04G.len / 2 + 0.006) / 2);   // Wangen um die Kurbel herum
-      put(g, mesh(cyl(0.064, 0.064, 0.006, 40), M.aluDark), 0, Y_KM, zKm(sd) + sd * (RS04G.len / 2 + 0.003), Math.PI / 2);
       box(g, 0.16, 0.04, 0.006, M.aluDark, 0, Y_KM, zKm(sd) + sd * (RS04G.len / 2 + 0.003));
       cur = prev; }
     cur = 'power'; box(g, 0.012, 0.03, 0.03, M.pcb, 0.02, -0.08, sd * (zRail(-0.08) + 0.024));
@@ -825,7 +823,6 @@ SIDE.forEach((sd, k) => {
       const zo = zc + sd * (RS04G.len / 2 + 0.003);
       tube(g, V(-0.012, yA + 0.088, ZS(sd) - sd * 0.005), V(-0.012, yA + 0.088, zo), 0.025, M.aluDark);                                // Bügel nach außen
       box(g, 0.03, 0.06, 0.006, M.aluDark, -0.012, yA + 0.06, zo);
-      put(g, mesh(cyl(0.064, 0.064, 0.006, 40), M.aluDark), 0, D.torso, zo, Math.PI / 2);
       cur = prev; }
   }
   {
@@ -844,7 +841,6 @@ SIDE.forEach((sd, k) => {
     capsules.push({ g, x: 0, y: Y_EM, z: zEm, r: RS03G.rf + 0.01, len: RS03G.len + 0.016, sd });
     { const prev = cur; cur = 'bowden';
       for (const x of [-0.06, 0.06]) box(g, 0.01, 0.03, RS03G.len / 2 + 0.006 + 0.062 - 0.012, M.aluDark, x, Y_EM, zUp + sd * (0.012 + (RS03G.len / 2 + 0.006 + 0.062 - 0.012) / 2));
-      put(g, mesh(cyl(0.05, 0.05, 0.005, 36), M.aluDark), 0, Y_EM, zEm + sd * (RS03G.len / 2 + 0.003), Math.PI / 2);
       box(g, 0.13, 0.03, 0.005, M.aluDark, 0, Y_EM, zEm + sd * (RS03G.len / 2 + 0.003));
       cur = prev; }
     cur = 'power'; box(g, 0.012, 0.03, 0.025, M.pcb, -0.02, -0.07, zUp + sd * 0.014);
@@ -1120,12 +1116,25 @@ SIDE.forEach((sd, k) => {
   guard(G.thigh[k], 0, Y_KM, zKc(sd), CR_K + 0.018, 0.016);
   guard(G.upper[k], 0, Y_EM, ZS(sd) + sd * 0.062, CR_E + 0.016, 0.014);
 });
-// Kapselhauben (Schalter „Hauben“): PETG-CF mit O-Ring, 5 mm Dämmung innen; der V-Ring dichtet am drehenden Abtrieb
-cur = 'finish';
-const capMat = new THREE.MeshPhysicalMaterial({ color: 0x2A2E33, roughness: 0.38, metalness: 0.1, clearcoat: 0.6, clearcoatRoughness: 0.35 });
+// Wärmemanagement der Gelenkkapseln: Die Wärme geht von der Wicklung über das Gehäuse und ein Wärmeleitpad in einen
+// Stiftkühlkörper auf der Außenseite (Fischer ICK S R 140, Stifte auf 30 mm gekürzt): Stifte kühlen in jeder Gelenklage gleich,
+// Schnee schmilzt darauf ab. Der Mantel aus PETG-CF dichtet nur seitlich (O-Ringe), er isoliert nicht im Wärmeweg.
+const finMat = std(0x23282D, 0.55, 0.6);
+const capMat = new THREE.MeshPhysicalMaterial({ color: 0x3A4048, roughness: 0.5, metalness: 0.05, clearcoat: 0.3, transparent: true, opacity: 0.85 });
 for (const c of capsules) {
-  const h = mesh(new THREE.CylinderGeometry(c.r, c.r, c.len, 44, 1, false), capMat); h.userData.capHood = true; put(c.g, h, c.x, c.y, c.z + c.sd * 0.004, Math.PI / 2);
-  const o = mesh(new THREE.TorusGeometry(c.r - 0.002, 0.002, 6, 40), M.tpu); o.userData.capHood = true; put(c.g, o, c.x, c.y, c.z - c.sd * (c.len / 2 - 0.004));   // O-Ring
+  const mlen = c.len - (c.r > 0.065 ? 0.018 : 0.016), zo = c.z + c.sd * (mlen / 2), rb = c.r > 0.065 ? 0.07 : 0.058;
+  { const prev = cur; cur = 'drive';
+    const base = put(c.g, mesh(cyl(rb, rb, 0.008, 48), finMat), c.x, c.y, zo + c.sd * 0.004, Math.PI / 2); base.userData.fin = true;   // Boden des Kühlkörpers
+    const pins = [];
+    for (let x = -rb; x <= rb; x += 0.0105) for (let y = -rb; y <= rb; y += 0.0105) if (x * x + y * y < (rb - 0.004) ** 2) pins.push([x, y]);
+    const im = new THREE.InstancedMesh(cyl(0.0022, 0.0022, 0.03, 8), finMat, pins.length); im.castShadow = true; im.receiveShadow = true;
+    const mm = new THREE.Matrix4(), qq = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
+    pins.forEach(([x, y], i) => im.setMatrixAt(i, mm.compose(V(c.x + x, c.y + y, zo + c.sd * 0.023), qq, V(1, 1, 1))));
+    im.userData.fin = true; tag(im); c.g.add(im);
+    cur = prev; }
+  cur = 'finish';
+  const h = mesh(new THREE.CylinderGeometry(c.r, c.r, mlen + 0.004, 44, 1, true), capMat); h.userData.capHood = true; put(c.g, h, c.x, c.y, c.z, Math.PI / 2);   // Mantel
+  for (const s2 of [-1, 1]) { const o = mesh(new THREE.TorusGeometry(c.r - 0.002, 0.002, 6, 40), M.tpu); o.userData.capHood = true; put(c.g, o, c.x, c.y, c.z + s2 * c.sd * (mlen / 2)); }   // O-Ringe
 }
 
 /* ================= 14–17 Komfort-Features ================= */
@@ -1358,8 +1367,8 @@ let tween = null, flowOn = false;
 // Kennlinie: ω(τ) = w0 − (w0 − wN) · τ / τN mit τN = Nennmoment laut Datenblatt (geprüft bei 100 U/min @ 48 V → 75 U/min @ 36 V).
 // tauCap: Dauermoment in der Kapsel (wenig Kühlfläche) für die Wärmeschätzung der Firmware.
 const MOTORS = {
-  RS04: { ref: 'RobStride RS04 (Planetengetriebe 9:1, CAN 2.0, zwei 14-Bit-Encoder)', kg: 1.42, tauN: 40, tauCap: 25, tauP: 120, w0: 150 * Math.PI / 30, wN: 75 * Math.PI / 30 },
-  RS03: { ref: 'RobStride RS03 (Planetengetriebe 9:1, CAN 2.0, zwei 14-Bit-Encoder)', kg: 0.88, tauN: 20, tauCap: 14, tauP: 60, w0: 150 * Math.PI / 30, wN: 75 * Math.PI / 30 },
+  RS04: { ref: 'RobStride RS04 (Planetengetriebe 9:1, CAN 2.0, zwei 14-Bit-Encoder)', kg: 1.42, tauN: 40, tauCap: 28, tauP: 120, w0: 150 * Math.PI / 30, wN: 75 * Math.PI / 30 },
+  RS03: { ref: 'RobStride RS03 (Planetengetriebe 9:1, CAN 2.0, zwei 14-Bit-Encoder)', kg: 0.88, tauN: 20, tauCap: 16, tauP: 60, w0: 150 * Math.PI / 30, wN: 75 * Math.PI / 30 },
 };
 const MOTOR = MOTORS.RS04;
 const MOT4 = `${MOTORS.RS04.ref}; Ø 120 × 52 mm; 1,42 kg; Nennmoment 40 Nm (35 Nm mit kleinerer Kühlplatte), Spitze 120 Nm; Leerlauf 200 U/min (48 V) → 150 U/min bei 36 V; Gehäuse 10 × M4 auf Ø 106, Abtrieb 9 × M5 auf Ø 36`;
@@ -1405,9 +1414,10 @@ const DB = [
   ['AN-K', 'Kniekapsel-Motor', 'Kauf', MOT4, 'oben am Oberschenkel; treibt das Knie über Kurbel und Schubstange 1:1', MOTORS.RS04.kg, 'AN-04 AN-02 BA-01 KB-01'],
   ['AN-S', 'Schulterkapsel-Motor', 'Kauf', MOT4, 'direkt auf der Schulterachse; Gehäuse an der Schulterschwinge, Abtrieb an der Oberarmschiene; 100 Nm', MOTORS.RS04.kg, 'AN-04 AN-02 SC-09 KB-03'],
   ['AN-E', 'Ellbogenkapsel-Motor', 'Kauf', MOT3, 'oben am Oberarm; treibt den Ellbogen über Kurbel und Schubstange 1:1; 56 Nm', MOTORS.RS03.kg, 'AN-04 AN-02 AR-04 KB-03'],
-  ['AN-02', 'Kapselhaube', 'Druck', 'PETG-CF, Wand 2 mm, O-Ring, 5 mm Dämmung innen', 'dichtet die Kapsel (Ziel IP65); passt in den A1 mini (Ø 144 mm)', 0.09, 'AN-03 AN-04'],
-  ['AN-03', 'Dichtung und Heizung', 'Kauf', 'V-Ring am Abtrieb, Druckausgleichselement M12, Heizfolie Silikon 12 V 4 W mit NTC, Kabelverschraubung M16', 'kein Eis, kein Kondenswasser; Heizung nur unter +3 °C und in Ruhe (Firmware)', 0.03, 'AN-02 EL-01'],
-  ['AN-04', 'Motorträger', 'Laser', 'EN AW-6082 6 mm: Deckelplatte mit Lochbild des Motors, Wangen um die Kurbel', 'hält das Motorgehäuse am Gelenk, nimmt das Rückmoment auf; Deckelplatte mit Erleichterungstaschen', 0.12, 'AN-H AN-K AN-S AN-E'],
+  ['AN-02', 'Kapselmantel', 'Druck', 'PETG-CF-Ring, Wand 2 mm, zwei O-Ring-Nuten, Bohrungen M16 (Kabel) und M12 (Druckausgleich)', 'dichtet die Kapsel seitlich (Ziel IP65); keine Dämmung im Wärmeweg', 0.05, 'AN-03 AN-05'],
+  ['AN-03', 'Dichtung und Heizung', 'Kauf', 'V-Ring am Abtrieb, Druckausgleichselement M12, Silikon-Heizband 12 V 4 W an der Abtriebsseite, Kabelverschraubung M16', 'kein Eis, kein Kondenswasser; Heizung nur unter +3 °C und in Ruhe (Firmware)', 0.03, 'AN-02 EL-01'],
+  ['AN-05', 'Stiftkühlkörper', 'Kauf + Bohren', 'Fischer Elektronik ICK S R 140 × 50 (Ø 140, Alu schwarz eloxiert), Stifte auf 30 mm gekürzt; RS03: Ø 120; Wärmeleitpad 1 mm, 6 W/mK', 'Wärmeweg Wicklung → Gehäuse → Pad → Kühlkörper → Luft; 1,85 K/W ruhend, 0,4 K/W bei Luftstrom (Händlerangabe, ungekürzt)', 0.28, 'AN-H AN-K AN-S AN-E AN-04'],
+  ['AN-04', 'Motorträger', 'Laser', 'EN AW-6082 8 mm: Wangen zwischen Schiene bzw. Schwinge und Kühlkörper', 'hält das Motorgehäuse über den Kühlkörper am Gelenk, nimmt das Rückmoment auf', 0.07, 'AN-H AN-K AN-S AN-E'],
   ['HU-01', 'Abspreizgabel', 'Laser', 'EN AW-6082 8 mm, verschraubt', 'Achse nach vorne durch das Hüftgelenk', 0.25, 'RA-01 HU-02 HU-04'],
   ['HU-02', 'Achsbolzen', 'Kauf', 'Passschraube Ø 16 + Kugelsperrbolzen GN 113.3-16', 'roter Ring: Bein abnehmen', 0.1, 'HU-01 HU-04'],
   ['HU-03', 'Zentrierfeder', 'Kauf', 'Druckfeder DIN EN 13906, Draht 1,1 mm, außen 13 mm, Länge 25 mm, Edelstahl (Katalogteil)', 'R ≈ 6 N/mm, hält das Bein mittig', 0.01, 'HU-01 HU-04'],
@@ -1469,7 +1479,7 @@ const DB = [
   ['BD-04', 'Arbeitslicht', 'Kauf', 'LED-Strahler 10 W, 12 V', 'zwei Stück am Rahmen', 0.12, 'RA-01 KB-04'],
 ];
 // Stückzahl je Seite bzw. gesamt (Teile, die im Modell als ein Körper zusammengefasst sind)
-const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-02': 4, 'AN-03': 4, 'AN-04': 4, 'RA-11': 2 };
+const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-02': 4, 'AN-03': 4, 'AN-04': 4, 'AN-05': 4, 'RA-11': 2 };
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const SRC = {
   'EL-01': ['PJRC Teensy 4.1 (Maße)', 'https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4'], 'EL-02': ['Mean Well DDR-60L-24 / Pololu D36V28F5', 'https://www.pololu.com/product/3782'], 'SE-06': ['50-kg-Halbbrücken-Wägezelle', 'https://www.sparkfun.com/products/10245'],
@@ -1481,13 +1491,13 @@ const SRC = {
 // ---------- Reale Kaufteile: Hersteller, Typ, Kenndaten, Quellen (Recherche Nov. 2026; Händlerangaben sind als solche markiert) ----------
 const RSL = [['RobStride-Handbücher, Maßzeichnungen, STEP (GitHub)', 'https://github.com/RobStride/Product_Information']];
 const AK = { mfr: 'RobStride Dynamics (Peking)', typ: 'RS04 (Robotergelenk mit Planetengetriebe 9:1, FOC-Treiber und zwei 14-Bit-Encodern integriert)',
-  dat: [['Nennmoment', '40 Nm (Kühlplatte 345 × 345 mm), 35 Nm (220 × 200 mm); in der Kapsel für die Wärmeschätzung 25 Nm angesetzt'], ['Spitzenmoment', '120 Nm (90 A Phasenstrom)'], ['Drehmomentkonstante', '2,1 Nm/A (Abtrieb)'],
+  dat: [['Nennmoment', '40 Nm (Kühlplatte 345 × 345 mm), 35 Nm (220 × 200 mm); in der Kühlkörper-Kapsel bei Frost 28 Nm angesetzt'], ['Spitzenmoment', '120 Nm (90 A Phasenstrom)'], ['Drehmomentkonstante', '2,1 Nm/A (Abtrieb)'],
     ['Spannung', '48 V Nenn, 24–60 V (hier 36 V Stihl-Akku)'], ['Drehzahl', 'Leerlauf 200 U/min ± 10 % bei 48 V → 150 U/min bei 36 V (15,7 rad/s); Gehen braucht an der Hüfte 3,5 rad/s'],
     ['Bus', 'CAN 2.0, 1 Mbit/s, 29-Bit-ID; Typ 1 Moment ±120 Nm, Geschwindigkeit ±15 rad/s; Rückmeldung Typ 2 mit Temperatur'], ['Maße', 'Ø 120 × 52 mm; Gehäuse 10 × M4 auf Ø 106; Abtrieb 9 × M5 auf Ø 36, 3 Stifte Ø 6'], ['Masse', '1,42 kg'],
     ['Schutzart', 'keine (Händler nennen IP52): Abdichtung übernimmt die Kapsel'], ['Preis', '¥ 1.199 in China (≈ 150 €), international ≈ 295–320 $ (Händler)']],
   src: [...RSL, ['Händler (Preis)', 'https://www.roboticscenter.ai/store/product/robstride-04']] };
 const AK3 = { mfr: 'RobStride Dynamics (Peking)', typ: 'RS03 (Robotergelenk mit Planetengetriebe 9:1, FOC-Treiber und zwei 14-Bit-Encodern integriert)',
-  dat: [['Nennmoment', '20 Nm (Kühlplatte 215 × 220 mm); in der Kapsel 14 Nm angesetzt'], ['Spitzenmoment', '60 Nm (43 A Phasenstrom)'], ['Drehmomentkonstante', '2,36 Nm/A'], ['Drehzahl', 'Leerlauf 200 U/min bei 48 V → 150 U/min bei 36 V'],
+  dat: [['Nennmoment', '20 Nm (Kühlplatte 215 × 220 mm); in der Kühlkörper-Kapsel 16 Nm angesetzt'], ['Spitzenmoment', '60 Nm (43 A Phasenstrom)'], ['Drehmomentkonstante', '2,36 Nm/A'], ['Drehzahl', 'Leerlauf 200 U/min bei 48 V → 150 U/min bei 36 V'],
     ['Bus', 'CAN 2.0, 1 Mbit/s; Typ 1 Moment ±60 Nm, Geschwindigkeit ±20 rad/s'], ['Maße', 'Flansch Ø 98, Körper Ø 80 × 54 mm; Gehäuse 8 × M4 auf Ø 98; Abtrieb 6 × M4 auf Ø 30,4'], ['Masse', '0,88 kg'], ['Preis', '¥ 999 in China (≈ 125 €), international ≈ 225–245 $']],
   src: [...RSL, ['Händler (Preis)', 'https://aifitlab.com/products/robstride-03-motor']] };
 const LIROS = { mfr: 'LIROS', typ: 'D-Pro 3 mm (Dyneema SK78, Kern-Mantel)', dat: [['Bruchlast', '950 daN'], ['Dehnung', 'sehr gering (Dyneema), kriecht unter Dauerlast: Vorspannung nachstellen (Wartung)'], ['Spitzenlast hier', '≈ 1,7 kN (Schulter) → Sicherheit ≈ 5']], src: [['AWN (Daten)', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m']] };
@@ -1495,6 +1505,7 @@ const KEB = { mfr: 'Jagwire', typ: 'Pro Compressionless Brake Housing 5 mm, KEB-
 const KFL = (b, d, l, h, m, kg, url) => ({ mfr: 'AMI / FYH / NIS (Normbauform)', typ: `KFL${b} Flanschlager, 2-Loch, Zinkdruckguss, Rillenkugellager mit Madenschraube, 2RS`, dat: [['Bohrung', `${d} mm`], ['Lochabstand', `${l} mm (Lochplatten in fertigung/ angepasst)`], ['Länge', `${h} mm`], ['Schrauben', m], ['Masse', kg]], src: [['Händlerdaten', url]] });
 const REAL = {
   'AN-H': AK, 'AN-K': AK, 'AN-S': AK, 'AN-E': AK3,
+  'AN-05': { mfr: 'Fischer Elektronik', typ: 'ICK S R 140 × 50: runder Stiftkühlkörper für LED-Module, Aluminium schwarz eloxiert', dat: [['Maße', 'Ø 140 mm, Stifthöhe 40 mm (für die Kapsel auf 30 mm gekürzt)'], ['Wärmewiderstand', '1,85 K/W ruhende Luft, 0,4 K/W mit Luftstrom (ungekürzt, Händlerangabe)'], ['Leistung', '32 W bei 60 K Übertemperatur, ruhende Luft'], ['Warum Stifte', 'kühlen in jeder Gelenklage gleich gut; Schnee schmilzt ab und läuft weg']], src: [['DigiKey (Daten)', 'https://www.digikey.de/en/products/detail/fischer-elektronik/ICK-S-R-140-x-50/26281855']] },
   'AN-03': { mfr: 'Normteile (z. B. SKF/Freudenberg, GORE, Thermo-Folien)', typ: 'V-Ring VA (Wellendichtung gegen Wasser und Schmutz), Druckausgleichselement M12, Silikon-Heizfolie 12 V 4 W mit NTC', dat: [['Schutzziel', 'IP65 (Schnee, Regen, Spritzwasser)'], ['Heizung', 'an unter +3 °C in Ruhe, aus über +8 °C (Firmware); im Schnitt ≈ 10–15 W fürs ganze Exo bei −10 °C'], ['Prüfung', '10 min Gartenschlauch, eine Nacht im Gefrierschrank, danach muss das Gelenk leicht laufen']], src: [['Abgedichtete Gelenke bei Humanoiden', 'https://humanoid.guide/?p=18933']] },
   'EN-01': { mfr: 'STIHL', typ: 'AP 500 S (AP-System, 36 V Li-Ion)', dat: [['Energie', '337 Wh'], ['Spannung', '36 V'], ['Schutz', 'IPX4'], ['Maße', '70 × 116 × 164 mm'], ['Masse', '≈ 2,0 kg']], src: [['STIHL Produktseite', 'https://stihl.com.fj/en/p/batteries-chargers-ap-500-s-battery-124181']] },
   'EL-01': { mfr: 'PJRC / Texas Instruments', typ: 'Teensy 4.1 + CAN-Transceiver SN65HVD230', dat: [['Prozessor', 'i.MX RT1062, Cortex-M7 600 MHz'], ['CAN', '3 Controller (einer CAN FD), Transceiver 3,3 V bis 1 Mbit/s'], ['Maße', '61 × 18 mm'], ['Preis', '≈ 40–42 €']], src: [['PJRC Teensy 4.1', 'https://www.pjrc.com/store/teensy41.html'], ['TI SN65HVD230', 'https://www.ti.com/product/SN65HVD230'], ['Preisvergleich', 'https://geizhals.at/teensy-4-1-a2738866.html']] },
@@ -1545,7 +1556,7 @@ function classify(m, key, c) {
   switch (key) {
     case 'frame': if (m.userData.gas) return 'RA-10'; if (m.userData.lock) return 'RA-09'; if (Math.abs(c.tl.y - 0.17) < 0.03 && !is(M.alu) && c.tl.x > -0.2) return 'RA-09'; if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
     case 'straps': if (is(M.chip, M.chrome)) return 'GU-03'; if (c.tl.y < 0.17) return 'GU-01'; return hx === 0x3A4148 ? 'GU-02' : 'GU-03';
-    case 'drive': if (m.userData.cap) return { hip: 'AN-H', knee: 'AN-K', sh: 'AN-S', el: 'AN-E' }[m.userData.cap]; if (m.userData.seal || m.userData.heat || m.userData.vent) return 'AN-03'; if (is(M.aluDark)) return 'AN-04'; return 'AN-01';
+    case 'drive': if (m.userData.cap) return { hip: 'AN-H', knee: 'AN-K', sh: 'AN-S', el: 'AN-E' }[m.userData.cap]; if (m.userData.fin) return 'AN-05'; if (m.userData.seal || m.userData.heat || m.userData.vent) return 'AN-03'; if (is(M.aluDark)) return 'AN-04'; return 'AN-01';
     case 'power':
       if (is(M.stihl, M.stihlGrey)) return 'EN-01';
       if (c.tl.x > 0.05) return is(M.chip) ? 'BD-02' : 'BD-01';
@@ -1832,7 +1843,9 @@ function convex(pts) { pts = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
 function cog() {
   const tot = V(), exo = V(); let m = 0, me = 0;
   for (const [g, p, f] of HUMAN) { const w = g.localToWorld(p.clone()); tot.addScaledVector(w, 75 * f); m += 75 * f; }
-  for (const p of Object.values(PIDS)) { if (!worn(p)) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
+  // Masse eines Teils gleichmäßig auf seine Körper verteilen (z. B. 4 Kühlkörper je Seite an Hüfte, Knie, Schulter, Ellbogen)
+  const pieces = (p) => { const kg = PDB[p.base].kg * multOf(p.base, p.side), ms = p.meshes.filter((x) => x.isMesh); return ms.length ? ms.map((x) => [x, kg / ms.length]) : [[p.rep, kg]]; };
+  for (const p of Object.values(PIDS)) { if (!worn(p)) continue; for (const [x, kg] of pieces(p)) { const c = new THREE.Box3().setFromObject(x).getCenter(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; } }
   let logKg = 0; if (logs[1].visible) { logKg = 15; const c = logs[1].children[0].getWorldPosition(V()); tot.addScaledVector(c, 15); m += 15; }
   tot.multiplyScalar(1 / m); exo.multiplyScalar(1 / me);
   const fp = []; for (let k = 0; k < 2; k++) for (const [x, z] of [[-0.075, -0.055], [0.21, -0.055], [0.21, 0.055], [-0.075, 0.055]]) { const w = G.foot[k].localToWorld(V(x, -D.ankle, SIDE[k] * HH + z)); fp.push(new THREE.Vector2(w.x, w.z)); }
@@ -1847,7 +1860,7 @@ function cog() {
   const legGroups = new Set([...G.swing, ...G.thigh, ...G.shank, ...G.brace, ...G.foot]);
   const onLeg = (o) => { for (let q = o; q; q = q.parent) if (legGroups.has(q)) return true; return false; };
   const up = V(); let mu = 0;
-  for (const p of Object.values(PIDS)) { if (!worn(p) || onLeg(p.rep)) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); up.addScaledVector(G.torso.worldToLocal(p.rep.getWorldPosition(V())), kg); mu += kg; }
+  for (const p of Object.values(PIDS)) { if (!worn(p)) continue; for (const [x, kg] of pieces(p)) { if (onLeg(x)) continue; up.addScaledVector(G.torso.worldToLocal(new THREE.Box3().setFromObject(x).getCenter(V())), kg); mu += kg; } }
   up.multiplyScalar(1 / mu);
   return { m, me, logKg, tot, exo, inside, margin: inside ? dmin : -dmin, fwd: tot.x - ank.x, mu, up };
 }

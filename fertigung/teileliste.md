@@ -15,8 +15,6 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `laser/abspreizgabel_wange.dxf` | Alu 6082 T6 | 8 mm | 4 | 60 × 100 | 4 | 14.7 mm | Abspreizgabel HU-01: 2 Wangen je Seite; Ø 16,2 für Passschraube/Kugelsperrbolzen, M6 zum Rahmen, M5 Federhalter |
 | `laser/abspreizgabel_steg.dxf` | Alu 6082 T6 | 6 mm | 2 | 82 × 60 | 5 | 9.2 mm | Steg zwischen den Gabelwangen (oben), Langloch für den Zentrierfeder-Halter |
 | `laser/zentrierfeder_halter.dxf` | Edelstahl 1.4301 | 3 mm | 4 | 28 × 30 | 2 | 7.6 mm | Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder |
-| `laser/motortraeger_rs04.dxf` | Alu 6082 T6 | 6 mm | 6 | 128 × 128 | 19 | 5.7 mm | Motorträger AN-04 für RS04 (Hüfte, Knie, Schulter): 10 × M4 auf Ø 106 |
-| `laser/motortraeger_rs03.dxf` | Alu 6082 T6 | 5 mm | 2 | 116 × 116 | 17 | 5.7 mm | Motorträger AN-04 für RS03 (Ellbogen): 8 × M4 auf Ø 98 |
 | `laser/motortraeger_wange.dxf` | Alu 6082 T6 | 8 mm | 12 | 40 × 120 | 5 | 13.4 mm | Wangen zwischen Schiene bzw. Schwinge und Motorträger (2 je Kapsel an Knie und Ellbogen, 1 je Kapsel an Hüfte und Schulter); Langloch zum Ausrichten |
 | `laser/abtriebsflansch_rs04.dxf` | Alu 6082 T6 | 8 mm | 4 | 90 × 90 | 14 | 6.2 mm | Flansch Abtrieb RS04 → Oberschenkelplatte (Hüfte) bzw. Oberarmschiene (Schulter); 9 × M5 auf Ø 36 |
 | `laser/kurbel_knie.dxf` | Alu 6082 T6 | 10 mm | 2 | 99 × 54 | 11 | 6.2 mm | Kurbel BA-01: auf dem Abtrieb des Kniemotors (9 × M5), Zapfen M8 bei 60 mm |
@@ -54,8 +52,10 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `druck/haube_rechts.stl` | PETG | 1 | 155 × 150 × 50 | 112 | ja | 9 | Haube Elektronikbox, rechte Hälfte |
 | `druck/kurbelschutz_knie.stl` | PETG transparent | 2 | 101 × 198 × 18 | 27 | diagonal | 2 | Fingerschutz RA-11 über Scheibe Ø 156: nichts kann zwischen Seil und Scheibe geraten |
 | `druck/kurbelschutz_ellbogen.stl` | PETG transparent | 2 | 87 × 174 × 16 | 21 | ja | 2 | Fingerschutz RA-11 über Scheibe Ø 132: nichts kann zwischen Seil und Scheibe geraten |
-| `druck/kapselhaube_rs04.stl` | PETG-CF | 6 | 136 × 136 × 64 | 81 | ja | 2 | Kapselhaube AN-02 für Motor Ø 120: O-Ring-Nut, M16 Kabel, M12 Druckausgleich; innen 5 mm Dämmung und Heizfolie einkleben |
-| `druck/kapselhaube_rs03.stl` | PETG-CF | 2 | 114 × 114 × 66 | 66 | ja | 2 | Kapselhaube AN-02 für Motor Ø 98: O-Ring-Nut, M16 Kabel, M12 Druckausgleich; innen 5 mm Dämmung und Heizfolie einkleben |
+| `druck/kapselmantel_rs04.stl` | PETG-CF | 6 | 131 × 131 × 56 | 51 | ja | 3 | Kapselmantel AN-02 für Motor Ø 120: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
+| `druck/kapselmantel_rs03.stl` | PETG-CF | 2 | 109 × 109 × 58 | 44 | ja | 3 | Kapselmantel AN-02 für Motor Ø 98: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
+| `druck/bohrschablone_kuehlkoerper_rs04.stl` | PETG | 1 | 146 × 146 × 14 | 107 | ja | 13 | Bohrschablone für den Stiftkühlkörper (Lochkreis Ø 106, Motorgehäuse); Pad zwischen Motor und Kühlkörper |
+| `druck/bohrschablone_kuehlkoerper_rs03.stl` | PETG | 1 | 126 × 126 × 14 | 80 | ja | 11 | Bohrschablone für den Stiftkühlkörper (Lochkreis Ø 98, Motorgehäuse); Pad zwischen Motor und Kühlkörper |
 | `druck/akkuschacht_wand.stl` | PETG-CF | 4 | 116 × 176 × 10 | 87 | ja | 7 | Akkuschacht EN-02: Innen- und Außenwand je Seite (zweiter Schacht nur bei Bedarf bestücken) |
 | `druck/akkuschacht_stirn.stl` | PETG-CF | 2 | 76 × 176 × 6 | 74 | ja | 7 | Stirnwand Akkuschacht mit Fenster für den Kontaktträger |
 | `druck/fersenschale.stl` | PETG | 2 | 50 × 118 × 50 | 31 | ja | 4 | Fersenschale BE-13 am Steigbügel, Schlitze für den Ratschenriemen |
