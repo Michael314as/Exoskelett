@@ -97,7 +97,7 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
   <header>
     <p class="kicker">Exoskelett · Konzeptzeichnung, Entwurf 4 · technische Ansicht: exo-technik.html</p>
     <h1>So ist das Exo aufgebaut</h1>
-    <p class="lede">Hüfte und Knie haben eigene Antriebe und helfen in beide Richtungen: Ein Hüftmotor sitzt auf der Hüftschwinge, Knie, Schultern und Ellbogen werden über Seile von hinten bewegt. Die Beine lassen sich seitlich abspreizen, der Fuß kippt mit. Blaue Sensor-Manschetten sagen dem Exo, wohin du willst; Fußsensoren und Wägezellen in den Schlaufen sagen ihm, was es tragen muss. Gurte wie bei einem guten Rucksack, Anzeige am rechten Oberarm. Nummer antippen, „Rundgang“ starten oder mit den Reglern bewegen.</p>
+    <p class="lede">Hüfte und Knie haben eigene Antriebe und helfen in beide Richtungen: Ein Hüftmotor sitzt auf der Hüftschwinge, Knie, Schultern und Ellbogen werden über Seile von hinten bewegt. Die Beine lassen sich seitlich abspreizen, der Fuß kippt mit. Blaue Sensor-Manschetten sagen dem Exo, wohin du willst; Fußsensoren und Wägezellen in den Schlaufen sagen ihm, was es tragen muss. Ein Lendengelenk mit Gasfedern lässt dich bücken und sperrt, sobald ein Baum hängt. Gurte wie bei einem guten Rucksack, Anzeige am rechten Oberarm. Nummer antippen, „Rundgang“ starten oder mit den Reglern bewegen.</p>
   </header>
   <main class="work">
     <div class="left">
@@ -356,6 +356,11 @@ const PART_INFO = [
     how: 'Zwei senkrechte Alu-Vierkantrohre 30 × 30 × 2 mm und drei Querrohre, an den Ecken Doppelplatten mit Schrauben. Unten sitzt an jedem Rohr die Gabel des Abspreizgelenks, oben die Schulterbügel (30 × 30 × 3). Hinten und seitlich ein Schutzbügel aus Alu-Rohr Ø 22 mit Gummipuffern: Fällst du nach hinten oder stößt seitlich an, trifft zuerst der Bügel, nicht Box oder Akkus. Die Rohrgrößen stammen aus der Festigkeitsrechnung (tools/festigkeit.py): wo mehr Kraft fließt, ist das Profil größer.',
     parts: 'Alu-Vierkantrohr, Eckplatten 4 mm, M6-Schrauben mit Sicherungsmutter.',
     care: 'Spitzenlast mit mindestens zweifacher Sicherheit, Dauerlast unter 50 MPa (Ermüdung). Rohrenden verschließen, damit kein Wasser steht und gefriert.' },
+  { key: 'lumb', name: 'Lendengelenk, Gasfedern, Sperre', dist: 1.3,
+    what: 'Ein Gelenk im Rückenrahmen auf Höhe deiner Lendenwirbel: Du kannst dich bücken und zur Seite neigen, ohne dass Hüftgurt und Schultergurte drücken.',
+    how: 'Scharnier mit Elastomerfeder (Beugen ±25°, seitlich ±10°). Zwei Gasfedern 150 N hinter dem Rahmen tragen das Exo-Oberteil beim Bücken. Hängt ein Baum über 5 kg in den Schlaufen, schiebt ein Hubmagnet einen Bolzen in das Rastsegment: Dann trägt der Rahmen den Baum, nicht dein Kreuz. Nach dem Absetzen löst die Sperre. Roter Hebel: von Hand sperren. Bewegt in der technischen Ansicht (Regler „Lende“).',
+    parts: 'Scharnierlaschen Alu 8 mm, Rastsegment Edelstahl 4 mm (Laser), Elastomerfeder Ø 24, Bolzen Ø 10, 2 Gasfedern 150 N / Hub 50 mm, Hubmagnet 24 V.',
+    care: 'Spalt zwischen den Laschen ≥ 25 mm oder ≤ 5 mm (keine Quetschstelle), Polster darüber.' },
   { key: 'straps', name: 'Gurtsystem', dist: 1.1,
     what: 'Hält das Exo am Oberkörper, ohne zu drücken. Die Last geht über die Exo-Beine in den Boden; die Gurte halten das Exo nur in der richtigen Lage.',
     how: '1) Breiter, gepolsterter Hüftgurt auf dem Beckenkamm, vorne Magnet-Schnalle: führt das Exo in Höhe und Seite und nimmt das Kippen auf, wenn die Arme ziehen. 2) S-förmige Schultergurte, oben in der Lochleiste höhenverstellbar, unten am Hüftgurt: halten das Exo, damit es nicht nach hinten kippt. 3) Lageverstellriemen von der Schulter schräg nach oben zum Rahmen: ziehen den Rahmen an den Rücken. 4) Brustgurt, höhenverstellbar: hält die Schultergurte zusammen, wenn ein Arm seitlich zieht. 5) Lenden- und Schulterblattpolster aus Abstandsgewirke: Luftspalt statt Schwitzen.',
@@ -418,7 +423,7 @@ const PART_INFO = [
     care: 'Notöffnung ohne Strom: roten Freilaufhebel am Antrieb ziehen (Stachelrad frei) oder Schnappschäkel am Kopf öffnen. Die zwei Köpfe sind versetzt, damit sich die Bänder nie berühren. Band nach jeder Saison prüfen, Lochung nicht ausgerissen.' },
   { key: 'foot', name: 'Fußgelenk und Steigbügel', dist: 0.6,
     what: 'Leitet die Last in den Boden, auch in Schlamm, Schnee und unebenem Gelände. Der Fuß kann abrollen und seitlich kippen.',
-    how: 'Die Unterschenkelschiene endet in einem Lager auf Höhe deines Knöchels (Fußspitze hoch/runter). Daran hängt der Fersenbügel, der hinter die Ferse führt. Dort sitzt das zweite Gelenk mit Achse nach vorne durch den Knöchel: Der Fuß kippt seitlich mit, beim Spreizen oder am Hang. Am Fuß nur ein schmaler Steigbügel unter der Sohlenmitte mit Spikes, Fersenschale und Ratschenriemen über den Rist. Passt zu jedem Arbeitsstiefel. Ein Drucksensor zwischen Bügel und Sohle meldet das Standbein.',
+    how: 'Die Unterschenkelschiene endet in einem Lager auf Höhe deines Knöchels (Fußspitze hoch/runter). Daran hängt der Fersenbügel, der hinter die Ferse führt. Dort sitzt das zweite Gelenk mit Achse nach vorne durch den Knöchel: Der Fuß kippt seitlich mit, beim Spreizen oder am Hang. Am Fuß nur ein schmaler Steigbügel unter der Sohlenmitte mit Spikes, Fersenschale und Ratschenriemen über den Rist. Passt zu jedem Arbeitsstiefel. Ein Drehteller unter dem Bügel lässt die Fußspitze ±20° drehen (Wenden, ohne das Knie zu verdrehen). Vier Wägezellen zwischen Bügel und Sohle melden das Standbein.',
     parts: 'Fersenbügel Alu, Steigbügel Edelstahl 4 mm (Laser), Gelenkbolzen mit Gummibuchsen, 6 Schraubspikes, Ratschenriemen, FSR-Drucksensor, Fersenschale PETG.',
     care: 'Spikes tauschbar, auf hartem Boden abschrauben. Die Gummibuchsen lassen etwas Drehung zu, damit die Fußspitze nach außen zeigen kann.' },
   { key: 'stand', name: 'Parkstütze', dist: 1.2,
@@ -505,7 +510,19 @@ function sensorCuff(g, y, zc, r, h, zr, sd, id) {
 cur = 'frame'; fl = 3;
 {
   const g = G.torso, rx = -0.155, ys = [0.1, 0.3, D.torso + 0.07];
-  for (const z of [-0.085, 0.085]) tube(g, V(rx, 0.075, z), V(rx, D.torso + 0.17, z), 0.03);   // 30 × 30 × 2
+  for (const z of [-0.085, 0.085]) { tube(g, V(rx, 0.075, z), V(rx, 0.15, z), 0.03); tube(g, V(rx, 0.19, z), V(rx, D.torso + 0.17, z), 0.03); }   // 30 × 30 × 2, geteilt am Lendengelenk
+  cur = 'lumb';
+  for (const z of [-0.085, 0.085]) {   // Lendengelenk: Scharnier mit Elastomerfeder (Beugen ±25°)
+    box(g, 0.05, 0.014, 0.05, M.aluDark, rx + 0.012, 0.155, z); box(g, 0.05, 0.014, 0.05, M.aluDark, rx + 0.012, 0.185, z);
+    put(g, mesh(cyl(0.012, 0.012, 0.052, 16), M.tpu), rx + 0.03, 0.17, z, Math.PI / 2); put(g, mesh(cyl(0.005, 0.005, 0.07, 10), M.steel), rx + 0.03, 0.17, z, Math.PI / 2);
+  }
+  box(g, 0.012, 0.03, 0.012, M.red, rx - 0.02, 0.17, 0.11);                                // Sperrhebel (von Hand)
+  for (const sd of [-1, 1]) {                                                               // Gasfedern 150 N: tragen das Oberteil beim Bücken
+    rod(g, V(-0.2, 0.09, sd * 0.055), V(-0.2025, 0.22, sd * 0.055), 0.009, M.steel); rod(g, V(-0.2025, 0.21, sd * 0.055), V(-0.205, 0.33, sd * 0.055), 0.004, M.chrome);
+    box(g, 0.02, 0.025, 0.03, M.motorDark, -0.13, 0.13, sd * 0.06);                          // Hubmagnet der Lendensperre
+  }
+  hotspot('lumb', g, rx + 0.04, 0.17, 0.12);
+  cur = 'frame';
   for (const y of ys) tube(g, V(rx, y, -0.11), V(rx, y, 0.11), 0.02);
   for (const z of [-0.085, 0.085]) for (const y of ys) {
     for (const dx of [0.0145, -0.0145]) box(g, 0.004, 0.06, 0.06, M.aluDark, rx + dx, y, z);
@@ -769,7 +786,8 @@ SIDE.forEach((sd, k) => {
     tube(g, V(-0.072, yg + 0.042, zf), V(-0.084, 0, zf), 0.012);                                       // Lasche zum Kippgelenk
     put(g, mesh(new THREE.TorusGeometry(0.06, 0.008, 6, 20, Math.PI), M.strap), 0.045, yg + 0.035, zf, 0, Math.PI / 2, 0);
     box(g, 0.022, 0.014, 0.014, M.steel, 0.045, yg + 0.06, zf + sd * 0.05);
-    cur = 'sensor'; box(g, 0.05, 0.003, 0.1, M.pcb, 0.035, yg + 0.0015, zf);                         // Fußkontakt (Drucksensor)
+    put(g, mesh(cyl(0.032, 0.032, 0.005, 32), M.chrome), 0.035, yg + 0.0005, zf);                   // Drehteller ±20° mit Zentrierfeder
+    cur = 'sensor'; box(g, 0.05, 0.003, 0.1, M.pcb, 0.035, yg + 0.004, zf);                           // Fußkontakt (Wägezellen)
     cur = 'foot';
     if (k === 1) hotspot('foot', g, 0.15, yg + 0.01, zf + sd * 0.1);
   }
@@ -787,6 +805,7 @@ SIDE.forEach((sd, k) => {
     tube(g, V(-0.155, D.torso + 0.07, sd * 0.085), V(-0.165, yA + 0.045, zA - sd * 0.02), 0.03);       // Schulterbügel 30 × 30 × 3
     for (const x of [-0.192, -0.133]) box(g, 0.01, 0.075, 0.055, M.alu, x, yA + 0.012, zA);              // Gabel
     box(g, 0.069, 0.012, 0.055, M.alu, -0.1625, yA + 0.05, zA);
+    for (const dz of [-0.018, 0.018]) rod(g, V(-0.172, yA + 0.05, zA + dz), V(-0.172, yA + 0.11, zA + dz), 0.004, M.chrome);   // Gleitführung: Schulter hebt sich ±3 cm mit dem Schulterblatt
     for (const x of [-0.2, -0.125]) put(g, mesh(cyl(0.011, 0.011, 0.012, 18), M.steel), x, yA, zA, 0, 0, Math.PI / 2);   // Hohlachse
     put(g, mesh(new THREE.TorusGeometry(0.012, 0.0025, 6, 16), M.red), -0.118, yA, zA, 0, Math.PI / 2, 0);              // Kugelsperrbolzen
     fl = null;
@@ -843,6 +862,7 @@ SIDE.forEach((sd, k) => {
     tube(g, V(0, -0.02, zFo), V(0, -D.fore + 0.01, zFo), 0.025);
     fl = null;
     sensorCuff(g, -0.07, sd * D.shHalf, 0.042, 0.05, zFo, sd, k === 1 ? 'fore' : null);
+    put(g, mesh(new THREE.TorusGeometry(0.05, 0.004, 8, 40), M.chrome), 0, -0.07, sd * D.shHalf, Math.PI / 2);   // Drehring: Unterarm dreht in der Manschette ±60°
     if (k === 1) hotspot('elbow', g, 0.0, R_EL + 0.02, zDisc + sd * 0.03);
   }
 });
@@ -1115,6 +1135,16 @@ SIDE.forEach((sd, k) => {
 dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.475, -0.16), W(G.torso, -0.2, D.torso + 0.04, -0.11), W(G.torso, -0.1, D.torso + 0.058, -0.075),
   W(G.torso, -0.01, D.torso + 0.098, -0.095), W(G.torso, 0.093, D.torso + 0.045, -0.1), W(G.torso, 0.134, D.torso - 0.05, -0.1)], true);   // Not-Aus, Ein/Aus, LED-Ring
 // Hauben (Schalter „Hauben“): Hüftmotor mit Seilgetriebe
+// Fingerschutz: durchsichtige Schalen über allen Seilscheiben (nichts kann eingezogen werden)
+const guardMat = new THREE.MeshPhysicalMaterial({ color: 0xBFD6E6, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
+function guard(g, x, y, z, r, w) { const prev = catNow; catNow = 'struct'; put(g, mesh(new THREE.CylinderGeometry(r, r, w, 40, 1, true), guardMat, false), x, y, z, Math.PI / 2); put(g, mesh(new THREE.CircleGeometry(r, 40), guardMat, false), x, y, z + Math.sign(z) * w / 2); catNow = prev; }
+cur = 'finish';
+SIDE.forEach((sd, k) => {
+  guard(G.swing[k], 0, 0, sd * Z.hm, R_HM + 0.012, 0.03);
+  guard(G.thigh[k], 0, -D.thigh, sd * (Z.ek + Z.fk) / 2, 0.092, 0.04);
+  guard(G.shsw[k], 0, D.torso, ZS(sd) + sd * 0.054, R_SH + 0.012, 0.026);
+  guard(G.upper[k], 0, -D.upper, ZS(sd) + sd * 0.054, R_EL + 0.012, 0.024);
+});
 cur = 'finish';
 SIDE.forEach((sd, k) => {
   const sh = mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.052, 36, 1, false), null); sh.material = null;

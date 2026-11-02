@@ -177,7 +177,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
 <div class="app">
   <header class="top">
     <div>
-      <p class="kicker" id="kicker">Exoskelett · Entwurf 3.2 · Use Case 1</p>
+      <p class="kicker" id="kicker">Exoskelett · Entwurf 4 · Use Case 1</p>
       <h1 id="title">Christbaum aufladen</h1>
       <div class="scen" role="group" aria-label="Use Case">
         <button type="button" id="scLoad" aria-pressed="true">Aufladen</button>
@@ -235,7 +235,7 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <li>Das Plateau ist eine Ladefläche, zum Beispiel Anhänger oder LKW, zwischen 0 und 1,75&nbsp;m hoch.</li>
           <li>Bäume von 1 bis 4&nbsp;m, nicht eingenetzt und unterschiedlich schwer. Das Gewicht ist frei einstellbar, als Anhaltspunkt dient eine Nordmanntanne (2&nbsp;m ≈ 15&nbsp;kg).</li>
           <li>Beim Umkippen darf der Baum frei fallen.</li>
-          <li>Das Exo ist aktiv: Motoren und Akku am Rücken. Das Beinseil läuft um Kurvenscheiben an Hüfte und Knie (Radius wächst mit der Beugung), die Schultern bewegt ein offenes Seilpaar, die Ellbogen ein Bowdenzug-Paar, beide in beide Richtungen. Die Hüfte hat ein freies Abspreizgelenk und ein Drehlager im Oberschenkel. Die blauen Manschetten messen, wohin du drückst, und das Exo folgt.</li>
+          <li>Das Exo ist aktiv: Motoren und Akku am Rücken. Ein Hüftmotor sitzt auf jeder Hüftschwinge (Seilgetriebe 1:6), das Knie zieht ein Bowdenzug-Paar über eine Kurvenscheibe (Radius wächst mit der Beugung), die Schultern bewegt ein offenes Seilpaar, die Ellbogen ein Bowdenzug-Paar, alle in beide Richtungen. Die Hüfte hat ein Abspreizgelenk hinter dir, der Rücken ein Lendengelenk mit Gasfedern, das sperrt, sobald der Baum in den Schlaufen hängt. Die blauen Manschetten messen, wohin du drückst, und das Exo folgt.</li>
           <li>Füße: schmaler Steigbügel mit Spikes wie bei einem Steigeisen, nur so groß wie der Schuh, damit er in Schlamm und Schnee nicht hängen bleibt.</li>
         </ul>
       </section>
@@ -281,9 +281,9 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <input type="range" id="body" min="45" max="130" step="1" value="75">
         </div>
         <div class="ctl">
-          <label for="exoKg">Gewicht des Exos</label><output id="exoKgOut" for="exoKg">18 kg</output>
-          <input type="range" id="exoKg" min="0" max="60" step="1" value="18">
-          <div class="scale" aria-hidden="true"><span>Hälfte am Rücken, Hälfte an den Beinen</span></div>
+          <label for="exoKg">Gewicht des Exos</label><output id="exoKgOut" for="exoKg">34 kg</output>
+          <input type="range" id="exoKg" min="0" max="60" step="1" value="34">
+          <div class="scale" aria-hidden="true"><span>34 kg laut Bauteilliste (ein Akku); geht über die Exo-Beine in den Boden</span></div>
         </div>
         <label class="switch" for="labels"><input type="checkbox" id="labels" checked><span>Beschriftungen in 3D</span></label>
       </section>
@@ -877,7 +877,7 @@ function analyseDrag(P, TL) {
 
 /* ================= Zustand ================= */
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 18, foot: 0,
+const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 34, foot: 0,
   labels: true, t: 0, playing: !reduced, view: 'oblique', env: 'dusk', trees: 0 };
 let P, TL, PK;
 
@@ -1614,7 +1614,7 @@ function captionFor(id) {
     switch (id) {
       case 'start': return ['Ausgangslage', 'Ausgangslage', `${trees} liegen am Boden, die Stümpfe zeigen nach vorne. Du stehst zwischen den Stümpfen, Blick in Laufrichtung.`];
       case 'dgrip': return ['Schritt 1 von 4', 'Greifen', `${P.dLunge ? 'Die Last ist schwer: rechts einen halben Schritt zurück, dann i' : 'I'}n die Knie und vorbeugen, die Hände an die Stümpfe. Die offenen Schlaufen am Handgelenk über die Stümpfe schieben, auf Tastendruck zieht je eine kleine Winde ihre Schlaufe zu.${n > 2 ? ' Beim dritten Baum hält rechts jede der zwei Schlaufen einen eigenen Stumpf.' : ''}`];
-      case 'drise': return ['Schritt 2 von 4', 'Aufrichten', 'Hochkommen, die Arme hängen lassen. Die Stümpfe heben sich mit, die Beinseile ziehen Hüfte und Knie in die Streckung.'];
+      case 'drise': return ['Schritt 2 von 4', 'Aufrichten', 'Hochkommen, die Arme hängen lassen. Die Stümpfe heben sich mit, Hüft- und Kniemotoren ziehen in die Streckung.'];
       case 'dwalk': return ['Schritt 3 von 4', 'Vorwärts schleifen', `Leicht vorgebeugt vorwärts gehen, gezeigt sind 7 m, gedacht für bis zu 100 m. Das Gewicht hängt in den Schlaufen und geht über Arme, Schultergelenke und Rahmen in den Hüftgurt und die Beinschienen. Die Arme hängen leicht nach hinten, dort gleichen sich Gewicht und Zug fast aus.`];
       case 'drelease': return ['Schritt 4 von 4', 'Ablegen', 'In die Knie, Stümpfe absetzen, Schlaufen auf Tastendruck öffnen und weitergehen.'];
       default: return ['Fertig', 'Am Plateau', `${trees} liegen am Ziel, bereit zum Aufladen.`];
@@ -1639,13 +1639,13 @@ function captionFor(id) {
 }
 const STEP_TEXT = {
   load: [['Greifen', 'In die Hocke, rechts die Schlaufen um den Stumpf, links weit oben am Stamm.'],
-    ['Aufrichten bis fast senkrecht', 'Zurücklehnen, rechts ist der Drehpunkt, links hebelt den Baum hoch. Die Beinseile helfen beim Hochkommen.'],
+    ['Aufrichten bis fast senkrecht', 'Zurücklehnen, rechts ist der Drehpunkt, links hebelt den Baum hoch. Hüft- und Kniemotoren helfen beim Hochkommen.'],
     ['Tragen', 'Fast senkrecht zum Plateau tragen, kaum Hebel. Die Schultermotoren halten die Arme.'],
     ['Hochheben', 'Fast lotrecht anheben, bis das Schnittende über der Ladefläche ist, dann an der Kante absetzen.'],
     ['Umkippen lassen', 'Die Schlaufen halten das Schnittende als Scharnier, der Baum kippt 90° aufs Plateau.'],
     ['Zurücktreten', 'Schlaufen auf, Arme runter, zurück.']],
   drag: [['Greifen', 'Zwischen den Stümpfen in die Knie, die Schlaufen am Handgelenk über die Stümpfe, zuziehen.'],
-    ['Aufrichten', 'Hochkommen, Arme hängen lassen. Die Beinseile helfen.'],
+    ['Aufrichten', 'Hochkommen, Arme hängen lassen. Hüft- und Kniemotoren helfen.'],
     ['Vorwärts schleifen', 'Leicht vorgebeugt vorwärts gehen, bis 100 m. Die Schlaufen tragen, nicht die Finger.'],
     ['Ablegen', 'In die Knie, Stümpfe absetzen, Schlaufen öffnen, weitergehen.']],
 };
@@ -1838,11 +1838,11 @@ function setScen(scen) {
   state.scen = scen; state.t = 0;
   ui.scLoad.setAttribute('aria-pressed', String(scen === 'load')); ui.scDrag.setAttribute('aria-pressed', String(scen === 'drag'));
   document.querySelectorAll('[data-for]').forEach((el) => { el.hidden = el.dataset.for !== scen; });
-  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Entwurf 3.2 · Use Case 2' : 'Exoskelett · Entwurf 3.2 · Use Case 1';
+  ui.kicker.textContent = scen === 'drag' ? 'Exoskelett · Entwurf 4 · Use Case 2' : 'Exoskelett · Entwurf 4 · Use Case 1';
   ui.title.textContent = scen === 'drag' ? 'Bäume schleifen' : 'Christbaum aufladen';
   ui.lede.textContent = scen === 'drag'
     ? 'Schlaufen am Handgelenk (rechts zwei, links eine) fassen ein bis drei Stümpfe, jede Schlaufe hat ihre eigene kleine Winde. Die Arme hängen, das Gewicht geht über Schultergelenke und Rahmen in den Hüftgurt, man geht vorwärts.'
-    : 'Rechts zwei Schlaufen am Handgelenk um den Stumpf, der Stamm liegt längs an der Hand, links weit oben am Stamm: zurücklehnen, fast senkrecht aufrichten, tragen, bis zur Ladefläche anheben und 90° aufs Plateau kippen lassen. Motoren und Akku sitzen hinten, Seile über Kurvenscheiben und Rollen bewegen Hüfte, Knie und Schultern, Bowdenzüge die Ellbogen.';
+    : 'Rechts zwei Schlaufen am Handgelenk um den Stumpf, der Stamm liegt längs an der Hand, links weit oben am Stamm: zurücklehnen, fast senkrecht aufrichten, tragen, bis zur Ladefläche anheben und 90° aufs Plateau kippen lassen. Motoren und Akku sitzen hinten, Hüftmotoren direkt auf den Hüftschwingen; Seile bewegen Schultern, Bowdenzüge Knie und Ellbogen, ein Lendengelenk mit Gasfedern lässt dich bücken.';
   buildSteps();
   rebuild({ drag: true });
   setView(state.view, true);
