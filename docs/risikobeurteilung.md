@@ -1,4 +1,4 @@
-# Risikobeurteilung (Eigenbau, Entwurf 4)
+# Risikobeurteilung (Eigenbau, Entwurf 5)
 
 Vorgehen angelehnt an DIN EN ISO 12100 (Risikobeurteilung von Maschinen). Für Exoskelette gibt es zusätzlich
 DIN EN ISO 13482 (Roboter für die persönliche Assistenz). Dieses Exo ist ein **Eigenbau für die eigene Nutzung**.
@@ -19,9 +19,11 @@ Bewertung: S = Schwere (1 leicht … 4 schwer), W = Wahrscheinlichkeit vor Maßn
 | Baum fällt aus der Schlaufe | Schlaufe rutscht | 2 | 2 | Zahnleiste formschlüssig, Zugkraft über Motorstrom, Schneckengetriebe hält stromlos | P20 | gering |
 | Baum lässt sich nicht lösen | Winde defekt | 3 | 1 | Schnappschäkel mit Zuglasche (Notöffnung von Hand) | P20 | gering |
 | Stufenwechsel öffnet Schlaufe | Bedienfehler | 3 | 2 | gesperrt in der Firmware (Test) | F1 | gering |
-| Quetschen an Seilscheiben, Rollen | Finger, Kleidung | 2 | 2 | **Fingerschutz aus transparentem PETG** über Hüft-, Knie-, Schulter- und Ellbogenscheibe, Seile in eigener Ebene außen | P8, P32 | gering |
+| Quetschen an Kurbel und Schubstange | Finger, Kleidung zwischen Kurbel und Schiene | 2 | 2 | **Kurbelschutz aus transparentem PETG** an Knie und Ellbogen, Stange außen an der Schiene | P8, P32 | gering |
 | Quetschen am Lendengelenk, Schulterschlitten | Haut, Jacke zwischen den Laschen | 2 | 2 | Spalt ≥ 25 mm oder ≤ 5 mm, Polster darüber, Gasfedern hinter dem Rahmen | P32 | gering |
-| Seilriss | Verschleiß, scharfe Kante | 2 | 2 | Seil zieht nur (Ausfall = locker), Dyneema mit 4-facher Reserve, Prüfung alle 40 h | Wartung | gering |
+| Bruch Schubstange / Gelenkkopf | Überlast, Verschleiß | 3 | 1 | Rohr knickt erst bei ≈ 16 kN (Betrieb ≤ 3,7 kN), Gelenkköpfe Edelstahl mit Reserve, jährlich auf Spiel prüfen | Wartung | gering |
+| Wasser oder Eis in der Gelenkkapsel | Dichtung undicht, Kondenswasser | 2 | 2 | O-Ring, V-Ring, Druckausgleichselement, Heizfolie; Motortemperatur und Motorfehler werden überwacht (Fehler = stromlos) | P35, P36 | gering |
+| Überspannung beim Bremsen | Motoren speisen zurück, Akku nimmt nichts auf | 3 | 2 | Bremswiderstand ab 46 V; sonst schalten die Motoren mitten in der Bewegung ab | P37 | gering |
 | Druckstellen, Scheuern | Achsen fluchten nicht | 2 | 3 | Maßblatt, Langlöcher, Polster, freie Abspreiz-/Drehgelenke | P1–P3 | mittel |
 | Überhitzung Motoren/Akku | Dauerlast | 2 | 2 | **Wärmemodell je Motor** (I²t, Zeitkonstante 3 min) senkt die Grenze stufenlos auf bis 40 %, Anzeige meldet „Motor warm“; Motor-Temperatur, Akku-BMS | P27, F1 | gering |
 | Schlaufenwinden überlasten Wandler | drei Winden gleichzeitig | 2 | 2 | Winden laufen nacheinander (Firmware), Zeitgrenze 12 s je Bewegung | F1, P20 | gering |

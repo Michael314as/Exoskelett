@@ -1,4 +1,4 @@
-# Konzept: Christbaum-Exo (Entwurf 4)
+# Konzept: Christbaum-Exo (Entwurf 5: Gelenkkapseln)
 
 Ziel: ein umsetzbares, robustes Exoskelett für zwei Arbeiten: Bäume am Stamm greifen und **schleifen** (Use Case 2)
 und Bäume am Stumpf greifen, fast senkrecht **aufrichten und aufladen** (Use Case 1). Es unterstützt Beine,
@@ -9,7 +9,22 @@ tauschen kann; gebaut ohne Drehbank und ohne Schweißen.
 Gelände**. Akku von vorhandenen Stihl-Geräten. Eine Person (1,75 m, 75 kg), Längen einstellbar. Die meisten Bäume
 schaffst du selbst; das Exo soll **entlasten**, nicht ersetzen.
 
-**Neu in Entwurf 4** (nach deiner Durchsicht der 3D-Konstruktion):
+**Neu in Entwurf 5: Gelenkkapseln.** Die Motoren sitzen direkt an den Gelenken, jeder in einer dichten, beheizten Kapsel.
+Seile, Bowdenzüge, Umlenkrollen, Seilscheiben und die Antriebsbox am Rücken entfallen. Grund: Das waren die Teile, die
+vereisen, sich dehnen und reißen konnten (Zugkräfte bis 2,4 kN, Bowdenzug-Wirkungsgrad 0,7). Details in Abschnitt 5.
+
+| Punkt | Entwurf 4 | Entwurf 5 |
+|---|---|---|
+| Hüfte | RS06 auf der Hüftschwinge, Seilschleife 1:6 | **RobStride RS04 direkt auf der Hüftachse** (120 Nm Spitze) |
+| Knie | RS06 in der Box, Bowdenzug-Paar, Kurvenscheibe | **RS04 oben am Oberschenkel, Schubstange 1:1** zum Kniehebel, Federpaket begrenzt das Beugen |
+| Schulter | RS06 in der Box, offenes Seilpaar über 4 Rollen | **RS04 direkt auf der Schulterachse** |
+| Ellbogen | RS06 in der Box, Bowdenzug-Paar | **RS03 oben am Oberarm, Schubstange 1:1** |
+| Wetter | Seile und Rollen können vereisen | Kapsel mit O-Ring, V-Ring, Druckausgleich, Heizfolie 4 W (Firmware schaltet sie) |
+| Rücken | Box mit 6 Motoren | flache Elektronikbox, Schwerpunkt des Oberteils fast über der Hüfte |
+| Gewicht | 31,9 kg | **37,2 kg** (Motoren schwerer, Kapseln) |
+| Material | 3.800–4.400 € | ≈ 4.700–5.600 € |
+
+**Entwurf 4 im Vergleich zu Entwurf 3** (zur Nachverfolgung):
 
 | Punkt | Entwurf 3.2 | Entwurf 4 |
 |---|---|---|
@@ -43,13 +58,13 @@ es tragen muss.**
 ## 2. Grundstruktur
 
 ```
- Schulterbügel ── Schulter (Seilscheibe, offenes Seilpaar) ── Oberarm (Anzeige rechts) ── Ellbogen (Bowden-Paar) ── Unterarm ── Schlaufenträger
+ Schulterbügel ── Schulterkapsel (RS04 direkt) ── Oberarm (Ellbogenkapsel RS03 + Schubstange, Anzeige rechts) ── Ellbogen ── Unterarm ── Schlaufenträger
        │                                                                                                         (rechts unten + außen, links unten)
- Rückenrahmen ── Antriebsbox: 6 Motoren (Knie, Schulter, Ellbogen), Steuerung; Akku unten hinten
+ Rückenrahmen ── flache Elektronikbox (Steuerung, Wandler), Akkus seitlich
        │            └── Gurtsystem: Hüftgurt, Schultergurte, Lageverstellriemen, Brustgurt, Polster
  Gabel des Abspreizgelenks (Achse nach vorne durchs Hüftgelenk, Zentrierfedern ±20°)
        │
- Hüftschwinge mit Hüftmotor (Seilgetriebe 1:6) ── Hüftlager ── Oberschenkelschiene (Manschette mit Sensor) ── Kniegelenk (Kurvenscheibe + Beugescheibe)
+ Hüftschwinge mit Hüftkapsel (RS04 direkt) ── Hüftlager ── Oberschenkelschiene (Kniekapsel RS04 oben, Manschette) ── Schubstange ── Kniegelenk (Kniehebel)
                                                                                                                  │
                                                        Unterschenkelschiene (Schale) ── Knöchellager ── Fersenbügel ── Kippgelenk hinter der Ferse ── Steigbügel
 ```
@@ -70,19 +85,18 @@ es tragen muss.**
   Sie liegt unter dem Hüftgurt und berührt ihn auch bei 20° Spreizen nicht.
 - **Zentrierfedern:** Ein Hebel an der Nabe sitzt zwischen zwei kleinen Druckfedern: Das Bein steht ohne Kraft in der
   Mitte und pendelt beim Gehen nicht; seitliche Schritte bleiben leicht. Gummipuffer begrenzen auf ±20°.
-- **Hüftmotor:** sitzt auf der Hüftschwinge hinter dem Hüftlager. Trommel Ø 2 cm, offene Seilschleife (Dyneema 3 mm) auf
-  eine Scheibe Ø 12 cm am Oberschenkel: Übersetzung 1:6, bis etwa 140 Nm, Wirkungsgrad etwa 95 %. Er spreizt mit, also
-  ändert Spreizen nichts am Antrieb, und er schwingt beim Gehen nicht mit. Haube gegen Äste und Schnee.
+- **Hüftkapsel:** RobStride RS04 direkt auf der Hüftachse, außen neben dem Hüftlager. Das Gehäuse hält ein Motorträger an
+  der Hüftschwinge, der Abtrieb ist mit der Oberschenkelplatte verschraubt: 110 Nm strecken, ohne Seil. Der Motor spreizt
+  mit und schwingt beim Gehen nicht mit. Dichte, beheizte Haube (Abschnitt 5).
 
 ## 4. Beine und Füße
 
 - **Schienen:** Außenrohr 25 × 25, innen 20 × 20 teleskopierbar. Die Oberschenkelschiene läuft von der Hüfte (23 cm
   neben der Körpermitte) schräg nach innen zum Knie (16 cm), die Unterschenkelschiene weiter zum Knöchel (15 cm): Knie-
   und Knöchellager sitzen dicht am Bein, die Schienen gehen **durchgehend bis in die Gelenke**.
-- **Knie:** Flanschlager auf Höhe deines Kniegelenks, außen zwei Scheiben fest am Unterschenkel. Streckzug über die
-  Kurvenscheibe (Hebel 5 cm gestreckt, 8 cm in der Hocke), Beugezug über die Beugescheibe Ø 9 cm. Beide kommen als
-  Bowdenzug-Paar von hinten aus der Box. Der Beugezug endet in einer **Federpatrone**: Sie begrenzt die Beugekraft
-  mechanisch auf etwa 11 Nm.
+- **Knie:** Flanschlager auf Höhe deines Kniegelenks, außen der Kniehebel (60 mm). Die Kniekapsel (RS04) sitzt oben am
+  Oberschenkel, ihre Kurbel treibt über eine Schubstange den Hebel an (1:1). In der Stange sitzt ein **Federpaket**: Es gibt
+  beim Beugen ab etwa 11 Nm nach und begrenzt die Beugekraft mechanisch, Strecken bleibt starr.
 - **Fuß:** Knöchellager (Fußspitze hoch/runter) → Fersenbügel, der hinter die Ferse führt → **Kippgelenk mit Achse nach
   vorne durch den Knöchel**, hinter der Ferse. Der Fuß kippt seitlich mit, beim Spreizen und am Hang. Gummibuchsen lassen
   etwas Drehung zu (Fußspitze nach außen).
@@ -90,17 +104,29 @@ es tragen muss.**
   Passt zu jedem Arbeitsstiefel, nichts saugt sich im Schlamm fest. Ein vergossener **Drucksensor** zwischen Bügel und
   Sohle meldet, ob das Bein belastet ist.
 
-## 5. Antriebe
+## 5. Antriebe: Gelenkkapseln
 
-| Kanal | Motor sitzt | Richtung | Übertragung | Spitze je Seite |
-|---|---|---|---|---|
-| Hüfte L/R | auf der Hüftschwinge | strecken stark, beugen bis 35 Nm | offene Seilschleife 1:6 | ~140 Nm |
-| Knie L/R | Box | strecken stark, beugen bis 10 Nm | Bowdenzug-Paar, Kurvenscheibe 5→8 cm | ~95–115 Nm |
-| Schulter L/R | Box | heben und senken | offenes Seilpaar über Rollen auf Scheibe Ø 14 cm | ~100 Nm |
-| Ellbogen L/R | Box | beugen und strecken | Bowdenzug-Paar auf Scheibe Ø 10 cm | ~58 Nm |
+| Gelenk | Motor | sitzt | Übertragung | Grenze in der Firmware | Motor kann |
+|---|---|---|---|---|---|
+| Hüfte L/R | RobStride RS04 | auf der Hüftachse, Gehäuse an der Hüftschwinge | direkt | strecken 110 Nm, beugen 35 Nm | 116 Nm |
+| Knie L/R | RobStride RS04 | oben am Oberschenkel (y −12 cm) | Kurbel 60 mm → Schubstange Ø 12 → Kniehebel 60 mm (1:1) | strecken 110 Nm, beugen 10 Nm (+ Federpaket ≈ 11 Nm mechanisch) | 114 Nm |
+| Schulter L/R | RobStride RS04 | auf der Schulterachse, Gehäuse an der Schulterschwinge | direkt | ±100 Nm | 116 Nm |
+| Ellbogen L/R | RobStride RS03 | oben am Oberarm (y −12 cm) | Kurbel 50 mm → Schubstange Ø 10 → Hebel 50 mm (1:1) | ±56 Nm | 57 Nm |
 
-8 bürstenlose Robotergelenk-Motoren **RobStride RS06** (CAN, 11 Nm dauernd / 36 Nm Spitze, 621 g, Ø 88 × 49 mm), von Hand rückdrehbar: Ohne Strom
-laufen alle Gelenke frei mit. Die Rechnung zum Mischweg: [kraftverteilung.md](kraftverteilung.md), Abschnitt 3.
+**Schubstange statt Seil:** Kurbel und Hebel bilden ein Parallelogramm, die Stange läuft parallel zur Schiene. Der Hebel
+arbeitet im Bereich ±55° um die Querlage, die Stange kommt nie in eine Strecklage. Größte Stangenkraft ≈ 3,7 kN (Knie, 110 Nm
+bei 60° Hebelstellung); Stahlrohr Ø 12 × 2 knickt erst bei ≈ 16 kN. Die Gelenkköpfe M8 gleichen 8° Schräglauf aus.
+
+**Die Kapsel:** Haube aus PETG-CF (Wand 2 mm) mit O-Ring am Motorträger, V-Ring auf dem drehenden Abtrieb, Druckausgleichs-
+element M12 gegen Kondenswasser beim Abkühlen, 5 mm Dämmung, Heizfolie 4 W. Die Firmware heizt eine Gruppe (Beine oder
+Arme), wenn die kälteste gemessene Wicklung unter +3 °C fällt und die Motoren kaum arbeiten; über +8 °C aus. Unter Last heizt
+der Motor sich selbst. Bei −10 °C sind das im Schnitt ≈ 10–15 W, rund 4 % Akku pro Stunde.
+
+**Warum nicht wasserdichte Motoren?** Von RobStride gibt es nur das kleine RS02 als IP67 (17 Nm), zu schwach. Die stärkeren
+Modelle haben keine Schutzart. Industriemotoren mit IP65/67 kosten mehrere tausend Euro je Gelenk. Also dichtet die Kapsel
+(Ziel IP65: Schnee, Regen, Spritzwasser). Eine Anfrage an RobStride nach IP67-Versionen: [anfrage-robstride.md](anfrage-robstride.md).
+
+**Rückdrehbar:** Die Planetengetriebe 9:1 lassen sich von Hand drehen; ohne Strom laufen alle Gelenke frei mit.
 
 ## 6. Oberkörper: Gurtsystem
 
@@ -118,22 +144,20 @@ einem guten Trekkingrucksack, angepasst an die Kräfte des Exos:
 Anziehen: rückwärts ins Exo auf der Parkstütze, Hüftgurt, Schultergurte, Lageverstellriemen, Brustgurt, Manschetten,
 Ristriemen. Der Not-Aus mit LED-Ring sitzt am linken Schultergurt.
 
-## 5a. Rucksack: zwei Akkus, Schutzbügel, Motoranordnung
+## 5a. Rucksack: zwei Akkus, Schutzbügel, Elektronikbox
 
 - **Zwei Stihl AP 500 S** links und rechts neben der Box in gedruckten Schächten, von hinten eingeschoben (Stihl-Rastung).
   Ein Ideal-Dioden-Modul schaltet sie parallel: einzeln im Betrieb wechselbar, doppelte Laufzeit (etwa 4 bis 6 h).
 - **Schutzbügel** aus Alu-Rohr Ø 22 mit Gummipuffern hinten und seitlich um Box und Akkus. Bei einem Sturz nach hinten
   oder seitlichem Anstoßen trifft zuerst der Bügel. Die Parkstütze klappt hinten am Bügel aus.
-- **Motoranordnung in der Box** nach dem Weg der Züge: Knie unten, Ellbogen Mitte, Schulter oben.
-- **Wetter:** Die Motoren dieser Klasse haben keine Schutzart gegen Wasser. Sie sitzen deshalb in der gedichteten Box
-  (IP54, Faltenbälge an den Zug-Durchführungen, Lüftung nach unten mit Labyrinth); die Hüftmotoren bekommen gedichtete Hauben.
+- **Elektronikbox** (Entwurf 5): flach (85 mm), nur Steuerung, Wandler und Sicherungen; die Motoren sitzen in den Gelenkkapseln.
 - **Festigkeit:** Rohrgrößen nach [festigkeit.md](festigkeit.md).
 
 ## 5b. Schulter: seitlich heben
 
 Wie an der Hüfte sitzt das Gelenk fürs seitliche Heben hinter dir, die Achse zeigt nach vorne durch dein Schultergelenk.
-Die Schulterschwinge führt über die Schulter zum Schulterlager. Das Seilpaar läuft durch die hohle Achse und über zwei
-Rollen an der Schwinge auf die Scheibe: Seitliches Heben ändert die Seillänge nicht. Eine Feder trägt den Exo-Arm.
+Die Schulterschwinge führt über die Schulter zum Schulterlager; dort sitzt die Schulterkapsel (RS04) direkt auf der Achse.
+Sie hebt beim seitlichen Heben mit, deshalb ändert seitliches Heben nichts am Antrieb. Eine Feder trägt den Exo-Arm.
 
 ## 6a. Steuerung (kurz)
 
@@ -189,8 +213,8 @@ den Körper. Deshalb hat Entwurf 4 jetzt:
 | **Drehring Unterarm** | Unterarm dreht frei | Ring-Lager an der Unterarm-Manschette | Handgelenk drehen (Stamm greifen, Säge halten) ohne die Schiene mitzunehmen |
 | **Drehteller am Steigbügel** | Fußspitze ±20° | Axial-Nadellager, Zentrierfeder | Wenden und Fuß nach außen stellen, ohne das Knie zu verdrehen |
 
-Dazu **Fingerschutz** aus transparentem PETG über allen Seilscheiben: Finger, Jackenärmel und Zweige werden nicht
-eingezogen, du siehst trotzdem, ob das Seil richtig liegt.
+Dazu **Kurbelschutz** aus transparentem PETG über den Kurbeln an Knie und Ellbogen: Finger, Jackenärmel und Zweige geraten
+nicht zwischen Kurbel und Schiene.
 
 **Warum keine weiteren Motoren für Rumpf und Fuß?** Ein Motor am Lendengelenk müsste etwa 150 Nm aufbringen, wäre
 schwer und würde dich beim Bücken bevormunden. Gasfeder + Sperre bringt den Nutzen (Last im Rahmen) ohne das Gewicht.
@@ -199,33 +223,35 @@ Exo läuft frei mit, warnt aber bei Rückneigung und dämpft die Beine bei einem
 
 ## 7. Energie
 
-- **Akku: Stihl AP 500 S** (36 V, etwa 337 Wh) in einem Schacht seitlich neben der Box; ein **zweiter Schacht** auf der
+- **Akku: Stihl AP 500 S** (36 V, etwa 337 Wh) in einem Schacht seitlich neben der Elektronikbox; ein **zweiter Schacht** auf der
   anderen Seite nimmt bei Bedarf einen zweiten Akku auf (parallel über Ideal-Dioden, im Betrieb einzeln wechselbar).
-- **Laufzeit, grob:** bei durchschnittlich 100 bis 150 W etwa 2 bis 3 Stunden. Schlaufenwinden brauchen fast nichts.
+- **Laufzeit, grob:** bei durchschnittlich 100 bis 150 W etwa 2 bis 3 Stunden; bei Frost kommen 10–15 W Kapselheizung dazu.
+- **Bremsenergie:** Beim Hinsetzen und Absenken speisen die Motoren zurück. Ein Bremswiderstand (ab 46 V, 10 Ω / 200 W)
+  begrenzt die Spannung, sonst schalten die Motoren bei Überspannung ab (RobStride-Entlademodul passt nicht: 34 / 64 V).
 - **Kälte und Nässe:** Akku in der gedämmten Box, wasserdichte Rundstecker, Elektronik im dichten Gehäuse.
 
 ## 8. Gewicht
 
-**Ehrliche Zahl aus der Bauteilliste der technischen Ansicht: vorher etwa 34 kg mit einem Akku** (jedes Teil mit Stückzahl,
-Gurte, Kabel, Hauben, Schutzbügel und Parkstütze eingerechnet; der zweite Akku bringt weitere 2 kg). Die früher genannten
-17–20 kg waren ohne Kleinteile, Schutz und Komfortgelenke gerechnet.
+**Bauteilliste der technischen Ansicht: 37,2 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
+wiegen 10,3 kg (6 × RS04 je 1,42 kg, 2 × RS03 je 0,88 kg) statt 5,0 kg; Kapselhauben, Dichtungen und Motorträger kommen dazu.
+Seile, Rollen, Scheiben, Bowdenzüge und die Motorbox fallen weg.
 
-Was das für dich heißt: Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung rechnet
-im Stand mit **22,1 kg Exo-Oberteil** (Schwerpunkt 8 cm hinter der Hüftachse, wird mit ausgeglichen) und lässt Hüft- und Kniemotoren diese Last tragen; die Motoren
-haben dafür genug Reserve (Knie in der Hocke ≈ 36 Nm je Bein gegen ≈ 44 Nm Dauermoment mit der Kurvenscheibe). Spürbar bleibt die **Trägheit** beim Drehen, Bücken und beim ersten Schritt.
-**Umgesetzt (ohne Abstrich an Sicherheit oder Funktion), jetzt 31,9 kg mit RobStride RS06** (je Motor 100 g mehr als AK70-10) (dazu Zählfehler in der Liste behoben: Schultergurte und Hauben waren dreifach gerechnet): Parkstütze abnehmbar, sie bleibt am Fahrzeug
-und wird nur zum Abstellen eingesteckt (−0,7 kg beim Tragen), Schutzbügel aus CFK-Rohr Ø 22 × 1,5 (−0,25 kg), Hauben mit
-1,2 mm Wand und Rippen (−0,15 kg), Boxgehäuse aus 1,5 mm Alu, die Motorplatte trägt (−0,15 kg).
-**Bewusst nicht gespart:** Die tragenden Rohre liegen bei etwa 60 MPa Spitze gegen 125 MPa zulässig, also Sicherheit ≈ 2
-([festigkeit.md](festigkeit.md)). Dünner erst, wenn Messungen am Prototyp kleinere Lasten zeigen. Weitere große Schritte
-gingen nur über weniger Funktion: zweiter Akkuschacht (−0,5 kg), Schutzbügel ganz weg (−0,35 kg), Lendengelenk und
-Gasfedern weg (−0,7 kg), Motoren der Klasse AK60 an den Ellbogen (−0,4 kg, aber weniger Kraft). Die zwei Hüftmotoren sitzen
-nah am Schwerpunkt und schwingen nicht mit.
+Was das für dich heißt:
+- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **22,2 kg
+  Exo-Oberteil**, dessen Schwerpunkt jetzt fast über der Hüfte liegt (25 cm darüber, 1 cm dahinter): Der Rucksack zieht
+  nicht mehr nach hinten.
+- Mehr Masse sitzt an den Gliedern: je Bein 1,4 kg Kniemotor oben am Oberschenkel, je Arm 1,4 kg an der Schulter und
+  0,9 kg oben am Oberarm. Beim schnellen Schwingen spürst du das; im Stand gleicht die Steuerung das Eigengewicht aus.
+- **Sparmöglichkeiten:** Kniemotor RS03 statt RS04 (−1,1 kg, aber nur 57 Nm am Knie: reicht für Gehen und leichtes Heben,
+  nicht für die Hocke mit schwerem Baum), zweiter Akkuschacht weg (−0,5 kg), Parkstütze bleibt am Fahrzeug (schon so).
+- **Bewusst nicht gespart:** Die tragenden Rohre liegen bei etwa 60 MPa Spitze gegen 125 MPa zulässig, also Sicherheit ≈ 2
+  ([festigkeit.md](festigkeit.md)).
 
 ## 9. Wetterfestigkeit
 
-Abgedichtete Lager (2RS), Seilrollen mit Abdeckung gegen Vereisen, Bowdenhüllen mit Endkappen, Dyneema nimmt kein
-Wasser auf, Alu und Edelstahl rosten nicht, Wägezellen in IP65-Ausführung oder vergossen, Stecker nach unten.
+Die Motoren sitzen in dichten, beheizten Gelenkkapseln (Abschnitt 5). Es gibt keine offenen Seile und Rollen mehr, die
+vereisen können; die Schubstangen sind starr und laufen in Gelenkköpfen aus Edelstahl. Abgedichtete Lager (2RS), Alu und
+Edelstahl rosten nicht, Wägezellen in IP65-Ausführung oder vergossen, Stecker nach unten, Elektronikbox IP54.
 
 ## 10. Sicherheit
 
@@ -238,23 +264,28 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 
 | Posten | etwa |
 |---|---|
-| 8 Robotergelenk-Motoren RobStride RS06 (≈ 197–255 $ je Stück + Versand, Einfuhrumsatzsteuer, Zoll) | 1 700 bis 2 200 € |
+| 6 × RobStride RS04 (≈ 295–320 $) + 2 × RS03 (≈ 225–245 $), mit Versand, Einfuhrumsatzsteuer, Zoll | 2 600 bis 2 900 € |
+| Kapseln: Motorträger, Kurbeln, Hebel (Laser), Hauben (Druck), V-Ringe, O-Ringe, Druckausgleich, Heizfolien, Schubstangen, Gelenkköpfe | 300 bis 380 € |
 | 3 Schlaufenantriebe 5840-31ZY + 3 Treiber Pololu G2 | 180 bis 220 € |
 | Steuerung, CAN, 11 Wägezellen + Verstärker, Not-Aus, Relais, Stecker, Kabel, Anzeige, Licht | 400 bis 500 € |
 | Akku-Adapter für Stihl AP (Akku vorhanden) | 20 bis 80 € |
-| Alu-Profile, Lager, Bolzen, Rollen, Seilscheiben, Laserteile, Dyneema, Bowdenzüge | 600 bis 700 € |
-| Lendengelenk, Gasfedern, Hubmagnet, Drehteller, Drehring, Schulterschlitten, Fingerschutz | 200 bis 230 € |
+| Alu-Profile, Lager, Bolzen, Laserteile Rahmen und Gelenke | 450 bis 550 € |
+| Lendengelenk, Gasfedern, Hubmagnet, Drehteller, Drehring, Schulterschlitten | 190 bis 220 € |
 | Steigbügel, Fersenbügel, Spikes, Gurtsystem, Manschetten, Polster | 300 bis 380 € |
-| Schutzbügel, Parkstütze, Hauben, Eloxieren, Filament | 250 bis 380 € |
-| **Summe Material** | **etwa 3 800 bis 4 400 €** (dazu Werkzeug einmalig 280 bis 500 €) |
+| Schutzbügel, Parkstütze, Haube Elektronikbox, Eloxieren, Filament | 230 bis 360 € |
+| **Summe Material** | **etwa 4 700 bis 5 600 €** (dazu Werkzeug einmalig 280 bis 500 €) |
+
+Über einen Einkaufsagenten direkt aus China (RS04 ¥ 1.199, RS03 ¥ 999) wären die Motoren etwa 1.000 € billiger;
+Gewährleistung und Lieferung sind dann schwieriger.
 
 ## 12. Bauen in Stufen
 
 1. **Schlaufengreifer als Handwerkzeug** (an einer Unterarm-Manschette, ohne Exo) und Steigbügel testen.
 2. **Rahmen, Beine, Hüfte passiv**, mit Steigbügeln: Lastpfad und Passform prüfen.
-3. **Prüfstand:** ein Motor, ein Seilpaar, eine Sensor-Manschette auf einem Holzarm.
-4. **Beine:** Hüftmotoren auf den Schwingen, dann Knie per Bowdenzug, Oberschenkel-Manschetten und Fußsensoren.
-5. **Arme:** Schulter mit offenem Seilpaar, Ellbogen mit Bowdenzug-Paar, dann Schlaufen ans Exo.
+3. **Prüfstand:** eine Gelenkkapsel mit RS04, Kurbel und Schubstange an einem Holzarm, eine Sensor-Manschette. Zuerst die
+   Kapsel: 10 min Gartenschlauch, eine Nacht im Gefrierschrank, danach muss das Gelenk sofort leicht laufen.
+4. **Beine:** Hüftkapseln, dann Kniekapseln mit Schubstange, Oberschenkel-Manschetten und Fußsensoren.
+5. **Arme:** Schulterkapseln, Ellbogenkapseln mit Schubstange, dann Schlaufen ans Exo.
 6. **Feinschliff:** Verstärkung, Filter, Akkulaufzeit, eine Saison Praxis.
 
 Jede Stufe ist für sich testbar und verteilt die Kosten über die Zeit.

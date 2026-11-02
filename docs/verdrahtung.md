@@ -50,9 +50,12 @@ Zellen: 0/1 Oberschenkel L/R, 2/3 Oberarm L/R, 4/5 Unterarm L/R, 6/7/8 Schlaufen
 
 | ID | Motor | Übersetzung Gelenk : Motor |
 |---|---|---|
-| 1 / 2 | Hüfte links / rechts (an der Hüftschwinge) | 6 (Scheibe Ø 12 / Trommel Ø 2) |
-| 3 / 4 | Knie links / rechts (Box, Bowdenzug) | 3,33 gestreckt, bis 5,33 in der Hocke (Kurvenscheibe) |
-| 5 / 6 | Schulter links / rechts | 4,67 |
-| 7 / 8 | Ellbogen links / rechts | 3,33 |
+| 1 / 2 | Hüfte links / rechts (Hüftkapsel RS04, direkt) | 1 : 1 |
+| 3 / 4 | Knie links / rechts (Kniekapsel RS04, Schubstange) | 1 : 1 |
+| 5 / 6 | Schulter links / rechts (Schulterkapsel RS04, direkt) | 1 : 1 |
+| 7 / 8 | Ellbogen links / rechts (Ellbogenkapsel RS03, Schubstange) | 1 : 1 |
 
-IDs vor dem Einbau einzeln mit dem Hersteller-Tool setzen. Danach im Stand prüfen: Jeder Motor antwortet.
+IDs vor dem Einbau einzeln mit dem Hersteller-Tool setzen (CAN-USB-Adapter, RobStride-Software). Danach im Stand prüfen: Jeder Motor antwortet.
+
+**Zusätzliche Ausgänge (Entwurf 5):** Pin 42 Heizfolien der Beinkapseln, Pin 43 Heizfolien der Armkapseln, je über einen Logic-MOSFET aus dem 12-V-Wandler (Lötpunkte auf der Unterseite des Teensy 4.1; die SD-Karte wird nicht benutzt).
+**Bremswiderstand:** zwischen Akku-Plus und Minus hinter dem Schütz, eigene Schaltung (Komparator + MOSFET, ein ab 46 V, aus ab 44 V), 10 Ω / 200 W am Rahmen gekühlt; arbeitet unabhängig von der Software.

@@ -12,8 +12,8 @@ noch die CE-Konformität dazu (siehe unten).
 | Steuerung (Regler, Sicherheit, Bedienung) | fertig, Entwurf 4 | Physik-Simulation, 70+ automatische Prüfungen inkl. Kopplung, Baumlast-Vorsteuerung, Standbein/Schwungbein, Winden nacheinander, Wärmeschutz, Sturzdämpfung, Lendensperre, Rückneigungswarnung (`make -C firmware test`) |
 | Firmware Teensy 4.1 | baut | ARM-GCC, `exo.hex` (87 KB), keine Warnung im eigenen Code (`firmware/tools/build_teensy.sh`) |
 | Firmware ESP32-C3 (Anzeige Oberarm, Handy) | auf dem PC geprüft | Sketch mit Platzhaltern kompiliert und getestet (`test/esp32_host.cpp`); der Build mit dem echten ESP32-Compiler ist noch nicht gelaufen |
-| Laserteile | 34 DXF (Entwurf 4) | automatische Prüfung: geschlossene Konturen, Stege ≥ 4 mm je Bohrung ([fertigung/](../fertigung/)); neu: Abspreizgabel, Hüftmotorplatte, Seilscheibe Ø 120, Knie-Kurvenscheibe 45–155°, Beugescheibe Ø 90, Steigbügel (Abwicklung), Drehteller, Fersenbügel, Kippgelenk, Lendengelenk mit Rastsegment, Gasfederhalter, Schultergabel, Schulterschlitten, Schlaufenträger |
-| Druckteile | 19 STL | wasserdicht, passen in den A1 mini; neu: Fingerschutz (4 Größen), Akkuschacht, Fersenschale |
+| Laserteile | 27 DXF (Entwurf 5) | automatische Prüfung: geschlossene Konturen, Stege ≥ 4 mm je Bohrung ([fertigung/](../fertigung/)); neu in Entwurf 5: Motorträger RS04/RS03, Wangen, Abtriebsflansch, Kurbeln und Hebel an Knie und Ellbogen |
+| Druckteile | 19 STL | wasserdicht, passen in den A1 mini; neu in Entwurf 5: Kapselhauben (RS04, RS03), Kurbelschutz |
 | Stückliste, Verdrahtung | fertig | [stueckliste.md](stueckliste.md), [verdrahtung.md](verdrahtung.md) (Pinplan = Firmware) |
 | Schätzwerte bis zur Messung | mit Quellen | [schaetzwerte.md](schaetzwerte.md): Schlaufenkraft, Motorwärme, Reaktionszeit, Gewicht |
 | Bestellliste Prototyp | fertig | [bestellung-prototyp.md](bestellung-prototyp.md): alle Teile nach Bezugsweg, Reihenfolge in 5 Stufen (Prüfstand zuerst) |

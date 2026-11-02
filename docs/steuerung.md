@@ -91,7 +91,7 @@ etwa 11 Nm, auch wenn die Software versagt.
 |---|---|---|
 | Totband | 2 N | Rauschen (≈ 0,6 N) löst nichts aus; darüber setzt die Hilfe stetig ein, ohne Sprung |
 | Tiefpass | 8 Hz | ruhig, aber schnell genug für Armbewegungen |
-| Reibungsausgleich | 0,25 Nm (Knie 0,4) | Lager und Bowdenzüge verschwinden fast; weich um den Stillstand, damit nichts zittert |
+| Reibungsausgleich | 0,15 Nm (Knie 0,2) | Getriebe und Gelenkköpfe verschwinden fast; weich um den Stillstand, damit nichts zittert |
 | Dämpfung | 0,3 Nm·s/rad | klein: mehr machte das Exo in der Simulation zäh |
 | Momentänderung | höchstens 400–600 Nm/s | nichts ruckt |
 | Weiche Wände | 0,15 rad vor jedem Anschlag | Hilfe läuft vor dem Anschlag aus |
@@ -114,7 +114,7 @@ etwa 11 Nm, auch wenn die Software versagt.
 | Not-Aus (Pilz) mit LED-Ring | linker Schultergurt | trennt Motoren hart vom Akku; Ring zeigt Zustand und Akku |
 | Daumentaster: rechts 2, links 1 | an der Hand | je Schlaufe: kurz = zu, lang = auf. Beide rechten 2 s: Stufe wechseln |
 | Anzeige | rechter Oberarm außen | Uhrzeit, Akku mit Restzeit, Stufe, Fehler im Klartext |
-| Vibration | Box | bestätigt Schlaufe und Stufenwechsel |
+| Vibration | Elektronikbox | bestätigt Schlaufe und Stufenwechsel |
 
 ## 5. Zustände
 
@@ -128,7 +128,7 @@ Sturz erkannt ──▶ AUSLAUF in 0,1 s     Parkstütze unten ──▶ keine U
 ## 6. Elektronik
 
 ```
-Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 8 Gelenkmotoren (CAN-Bus): 2 an den Hüften, 6 in der Box
+Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 8 Gelenkkapseln (CAN-Bus): RS04 an Hüften, Knien, Schultern; RS03 an den Ellbogen; Bremswiderstand ab 46 V
                                                                ├── DC/DC 24 V ── 3 Motortreiber ── 3 Schlaufenwinden
                                                                └── DC/DC 5 V ── Steuerung, Display
 Teensy 4.1 + CAN-Transceiver + Knopfzelle (Uhr)
@@ -152,6 +152,15 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 | **Rückneigung** | Rumpf mehr als 9° nach hinten | Vibrationspulse: „lehn dich nach vorne“, bevor der Baum dich umzieht |
 | **Winden nacheinander** | mehrere Schlaufen gleichzeitig gedrückt | eine Winde nach der anderen (24-V-Wandler 2,5 A), Zeitgrenze 12 s je Bewegung |
 
+## 6b. Gelenkkapseln (Entwurf 5)
+
+| Funktion | Wie |
+|---|---|
+| Motoren | RobStride RS04 (Hüfte, Knie, Schulter), RS03 (Ellbogen), Übersetzung 1:1 (direkt bzw. Schubstange); Wertebereiche des CAN-Protokolls je Modell |
+| Wärmeschutz | wie 6a, mit dem Dauermoment in der Kapsel (RS04 25 Nm, RS03 14 Nm) statt dem Datenblattwert |
+| Frostschutz | Heizfolien je Gruppe (Pin 42 Beine, Pin 43 Arme): an, wenn die kälteste gemessene Wicklung unter +3 °C fällt und die Gruppe kaum arbeitet; aus über +8 °C |
+| Knie beugen | Software begrenzt auf 10 Nm, zusätzlich gibt das Federpaket in der Schubstange ab ≈ 11 Nm mechanisch nach |
+
 ## 7. Was schiefgehen kann, und was dagegen hilft
 
 | Problem | Ursache | Abhilfe |
@@ -168,7 +177,7 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 ## 8. So baut man es auf
 
 1. **Am Tisch:** eine Wägezelle an den Teensy, mit Gewichten kalibrieren, Rauschen anschauen.
-2. **Prüfstand Ellbogen:** Holzarm, Seilscheibe, Bowdenzug-Paar, ein Motor, eine Manschette ([montage.md](montage.md), Abschnitt 6).
+2. **Prüfstand:** eine Gelenkkapsel (RS04) mit Kurbel und Schubstange an einem Holzarm, eine Manschette. Zuerst Dichtheit und Frost testen (P35, P36).
 3. **Am Körper:** erst ein Arm, dann Schulter, dann Hüfte im Stand (Fußsensor), dann Knie, zuletzt Gehen.
 4. **Unter Last:** Sandsack in den Schlaufen (prüft die Last-Vorsteuerung), dann leichte, dann schwerere Bäume.
 

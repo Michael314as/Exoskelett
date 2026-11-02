@@ -17,7 +17,7 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | P5 | Isolation | Multimeter Akku+ / Akku− gegen Rahmen | > 1 MΩ | ☐ |
 | P6 | Not-Aus | Exo aktiv, Not-Aus drücken | Schütz offen, Ring rot, Motoren stromlos (Multimeter) | ☐ |
 | P7 | Watchdog | Test-Firmware mit Endlosschleife | Neustart in < 0,6 s, Schütz offen | ☐ |
-| P8 | Seilwege | volle Hocke, Arm ganz hoch und runter, Ellbogen ganz | Seil berührt kein Gelenk, keine Kante | ☐ |
+| P8 | Schubstangen | volle Hocke, Arm ganz hoch und runter, Ellbogen ganz | Stange und Kurbel berühren nichts, Hebel bleibt im Bereich ±55° | ☐ |
 | P9 | Vorspannung | Gelenk von Hand hin und her | kein fühlbares Spiel, kein Ruck an den Umkehrpunkten | ☐ |
 | P10 | Zellen-Vorzeichen | jede Manschette in +Richtung drücken | Konsole zeigt positive Kraft an der richtigen Zelle | ☐ |
 | P11 | Rauschen | Exo aus, ruhig, 10 s Rohwerte | Schwankung < 1 N | ☐ |
@@ -42,11 +42,14 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | P26 | Licht, Anzeige | Doppeltipp, Display | Licht schaltet, Display zeigt Akku/Stufe/Bäume | ☐ |
 | P27 | Sandsack 20 kg tragen | 50 m, Stufe 2 | Handkraft spürbar kleiner, keine Erwärmung > 60 °C an Motoren | ☐ |
 | P28 | Echte Bäume | 10 leichte, dann 10 mittlere | ohne Zwischenfall | ☐ |
-| P29 | Wetter | 1 h bei Nässe/Schnee | keine Aussetzer, Box innen trocken | ☐ |
+| P29 | Wetter | 1 h bei Nässe/Schnee | keine Aussetzer, Elektronikbox und Kapseln innen trocken | ☐ |
 | P30 | Akkulaufzeit | typischer Arbeitstag | ≥ 2 h mit einem Akku | ☐ |
 | P31 | Lendengelenk | bücken leer, dann 10 kg in Schlaufe | leer frei ±25°, Gasfedern tragen das Oberteil; mit Last rastet die Sperre in < 0,5 s, löst nach dem Absetzen | ☐ |
-| P32 | Fingerschutz, Quetschstellen | Finger/Jackenärmel an jede Scheibe, Lendengelenk, Schulterschlitten | nichts wird eingezogen oder eingeklemmt | ☐ |
+| P32 | Kurbelschutz, Quetschstellen | Finger/Jackenärmel an jede Kurbel, Lendengelenk, Schulterschlitten | nichts wird eingezogen oder eingeklemmt | ☐ |
 | P33 | Wärmeschutz | 20 kg Sandsack 5 min dauernd halten | Unterstützung sinkt langsam statt abzuschalten, Anzeige „Motor warm“, Motorgehäuse < 70 °C | ☐ |
 | P34 | Komfort-Freiheitsgrade | Fuß drehen, Unterarm drehen, Schultern hochziehen | Drehteller ±20° mit Rückstellung, Drehring frei, Schulter folgt ±3 cm | ☐ |
+| P35 | Kapsel dicht | 10 min Gartenschlauch auf die Kapsel, Gelenk dabei bewegen; Haube öffnen | innen trocken, kein Wasser am Motor | ☐ |
+| P36 | Kapsel bei Frost | über Nacht in den Gefrierschrank (−18 °C), dann einschalten | Heizung springt an, Gelenk läuft sofort leicht, nach 10 min Wicklung > +3 °C | ☐ |
+| P37 | Bremsenergie | 20 kg am Holzarm schnell absenken, Spannung am Bus messen | bleibt unter 50 V, kein Motor schaltet ab | ☐ |
 
 Datum, Firmware-Version (Git-Commit), Prüfer: ____________________

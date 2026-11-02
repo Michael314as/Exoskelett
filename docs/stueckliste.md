@@ -1,4 +1,4 @@
-# Stückliste und Herstellweg (Entwurf 4)
+# Stückliste und Herstellweg (Entwurf 5: Gelenkkapseln)
 
 Jedes Teil des Exos mit Menge, Material, **wie es entsteht** und welches Werkzeug dafür nötig ist.
 Damit ist geprüft, dass nichts eine Drehbank, Fräse oder Schweißanlage braucht.
@@ -12,8 +12,8 @@ Herstellweg:
 
 Preise sind Richtwerte (Stand November 2026). Motoren nach recherchierten Händlerpreisen, siehe [bestellung-prototyp.md](bestellung-prototyp.md).
 
-**Gesamt Material, ein Exo:** etwa **3.800–4.400 €**, davon Motoren RobStride RS06 1.700–2.200 €, alles andere ≈ 2.100–2.200 €.
-Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand + Schlaufe ≈ 480 €.
+**Gesamt Material, ein Exo:** etwa **4.700–5.600 €**, davon Motoren (6 × RobStride RS04, 2 × RS03) 2.600–2.900 €, alles andere ≈ 2.100–2.700 €.
+Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand (eine Kapsel) + Schlaufe ≈ 600 €.
 
 ---
 
@@ -28,7 +28,7 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Abspreizgelenk: Gabel | 2 | Alu 8 mm, 2 Platten + Steg | Laser | 25 € |
 | Abspreizgelenk: Nabe, Achsbolzen, Kugelsperrbolzen Ø 16 | 2 Satz | Alu-Block, 2 Gleitlager, Bolzen | Kauf + Bohren | 40 € |
 | Zentrierfedern + Gummipuffer | 4 + 4 | Druckfeder Ø 13, TPU | Kauf / Druck | 10 € |
-| Hüftschwinge | 2 | Alu-Vierkantrohr 25 × 25 × 2, je 2 Stücke + Eckplatten, Motorplatte Alu 4 mm | Säge + Bohren, Laser | 25 € |
+| Hüftschwinge | 2 | Alu-Vierkantrohr 35 × 35 × 3 + Eckplatten | Säge + Bohren, Laser | 25 € |
 | Hüftlager | 2 | Flanschlager UCFL/KFL, 2RS | Kauf | 20 € |
 | Ober-/Unterschenkelschienen außen | 4 | Alu 25 × 25 × 2 | Säge + Bohren (Lochraster per Schablone) | 15 € |
 | Ober-/Unterschenkelschienen innen | 4 | Alu 20 × 20 × 2 | Säge + Bohren | 10 € |
@@ -42,24 +42,26 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Knöchellager (Flanschlager klein) | 2 | 2RS | Kauf | 14 € |
 | Fersenbügel mit Kippgelenk hinter der Ferse | 2 Satz | Alu-Rohr 16 mm gebogen oder Laser-Laschen, Bolzen mit Gummibuchsen | Laser + Kauf | 25 € |
 
-## 2. Antrieb und Seile
+## 2. Antrieb: Gelenkkapseln und Schubstangen
 
 | Teil | Menge | Material, Maß | Herstellweg | etwa |
 |---|---|---|---|---|
-| Robotergelenk-Motoren RobStride RS06 (CAN 2.0, 15–60 V) | 8 | 11 Nm Nenn / 36 Nm Spitze, 621 g (2 an den Hüften, 6 in der Box); ≈ 197–255 $/Stück (China ¥ 849) + Versand, Einfuhrumsatzsteuer 19 %, Zoll ≈ 2,7 % | Kauf | 1.700–2.200 € |
-| Seiltrommeln | 6 + 2 | Alu-Rohr Ø 30 (Box) bzw. Ø 20 (Hüfte) + Bordscheiben | Säge + Bohren, Bordscheiben Laser | 35 € |
-| Montageplatte Box | 1 | Alu 4 mm | Laser | 20 € |
-| Seilscheibe Hüftmotor Ø 12 cm, zwei Rillen | 2 | Alu, 3 Lagen + 2 Zwischenlagen | Laser | 25 € |
-| Kurvenscheibe Knie (strecken) und Beugescheibe Ø 9 cm | 2 + 2 | Alu 10 mm, Profil 5→8 cm | Laser (2 Lagen + Zwischenlage) | 30 € |
-| Federpatrone Knie-Beugezug | 2 | Druckfeder ~250 N mit Hülse und Anschlag | Kauf + Druck | 15 € |
-| Seilscheibe Schulter Ø 14 / Ellbogen Ø 10 | 4 | Alu 10 mm | Laser (2 Lagen + Zwischenlage) | 30 € |
-| Seilrollen mit Kugellager | 4 | Ø 30–40 mm (nur noch Schulter) | Kauf | 12 € |
-| Dyneema-Seil 3 mm | 15 m | SK78 | Kauf | 20 € |
-| Bowdenhülle + Innenzug | 4 Paar | kompressionsarm, PTFE-Liner (Ellbogen, Knie) | Kauf | 60 € |
-| Spannschrauben, Seilklemmen, Kauschen | 1 Satz | Edelstahl | Kauf | 20 € |
+| Robotergelenk-Motor RobStride RS04 (Hüfte, Knie, Schulter) | 6 | 40 Nm Nenn / 120 Nm Spitze, 1,42 kg, Ø 120 × 52; ≈ 295–320 $ (China ¥ 1.199) | Kauf | 1.950–2.200 € |
+| Robotergelenk-Motor RobStride RS03 (Ellbogen) | 2 | 20 Nm Nenn / 60 Nm Spitze, 0,88 kg; ≈ 225–245 $ (China ¥ 999) | Kauf | 500–560 € |
+| (beides inkl. Versand, Einfuhrumsatzsteuer 19 %, Zoll ≈ 2,7 %) | | | | |
+| Motorträger RS04 / RS03 + Wangen | 8 + 12 | Alu 6082, 5–8 mm | Laser | 90 € |
+| Abtriebsflansch RS04 (Oberschenkel, Oberarm) | 4 | Alu 8 mm | Laser | 20 € |
+| Kapselhauben | 8 | PETG-CF, Wand 2 mm, O-Ring-Nut | Druck | 25 € |
+| V-Ringe, O-Ringe, Kabelverschraubungen M16 | 8 Satz | NBR, Messing vernickelt | Kauf | 40 € |
+| Druckausgleichselemente M12 | 8 | Membran (z. B. GORE) | Kauf | 50 € |
+| Heizfolien Silikon 12 V 4 W mit NTC, Dämmung 5 mm | 8 | | Kauf | 60 € |
+| Kurbeln Knie (r 60) / Ellbogen (r 50), Hebel Knie / Ellbogen | 2 + 2 + 2 + 2 | Alu 6082, 8–10 mm | Laser | 30 € |
+| Schubstangen | 2 + 2 | Stahlrohr Ø 12 × 2 (Knie), Ø 10 × 1,5 (Ellbogen), Gewinde M8 / M6 | Säge + Kleben/Löten | 15 € |
+| Gelenkköpfe Edelstahl, DIN ISO 12240-4 | 4 × M8 + 4 × M6 | wartungsfrei (z. B. SKF SIKAC 8 M / 6 M) | Kauf | 70 € |
+| Federpaket Knie (Druckfeder mit Hülse in der Stange) | 2 | Federstahl | Kauf + Druck | 15 € |
+| Bremswiderstand mit Schaltung (ab 46 V, 10 Ω / 200 W) | 1 | Aluminium-Gehäusewiderstand, MOSFET, Komparator | Kauf + Löten | 30 € |
 
-*Seilrille ohne Drehbank:* Zwei gelaserte Scheiben mit vollem Durchmesser und eine dünnere Zwischenscheibe mit kleinerem
-Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
+*Warum keine Seile mehr:* siehe [konzept.md](konzept.md), Abschnitt 5.
 
 ## 3. Arme, Manschetten, Greifer
 
@@ -108,13 +110,13 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 | Schutzbügel CFK-Rundrohr Ø 22 × 1,5, Alu-Eckverbinder geklebt, Gummipuffer | 1 Satz | Kauf + Kleben | 45 € |
 | Magnet-Schnallen | 3 | Kauf | 40 € |
 | Kugelsperrbolzen für Transport | 6 | Kauf | 30 € |
-| Haube über der Box, Abdeckungen | 1 Satz | Druck (Haube in 2 Teilen, je < 18 cm) | 10 € |
+| Haube über der Elektronikbox | 1 Satz | Druck (2 Teile, je < 18 cm) | 10 € |
 | Schutzhauben Cordura | 1 Satz | Kauf/Nähen lassen | 30 € |
 | Eloxieren oder Pulverbeschichten | 1 Auftrag | Dienst | 60–150 € |
 | Lendengelenk: Scharnierlaschen, Rastsegment, Elastomerfeder, Bolzen Ø 10 | 1 Satz | Laser + Kauf | 35 € |
 | Gasfedern 150 N, Ø 15/6, Hub 80 mm, L 236 mm, Kugelpfannen M6, Halter | 2 + 4 | Kauf + Laser | 30 € |
 | Hubmagnet Intertec ITS-LZ-3263-D-24VDC + Sperrbolzen Ø 8 (Lendensperre) | 1 | Kauf | 40 € |
-| Fingerschutz Seilscheiben (Hüfte, Knie, Schulter, Ellbogen) | 8 | Druck PETG transparent | 10 € |
+| Kurbelschutz Knie und Ellbogen | 4 | Druck PETG transparent | 5 € |
 | Drehteller Steigbügel: Axial-Nadellager AXK 3047, 2 Laufscheiben, Zentrierfeder | 2 Satz | Kauf + Laser | 25 € |
 | Drehring Unterarm (Dünnring- oder Kunststoff-Kugellager Ø 80–90) | 2 | Kauf | 30 € |
 | Schulterschlitten: Wellen Ø 8 h6, Linearlager LM8UU, Druckfeder | 2 Satz | Kauf + Laser | 25 € |

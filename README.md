@@ -4,15 +4,15 @@ Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnitte
 
 > **3D:** `visualisierung/exo-konstruktion.html` (Konzeptzeichnung) und `visualisierung/exo-technik.html` (technische Ansicht mit Bauteil-IDs, realen Kaufteilen, Bewegung nach Motorkennlinie, Schwerpunkt, Maßen).
 
-> **Stand: Entwurf 4** (Hüfte mit Abspreizgelenk und eigenem Hüftmotor, Beine in beide Richtungen, Gurtsystem, Schlaufen unten + außen, Anzeige am Oberarm). Dazu Lendengelenk mit Gasfedern und automatischer Sperre, Fingerschutz, Drehteller am Fuß, Drehring am Unterarm, Schulterschlitten, Wärmeschutz und Sturzdämpfung in der Firmware. Die Fertigungsdateien in `fertigung/` sind auf Entwurf 4. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md). Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
+> **Stand: Entwurf 5 – Gelenkkapseln.** Die Motoren (RobStride RS04 an Hüfte, Knie, Schulter; RS03 am Ellbogen) sitzen direkt an den Gelenken in dichten, beheizten Kapseln; Knie und Ellbogen werden über starre Schubstangen angetrieben. Keine Seile, Bowdenzüge oder Umlenkrollen mehr, die vereisen oder reißen können. Gewicht laut Bauteilliste 37,2 kg, Material ≈ 4.700–5.600 €. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md).
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt
 
-- Motoren und Stihl-Akku sitzen hinten im Rückenrahmen.
-- **Beine:** ein Dyneema-Seil pro Bein streckt Hüfte und Knie (nur nach oben, Beugen macht man selbst). Es läuft um Scheiben auf den Gelenkachsen, am Knie eine Kurvenscheibe mit mehr Hebel in der Hocke.
-- **Hüfte:** Beine lassen sich frei seitlich abspreizen und drehen; angetrieben wird nur vor/zurück.
-- **Arme:** Seilpaare auf Seilscheiben bewegen Schultern (offenes Seil) und Ellbogen (Bowdenzug) in **beide Richtungen**.
+- Stihl-Akku und Elektronik sitzen hinten im Rückenrahmen, die **Motoren direkt an den Gelenken** in dichten, beheizten Kapseln.
+- **Beine:** Hüftmotor direkt auf der Hüftachse, Kniemotor oben am Oberschenkel mit Schubstange zum Knie; beide Richtungen, im Stand trägt das Exo sich selbst und einen Teil von dir.
+- **Hüfte:** Beine lassen sich frei seitlich abspreizen (Zentrierfedern); angetrieben wird vor/zurück.
+- **Arme:** Schultermotor direkt auf der Schulterachse, Ellbogenmotor oben am Oberarm mit Schubstange, **beide Richtungen**.
 - **Greifen:** Schlaufen kommen am Handgelenk nach unten heraus, rechts zwei, links eine; der Stamm liegt längs als Verlängerung des Unterarms. Jede Schlaufe hat eine eigene kleine Winde.
 - **Steuerung:** Die blauen Manschetten sitzen auf Kraftsensoren. Drückst du gegen eine Manschette, bewegt das Exo das Gelenk mit.
 - **Füße:** Steigbügel mit Spikes nach dem Prinzip eines Steigeisens, für Schlamm, Schnee und unebenes Gelände.
