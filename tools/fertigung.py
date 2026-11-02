@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fertigungsdateien für das Christbaum-Exo (Entwurf 4).
+"""Fertigungsdateien für das Christbaum-Exo (Entwurf 5: Gelenkkapseln).
 
 Erzeugt aus Parametern:
   fertigung/laser/*.dxf   Laserteile (Alu/Edelstahl), nur Schnittkonturen in mm, eine Datei je Teil
@@ -28,12 +28,11 @@ SEG = 96
 # ------------------------------------------------------------------ Parameter (vom Kaufteil abhängig) ----
 # Flanschlager 2-Loch (Händlerdaten, vor der Bestellung am gelieferten Teil prüfen): Bohrung, Lochabstand, Schraubenloch
 KFL = {'KFL08': (8, 37.0, 4.8), 'KFL001': (12, 48.0, 6.6), 'KFL002': (15, 53.0, 7.0)}
-# Motor RobStride RS06 (Maßzeichnung im RS06 User Manual, github.com/RobStride/Product_Information):
-#   Gehäuse 8 × M3 (8,5 tief) auf Ø 82 ± 0,2, außen Ø 88, Länge 49; Abtrieb 6 × M4 auf Ø 24, 3 Stifte Ø 4, drehender Bund Ø 52
-MOTOR_LOCHKREIS = 82.0
-MOTOR_LOCH = 3.4             # Durchgang M3
-MOTOR_LOECHER = 8
-MOTOR_ZENTRIER = 53.6        # Freigang für den drehenden Abtriebsbund Ø 52
+# Motoren RobStride (Maßzeichnungen in den Handbüchern, github.com/RobStride/Product_Information):
+#   RS04: Ø 120 × 52, Gehäuse 10 × M4 auf Ø 106 (vorne und hinten), Abtrieb 9 × M5 auf Ø 36 + 3 Stifte Ø 6, Bund Ø 94
+#   RS03: Flansch Ø 98 (8 × M4 auf Ø 98), Körper Ø 80 × 54, Abtrieb 6 × M4 auf Ø 30,36 + 3 Stifte Ø 4
+RS04 = dict(lk=106.0, n=10, loch=4.5, ab_lk=36.0, ab_n=9, ab_loch=5.5)
+RS03 = dict(lk=98.0, n=8, loch=4.5, ab_lk=30.36, ab_n=6, ab_loch=4.5)
 M10, M6, M5_GEWINDE, M4, M3 = 10.5, 6.6, 4.2, 4.5, 3.4   # Durchgänge bzw. Kernloch M5 (Spikes in Edelstahl schneiden)
 STEG_MIN = 4.0               # kleinster Abstand Loch–Rand bzw. Loch–Loch (Laser-Faustregel ~ 1 × Blechdicke)
 
@@ -109,12 +108,10 @@ laser('lagerplatte_kfl001', lagerplatte('KFL001', 80, 64), 'Alu 6082 T6', 6, 8, 
 laser('lagerplatte_kfl08', lagerplatte('KFL08', 66, 56), 'Alu 6082 T6', 6, 8, 'Gelenkplatten Ellbogen und Knöchel für KFL08 (Lochabstand 37 mm), 2 je Gelenk')
 laser('lagerplatte_kfl002', lagerplatte('KFL002', 86, 66), 'Alu 6082 T6', 8, 2, 'Hüftlager KFL002 an der Hüftschwinge (Lochabstand 53 mm)')
 
-def motorbild(cs, x, y, dreh=22.5):
-    """Freigang für den Abtrieb + 8 Schrauben M3 auf dem Motor-Lochkreis Ø 82 (um 22,5° gedreht: keine Schraube am Plattenrand)."""
-    cs = cs - circ(MOTOR_ZENTRIER / 2, x, y)
-    for i in range(MOTOR_LOECHER):
-        a = math.radians(dreh + 360.0 / MOTOR_LOECHER * i)
-        cs = cs - circ(MOTOR_LOCH / 2, x + MOTOR_LOCHKREIS / 2 * math.cos(a), y + MOTOR_LOCHKREIS / 2 * math.sin(a))
+def lochkreis(cs, lk, n, d, x=0.0, y=0.0, dreh=0.0):
+    for i in range(n):
+        a = math.radians(dreh + 360.0 / n * i)
+        cs = cs - circ(d / 2, x + lk / 2 * math.cos(a), y + lk / 2 * math.sin(a))
     return cs
 
 # Abspreizgabel Hüfte (HU-01): zwei Wangen je Seite, Achse Ø 16 nach vorne durch das Hüftgelenk, oben an den Rahmen geschraubt
@@ -125,51 +122,41 @@ laser('abspreizgabel_steg', P(rrect(82, 60, 6)) - circ(M6 / 2, -30, -18) - circ(
 laser('zentrierfeder_halter', P(rrect(28, 30, 4)) - circ(M4 / 2, 0, 7) - circ(6.2 / 2, 0, -6),
       'Edelstahl 1.4301', 3, 4, 'Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder')
 
-# Hüftschwinge: Motorplatte des Hüftmotors (Langlöcher zum Spannen der Seilschleife)
-def hueftmotorplatte():
-    cs = motorbild(P(rrect(130, 110, 8)), -5, 0)
-    for x in (-50, 50):
-        for y in (-40, 40):
-            cs = cs - slot(16, M6, x, y)
-    return cs
-laser('hueftmotor_platte', hueftmotorplatte(), 'Alu 6082 T6', 8, 2, 'Motorplatte an der Hüftschwinge HU-05; Langlöcher ±5 mm spannen das Seil Trommel → Scheibe Ø 120')
-
-# Seilscheiben aus Schichten: Bord (voller Ø), Rille (Ø − 2 · Rillentiefe), Trennscheibe. Löcher fluchten durch alle Lagen.
-def scheibe(R, rille=False, trenn=False, schrauben=6, pcd=None, erleichtern=True, bohrung=M10):
-    r = R - 4.0 if rille else R
-    cs = P(circ(r)) - circ(bohrung / 2)
-    pcd = pcd or (R * 0.62)
-    for i in range(schrauben):
-        a = 2 * math.pi * i / schrauben
-        cs = cs - circ(M4 / 2, pcd * math.cos(a), pcd * math.sin(a))
-    if erleichtern and R >= 60:                                                 # kleine Scheiben bleiben voll (Steg)
-        for i in range(4):
-            a = 2 * math.pi * i / 4 + math.pi / 4
-            cs = cs - circ(R * 0.17, R * 0.38 * math.cos(a), R * 0.38 * math.sin(a))
-    if rille:                                                                   # Seil durch die Lage, Klemmschraube daneben
-        cs = cs - circ(1.6, 0, -(r - 9.0))                                   # mittig zwischen zwei Schrauben
-    return cs
-# Hüfte Ø 120 am Oberschenkel (offene Schleife zum Motor, eine Rille mit zwei Seilenden), Schulter Ø 140 und Ellbogen Ø 100 (Seilpaar)
-for nm, R, pair, n, pcd in (('schulter', 70, True, 2, None), ('ellbogen', 50, True, 2, None), ('huefte', 60, True, 2, 45.0)):
-    laser(f'seilscheibe_{nm}_bord', scheibe(R, pcd=pcd), 'Alu 5754', 4, 2 * n, f'Seilscheibe {nm} Ø{2 * R}: Bordscheiben außen')
-    laser(f'seilscheibe_{nm}_rille', scheibe(R, rille=True, pcd=pcd), 'Alu 5754', 3, (2 if pair else 1) * n, f'Seilscheibe {nm}: Rillenlagen, 3 mm für Seil Ø 3')
-    laser(f'seilscheibe_{nm}_trenn', scheibe(R, trenn=True, pcd=pcd), 'Alu 5754', 2, n, f'Seilscheibe {nm}: Trennlage zwischen den beiden Rillen')
-laser('knie_beugescheibe_bord', scheibe(45, erleichtern=False), 'Alu 5754', 4, 4, 'Beugescheibe Knie Ø 90 (Beugezug mit Federpatrone): Bordscheiben')
-laser('knie_beugescheibe_rille', scheibe(45, rille=True, erleichtern=False), 'Alu 5754', 3, 2, 'Beugescheibe Knie: Rillenlage')
-
-# Knie-Kurvenscheibe (Streckzug): Radius 50 mm gestreckt bis 80 mm in der Hocke, wie kneeCam im 3D-Modell (45° … 155°)
-def camR(a):
-    return 50 + 30 * min(1.0, max(0.0, (a - math.radians(45)) / math.radians(110)))
-def kurve(rille):
-    d = 4.0 if rille else 0.0
-    pts = polar(lambda a: camR(a) - d, -60, 220, 280) + [(0.0, 0.0)]
-    cs = P(CS([pts]) + circ(26)) - circ(M10 / 2) - circ(M4 / 2, 0, 16) - circ(M4 / 2, 0, -16) - circ(M4 / 2, 16, 0) - circ(M4 / 2, -16, 0)
-    if rille:
-        a = math.radians(0)
-        cs = cs - circ(1.6, (camR(a) - 12) * math.cos(a), (camR(a) - 12) * math.sin(a))
-    return cs
-laser('knie_kurvenscheibe_bord', kurve(False), 'Alu 5754', 4, 4, 'Knie-Kurvenscheibe Streckzug: Bordscheiben (2 je Knie)')
-laser('knie_kurvenscheibe_rille', kurve(True), 'Alu 5754', 3, 2, 'Knie-Kurvenscheibe: Rillenlage, Seilende bei 0°')
+# ---------- Gelenkkapseln (Entwurf 5) ----------
+# Motorträger-Deckel: liegt auf der Rückseite des Motors (Lochbild des Gehäuses), Taschen zum Erleichtern, Mitte frei für Stecker und Druckausgleich
+def motortraeger(m, R, taschen):
+    p = lochkreis(P(circ(R)) - circ(14), m['lk'], m['n'], m['loch'], dreh=18)
+    for i in range(taschen):
+        a = math.radians(360.0 / taschen * i)
+        p = p - slot(16, 9, (R * 0.55) * math.cos(a), (R * 0.55) * math.sin(a), math.degrees(a) + 90)
+    for x in (-R + 9, R - 9):                                                    # Anschluss an die Wangen
+        p = p - circ(M6 / 2, x, 0)
+    return p
+laser('motortraeger_rs04', motortraeger(RS04, 64.0, 6), 'Alu 6082 T6', 6, 6, 'Motorträger AN-04 für RS04 (Hüfte, Knie, Schulter): 10 × M4 auf Ø 106')
+laser('motortraeger_rs03', motortraeger(RS03, 58.0, 6), 'Alu 6082 T6', 5, 2, 'Motorträger AN-04 für RS03 (Ellbogen): 8 × M4 auf Ø 98')
+laser('motortraeger_wange', P(rrect(40, 120, 6)) - circ(M6 / 2, 0, 50) - circ(M6 / 2, 0, -50) - slot(24, M6, 0, 0, 90) - circ(M6 / 2, -10, -30) - circ(M6 / 2, 10, -30),
+      'Alu 6082 T6', 8, 12, 'Wangen zwischen Schiene bzw. Schwinge und Motorträger (2 je Kapsel an Knie und Ellbogen, 1 je Kapsel an Hüfte und Schulter); Langloch zum Ausrichten')
+# Abtriebsflansche: Oberschenkel (Hüfte) und Oberarm (Schulter) am Abtrieb des RS04; Stiftlöcher Ø 6 nach dem Motor bohren (Steg)
+def abtriebsflansch(m, w, h):
+    p = lochkreis(P(rrect(w, h, 8)) - circ(9), m['ab_lk'], m['ab_n'], m['ab_loch'])
+    for x in (-w / 2 + 10, w / 2 - 10):
+        for y in (-h / 2 + 10, h / 2 - 10):
+            p = p - circ(M6 / 2, x, y)
+    return p
+laser('abtriebsflansch_rs04', abtriebsflansch(RS04, 90, 90), 'Alu 6082 T6', 8, 4, 'Flansch Abtrieb RS04 → Oberschenkelplatte (Hüfte) bzw. Oberarmschiene (Schulter); 9 × M5 auf Ø 36')
+# Kurbeln und Hebel (Parallelogramm 1:1): Kurbel am Motorabtrieb, Hebel am Gelenk, Zapfen für die Gelenkköpfe
+def kurbel(m, r, zapfen, nabe):
+    p = P(circ(nabe) + rrect(r, 2 * zapfen + 8, zapfen + 4, r / 2, 0) + circ(zapfen + 4, r, 0)) - circ(6)
+    p = lochkreis(p, m['ab_lk'], m['ab_n'], m['ab_loch'], dreh=20)
+    return p - circ(zapfen / 2, r, 0)
+laser('kurbel_knie', kurbel(RS04, 60.0, 8.2, 27.0), 'Alu 6082 T6', 10, 2, 'Kurbel BA-01: auf dem Abtrieb des Kniemotors (9 × M5), Zapfen M8 bei 60 mm')
+laser('kurbel_ellbogen', kurbel(RS03, 50.0, 6.2, 23.0), 'Alu 6082 T6', 8, 2, 'Kurbel AR-04: auf dem Abtrieb des Ellbogenmotors (6 × M4), Zapfen M6 bei 50 mm')
+def hebel(r, zapfen, bohrung, lk, n, d, nabe):
+    p = P(circ(nabe) + rrect(r, 2 * zapfen + 8, zapfen + 4, r / 2, 0) + circ(zapfen + 4, r, 0)) - circ(bohrung / 2)
+    p = lochkreis(p, lk, n, d, dreh=30)
+    return p - circ(zapfen / 2, r, 0)
+laser('kniehebel', hebel(60.0, 8.2, 12.5, 32.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 2, 'Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen M8 bei 60 mm')
+laser('ellbogenhebel', hebel(50.0, 6.2, 8.5, 26.0, 3, M4, 20.0), 'Alu 6082 T6', 8, 2, 'Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen M6 bei 50 mm')
 
 # Steigbügel (BE-11) unter der Sohlenmitte: Abwicklung, die beiden Laschen werden 90° hochgekantet (Biegelinie ±67,5 mm)
 def steigbuegel():
@@ -221,19 +208,6 @@ def schlaufentraeger(koepfe):
     return p
 laser('schlaufentraeger_rechts', schlaufentraeger(2), 'Alu 6082 T6', 6, 1, 'Schlaufenträger rechts (2 Köpfe: unten + außen), kalt biegen nach Schablone')
 laser('schlaufentraeger_links', schlaufentraeger(1), 'Alu 6082 T6', 6, 1, 'Schlaufenträger links (1 Kopf unten)')
-
-# Motorplatte der Antriebsbox: 6 Motoren in 3 Reihen (unten Knie, Mitte Ellbogen, oben Schulter), Lochkreis 45° gedreht
-def motorplatte():
-    cs = P(rrect(290, 350, 10))
-    for y in (-100, 0, 100):
-        for x in (-100, 100):
-            cs = motorbild(cs, x, y)
-    for x in (-135, 135):
-        for y in (-160, -50, 50, 160):
-            cs = cs - circ(M6 / 2, x, y)
-    cs = cs - slot(60, 10, 0, -160, 0) - slot(60, 10, 0, 160, 0)
-    return cs
-laser('motorplatte', motorplatte(), 'Alu 5754', 4, 1, 'Montageplatte Antriebsbox für 6 × RobStride RS06 (8 × M3 auf Ø 82 laut Herstellerzeichnung)')
 
 # Parkstütze: Klappgelenk-Lasche mit Rastloch
 laser('parkstuetze_lasche', P(rrect(70, 56, 8)) - circ(M10 / 2, -20, -8) - circ(M6 / 2, 18, 10) - circ(M6 / 2, 18, -10) - circ(6.2 / 2, -20, 12),
@@ -319,8 +293,8 @@ def haube(seite):
     for y in (-50, 0, 50):
         m = m - Manifold.cylinder(30, 1.7, 1.7, 24).rotate((0, 90, 0)).translate((-5, y, H - t - 6))
     return m if seite == 'links' else m.mirror((1, 0, 0))
-druck('haube_links', haube('links'), 'PETG', 1, 'Haube Antriebsbox, linke Hälfte')
-druck('haube_rechts', haube('rechts'), 'PETG', 1, 'Haube Antriebsbox, rechte Hälfte')
+druck('haube_links', haube('links'), 'PETG', 1, 'Haube Elektronikbox, linke Hälfte')
+druck('haube_rechts', haube('rechts'), 'PETG', 1, 'Haube Elektronikbox, rechte Hälfte')
 
 def fingerschutz(R, breite, name, n, bogen=200):
     """Halbschale über einer Seilscheibe (RA-11): Mantel mit Abstand 6 mm, eine Seitenwand, Schraublaschen. Druck in transparentem PETG."""
@@ -333,10 +307,23 @@ def fingerschutz(R, breite, name, n, bogen=200):
         lug = Manifold.cube((14, 14, t * 2), True).translate((x, y, t))
         m = m + lug - Manifold.cylinder(10, M4 / 2, M4 / 2, 24).translate((x, y, -1))
     druck(name, m, 'PETG transparent', n, f'Fingerschutz RA-11 über Scheibe Ø {2 * R:.0f}: nichts kann zwischen Seil und Scheibe geraten')
-fingerschutz(60, 24, 'fingerschutz_huefte', 2)
-fingerschutz(80, 22, 'fingerschutz_knie', 2, bogen=150)
-fingerschutz(70, 24, 'fingerschutz_schulter', 2)
-fingerschutz(50, 22, 'fingerschutz_ellbogen', 2)
+fingerschutz(78, 18, 'kurbelschutz_knie', 2, bogen=200)
+fingerschutz(66, 16, 'kurbelschutz_ellbogen', 2, bogen=200)
+
+def kapselhaube(r_motor, laenge, name, n):
+    """Haube der Gelenkkapsel (AN-02): Topf aus PETG-CF, Wand 2 mm, 5 mm Raum für Dämmung, Nut für O-Ring am offenen Rand,
+    unten Bohrung M16 für die Kabelverschraubung und M12 für das Druckausgleichselement, innen vier Rippen."""
+    ri = r_motor + 5.0 + 1.0; t = 2.0; h = laenge + 12.0
+    m = Manifold.cylinder(h, ri + t, ri + t, 96) - Manifold.cylinder(h, ri, ri, 96).translate((0, 0, t))
+    m = m - (Manifold.cylinder(2.0, ri + 1.2, ri + 1.2, 96) - Manifold.cylinder(2.0, ri - 0.2, ri - 0.2, 96)).translate((0, 0, h - 2.0))   # O-Ring-Nut
+    m = m - Manifold.cylinder(t + 2, 8.1, 8.1, 32).translate((0, -ri * 0.55, -1))                     # M16 Kabelverschraubung
+    m = m - Manifold.cylinder(t + 2, 6.1, 6.1, 32).translate((ri * 0.5, -ri * 0.45, -1))             # M12 Druckausgleich
+    for i in range(4):
+        a = math.radians(45 + 90 * i)
+        m = m + Manifold.cube((6, 2, h - t - 3), True).rotate((0, 0, math.degrees(a))).translate(((ri - 1) * math.cos(a), (ri - 1) * math.sin(a), t + (h - t - 3) / 2))
+    druck(name, m, 'PETG-CF', n, f'Kapselhaube AN-02 für Motor Ø {2 * r_motor:.0f}: O-Ring-Nut, M16 Kabel, M12 Druckausgleich; innen 5 mm Dämmung und Heizfolie einkleben')
+kapselhaube(60.0, 52.0, 'kapselhaube_rs04', 6)
+kapselhaube(49.0, 54.0, 'kapselhaube_rs03', 2)
 
 def akkuschacht_wand():
     """Seitenwand Akkuschacht EN-02 (Stihl AP 500 S 70 × 116 × 164): Einschub von hinten, Nut für Alu-Führungsschiene 4 × 4."""
@@ -445,7 +432,7 @@ def main():
     # Teileliste
     md = ['# Teileliste Fertigung (erzeugt mit tools/fertigung.py)', '',
           'Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: Druckteile, Einheit mm.', '',
-          '**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochkreis der Motoren (RobStride RS06: `MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm, 8 × M3) mit den Datenblättern der gekauften Teile.', '',
+          '**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochbilder der Motoren (RobStride RS04: 10 × M4 auf Ø 106, Abtrieb 9 × M5 auf Ø 36; RS03: 8 × M4 auf Ø 98, Abtrieb 6 × M4 auf Ø 30,36) mit den Datenblättern der gekauften Teile.', '',
           '## Laserteile', '', '| Datei | Material | Dicke | Stück | Größe | Löcher | kleinster Steg | Zweck |', '|---|---|---|---|---|---|---|---|']
     md += [f'| `laser/{r[0]}.dxf` | {r[1]} | {r[2]} mm | {r[3]} | {r[4]} | {r[5]} | {r[6]} mm | {r[7]} |' for r in rows_l]
     md += ['', '## Druckteile (Bambu Lab A1 mini, 180 × 180 × 180 mm)', '', '| Datei | Material | Stück | Größe | Volumen cm³ | passt | Genus | Zweck |', '|---|---|---|---|---|---|---|---|']
