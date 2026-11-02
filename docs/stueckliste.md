@@ -107,6 +107,13 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 | Haube über der Box, Abdeckungen | 1 Satz | Druck (Haube in 2 Teilen, je < 18 cm) | 10 € |
 | Schutzhauben Cordura | 1 Satz | Kauf/Nähen lassen | 30 € |
 | Eloxieren oder Pulverbeschichten | 1 Auftrag | Dienst | 60–150 € |
+| Lendengelenk: Scharnierlaschen, Rastsegment, Elastomerfeder, Bolzen Ø 10 | 1 Satz | Laser + Kauf | 35 € |
+| Gasfedern 150 N, Hub 50 mm, Kugelpfannen M6, Halter | 2 + 4 | Kauf + Laser | 30 € |
+| Hubmagnet 24 V mit Sperrbolzen Ø 8 (Lendensperre) | 1 | Kauf | 15 € |
+| Fingerschutz Seilscheiben (Hüfte, Knie, Schulter, Ellbogen) | 8 | Druck PETG transparent | 10 € |
+| Drehteller Steigbügel: Axial-Nadellager AXK 3047, 2 Laufscheiben, Zentrierfeder | 2 Satz | Kauf + Laser | 25 € |
+| Drehring Unterarm (Dünnring- oder Kunststoff-Kugellager Ø 80–90) | 2 | Kauf | 30 € |
+| Schulterschlitten: Wellen Ø 8 h6, Linearlager LM8UU, Druckfeder | 2 Satz | Kauf + Laser | 25 € |
 
 ---
 

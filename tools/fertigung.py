@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fertigungsdateien für das Christbaum-Exo (Entwurf 3.2).
+"""Fertigungsdateien für das Christbaum-Exo (Entwurf 4).
 
 Erzeugt aus Parametern:
   fertigung/laser/*.dxf   Laserteile (Alu/Edelstahl), nur Schnittkonturen in mm, eine Datei je Teil
@@ -101,16 +101,37 @@ def lagerplatte(w, h):
     a = FLANSCH_LOCHABSTAND / 2
     return (P(rrect(w, h, 8)) - circ(M10 / 2) - circ(FLANSCH_LOCH / 2, -a, 0) - circ(FLANSCH_LOCH / 2, a, 0)
             - circ(M6 / 2, -a + 8, -h / 2 + 10) - circ(M6 / 2, a - 8, -h / 2 + 10) - circ(M6 / 2, 0, h / 2 - 10))
-laser('lagerplatte', lagerplatte(95, 70), 'Alu 5754', 6, 16, 'Gelenkplatten Hüfte, Knie, Schulter, Ellbogen (je 2 Platten pro Gelenk)')
+laser('lagerplatte', lagerplatte(95, 70), 'Alu 6082 T6', 6, 16, 'Gelenkplatten Knie, Knöchel, Schulter, Ellbogen (je 2 Platten pro Gelenk)')
 
-# Abspreizgelenk Hüfte: Gabellasche mit Scharnierbohrung, Anschlagbohrungen für Gummipuffer
-laser('abspreiz_lasche', P(rrect(90, 45, 10)) - circ(M10 / 2, 25, 0) - circ(M6 / 2, -25, 10) - circ(M6 / 2, -25, -10) - slot(14, M4, 0, 14) - slot(14, M4, 0, -14),
-      'Alu 5754', 6, 8, 'Scharnier Abspreizgelenk (4 je Seite: 2 Gabel, 2 Zunge)')
+def motorbild(cs, x, y, dreh=45.0):
+    """Zentrierbund + 4 Schrauben auf dem Motor-Lochkreis (Winkel so, dass die Schrauben nicht an den Plattenrand kommen)."""
+    cs = cs - circ(MOTOR_ZENTRIER / 2 + 0.2, x, y)
+    for i in range(4):
+        a = math.radians(dreh + 90 * i)
+        cs = cs - circ(MOTOR_LOCH / 2, x + MOTOR_LOCHKREIS / 2 * math.cos(a), y + MOTOR_LOCHKREIS / 2 * math.sin(a))
+    return cs
+
+# Abspreizgabel Hüfte (HU-01): zwei Wangen je Seite, Achse Ø 16 nach vorne durch das Hüftgelenk, oben an den Rahmen geschraubt
+laser('abspreizgabel_wange', P(rrect(60, 100, 8)) - circ(16.2 / 2, 0, -25) - circ(M6 / 2, -15, 32) - circ(M6 / 2, 15, 32) - circ(M5_GEWINDE / 2 + 0.3, 0, 12),
+      'Alu 6082 T6', 8, 4, 'Abspreizgabel HU-01: 2 Wangen je Seite; Ø 16,2 für Passschraube/Kugelsperrbolzen, M6 zum Rahmen, M5 Federhalter')
+laser('abspreizgabel_steg', P(rrect(82, 60, 6)) - circ(M6 / 2, -30, -18) - circ(M6 / 2, 30, -18) - circ(M6 / 2, -30, 18) - circ(M6 / 2, 30, 18) - slot(20, M4, 0, 0),
+      'Alu 6082 T6', 6, 2, 'Steg zwischen den Gabelwangen (oben), Langloch für den Zentrierfeder-Halter')
+laser('zentrierfeder_halter', P(rrect(28, 30, 4)) - circ(M4 / 2, 0, 7) - circ(6.2 / 2, 0, -6),
+      'Edelstahl 1.4301', 3, 4, 'Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder')
+
+# Hüftschwinge: Motorplatte des Hüftmotors (Langlöcher zum Spannen der Seilschleife)
+def hueftmotorplatte():
+    cs = motorbild(P(rrect(130, 110, 8)), -5, 0)
+    for x in (-50, 50):
+        for y in (-40, 40):
+            cs = cs - slot(16, M6, x, y)
+    return cs
+laser('hueftmotor_platte', hueftmotorplatte(), 'Alu 6082 T6', 8, 2, 'Motorplatte an der Hüftschwinge HU-05; Langlöcher ±5 mm spannen das Seil Trommel → Scheibe Ø 120')
 
 # Seilscheiben aus Schichten: Bord (voller Ø), Rille (Ø − 2 · Rillentiefe), Trennscheibe. Löcher fluchten durch alle Lagen.
-def scheibe(R, rille=False, trenn=False, schrauben=6, pcd=None, erleichtern=True):
+def scheibe(R, rille=False, trenn=False, schrauben=6, pcd=None, erleichtern=True, bohrung=M10):
     r = R - 4.0 if rille else R
-    cs = P(circ(r)) - circ(M10 / 2)
+    cs = P(circ(r)) - circ(bohrung / 2)
     pcd = pcd or (R * 0.62)
     for i in range(schrauben):
         a = 2 * math.pi * i / schrauben
@@ -119,67 +140,92 @@ def scheibe(R, rille=False, trenn=False, schrauben=6, pcd=None, erleichtern=True
         for i in range(4):
             a = 2 * math.pi * i / 4 + math.pi / 4
             cs = cs - circ(R * 0.17, R * 0.38 * math.cos(a), R * 0.38 * math.sin(a))
-    # Seilklemme: Bohrung durch die Rillenlage, in der das Seil endet
-    if rille:
-        cs = cs - circ(1.6, (r - 9.0) * math.cos(-1.2), (r - 9.0) * math.sin(-1.2))   # Seil durch die Lage, Klemmschraube daneben
+    if rille:                                                                   # Seil durch die Lage, Klemmschraube daneben
+        cs = cs - circ(1.6, 0, -(r - 9.0))                                   # mittig zwischen zwei Schrauben
     return cs
-for nm, R, pair in (('schulter', 70, True), ('ellbogen', 50, True), ('huefte', 95, False)):
-    laser(f'seilscheibe_{nm}_bord', scheibe(R), 'Alu 5754', 4, 2 * 2, f'Seilscheibe {nm} Ø{2 * R}: Bordscheiben außen')
-    laser(f'seilscheibe_{nm}_rille', scheibe(R, rille=True), 'Alu 5754', 3, (2 if pair else 1) * 2, f'Seilscheibe {nm}: Rillenlage(n), 3 mm für Seil/Zug bis 2,5 mm')
-    if pair:
-        laser(f'seilscheibe_{nm}_trenn', scheibe(R, trenn=True), 'Alu 5754', 2, 2, f'Seilscheibe {nm}: Trennlage zwischen den beiden Rillen')
+# Hüfte Ø 120 am Oberschenkel (offene Schleife zum Motor, eine Rille mit zwei Seilenden), Schulter Ø 140 und Ellbogen Ø 100 (Seilpaar)
+for nm, R, pair, n, pcd in (('schulter', 70, True, 2, None), ('ellbogen', 50, True, 2, None), ('huefte', 60, True, 2, 45.0)):
+    laser(f'seilscheibe_{nm}_bord', scheibe(R, pcd=pcd), 'Alu 5754', 4, 2 * n, f'Seilscheibe {nm} Ø{2 * R}: Bordscheiben außen')
+    laser(f'seilscheibe_{nm}_rille', scheibe(R, rille=True, pcd=pcd), 'Alu 5754', 3, (2 if pair else 1) * n, f'Seilscheibe {nm}: Rillenlagen, 3 mm für Seil Ø 3')
+    laser(f'seilscheibe_{nm}_trenn', scheibe(R, trenn=True, pcd=pcd), 'Alu 5754', 2, n, f'Seilscheibe {nm}: Trennlage zwischen den beiden Rillen')
+laser('knie_beugescheibe_bord', scheibe(45, erleichtern=False), 'Alu 5754', 4, 4, 'Beugescheibe Knie Ø 90 (Beugezug mit Federpatrone): Bordscheiben')
+laser('knie_beugescheibe_rille', scheibe(45, rille=True, erleichtern=False), 'Alu 5754', 3, 2, 'Beugescheibe Knie: Rillenlage')
 
-# Knie-Kurvenscheibe: Radius 50 mm gestreckt bis 80 mm in der Hocke (wie camR im 3D-Modell)
+# Knie-Kurvenscheibe (Streckzug): Radius 50 mm gestreckt bis 80 mm in der Hocke, wie kneeCam im 3D-Modell (45° … 155°)
 def camR(a):
-    return 50 + 30 * min(1.0, max(0.0, (a + math.radians(11)) / math.radians(111)))
+    return 50 + 30 * min(1.0, max(0.0, (a - math.radians(45)) / math.radians(110)))
 def kurve(rille):
     d = 4.0 if rille else 0.0
-    pts = polar(lambda a: camR(a) - d, -110, 190, 240) + [(0.0, 0.0)]
-    cs = P(CS([pts]) + circ(22)) - circ(M10 / 2) - circ(M4 / 2, 0, 16) - circ(M4 / 2, 0, -16) - circ(M4 / 2, 16, 0) - circ(M4 / 2, -16, 0)
+    pts = polar(lambda a: camR(a) - d, -60, 220, 280) + [(0.0, 0.0)]
+    cs = P(CS([pts]) + circ(26)) - circ(M10 / 2) - circ(M4 / 2, 0, 16) - circ(M4 / 2, 0, -16) - circ(M4 / 2, 16, 0) - circ(M4 / 2, -16, 0)
     if rille:
-        a = math.radians(-70)
+        a = math.radians(0)
         cs = cs - circ(1.6, (camR(a) - 12) * math.cos(a), (camR(a) - 12) * math.sin(a))
     return cs
-laser('knie_kurvenscheibe_bord', kurve(False), 'Alu 5754', 4, 4, 'Knie-Kurvenscheibe: Bordscheiben (2 je Knie)')
-laser('knie_kurvenscheibe_rille', kurve(True), 'Alu 5754', 3, 2, 'Knie-Kurvenscheibe: Rillenlage')
+laser('knie_kurvenscheibe_bord', kurve(False), 'Alu 5754', 4, 4, 'Knie-Kurvenscheibe Streckzug: Bordscheiben (2 je Knie)')
+laser('knie_kurvenscheibe_rille', kurve(True), 'Alu 5754', 3, 2, 'Knie-Kurvenscheibe: Rillenlage, Seilende bei 0°')
 
-# Steigbügel: offener Sohlenrahmen, Spike-Gewinde M5, Schlitze für Riemen, Bohrungen für den Seitenbügel
-def sohle():
-    L, W = 290.0, 110.0
-    p = P(_round(CS.square((L - W, 0.01), True), W / 2))                  # Stadionform wie eine Schuhsohle
-    p - _round(CS.square((40, 0.01), True), 33).translate((-71, 0))        # zwei Aussparungen: 22 mm Rand, 16 mm Steg
-    p - _round(CS.square((40, 0.01), True), 33).translate((71, 0))
-    for x in (-105, -55, 0, 55, 105):                                      # 10 Spikes M5 im Rand
-        for sgn in (-1, 1):
-            p - circ(M5_GEWINDE / 2, x, sgn * 45)
-    for x in (-25, 25):                                                    # Seitenbügel
-        for sgn in (-1, 1):
-            p - circ(M6 / 2, x, sgn * 44)
-    p - slot(24, 6, -136, 0, 90)                                           # Riemenschlitze Ferse/Spitze
-    p - slot(24, 6, 136, 0, 90)
+# Steigbügel (BE-11) unter der Sohlenmitte: Abwicklung, die beiden Laschen werden 90° hochgekantet (Biegelinie ±67,5 mm)
+def steigbuegel():
+    L, B, lasche = 60.0, 135.0, 35.0
+    p = P(rrect(L, B + 2 * lasche, 6))
+    for x in (-21, 21):                                                    # 6 Spikes M5 (Gewinde schneiden)
+        for y in (-50, 0, 50):
+            p - circ(M5_GEWINDE / 2, x, y)
+    p - circ(M10 / 2, 0, 25)                                              # Zapfen Drehteller BE-14 (vorne versetzt, zwischen den Spikes)
+    for s in (-1, 1):                                                      # Laschen: Fersenschale + Ristriemen
+        p - circ(M6 / 2, -14, s * (B / 2 + 20)) - circ(M6 / 2, 14, s * (B / 2 + 20))
     return p
-laser('steigbuegel_sohle', sohle(), 'Edelstahl 1.4301', 4, 2, 'Sohlenrahmen, Spikes M5 einschrauben (Gewinde schneiden)')
-laser('steigbuegel_seitenlasche', P(rrect(50, 130, 8)) - circ(M10 / 2, 0, 45) - circ(M6 / 2, -12, -50) - circ(M6 / 2, 12, -50) - slot(20, M6, 0, -5, 90),
-      'Edelstahl 1.4301', 4, 2, 'Seitenbügel Sprunggelenk → Sohle (Langloch zur Höhenanpassung)')
+laser('steigbuegel', steigbuegel(), 'Edelstahl 1.4301', 4, 2, 'Steigbügel BE-11: Abwicklung 60 × 205, Laschen an den Linien ±67,5 mm 90° hochkanten (Kantdienstleister)')
+laser('drehteller_scheibe', P(circ(32)) - circ(M10 / 2) - circ(M4 / 2, 22, 0) - circ(M4 / 2, -22, 0) - circ(M4 / 2, 0, 22) - circ(M4 / 2, 0, -22),
+      'Edelstahl 1.4301', 2, 4, 'Drehteller BE-14: Laufscheiben über und unter dem Axial-Nadellager AXK (2 je Fuß), M4 für die Wägezellen-Platte')
+laser('fersenbuegel_lasche', P(rrect(40, 50, 6)) - circ(M10 / 2, 0, 10) - circ(M6 / 2, -10, -14) - circ(M6 / 2, 10, -14),
+      'Alu 6082 T6', 8, 2, 'Fersenbügel BE-09 am Knöchellager (Rundstab Ø 16 wird eingeschweißt oder geklemmt)')
+laser('kippgelenk_gabel', P(rrect(30, 40, 5)) - circ(8.2 / 2, 0, 8) - circ(M5_GEWINDE / 2 + 0.3, 0, -10),
+      'Alu 6082 T6', 6, 4, 'Kippgelenk BE-10 hinter der Ferse: 2 Wangen je Fuß, Bolzen Ø 8 mit Gummibuchse')
 
-# Schlaufenkopf-Halter (Unterarmschiene → Schlaufenkopf)
-laser('schlaufenkopf_lasche', P(rrect(110, 40, 8)) - circ(M6 / 2, -42, 0) - circ(M6 / 2, -26, 0) - circ(M5_GEWINDE / 2 + 0.3, 20, 10) - circ(M5_GEWINDE / 2 + 0.3, 20, -10)
-      - circ(3.0, 40, 0), 'Alu 5754', 4, 3, 'Halter Schlaufenkopf (rechts 2, links 1); 6-mm-Loch für Seildurchführung')
+# Lendengelenk (RA-09): Scharnierlaschen, Rastsegment für den Hubmagneten, Gasfeder-Halter
+laser('lendengelenk_lasche', P(rrect(70, 50, 8)) - circ(M10 / 2, 20, 0) - circ(M6 / 2, -20, 12) - circ(M6 / 2, -20, -12),
+      'Alu 6082 T6', 8, 8, 'Scharnier Lendengelenk: 2 Laschen oben + 2 unten je Rahmenrohr; Bolzen Ø 10, Elastomerfeder dazwischen')
+def rastsegment():
+    pts = polar(lambda a: 85.0, -35, 35, 60) + [(0.0, 0.0)]
+    p = P(CS([pts]) + circ(18)) - circ(M10 / 2)
+    for a in (-25, -12.5, 0, 12.5, 25):                                    # Rastlöcher für den Sperrbolzen Ø 8
+        p - circ(8.5 / 2, 70 * math.cos(math.radians(a)), 70 * math.sin(math.radians(a)))
+    p - circ(M6 / 2, 32, 8) - circ(M6 / 2, 32, -8)
+    return p
+laser('lendensperre_rastsegment', rastsegment(), 'Edelstahl 1.4301', 4, 1, 'Sperre RA-09: Hubmagnet-Bolzen rastet in 5 Stellungen (−25 … +25°), sperrt bei Last')
+laser('gasfeder_halter', P(rrect(44, 34, 5)) - circ(M6 / 2, -12, -7) - circ(M6 / 2, 12, -7) - circ(M6 / 2, 0, 8),
+      'Alu 6082 T6', 5, 4, 'Halter Gasfeder RA-10 (oben und unten), M6 für den Kugelzapfen')
 
-# Motorplatte der Antriebsbox: 6 Motoren in 3 Reihen × 2
+# Schulter: Gabel (SC-02) mit Hohlachse Ø 22 und Schlitten der Schulterblatt-Führung (SC-12)
+laser('schultergabel_wange', P(rrect(55, 80, 8)) - circ(22.2 / 2, 0, -18) - circ(M6 / 2, -14, 26) - circ(M6 / 2, 14, 26),
+      'Alu 6082 T6', 10, 4, 'Schultergabel SC-02: 2 Wangen je Seite, Hohlachse Ø 22 (Seile laufen innen durch)')
+laser('schulterschlitten', P(rrect(70, 55, 6)) - circ(15.2 / 2, -18, 0) - circ(15.2 / 2, 18, 0) - circ(M6 / 2, 0, 18) - circ(M6 / 2, 0, -18),
+      'Alu 6082 T6', 8, 2, 'Schlitten SC-12: 2 Linearlager LM8UU (Ø 15) auf Wellen Ø 8, ±30 mm Hub')
+
+# Schlaufenträger (SG-01): gerades Band, nach Biegeschablone um das Handgelenk gebogen
+def schlaufentraeger(koepfe):
+    p = P(rrect(200, 30, 6)) - circ(M6 / 2, -88, 0) - circ(M6 / 2, -70, 0)
+    for x in (-30, 10, 50):                                                # Clips des Bandkanals
+        p - circ(M4 / 2, x, 7)
+    for i in range(koepfe):                                                # je Schlaufenkopf 2 × M5
+        x = 82 - i * 50
+        p - circ(M5_GEWINDE / 2 + 0.3, x, -6) - circ(M5_GEWINDE / 2 + 0.3, x - 14, -6)
+    return p
+laser('schlaufentraeger_rechts', schlaufentraeger(2), 'Alu 6082 T6', 6, 1, 'Schlaufenträger rechts (2 Köpfe: unten + außen), kalt biegen nach Schablone')
+laser('schlaufentraeger_links', schlaufentraeger(1), 'Alu 6082 T6', 6, 1, 'Schlaufenträger links (1 Kopf unten)')
+
+# Motorplatte der Antriebsbox: 6 Motoren in 3 Reihen (unten Knie, Mitte Ellbogen, oben Schulter), Lochkreis 45° gedreht
 def motorplatte():
-    cs = P(rrect(290, 360, 10))
-    for row, y in enumerate((-110, 0, 110)):
-        for s in (-1, 1):
-            x = s * 70
-            cs = cs - circ(MOTOR_ZENTRIER / 2 + 0.2, x, y)
-            for i in range(4):
-                a = math.pi / 4 + i * math.pi / 2
-                cs = cs - circ(MOTOR_LOCH / 2, x + MOTOR_LOCHKREIS / 2 * math.cos(a), y + MOTOR_LOCHKREIS / 2 * math.sin(a))
-    for x in (-125, 125):
-        for y in (-160, -40, 40, 160):
+    cs = P(rrect(290, 350, 10))
+    for y in (-100, 0, 100):
+        for x in (-105, 105):
+            cs = motorbild(cs, x, y)
+    for x in (-135, 135):
+        for y in (-160, -50, 50, 160):
             cs = cs - circ(M6 / 2, x, y)
-    cs = cs - slot(60, 10, 0, -170, 0) - slot(60, 10, 0, 170, 0)
+    cs = cs - slot(60, 10, 0, -160, 0) - slot(60, 10, 0, 160, 0)
     return cs
 laser('motorplatte', motorplatte(), 'Alu 5754', 4, 1, 'Montageplatte Antriebsbox (Lochkreis Motor vor Bestellung prüfen)')
 
@@ -269,6 +315,59 @@ def haube(seite):
     return m if seite == 'links' else m.mirror((1, 0, 0))
 druck('haube_links', haube('links'), 'PETG', 1, 'Haube Antriebsbox, linke Hälfte')
 druck('haube_rechts', haube('rechts'), 'PETG', 1, 'Haube Antriebsbox, rechte Hälfte')
+
+def fingerschutz(R, breite, name, n, bogen=200):
+    """Halbschale über einer Seilscheibe (RA-11): Mantel mit Abstand 6 mm, eine Seitenwand, Schraublaschen. Druck in transparentem PETG."""
+    t, ra = 1.8, R + 6.0
+    mantel = Manifold.extrude(ring_sector(ra, ra + t, -bogen / 2, bogen / 2), breite)
+    wand = Manifold.extrude(ring_sector(R * 0.55, ra + t, -bogen / 2, bogen / 2), t)
+    m = mantel + wand
+    for a in (-bogen / 2 + 6, bogen / 2 - 6):                             # Laschen mit M4 an den Enden
+        x, y = (ra + 8) * math.cos(math.radians(a)), (ra + 8) * math.sin(math.radians(a))
+        lug = Manifold.cube((14, 14, t * 2), True).translate((x, y, t))
+        m = m + lug - Manifold.cylinder(10, M4 / 2, M4 / 2, 24).translate((x, y, -1))
+    druck(name, m, 'PETG transparent', n, f'Fingerschutz RA-11 über Scheibe Ø {2 * R:.0f}: nichts kann zwischen Seil und Scheibe geraten')
+fingerschutz(60, 24, 'fingerschutz_huefte', 2)
+fingerschutz(80, 22, 'fingerschutz_knie', 2, bogen=150)
+fingerschutz(70, 24, 'fingerschutz_schulter', 2)
+fingerschutz(50, 22, 'fingerschutz_ellbogen', 2)
+
+def akkuschacht_wand():
+    """Seitenwand Akkuschacht EN-02 (Stihl AP 500 S 70 × 116 × 164): Einschub von hinten, Nut für Alu-Führungsschiene 4 × 4."""
+    L, H, t = 116.0, 176.0, 4.0
+    m = Manifold.cube((L, H, t)).translate((-L / 2, -H / 2, 0))
+    for y in (-60, 60):
+        m = m + Manifold.cube((L, 9, 6)).translate((-L / 2, y - 4.5, t)) - Manifold.cube((L + 2, 4.4, 4.4)).translate((-L / 2 - 1, y - 2.2, t + 1.8))
+    for x in (-40, 40):
+        for y in (-80, 80):
+            m = m - Manifold.cylinder(20, M4 / 2, M4 / 2, 24).translate((x, y, -1))
+    for y in (-30, 0, 30):                                                 # Wasserablauf / Lüftung
+        m = m - Manifold.cube((60, 4, 20), True).translate((0, y, 0))
+    return m
+druck('akkuschacht_wand', akkuschacht_wand(), 'PETG-CF', 4, 'Akkuschacht EN-02: Innen- und Außenwand je Seite (zweiter Schacht nur bei Bedarf bestücken)')
+
+def akkuschacht_stirn():
+    """Stirnwand mit Kontaktträger: Fenster für die Stihl-Kontaktleiste, Dichtlippe aus TPU separat."""
+    W, H, t = 76.0, 176.0, 6.0
+    m = Manifold.cube((W, H, t)).translate((-W / 2, -H / 2, 0))
+    m = m - Manifold.cube((22, 46, t + 2), True).translate((0, 0, t / 2))
+    for y in (-35, 35):
+        m = m - Manifold.cylinder(20, 1.4, 1.4, 16).translate((0, y, -1))   # Kontaktträger M3 (Kernloch)
+    for x in (-28, 28):
+        for y in (-80, 80):
+            m = m - Manifold.cylinder(20, M4 / 2, M4 / 2, 24).translate((x, y, -1))
+    return m
+druck('akkuschacht_stirn', akkuschacht_stirn(), 'PETG-CF', 2, 'Stirnwand Akkuschacht mit Fenster für den Kontaktträger')
+
+def fersenschale():
+    t, r, h = 4.0, 56.0, 50.0
+    m = Manifold.extrude(ring_sector(r, r + t, 100, 260), h)
+    for a in (110, 250):
+        x, y = (r + t / 2) * math.cos(math.radians(a)), (r + t / 2) * math.sin(math.radians(a))
+        m = m - Manifold.cylinder(30, M6 / 2, M6 / 2, 24).rotate((0, 90, 0)).rotate((0, 0, a)).translate((x, y, 12)).translate((-math.cos(math.radians(a)) * 10, -math.sin(math.radians(a)) * 10, 0))
+        m = m - Manifold.cube((t * 3, 4, 26), True).rotate((0, 0, a)).translate((x, y, 34))
+    return m
+druck('fersenschale', fersenschale(), 'PETG', 2, 'Fersenschale BE-13 am Steigbügel, Schlitze für den Ratschenriemen')
 
 # ------------------------------------------------------------------ Ausgabe und Prüfung ----
 def write_stl(path, m):

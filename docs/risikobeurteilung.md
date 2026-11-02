@@ -1,4 +1,4 @@
-# Risikobeurteilung (Eigenbau, Entwurf 3.2)
+# Risikobeurteilung (Eigenbau, Entwurf 4)
 
 Vorgehen angelehnt an DIN EN ISO 12100 (Risikobeurteilung von Maschinen). Für Exoskelette gibt es zusätzlich
 DIN EN ISO 13482 (Roboter für die persönliche Assistenz). Dieses Exo ist ein **Eigenbau für die eigene Nutzung**.
@@ -13,18 +13,22 @@ Bewertung: S = Schwere (1 leicht … 4 schwer), W = Wahrscheinlichkeit vor Maßn
 | Ungewollte Bewegung | Sensorfehler, Kabelbruch | 3 | 2 | Plausibilitätsprüfung, sofort stromlos, Rückmeldung rot | P19, F1 | gering |
 | Software hängt | Fehler, Störung | 3 | 2 | Hardware-Watchdog 0,5 s, Schütz fällt ab, Pulldown | P7 | gering |
 | Not-Aus wirkungslos | nur Software | 4 | 1 | Not-Aus trennt elektrisch hart, zweiter Kontakt meldet | P6 | gering |
-| Sturz mit Exo | Gelände, Kippen nach vorne | 3 | 3 | Ausfallschritt, Steigbügel mit Spikes, Sturzerkennung → Motoren weich, Aussteigen ohne Werkzeug | P4, P25 | mittel |
+| Sturz mit Exo | Gelände, Kippen nach vorne | 3 | 3 | Ausfallschritt, Steigbügel mit Spikes, Sturzerkennung → Motoren weich, **Beine 1,5 s gedämpft** (kein Zusammensacken, kein Treten), Aussteigen ohne Werkzeug | P4, P25 | mittel |
+| Kippen nach hinten | Baum zieht, Rumpf zu weit zurück | 3 | 2 | **Warnung per Vibration** ab 9° Rückneigung (Firmware), Schutzbügel hinten mit Gummipuffern trifft zuerst, Akkus seitlich geschützt | P25b | gering |
+| Rumpf knickt unter Last ein | Lendengelenk frei beweglich | 3 | 2 | Gasfedern tragen das Oberteil, **Sperre rastet automatisch**, sobald > 5 kg in den Schlaufen hängen (0,3 s), Hebel zum Sperren von Hand | P31 | gering |
 | Baum fällt aus der Schlaufe | Schlaufe rutscht | 2 | 2 | Zahnleiste formschlüssig, Zugkraft über Motorstrom, Schneckengetriebe hält stromlos | P20 | gering |
 | Baum lässt sich nicht lösen | Winde defekt | 3 | 1 | Schnappschäkel mit Zuglasche (Notöffnung von Hand) | P20 | gering |
 | Stufenwechsel öffnet Schlaufe | Bedienfehler | 3 | 2 | gesperrt in der Firmware (Test) | F1 | gering |
-| Quetschen an Seilscheiben, Rollen | Finger, Kleidung | 2 | 2 | Abdeckungen, Seile in eigener Ebene außen | P8 | gering |
+| Quetschen an Seilscheiben, Rollen | Finger, Kleidung | 2 | 2 | **Fingerschutz aus transparentem PETG** über Hüft-, Knie-, Schulter- und Ellbogenscheibe, Seile in eigener Ebene außen | P8, P32 | gering |
+| Quetschen am Lendengelenk, Schulterschlitten | Haut, Jacke zwischen den Laschen | 2 | 2 | Spalt ≥ 25 mm oder ≤ 5 mm, Polster darüber, Gasfedern hinter dem Rahmen | P32 | gering |
 | Seilriss | Verschleiß, scharfe Kante | 2 | 2 | Seil zieht nur (Ausfall = locker), Dyneema mit 4-facher Reserve, Prüfung alle 40 h | Wartung | gering |
 | Druckstellen, Scheuern | Achsen fluchten nicht | 2 | 3 | Maßblatt, Langlöcher, Polster, freie Abspreiz-/Drehgelenke | P1–P3 | mittel |
-| Überhitzung Motoren/Akku | Dauerlast | 2 | 2 | Motor-Temperatur aus dem Motor, Strombegrenzung, Akku-BMS | P27 | gering |
+| Überhitzung Motoren/Akku | Dauerlast | 2 | 2 | **Wärmemodell je Motor** (I²t, Zeitkonstante 3 min) senkt die Grenze stufenlos auf bis 40 %, Anzeige meldet „Motor warm“; Motor-Temperatur, Akku-BMS | P27, F1 | gering |
+| Schlaufenwinden überlasten Wandler | drei Winden gleichzeitig | 2 | 2 | Winden laufen nacheinander (Firmware), Zeitgrenze 12 s je Bewegung | F1, P20 | gering |
 | Akku-Kurzschluss | Nässe, Scheuerstelle | 4 | 1 | Hauptsicherung, IP67-Stecker, Isolationsprüfung | P5, P29 | gering |
 | Überlastung des Körpers | Exo verdeckt, wie schwer es ist | 3 | 2 | Verstärkung höchstens 3 (Mensch spürt immer ≥ 25 %), Stufen | P16 | gering |
 | Arbeiten mit Motorsäge | Kettensäge im unterstützten Modus | 4 | 2 | **verboten**: Bedienungsanleitung, Exo vorher aus | – | Nutzer |
 | Dritte in der Nähe | Baum kippt aufs Plateau | 3 | 2 | Gefahrenbereich 4 m freihalten | – | Nutzer |
 
 **Fazit:** Mit den Maßnahmen ist das Restrisiko für die eigene Nutzung nach bestandener Abnahme vertretbar.
-Offen bleiben Sturz im Gelände und Passform: Sie werden in der Saison-Erprobung beobachtet und ins Protokoll eingetragen.
+Offen bleiben Sturz im Gelände (das Exo hat keinen Fußmotor und hält das Gleichgewicht nicht aktiv) und Passform: Sie werden in der Saison-Erprobung beobachtet und ins Protokoll eingetragen.

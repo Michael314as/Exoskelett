@@ -37,11 +37,16 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | P22 | Arme | heben, senken, beugen, strecken | Exo folgt ohne Verzögerung, die man merkt | ☐ |
 | P23 | Beine | aus der Hocke hoch, 20× | spürbare Hilfe, beim Gehen keine | ☐ |
 | P24 | Parkstütze | Stütze runter während aktiv | Unterstützung aus, Ring gelb | ☐ |
-| P25 | Sturz | auf Matte fallen lassen (Helfer) | Motoren in < 0,2 s weich | ☐ |
+| P25 | Sturz | auf Matte fallen lassen (Helfer) | Motoren in < 0,2 s weich, Beine gedämpft (sacken langsam, treten nicht) | ☐ |
+| P25b | Rückneigung | mit Helfer langsam nach hinten lehnen | Vibration ab etwa 9°, hört beim Aufrichten auf | ☐ |
 | P26 | Licht, Anzeige | Doppeltipp, Display | Licht schaltet, Display zeigt Akku/Stufe/Bäume | ☐ |
 | P27 | Sandsack 20 kg tragen | 50 m, Stufe 2 | Handkraft spürbar kleiner, keine Erwärmung > 60 °C an Motoren | ☐ |
 | P28 | Echte Bäume | 10 leichte, dann 10 mittlere | ohne Zwischenfall | ☐ |
 | P29 | Wetter | 1 h bei Nässe/Schnee | keine Aussetzer, Box innen trocken | ☐ |
 | P30 | Akkulaufzeit | typischer Arbeitstag | ≥ 2 h mit einem Akku | ☐ |
+| P31 | Lendengelenk | bücken leer, dann 10 kg in Schlaufe | leer frei ±25°, Gasfedern tragen das Oberteil; mit Last rastet die Sperre in < 0,5 s, löst nach dem Absetzen | ☐ |
+| P32 | Fingerschutz, Quetschstellen | Finger/Jackenärmel an jede Scheibe, Lendengelenk, Schulterschlitten | nichts wird eingezogen oder eingeklemmt | ☐ |
+| P33 | Wärmeschutz | 20 kg Sandsack 5 min dauernd halten | Unterstützung sinkt langsam statt abzuschalten, Anzeige „Motor warm“, Motorgehäuse < 70 °C | ☐ |
+| P34 | Komfort-Freiheitsgrade | Fuß drehen, Unterarm drehen, Schultern hochziehen | Drehteller ±20° mit Rückstellung, Drehring frei, Schulter folgt ±3 cm | ☐ |
 
 Datum, Firmware-Version (Git-Commit), Prüfer: ____________________

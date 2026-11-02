@@ -4,7 +4,7 @@ Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnitte
 
 > **3D:** `visualisierung/exo-konstruktion.html` (Konzeptzeichnung) und `visualisierung/exo-technik.html` (technische Ansicht mit Bauteil-IDs, realen Kaufteilen, Bewegung nach Motorkennlinie, Schwerpunkt, Maßen).
 
-> **Stand: Entwurf 4** (Hüfte mit Abspreizgelenk und eigenem Hüftmotor, Beine in beide Richtungen, Gurtsystem, Schlaufen unten + außen, Anzeige am Oberarm). Die Fertigungsdateien in `fertigung/` sind noch auf Entwurf 3.2 und werden für Entwurf 4 neu erzeugt. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md). Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
+> **Stand: Entwurf 4** (Hüfte mit Abspreizgelenk und eigenem Hüftmotor, Beine in beide Richtungen, Gurtsystem, Schlaufen unten + außen, Anzeige am Oberarm). Dazu Lendengelenk mit Gasfedern und automatischer Sperre, Fingerschutz, Drehteller am Fuß, Drehring am Unterarm, Schulterschlitten, Wärmeschutz und Sturzdämpfung in der Firmware. Die Fertigungsdateien in `fertigung/` sind auf Entwurf 4. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md). Konzept, Steuerung, Kraftverteilung und Entwicklungsplan stehen, dazu zwei 3D-Ansichten.
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt
@@ -113,7 +113,7 @@ Der Weg vom Konzept zum tragbaren Exo steht in [`docs/entwicklungsplan.md`](docs
 
 ```
 docs/
-  konzept.md                 Konzept Entwurf 3: Aufbau, Antriebe, Greifer, Füße, Kosten
+  konzept.md                 Konzept Entwurf 4: Aufbau, Antriebe, Greifer, Füße, Kosten
   steuerung.md               Sensor-Manschetten, Regelung, Elektronik, Sicherheit
   bedienung-und-features.md  Bedienung, Komfort-Features, Fertigung ohne Maschinen, Kosten
   stueckliste.md             Jedes Teil mit Herstellweg (Kauf, Laser, Druck, Bohren), Druckgrößen, Werkzeug
@@ -126,7 +126,7 @@ docs/
   kraftverteilung.md         Lasten je Arbeitsschritt, Kraftfluss, was die Motoren schaffen
   entwicklungsplan.md        Grundwissen, Phasen, Tests, Werkzeug, Stolpersteine
 fertigung/
-  laser/*.dxf, druck/*.stl   18 Laserteile, 12 Druckteile (erzeugt mit tools/fertigung.py)
+  laser/*.dxf, druck/*.stl   32 Laserteile, 19 Druckteile (erzeugt mit tools/fertigung.py)
 firmware/
   src/                       Steuerung (Gelenkregler, Sicherheit, Bedienung, Teensy-Anbindung)
   esp32/                     Display und Handy (ESP32-C3)

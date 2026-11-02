@@ -7,7 +7,7 @@ Joystick, keine Knöpfe zum Bewegen. Dafür braucht das Exo drei Arten von Infor
 |---|---|---|
 | Wohin willst du? | **Sensor-Manschetten** (Wägezellen) an Oberarm, Unterarm, Oberschenkel | Bewegung: Das Exo folgt deinem Druck |
 | Was muss es tragen? | **Wägezellen in den Schlaufenköpfen**, Gelenkwinkel, Rumpfneigung | Last: Das Exo trägt seinen Anteil von selbst |
-| Welches Bein steht? | **Drucksensor im Steigbügel** | Standbein trägt, Schwungbein läuft frei |
+| Welches Bein steht? | **Wägezellen im Steigbügel** | Standbein trägt, Schwungbein läuft frei |
 
 Die Antwort darauf rechnet der Teensy 200-mal pro Sekunde und schickt jedem der 8 Motoren ein Moment.
 
@@ -64,7 +64,7 @@ erhalten, und das Exo kann nie „mehr wollen“ als die Last.
 Exo-Oberteil (≈ 11 kg) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
 die Vorneigung des Rumpfs aus (Lagesensor), das Knie die Beugung. Stehen beide Füße, teilen sich die Beine die Last.
 
-**d) Standbein und Schwungbein.** Der Drucksensor im Steigbügel entscheidet (geglättet über 80 ms, damit beim Aufsetzen
+**d) Standbein und Schwungbein.** Die Fußlast aus den Wägezellen im Steigbügel entscheidet (geglättet über 80 ms, damit beim Aufsetzen
 nichts springt):
 
 | | Standbein | Schwungbein |
@@ -126,7 +126,7 @@ Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──
                                                                └── DC/DC 5 V ── Steuerung, Display
 Teensy 4.1 + CAN-Transceiver + Knopfzelle (Uhr)
    ├── 9 Wägezellen-Verstärker (6 Manschetten, 3 Schlaufenköpfe)
-   ├── 2 Drucksensoren in den Steigbügeln
+   ├── 2 × 4 Wägezellen in den Steigbügeln (je ein HX711)
    ├── Lagesensor am Rücken
    ├── Taster, LED-Ring, Vibration, Licht
    ├── Statuszeile → ESP32-C3 mit E-Paper am rechten Oberarm (und Bluetooth zum Handy)
@@ -134,6 +134,16 @@ Teensy 4.1 + CAN-Transceiver + Knopfzelle (Uhr)
 ```
 
 Pinplan: [verdrahtung.md](verdrahtung.md).
+
+## 6a. Schutzfunktionen (Entwurf 4)
+
+| Funktion | Auslöser | Was passiert |
+|---|---|---|
+| **Wärmeschutz** | Wärmemodell je Motor: Strom² über die Zeit (Zeitkonstante 3 min) | ab 100 % Wärme sinkt die Momentgrenze stufenlos bis auf 40 %; das Exo wird schwächer statt abzuschalten, Anzeige „Motor warm“ |
+| **Sturzdämpfung** | Sturz erkannt (Kippgeschwindigkeit) | Arme stromlos, Beine 1,5 s mit Dämpfung (−4 Nm·s/rad): das Exo sackt langsam statt zu treten oder zu klappen |
+| **Lendensperre** | > 5 kg in den Schlaufen für 0,3 s | Hubmagnet (Pin 13) sperrt das Lendengelenk, der Rahmen trägt den Baum; nach dem Absetzen frei |
+| **Rückneigung** | Rumpf mehr als 9° nach hinten | Vibrationspulse: „lehn dich nach vorne“, bevor der Baum dich umzieht |
+| **Winden nacheinander** | mehrere Schlaufen gleichzeitig gedrückt | eine Winde nach der anderen (24-V-Wandler 2,5 A), Zeitgrenze 12 s je Bewegung |
 
 ## 7. Was schiefgehen kann, und was dagegen hilft
 
@@ -145,6 +155,8 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 | Bein streckt beim Gehen | Fußsensor meldet falsch | Schwelle am Prüfstand einstellen, Sensor prüfen |
 | Bein knickt beim Aufsetzen | Standbein zu spät erkannt | Glättung verkürzen; Federpatrone begrenzt ohnehin |
 | Schulter hilft beim Hebeln zu viel | Kopplung vom Unterarm | Hebel im Abgleich prüfen (Oberarmlänge) |
+| Unterstützung wird nach langem Halten schwächer | Wärmeschutz | gewollt: Last kurz absetzen, Motoren kühlen in wenigen Minuten ab |
+| Rumpf lässt sich nicht beugen | Lendensperre aktiv (Last in den Schlaufen) | Baum absetzen; Hebel prüfen |
 
 ## 8. So baut man es auf
 

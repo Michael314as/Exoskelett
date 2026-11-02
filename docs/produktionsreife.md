@@ -9,14 +9,14 @@ noch die CE-Konformität dazu (siehe unten).
 | Bereich | Stand | Nachweis |
 |---|---|---|
 | Konzept, Kräfte, Steuerungskonzept | fertig | [konzept.md](konzept.md), [kraftverteilung.md](kraftverteilung.md), [steuerung.md](steuerung.md) |
-| Steuerung (Regler, Sicherheit, Bedienung) | fertig, Entwurf 4 | Physik-Simulation, 60+ automatische Prüfungen inkl. Kopplung, Baumlast-Vorsteuerung, Standbein/Schwungbein (`make -C firmware test`) |
+| Steuerung (Regler, Sicherheit, Bedienung) | fertig, Entwurf 4 | Physik-Simulation, 70+ automatische Prüfungen inkl. Kopplung, Baumlast-Vorsteuerung, Standbein/Schwungbein, Winden nacheinander, Wärmeschutz, Sturzdämpfung, Lendensperre, Rückneigungswarnung (`make -C firmware test`) |
 | Firmware Teensy 4.1 | baut | ARM-GCC, `exo.hex` (87 KB), keine Warnung im eigenen Code (`firmware/tools/build_teensy.sh`) |
 | Firmware ESP32-C3 (Anzeige Oberarm, Handy) | auf dem PC geprüft | Sketch mit Platzhaltern kompiliert und getestet (`test/esp32_host.cpp`); der Build mit dem echten ESP32-Compiler ist noch nicht gelaufen |
-| Laserteile | 18 DXF (Entwurf 3.2) | automatische Prüfung: geschlossene Konturen, Stege ≥ 4 mm je Bohrung ([fertigung/](../fertigung/)). **Für Entwurf 4 neu zu erzeugen:** Gabel Abspreizgelenk, Hüftschwinge mit Motorplatte, Seilscheibe Ø 12, Beugescheibe, Steigbügel, Fersenbügel, Schlaufenträger |
-| Druckteile | 12 STL | wasserdicht, passen in den A1 mini |
+| Laserteile | 32 DXF (Entwurf 4) | automatische Prüfung: geschlossene Konturen, Stege ≥ 4 mm je Bohrung ([fertigung/](../fertigung/)); neu: Abspreizgabel, Hüftmotorplatte, Seilscheibe Ø 120, Knie-Kurvenscheibe 45–155°, Beugescheibe Ø 90, Steigbügel (Abwicklung), Drehteller, Fersenbügel, Kippgelenk, Lendengelenk mit Rastsegment, Gasfederhalter, Schultergabel, Schulterschlitten, Schlaufenträger |
+| Druckteile | 19 STL | wasserdicht, passen in den A1 mini; neu: Fingerschutz (4 Größen), Akkuschacht, Fersenschale |
 | Stückliste, Verdrahtung | fertig | [stueckliste.md](stueckliste.md), [verdrahtung.md](verdrahtung.md) (Pinplan = Firmware) |
 | Montage, Kalibrierung | fertig | [montage.md](montage.md), Werkstatt-Konsole in der Firmware (`null`, `kal`, `speichern`) |
-| Abnahme | Protokoll fertig | [pruefung.md](pruefung.md): 35 Punkte mit messbaren Kriterien |
+| Abnahme | Protokoll fertig | [pruefung.md](pruefung.md): 40 Punkte mit messbaren Kriterien |
 | Prüfstand-Modus, Messdaten-Log, Parameterbestimmung | fertig | `tools/auswertung.py` findet bekannte Werte aus einem Simulations-Log auf 20 % genau (`make -C firmware ident`) |
 | Risikobeurteilung | fertig | [risikobeurteilung.md](risikobeurteilung.md) |
 | Wartung | fertig | [wartung.md](wartung.md), Hinweise aus den Betriebsstunden in der Firmware |

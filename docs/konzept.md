@@ -176,17 +176,46 @@ oder den Schnappschäkel.
 in Prozent mit Restzeit** und die **Stufe**, unten **Fehler und Warnungen im Klartext** (z. B. „Akku schwach“,
 „Sensor-Manschette gestört“, „Parkstütze unten“). Keine Produktionsdaten. Die Uhr läuft auf dem Teensy mit Knopfzelle.
 
+## 6d. Tragekomfort: Lendengelenk und kleine Freiheitsgrade
+
+Ein starrer Rücken zwingt dich, aus den Knien zu heben, und drückt bei jedem Bücken Hüftgurt und Schultergurte gegen
+den Körper. Deshalb hat Entwurf 4 jetzt:
+
+| Gelenk | Bewegung | Wie | Warum |
+|---|---|---|---|
+| **Lendengelenk** im Rückenrahmen, 17 cm über den Hüftgelenken | Rumpf beugen ±25°, seitlich ±10° | Scharnier mit Elastomerfeder, **zwei Gasfedern 150 N** tragen das Oberteil (≈ 36 Nm) | Bücken fühlt sich leicht an, das Exo-Oberteil zieht dich nicht nach vorne |
+| **Sperre** am Lendengelenk | rastet in 5 Stellungen (−25 … +25°) | Hubmagnet 24 V mit Sperrbolzen, Rastsegment Edelstahl | sobald > 5 kg in den Schlaufen hängen (0,3 s), sperrt die Firmware: dann trägt der Rahmen den Baum, nicht dein Kreuz. Hebel zum Sperren von Hand |
+| **Schulterschlitten** | Schulter hebt und senkt sich ±3 cm | 2 Wellen Ø 8 mit Linearlagern, Druckfeder | Schulterblatt kann sich bewegen: Arm über Kopf und Schulterzucken ohne Zwang |
+| **Drehring Unterarm** | Unterarm dreht frei | Ring-Lager an der Unterarm-Manschette | Handgelenk drehen (Stamm greifen, Säge halten) ohne die Schiene mitzunehmen |
+| **Drehteller am Steigbügel** | Fußspitze ±20° | Axial-Nadellager, Zentrierfeder | Wenden und Fuß nach außen stellen, ohne das Knie zu verdrehen |
+
+Dazu **Fingerschutz** aus transparentem PETG über allen Seilscheiben: Finger, Jackenärmel und Zweige werden nicht
+eingezogen, du siehst trotzdem, ob das Seil richtig liegt.
+
+**Warum keine weiteren Motoren für Rumpf und Fuß?** Ein Motor am Lendengelenk müsste etwa 150 Nm aufbringen, wäre
+schwer und würde dich beim Bücken bevormunden. Gasfeder + Sperre bringt den Nutzen (Last im Rahmen) ohne das Gewicht.
+Einen Fußmotor für aktive Balance hat das Exo bewusst nicht: Das Gleichgewicht hältst du selbst über deine Füße, das
+Exo läuft frei mit, warnt aber bei Rückneigung und dämpft die Beine bei einem Sturz ([steuerung.md](steuerung.md)).
+
 ## 7. Energie
 
-- **Akku: Stihl AP 500 S** (36 V, etwa 337 Wh), unten in der Antriebsbox in einem gedruckten Adapter.
+- **Akku: Stihl AP 500 S** (36 V, etwa 337 Wh) in einem Schacht seitlich neben der Box; ein **zweiter Schacht** auf der
+  anderen Seite nimmt bei Bedarf einen zweiten Akku auf (parallel über Ideal-Dioden, im Betrieb einzeln wechselbar).
 - **Laufzeit, grob:** bei durchschnittlich 100 bis 150 W etwa 2 bis 3 Stunden. Schlaufenwinden brauchen fast nichts.
 - **Kälte und Nässe:** Akku in der gedämmten Box, wasserdichte Rundstecker, Elektronik im dichten Gehäuse.
 
 ## 8. Gewicht
 
-Motoren 8 × 0,5–1 kg, Schlaufenwinden 3 × 0,3 kg, Akku etwa 2 kg, Alu-Rahmen mit Hüftschwingen etwa 5,5 kg,
-Steigbügel und Fersenbügel etwa 1 kg, Gurte etwa 1,5 kg, Rest etwa 2 kg. **Ziel: 17 bis 20 kg.** Die zwei Hüftmotoren
-sitzen nah am Schwerpunkt und schwingen nicht mit, das Bein bleibt so leicht wie bisher.
+**Ehrliche Zahl aus der Bauteilliste der technischen Ansicht: etwa 34 kg mit einem Akku** (jedes Teil mit Stückzahl,
+Gurte, Kabel, Hauben, Schutzbügel und Parkstütze eingerechnet; der zweite Akku bringt weitere 2 kg). Die früher genannten
+17–20 kg waren ohne Kleinteile, Schutz und Komfortgelenke gerechnet.
+
+Was das für dich heißt: Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden, im Stand tragen es die
+Hüftmotoren mit (Vorsteuerung „Exo-Oberteil“). Spürbar bleibt die **Trägheit** beim Drehen, Bücken und beim ersten Schritt.
+Sparpotenzial, wenn es sich am Körper zu schwer anfühlt: Parkstütze weglassen (−0,7 kg), Schutzbügel aus CFK-Rohr
+(−0,4 kg), Hauben aus dünnerem Druck (−0,2 kg), Box aus Alu-Blech 1,5 mm statt Profil (−0,3 kg), Schienen nach
+der Erprobung abspecken (Festigkeitsrechnung zeigt Reserven an Unterschenkel und Unterarm). Die zwei Hüftmotoren sitzen
+nah am Schwerpunkt und schwingen nicht mit.
 
 ## 9. Wetterfestigkeit
 
