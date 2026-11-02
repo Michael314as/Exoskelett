@@ -15,6 +15,7 @@ noch die CE-Konformität dazu (siehe unten).
 | Laserteile | 32 DXF (Entwurf 4) | automatische Prüfung: geschlossene Konturen, Stege ≥ 4 mm je Bohrung ([fertigung/](../fertigung/)); neu: Abspreizgabel, Hüftmotorplatte, Seilscheibe Ø 120, Knie-Kurvenscheibe 45–155°, Beugescheibe Ø 90, Steigbügel (Abwicklung), Drehteller, Fersenbügel, Kippgelenk, Lendengelenk mit Rastsegment, Gasfederhalter, Schultergabel, Schulterschlitten, Schlaufenträger |
 | Druckteile | 19 STL | wasserdicht, passen in den A1 mini; neu: Fingerschutz (4 Größen), Akkuschacht, Fersenschale |
 | Stückliste, Verdrahtung | fertig | [stueckliste.md](stueckliste.md), [verdrahtung.md](verdrahtung.md) (Pinplan = Firmware) |
+| Bestellliste Prototyp | fertig | [bestellung-prototyp.md](bestellung-prototyp.md): alle Teile nach Bezugsweg, Reihenfolge in 5 Stufen (Prüfstand zuerst) |
 | Montage, Kalibrierung | fertig | [montage.md](montage.md), Werkstatt-Konsole in der Firmware (`null`, `kal`, `speichern`) |
 | Abnahme | Protokoll fertig | [pruefung.md](pruefung.md): 40 Punkte mit messbaren Kriterien |
 | Prüfstand-Modus, Messdaten-Log, Parameterbestimmung | fertig | `tools/auswertung.py` findet bekannte Werte aus einem Simulations-Log auf 20 % genau (`make -C firmware ident`) |
