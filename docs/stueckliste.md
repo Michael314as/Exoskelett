@@ -29,7 +29,7 @@ Preise sind grobe Richtwerte.
 | Hüftlager | 2 | Flanschlager UCFL/KFL, 2RS | Kauf | 20 € |
 | Ober-/Unterschenkelschienen außen | 4 | Alu 25 × 25 × 2 | Säge + Bohren (Lochraster per Schablone) | 15 € |
 | Ober-/Unterschenkelschienen innen | 4 | Alu 20 × 20 × 2 | Säge + Bohren | 10 € |
-| Kniegelenk-Platten | 4 | Alu 6 mm | Laser | 15 € |
+| Lagerplatten für die Flanschlager (KFL001 Lochabstand 48 mm: Knie, Schulter; KFL08 37 mm: Ellbogen, Knöchel; KFL002 53 mm: Hüfte) | 8 + 8 + 2 | Alu 6082, 6 / 8 mm | Laser | 35 € |
 | Kniegelenk-Lager | 2 | Flanschlager klein, 2RS | Kauf | 14 € |
 | Passschrauben, Nylonmuttern | 1 Satz | M10/M12, Edelstahl | Kauf | 25 € |
 | Steckbolzen mit Federring | 8 | Ø 6 mm | Kauf | 15 € |

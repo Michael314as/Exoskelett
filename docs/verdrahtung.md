@@ -19,7 +19,7 @@ Not-Aus-Rückmeldung: zweiter Kontakt des Pilzes → Pin 30 (offen = Not-Aus ged
 | CAN-Bus | verdrillt, geschirmt | 120-Ω-Abschluss am Teensy und am letzten Motor |
 | Wägezellen | 4-adrig geschirmt | Schirm nur am Teensy-Ende auf Masse |
 | Hüftmotoren | 1,5 mm² + CAN in einem Kabel | über die Hüftschwinge, mit Schlaufe am Abspreizgelenk (±20°) |
-| Fußsensoren (FSR) | 2-adrig, vergossen | am Unterschenkel entlang, Stecker am Knie |
+| Fußkontakt (4 Wägezellen + HX711 je Fuß) | 4-adrig geschirmt, HX711 vergossen im Steigbügel | am Unterschenkel entlang, Stecker am Knie |
 | Display | 4-adrig (5 V, Masse, TX, frei) | im Gewebeschlauch über die Schulter zum rechten Oberarm |
 | Steuerung 5 V | 0,5 mm² | eigene Sicherung 2 A |
 
@@ -37,7 +37,7 @@ Pulldown 10 kΩ hält das Schütz dann sicher offen.
 | 6 / 7 / 8 | Winde R1 / R2 / L1 PWM | 27 / 28 / 29 | Winde R1 / R2 / L1 Endschalter offen |
 | 9 | HX711 Daten Zelle 0 (Oberschenkel L) | 30 | Not-Aus-Rückmeldung |
 | 10 / 11 / 12 | HX711 Daten Zellen 6 / 7 / 8 (Schlaufen R1 / R2 / L1) | 31 | Schütz |
-| 13 | Hubmagnet Lendensperre (MOSFET, Freilaufdiode; stromlos = frei) | 38 / 39 | Fußsensor (FSR) links / rechts, 10 kΩ nach Masse |
+| 13 | Hubmagnet Lendensperre ITS-LZ-3263-D-24VDC (Logic-MOSFET, Freilaufdiode; PWM: 0,2 s voll, dann 35 % halten; stromlos = frei) | 38 / 39 | HX711 Fußkontakt links / rechts (DOUT, Takt gemeinsam an 34), je 4 Halbbrücken-Zellen 50 kg |
 | 14 / 15 / 16 | Windenstrom R1 / R2 / L1 (0,5 V/A) | 32 | Parkstütze unten (Endschalter) |
 | 17 | Akkuspannung (Teiler 1:15) | 33 | Arbeitslicht (MOSFET) |
 | 18 / 19 | I2C SDA / SCL → BNO085 | 34 | HX711 Takt (alle 9) |

@@ -341,6 +341,7 @@ int main() {
     in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);
     in.loopN[LoopR1] = 150.f; run(0.5f);
     check(o.lumbarLock, "Baum 15 kg in der Schlaufe: Lendengelenk gesperrt");
+    check(o.lumbarDuty > 0.3f && o.lumbarDuty < 0.4f, "Hubmagnet hält mit 35 % (0,19 A): 24-V-Wandler reicht auch, wenn gleichzeitig eine Winde zieht");
     in.loopN[LoopR1] = 0.f; run(0.5f);
     check(!o.lumbarLock, "Baum abgelegt: Lendengelenk wieder frei");
     in.trunkPitch = -0.25f; bool vib = false; for (float t = 0; t < 1.f; t += dt) { o = app.step(in, dt); vib |= o.vibrate; }

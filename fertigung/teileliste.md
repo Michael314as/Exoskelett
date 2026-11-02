@@ -2,14 +2,16 @@
 
 Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: Druckteile, Einheit mm.
 
-**Vor der Bestellung prüfen:** Lochabstand der Flanschlager (Parameter `FLANSCH_LOCHABSTAND` = 67 mm) und Lochkreis der Motoren (`MOTOR_LOCHKREIS` = 70 mm) mit den Datenblättern der gekauften Teile.
+**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochkreis der Motoren (`MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm) mit den Datenblättern der gekauften Teile.
 
 ## Laserteile
 
 | Datei | Material | Dicke | Stück | Größe | Löcher | kleinster Steg | Zweck |
 |---|---|---|---|---|---|---|---|
 | `laser/eckplatte.dxf` | Alu 5754 | 4 mm | 24 | 60 × 60 | 4 | 14.2 mm | Doppelplatten an allen Rahmenecken (2 je Ecke) |
-| `laser/lagerplatte.dxf` | Alu 6082 T6 | 6 mm | 16 | 95 × 70 | 6 | 13.9 mm | Gelenkplatten Knie, Knöchel, Schulter, Ellbogen (je 2 Platten pro Gelenk) |
+| `laser/lagerplatte_kfl001.dxf` | Alu 6082 T6 | 6 mm | 8 | 80 × 64 | 6 | 6.9 mm | Gelenkplatten Knie und Schulter für KFL001 (Lochabstand 48 mm), 2 je Gelenk |
+| `laser/lagerplatte_kfl08.dxf` | Alu 6082 T6 | 6 mm | 8 | 66 × 56 | 6 | 6.9 mm | Gelenkplatten Ellbogen und Knöchel für KFL08 (Lochabstand 37 mm), 2 je Gelenk |
+| `laser/lagerplatte_kfl002.dxf` | Alu 6082 T6 | 8 mm | 2 | 86 × 66 | 6 | 6.9 mm | Hüftlager KFL002 an der Hüftschwinge (Lochabstand 53 mm) |
 | `laser/abspreizgabel_wange.dxf` | Alu 6082 T6 | 8 mm | 4 | 60 × 100 | 4 | 14.7 mm | Abspreizgabel HU-01: 2 Wangen je Seite; Ø 16,2 für Passschraube/Kugelsperrbolzen, M6 zum Rahmen, M5 Federhalter |
 | `laser/abspreizgabel_steg.dxf` | Alu 6082 T6 | 6 mm | 2 | 82 × 60 | 5 | 9.2 mm | Steg zwischen den Gabelwangen (oben), Langloch für den Zentrierfeder-Halter |
 | `laser/zentrierfeder_halter.dxf` | Edelstahl 1.4301 | 3 mm | 4 | 28 × 30 | 2 | 7.6 mm | Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder |

@@ -2,7 +2,7 @@
 // Bauen: pio run (siehe platformio.ini). Pinbelegung: docs/verdrahtung.md (muss mit PIN_* unten übereinstimmen).
 //
 // Motoren: 8 × CubeMars AK70-10 (oder baugleich) im MIT-Modus über CAN1, 1 Mbit/s: 2 Hüftmotoren an der Hüftschwinge,
-// 6 in der Box (Knie, Schulter, Ellbogen). Wägezellen: 9 × HX711 (6 Manschetten, 3 Schlaufenköpfe). Fußkontakt: 2 × FSR.
+// 6 in der Box (Knie, Schulter, Ellbogen). Wägezellen: 9 × HX711 (6 Manschetten, 3 Schlaufenköpfe). Fußkontakt: 2 × HX711 mit je 4 Halbbrücken-Zellen 50 kg.
 // Lagesensor: BNO085 (I2C), liefert Kippgeschwindigkeit (Sturz) und Vorneigung des Rumpfs. Uhr: RTC des Teensy mit Knopfzelle. LED-Ring: 12 × WS2812. Watchdog: WDOG1 des i.MX RT1062 (direkt über Register, 0,5 s).
 // Anzeige und Handy-Funk macht ein ESP32-C3 an Serial1: Der Teensy schickt ihm jede Sekunde eine Statuszeile.
 // (Ein E-Paper-Update blockiert mehrere 100 ms und darf deshalb nicht im Regeltakt laufen.)
@@ -27,8 +27,8 @@ constexpr int PIN_LOOP_CUR[NL] = {14, 15, 16}, PIN_VBAT = 17;                  /
 constexpr int PIN_LED_RING = 20, PIN_VIBE = 21;                                // CAN1: 22 TX, 23 RX
 constexpr int PIN_LOOP_DIR[NL] = {24, 25, 26}, PIN_LOOP_END[NL] = {27, 28, 29};
 constexpr int PIN_ESTOP_SENSE = 30, PIN_CONTACTOR = 31, PIN_STAND = 32, PIN_LIGHT = 33, PIN_HX_SCK = 34;
-constexpr int PIN_HX_DOUT[kCells] = {9, 35, 36, 37, 40, 41, 10, 11, 12};      // 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1
-constexpr int PIN_FOOT[2] = {38, 39};                                          // FSR im Steigbügel L/R (analog A14/A15, 10 kΩ nach Masse)
+constexpr int PIN_HX_DOUT[kCells] = {9, 35, 36, 37, 40, 41, 10, 11, 12, 38, 39};   // 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1, 9/10 Fuß L/R
+constexpr float kFootContactN = 49.f;                                          // ≈ 5 kg auf dem Steigbügel = Standbein (am Prüfstand einstellen)
 
 static App app;
 static Inputs in;
@@ -222,7 +222,7 @@ void loop() {
   in.safety.batteryV = analogRead(PIN_VBAT) * (3.3f / 1023.f) * 15.f;          // Spannungsteiler 1:15
   in.safety.trunkTiltRate = readTrunkTiltRate(&in.standingStill);
   in.trunkPitch = trunkPitch;
-  for (int k = 0; k < 2; k++) in.footContact[k] = analogRead(PIN_FOOT[k]) > 300;   // ≈ 5 kg auf dem Steigbügel (am Prüfstand einstellen)
+  for (int k = 0; k < 2; k++) in.footContact[k] = cellN[9 + k] > kFootContactN;   // 4 Halbbrücken-Zellen je Steigbügel als Vollbrücke an einem HX711
 
   const Outputs o = app.step(in, dt);
 
@@ -235,7 +235,7 @@ void loop() {
   if (motorsOn) for (int i = 0; i < NJ; i++) if ((cfg.jointMask >> i) & 1u) motorSendTorque(i, o.tau[i]);
   if (logOn) logLine(o);
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
-  digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate); digitalWrite(PIN_LUMB_LOCK, o.lumbarLock);
+  digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate); analogWrite(PIN_LUMB_LOCK, (int)(o.lumbarDuty * 255.f + 0.5f));
 
   // Betriebsstunden: gespeichert wird nur, wenn das Exo aus ist (Flash-Schreiben kann den Regeltakt stören)
   static bool dirty = false;

@@ -47,6 +47,7 @@ struct Outputs {
   float ff[NJ] = {};                   // Anteil Vorsteuerung (für Log und Tests)
   float stance[2] = {};                // 0 = Schwungbein, 1 = Standbein (geglättet)
   bool lumbarLock = false;             // Lendengelenk sperren (Hubmagnet): Baum in den Schlaufen
+  float lumbarDuty = 0.f;              // PWM für den Hubmagneten: 0,2 s voll anziehen, dann 35 % halten (0,54 → 0,19 A am 24-V-Wandler)
   bool warnBackward = false;           // Rücklage: Rumpf zu weit nach hinten
   float heat[NJ] = {};                 // Wärmeschätzung je Motor (1 = Dauerbetrieb mit Nennmoment)
 };
@@ -148,6 +149,7 @@ class App {
     // Lendengelenk sperren, solange ein Baum (> 5 kg) in den Schlaufen hängt; Rücklage-Warnung
     const float loadN = in.loopN[LoopR1] + in.loopN[LoopR2] + in.loopN[LoopL1];
     lockT_ = loadN > 49.f ? lockT_ + dt : 0.f; o.lumbarLock = lockT_ > 0.3f && sup.mode == Mode::Active;
+    lockOn_ = o.lumbarLock ? lockOn_ + dt : 0.f; o.lumbarDuty = !o.lumbarLock ? 0.f : lockOn_ < 0.2f ? 1.f : 0.35f;
     o.warnBackward = sup.mode == Mode::Active && in.trunkPitch < -0.15f;
     if (o.warnBackward) { warnT_ += dt; if (std::fmod(warnT_, 0.6f) < 0.15f) vibe_ = std::fmax(vibe_, 0.05f); } else warnT_ = 0.f;
     o.led = sup.led(s);
@@ -160,7 +162,7 @@ class App {
  private:
   float both_ = 0.f, vibe_ = 0.f, stance_[2] = {1.f, 1.f};
   int activeWinch_ = -1;
-  float heat_[NJ] = {}, fallT_ = -1.f, lockT_ = 0.f, warnT_ = 0.f;
+  float heat_[NJ] = {}, fallT_ = -1.f, lockT_ = 0.f, lockOn_ = 0.f, warnT_ = 0.f;
   bool levelSent_ = false, comboActive_ = false, comboRelease_ = false;
 
   // Gefilterte Manschettenkraft eines Gelenks (aus dem letzten Takt) ohne Totband-Anteil

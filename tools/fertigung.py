@@ -26,8 +26,8 @@ OUT_L, OUT_D = ROOT / 'fertigung' / 'laser', ROOT / 'fertigung' / 'druck'
 SEG = 96
 
 # ------------------------------------------------------------------ Parameter (vom Kaufteil abhängig) ----
-FLANSCH_LOCHABSTAND = 67.0   # Flanschlager 2-Loch, Bohrung 12 mm (z. B. KFL001): Lochabstand laut Datenblatt prüfen
-FLANSCH_LOCH = 9.0           # Durchgang für M8
+# Flanschlager 2-Loch (Händlerdaten, vor der Bestellung am gelieferten Teil prüfen): Bohrung, Lochabstand, Schraubenloch
+KFL = {'KFL08': (8, 37.0, 4.8), 'KFL001': (12, 48.0, 6.6), 'KFL002': (15, 53.0, 7.0)}
 MOTOR_LOCHKREIS = 70.0       # Befestigungslochkreis des Motors (AK70-10: laut Datenblatt prüfen)
 MOTOR_LOCH = 3.4             # Durchgang M3
 MOTOR_ZENTRIER = 40.0        # Zentrierbund Ø
@@ -97,11 +97,14 @@ laser('eckplatte', P(rrect(60, 60, 6)) - circ(M6 / 2, -15, 15) - circ(M6 / 2, 15
       'Alu 5754', 4, 24, 'Doppelplatten an allen Rahmenecken (2 je Ecke)')
 
 # Lagerplatte für Hüft-, Knie-, Schulter- und Ellbogenlager (Flanschlager 2-Loch + Passschraube)
-def lagerplatte(w, h):
-    a = FLANSCH_LOCHABSTAND / 2
-    return (P(rrect(w, h, 8)) - circ(M10 / 2) - circ(FLANSCH_LOCH / 2, -a, 0) - circ(FLANSCH_LOCH / 2, a, 0)
-            - circ(M6 / 2, -a + 8, -h / 2 + 10) - circ(M6 / 2, a - 8, -h / 2 + 10) - circ(M6 / 2, 0, h / 2 - 10))
-laser('lagerplatte', lagerplatte(95, 70), 'Alu 6082 T6', 6, 16, 'Gelenkplatten Knie, Knöchel, Schulter, Ellbogen (je 2 Platten pro Gelenk)')
+def lagerplatte(typ, w, h):
+    welle, abstand, loch = KFL[typ]
+    a = abstand / 2
+    return (P(rrect(w, h, 8)) - circ((welle + 1.0) / 2) - circ(loch / 2, -a, 0) - circ(loch / 2, a, 0)
+            - circ(M6 / 2, -w / 2 + 10, -h / 2 + 10) - circ(M6 / 2, w / 2 - 10, -h / 2 + 10) - circ(M6 / 2, 0, h / 2 - 10))
+laser('lagerplatte_kfl001', lagerplatte('KFL001', 80, 64), 'Alu 6082 T6', 6, 8, 'Gelenkplatten Knie und Schulter für KFL001 (Lochabstand 48 mm), 2 je Gelenk')
+laser('lagerplatte_kfl08', lagerplatte('KFL08', 66, 56), 'Alu 6082 T6', 6, 8, 'Gelenkplatten Ellbogen und Knöchel für KFL08 (Lochabstand 37 mm), 2 je Gelenk')
+laser('lagerplatte_kfl002', lagerplatte('KFL002', 86, 66), 'Alu 6082 T6', 8, 2, 'Hüftlager KFL002 an der Hüftschwinge (Lochabstand 53 mm)')
 
 def motorbild(cs, x, y, dreh=45.0):
     """Zentrierbund + 4 Schrauben auf dem Motor-Lochkreis (Winkel so, dass die Schrauben nicht an den Plattenrand kommen)."""
@@ -439,8 +442,7 @@ def main():
     # Teileliste
     md = ['# Teileliste Fertigung (erzeugt mit tools/fertigung.py)', '',
           'Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: Druckteile, Einheit mm.', '',
-          '**Vor der Bestellung prüfen:** Lochabstand der Flanschlager (Parameter `FLANSCH_LOCHABSTAND` = '
-          f'{FLANSCH_LOCHABSTAND:.0f} mm) und Lochkreis der Motoren (`MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm) mit den Datenblättern der gekauften Teile.', '',
+          '**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochkreis der Motoren (`MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm) mit den Datenblättern der gekauften Teile.', '',
           '## Laserteile', '', '| Datei | Material | Dicke | Stück | Größe | Löcher | kleinster Steg | Zweck |', '|---|---|---|---|---|---|---|---|']
     md += [f'| `laser/{r[0]}.dxf` | {r[1]} | {r[2]} mm | {r[3]} | {r[4]} | {r[5]} | {r[6]} mm | {r[7]} |' for r in rows_l]
     md += ['', '## Druckteile (Bambu Lab A1 mini, 180 × 180 × 180 mm)', '', '| Datei | Material | Stück | Größe | Volumen cm³ | passt | Genus | Zweck |', '|---|---|---|---|---|---|---|---|']

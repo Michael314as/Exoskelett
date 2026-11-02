@@ -126,7 +126,7 @@ docs/
   kraftverteilung.md         Lasten je Arbeitsschritt, Kraftfluss, was die Motoren schaffen
   entwicklungsplan.md        Grundwissen, Phasen, Tests, Werkzeug, Stolpersteine
 fertigung/
-  laser/*.dxf, druck/*.stl   32 Laserteile, 19 Druckteile (erzeugt mit tools/fertigung.py)
+  laser/*.dxf, druck/*.stl   34 Laserteile, 19 Druckteile (erzeugt mit tools/fertigung.py)
 firmware/
   src/                       Steuerung (Gelenkregler, Sicherheit, Bedienung, Teensy-Anbindung)
   esp32/                     Display und Handy (ESP32-C3)

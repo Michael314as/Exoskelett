@@ -11,14 +11,14 @@
 
 namespace exo {
 
-constexpr int kCells = 9;
+constexpr int kCells = 11;
 
 struct Settings {
   uint32_t magic = 0x45584F33;   // "EXO3"
-  uint16_t version = 3;
+  uint16_t version = 4;          // 4: zwei Fußkontakt-Wägezellen dazu (11 Zellen)
   uint8_t level = 1;             // Unterstützungsstufe 0/1/2
   uint8_t jointMask = 0xFF;      // aktive Gelenke (Bit = JointId); Prüfstand: nur Ellbogen rechts
-  CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1
+  CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1, 9/10 Fuß L/R
   float joint0[8] = {};          // Motorwinkel bei gestreckter Grundstellung (Nullpunkt)
   float hours = 0.f;             // Betriebsstunden (für Wartungshinweise)
   uint32_t crc = 0;
@@ -31,7 +31,7 @@ inline uint32_t crc32(const uint8_t* d, size_t n) {
 }
 inline void seal(Settings& s) { s.crc = crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc)); }
 inline bool valid(const Settings& s) {
-  return s.magic == 0x45584F33 && s.version == 3 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
+  return s.magic == 0x45584F33 && s.version == 4 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
 }
 
 // Wartungshinweis aus den Betriebsstunden (Intervalle laut docs/wartung.md)
