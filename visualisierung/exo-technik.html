@@ -150,6 +150,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
         <label class="sl" for="squat">Hocke <input type="range" id="squat" min="0" max="1" step="0.01" value="0.2"></label>
         <label class="sl" for="arm">Arm heben <input type="range" id="arm" min="0" max="1" step="0.01" value="0.25"></label>
         <label class="sl" for="elb">Ellbogen <input type="range" id="elb" min="0" max="1" step="0.01" value="0.35"></label>
+        <label class="sl" for="lumb">Rumpf beugen <input type="range" id="lumb" min="0" max="1" step="0.01" value="0"></label>
         <label class="sl" for="abd">Arme seitlich <input type="range" id="abd" min="0" max="1" step="0.01" value="0"></label>
         <label class="sl" for="spread">Beine spreizen <input type="range" id="spread" min="0" max="1" step="0.01" value="0"></label>
         <label class="sl" for="loop">Schlaufen zu <input type="range" id="loop" min="0" max="1" step="0.01" value="0"></label>
@@ -367,10 +368,10 @@ function shellGeo(r, t, h, a0, a1) {
 
 /* ================= Gruppen (Körpersegmente) ================= */
 const root = new THREE.Group(); root.position.y = 0.026; scene.add(root);   // Spikes stehen über dem Boden
-const G = { torso: new THREE.Group(), shsw: [new THREE.Group(), new THREE.Group()], swing: [new THREE.Group(), new THREE.Group()], brace: [new THREE.Group(), new THREE.Group()], thigh: [new THREE.Group(), new THREE.Group()], shank: [new THREE.Group(), new THREE.Group()],
+const G = { torso: new THREE.Group(), chest: new THREE.Group(), shsw: [new THREE.Group(), new THREE.Group()], swing: [new THREE.Group(), new THREE.Group()], brace: [new THREE.Group(), new THREE.Group()], thigh: [new THREE.Group(), new THREE.Group()], shank: [new THREE.Group(), new THREE.Group()],
   foot: [new THREE.Group(), new THREE.Group()], upper: [new THREE.Group(), new THREE.Group()], fore: [new THREE.Group(), new THREE.Group()] };
 const BG = { upper: [new THREE.Group(), new THREE.Group()], fore: [new THREE.Group(), new THREE.Group()] };   // Arme des Menschen (führen)
-root.add(G.torso, ...G.shsw, ...G.swing, ...G.brace, ...G.thigh, ...G.shank, ...G.foot, ...G.upper, ...G.fore, ...BG.upper, ...BG.fore);
+root.add(G.torso, G.chest, ...G.shsw, ...G.swing, ...G.brace, ...G.thigh, ...G.shank, ...G.foot, ...G.upper, ...G.fore, ...BG.upper, ...BG.fore);
 const SIDE = [-1, 1];                       // links -z, rechts +z
 
 /* ================= Bauteil-Infos ================= */
@@ -530,7 +531,12 @@ function sensorCuff(g, y, zc, r, h, zr, sd, id) {
 cur = 'frame'; fl = 3;
 {
   const g = G.torso, rx = -0.155, ys = [0.1, 0.3, D.torso + 0.07];
-  for (const z of [-0.085, 0.085]) tube(g, V(rx, 0.075, z), V(rx, D.torso + 0.17, z), 0.03);   // 30 × 30 × 2
+  for (const z of [-0.085, 0.085]) { tube(g, V(rx, 0.075, z), V(rx, 0.15, z), 0.03); tube(g, V(rx, 0.19, z), V(rx, D.torso + 0.17, z), 0.03); }   // 30 × 30 × 2, geteilt am Lendengelenk
+  for (const z of [-0.085, 0.085]) {   // Lendengelenk: Scharnier mit Elastomerfeder (Beugen ±25°), Sperrhebel
+    box(g, 0.05, 0.014, 0.05, M.aluDark, rx + 0.012, 0.155, z); box(g, 0.05, 0.014, 0.05, M.aluDark, rx + 0.012, 0.185, z);
+    put(g, mesh(cyl(0.012, 0.012, 0.052, 16), M.tpu), rx + 0.03, 0.17, z, Math.PI / 2); put(g, mesh(cyl(0.005, 0.005, 0.07, 10), M.steel), rx + 0.03, 0.17, z, Math.PI / 2);
+  }
+  box(g, 0.012, 0.03, 0.012, M.red, rx - 0.02, 0.17, 0.11);
   for (const y of ys) tube(g, V(rx, y, -0.11), V(rx, y, 0.11), 0.02);
   for (const z of [-0.085, 0.085]) for (const y of ys) {
     for (const dx of [0.0145, -0.0145]) box(g, 0.004, 0.06, 0.06, M.aluDark, rx + dx, y, z);
@@ -547,7 +553,7 @@ cur = 'frame'; fl = 3;
 /* ---------- Schutzbügel: hinten und seitlich um Box und Akkus (Sturz nach hinten, Anstoßen) ---------- */
 cur = 'frame';
 SIDE.forEach((sd) => {
-  const P = [V(-0.155, D.torso + 0.13, sd * 0.085), V(-0.32, D.torso + 0.08, sd * 0.13), V(-0.365, 0.42, sd * 0.25), V(-0.365, 0.15, sd * 0.25), V(-0.2, 0.15, sd * 0.25), V(-0.155, 0.1, sd * 0.1)];
+  const P = [V(-0.155, D.torso + 0.13, sd * 0.085), V(-0.32, D.torso + 0.08, sd * 0.13), V(-0.365, 0.42, sd * 0.25), V(-0.365, 0.15, sd * 0.25), V(-0.2, 0.2, sd * 0.25), V(-0.155, 0.3, sd * 0.1)];
   for (let i = 1; i < P.length; i++) { rod(G.torso, P[i - 1], P[i], 0.011, M.alu, 14); put(G.torso, mesh(new THREE.SphereGeometry(0.011, 12, 10), M.alu), P[i].x, P[i].y, P[i].z); }
   for (const i of [2, 3]) put(G.torso, mesh(new THREE.SphereGeometry(0.02, 14, 10), M.tpu), P[i].x - 0.01, P[i].y, P[i].z + sd * 0.008);   // Gummipuffer
   rod(G.torso, V(-0.365, 0.42, sd * 0.25), V(-0.365, 0.42, -sd * 0.0), 0.009, M.alu, 12);                                       // Querstrebe hinten
@@ -934,7 +940,7 @@ SIDE.forEach((sd, k) => {
 /* ---------- Seile und Bowdenzüge (werden bei jeder Haltung neu gelegt) ---------- */
 const dyn = [];
 function dynTube(mat, r, key, fn, smooth = false) { const m = new THREE.Mesh(new THREE.BufferGeometry(), mat); m.castShadow = false; scene.add(m); (parts[key] = parts[key] || []).push(m); m.userData.base = mat; dyn.push({ m, r, fn, smooth }); return dyn[dyn.length - 1]; }
-const W = (g, x, y, z) => g.localToWorld(V(x, y, z));
+const W = (g, x, y, z) => (g === G.torso && y > 0.13 ? G.chest : g).localToWorld(V(x, y, z));   // Oberkörper-Teile hängen am Lendengelenk
 const arcPts = (c, R, a0, a1, n = 14) => { const out = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; out.push(V(c.x + Math.cos(a) * R, c.y + Math.sin(a) * R, c.z)); } return out; };
 // Bogen auf einer Scheibe in der x-y-Ebene der Baugruppe g; Winkel in g gemessen
 const arcLocal = (g, R, z, a0, a1, n = 14) => { const out = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; out.push(g.localToWorld(V(Math.cos(a) * R, Math.sin(a) * R, z))); } return out; };
@@ -944,7 +950,7 @@ const angOf = (g, dx, dy) => { const v = new THREE.Vector3(dx, dy, 0).transformD
 SIDE.forEach((sd, k) => {
   const zs = ZS(sd), zDisc = zs + sd * 0.054;
   // Schulter: offenes Seilpaar von der Box über die Umlenkrollen auf die Seilscheibe
-  const route = (i) => [...shRoute[k][i].slice(0, -1).map((p) => G.torso.localToWorld(p.clone())), ...shRoute2[k][i].slice(1, -1).map((p) => G.shsw[k].localToWorld(p.clone()))];
+  const route = (i) => [...shRoute[k][i].slice(0, -1).map((p) => G.chest.localToWorld(p.clone())), ...shRoute2[k][i].slice(1, -1).map((p) => G.shsw[k].localToWorld(p.clone()))];
   dynTube(M.rope, 0.0016, 'shoulder', () => {      // heben: oben, wickelt nach vorne ab
     const U = G.upper[k], at = angIn(U, G.shsw[k], 0, 1), aa = deg(-70);
     return [...route(0), ...arcLocal(U, R_SH, zDisc + 0.0035 * sd, at, Math.min(aa, at))];
@@ -1291,9 +1297,10 @@ function tourStep() { if (!tour) return; select(PART_INFO[tour.i % PART_INFO.len
 function stopTour() { if (!tour) return; clearTimeout(tour.t); tour = null; $('tour').textContent = 'Rundgang'; }
 
 /* ================= Haltung ================= */
-const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0, abd: 0 };
+const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0, abd: 0, lumb: 0 };
 // Gang: Phase 0 = Fersenaufsatz; Hüft- und Kniewinkel nach typischen Ganglinien (Hüfte −10…+25°, Knie bis 60° im Schwung)
 const gait = { on: false, ph: 0, stance: [true, true] };
+const Y_L = 0.17, P_L = V(-0.07, 0.17, 0);   // Lendengelenk: Höhe über den Hüftgelenken, Drehachse auf Höhe der Lendenwirbel
 const bal = { extra: 0 };   // zusätzliche Rumpfvorneigung, mit der der Mensch den Rucksack ausbalanciert
 const gaitAng = (k) => { const ph = (gait.ph + k * 0.5) % 1; return { hip: deg(7.5 + 17.5 * Math.cos(2 * Math.PI * (ph - 0.88))), knee: deg(5 + 10 * Math.exp(-(((ph - 0.15) / 0.08) ** 2)) + 55 * Math.exp(-(((ph - 0.72) / 0.1) ** 2))), stance: ph < 0.6 }; };
 const ex = { psi: null, eps: null };                       // Winkel des Exo-Arms (folgt dem Menschen)
@@ -1318,7 +1325,9 @@ function pose(dt) {
   legs.forEach((L, k) => { place(G.swing[k], L.Rsw, L.Hp, L.sd); place(G.thigh[k], L.Rth, L.Hp, L.sd); place(G.shank[k], L.Rsh, L.Kp, L.sd); place(G.brace[k], L.Rbr, L.Ap, L.sd); place(G.foot[k], L.Rft, L.Ap, L.sd); });
   G.torso.position.copy(off); G.torso.rotation.set(0, 0, -lam);
   G.torso.updateMatrixWorld();
-  const s2 = V(0, D.torso, 0).applyMatrix4(G.torso.matrixWorld);
+  { const lb = deg(30) * st.lumb, M4 = new THREE.Matrix4().copy(G.torso.matrix).multiply(new THREE.Matrix4().makeTranslation(P_L.x, P_L.y, P_L.z)).multiply(mRz(-lb)).multiply(new THREE.Matrix4().makeTranslation(-P_L.x, -P_L.y, -P_L.z));
+    M4.decompose(G.chest.position, G.chest.quaternion, G.chest.scale); G.chest.updateMatrixWorld(); }
+  const s2 = V(0, D.torso, 0).applyMatrix4(G.chest.matrixWorld);
   // Mensch führt, Exo folgt mit kleiner Verzögerung (wie die Regelung über die Manschetten)
   const hum = armAng();
   if (ex.psi === null) { ex.psi = hum.psi; ex.eps = hum.eps; }
@@ -1326,10 +1335,10 @@ function pose(dt) {
   ex.psi += (hum.psi - ex.psi) * a; ex.eps += (hum.eps - ex.eps) * a;
   const aA = deg(45) * st.abd, qz = (a) => new THREE.Quaternion().setFromAxisAngle(V(0, 0, 1), a);
   for (let k = 0; k < 2; k++) {
-    const sd = SIDE[k], Rsw = Rto.clone().multiply(mRx(-sd * aA)), Pl = V(0, D.torso, sd * D.shHalf), Pw = G.torso.localToWorld(Pl.clone());
+    const sd = SIDE[k], Rsw = new THREE.Matrix4().makeRotationFromQuaternion(G.chest.quaternion).multiply(mRx(-sd * aA)), Pl = V(0, D.torso, sd * D.shHalf), Pw = G.chest.localToWorld(Pl.clone());
     const Sw = G.shsw[k]; Sw.quaternion.setFromRotationMatrix(Rsw); Sw.position.copy(Pw).sub(Pl.clone().applyMatrix4(Rsw)); Sw.updateMatrixWorld();
-    for (const [U, F, psi, eps] of [[G.upper[k], G.fore[k], ex.psi, ex.eps], [BG.upper[k], BG.fore[k], hum.psi, hum.eps]]) {
-      U.position.copy(Sw.localToWorld(V(0, D.torso, 0))); U.quaternion.copy(Sw.quaternion).multiply(qz(psi + lam)); U.updateMatrixWorld();
+    for (const [U, F, psi, eps] of [[G.upper[k], G.fore[k], ex.psi, ex.eps], [BG.upper[k], BG.fore[k], ex.psi + clamp(hum.psi - ex.psi, -deg(1.5), deg(1.5)), ex.eps + clamp(hum.eps - ex.eps, -deg(1.5), deg(1.5))]]) {   // Arm liegt in den Manschetten; der kleine Versatz ist das Polster
+      U.position.copy(Sw.localToWorld(V(0, D.torso, 0))); U.quaternion.copy(Sw.quaternion).multiply(qz(psi + lam + deg(30) * st.lumb)); U.updateMatrixWorld();
       F.position.copy(U.localToWorld(V(0, -D.upper, 0))); F.quaternion.copy(U.quaternion).multiply(qz(eps)); F.updateMatrixWorld();
     }
   }
@@ -1348,7 +1357,11 @@ function pose(dt) {
   for (const [id, f] of [['upper', fUp], ['fore', fFo], ['thigh', live.fTh]]) {
     const c = cuffArrows[id]; if (!c) continue;
     const show = Math.abs(f) > 1.5; c.arr.visible = show;
-    if (show) { const dir = f > 0 ? 1 : -1; c.arr.setDirection(V(dir, 0, 0)); c.arr.position.set(dir * 0.065, c.y, c.zc + 0.0); c.arr.setLength(Math.min(0.16, 0.035 + Math.abs(f) * 0.004), 0.025, 0.018); }
+    if (show && id === 'thigh') {   // Bein: Pfeil zeigt, wohin du die Manschette drückst = wohin sie sich bewegt (Aufstehen: nach oben)
+      const g = c.arr.parent, wp = g.localToWorld(V(0, c.y, c.zc)), v = c.prev ? wp.clone().sub(c.prev) : V(); c.prev = wp;
+      if (v.lengthSq() > 1e-10) { const lv = v.transformDirection(new THREE.Matrix4().copy(g.matrixWorld).invert()); lv.z = 0; if (lv.lengthSq() > 1e-8) { c.ldir = lv.normalize(); } }
+      if (c.ldir) { c.arr.setDirection(c.ldir); c.arr.position.set(c.ldir.x * 0.075, c.y + c.ldir.y * 0.075, c.zc); c.arr.setLength(Math.min(0.16, 0.035 + Math.abs(f) * 0.004), 0.025, 0.018); }
+    } else if (show) { const dir = f > 0 ? 1 : -1; c.arr.setDirection(V(dir, 0, 0)); c.arr.position.set(dir * 0.065, c.y, c.zc + 0.0); c.arr.setLength(Math.min(0.16, 0.035 + Math.abs(f) * 0.004), 0.025, 0.018); }
   }
   // Schlaufen: offen (Ring vor dem Kopf) → zu (um den Stamm, falls eingelegt, sonst klein am Kopf)
   for (const L of loops) {
@@ -1383,6 +1396,7 @@ const DB = [
   ['RA-01', 'Rahmenrohr senkrecht', 'Halbzeug', 'EN AW-6082 T6 Vierkantrohr 30 × 30 × 2', 'L 600 mm; Biegespannung Spitze 59 MPa', 0.36, 'RA-02 RA-03 HU-01 SC-01'],
   ['RA-02', 'Querrohr', 'Halbzeug', 'EN AW-6082 T6 Vierkantrohr 20 × 20 × 2', 'L 220 mm', 0.09, 'RA-01 RA-03'],
   ['RA-03', 'Eck-Doppelplatte, Lochleiste', 'Laser', 'AlMg3 4 mm', '60 × 60 mm, M6 DIN 912 A2 + DIN 985', 0.04, 'RA-01 RA-02 GU-02'],
+  ['RA-09', 'Lendengelenk', 'Laser + Kauf', 'Scharnier Alu 8 mm, Elastomerfeder Ø 24 (Shore 70), Bolzen Ø 10, Sperrhebel', 'Rumpf beugen ±25° und seitlich ±10° (Elastomer); Sperre zum schweren Heben; die Achse liegt auf Höhe der Lendenwirbel', 0.35, 'RA-01 GU-01 GU-02'],
   ['RA-04', 'Schutzbügel', 'Halbzeug, gebogen', 'Alu-Rundrohr Ø 22 × 2 (EN AW-6060)', 'Biegeradius ≥ 60 mm; trifft bei Sturz nach hinten zuerst auf', 0.6, 'RA-01 RA-05 RA-07'],
   ['RA-05', 'Gummipuffer', 'Kauf', 'Gummipuffer Typ A Ø 40 × 30, M8', 'Shore 55', 0.03, 'RA-04'],
   ['RA-07', 'Parkstütze', 'Halbzeug + Kauf', 'Vierkant 20 × 20 × 2, Kugelsperrbolzen GN 113 Ø 6', 'Endschalter meldet „unten“ an die Steuerung', 0.35, 'RA-04 EL-01'],
@@ -1472,7 +1486,7 @@ const DB = [
   ['SG-03', 'Schnappschäkel', 'Kauf', 'Wichard 2673 (Edelstahl)', 'Notöffnung am festen Bandende', 0.03, 'SG-02 SG-04'],
   ['SG-04', 'Spannband', 'Fertigung', 'Edelstahl-Lochband 20 × 0,3 mm, Gummi 2 mm innen', 'Ø 13 cm offen, Stämme Ø 4–12 cm; schließt mit ≈ 275 N, hält selbsthemmend', 0.06, 'SG-02 SG-05 SG-06'],
   ['SG-05', 'Bandkanal und Speicher', 'Halbzeug', 'Alu-U 12 × 12 mit PTFE-Profil', 'nimmt bis 25 cm Band auf', 0.05, 'SG-04 SG-06 AR-02'],
-  ['SG-06', 'Bandantrieb', 'Kauf', 'Schneckengetriebemotor 5840-31ZY 24 V, 10 U/min (Nennmoment 45 kg·cm, Blockiermoment 80 kg·cm, Getriebe 58 × 40 mm, Wellen-Ø 8 mm) + Stachelrad r 16 mm', 'Bandzug 275 N (Nenn) bis 490 N (Blockieren); Band 16,8 mm/s → schließt Ø 13 → 9 cm in 7,5 s; selbsthemmend, Freilaufhebel. Der kleinere JGY-370 (0,9 Nm) wäre zu schwach (≈ 55 N).', 0.25, 'SG-05 EL-03 KB-03'],
+  ['SG-06', 'Bandantrieb', 'Kauf', 'Schneckengetriebemotor 5840-31ZY 24 V, 27 U/min (gleiche Baugröße 58 × 40 mm wie die 10-U/min-Variante) + Stachelrad r 16 mm', 'Band 45 mm/s → schließt Ø 13 → 9 cm in 2,8 s; Schließkraft ≈ 100 N (aus der Leistung der 10-U/min-Variante geschätzt, 45 kg·cm × 10/27), reicht zum Anlegen; den Stamm hält das selbsthemmende Getriebe (Haltekraft > 400 N). Freilaufhebel.', 0.25, 'SG-05 EL-03 KB-03'],
   ['SG-07', 'Bedienteil Hand', 'Druck + Kauf', 'Wippschalter IP67, LED, Handschlaufe', 'vor = zu, zurück halten = auf', 0.05, 'SG-06 KB-03'],
   ['BD-01', 'Not-Aus mit LED-Ring', 'Kauf', 'Eaton M22-PVT/K11 + WS2812B-Ring 12 LEDs', 'linker Schultergurt', 0.09, 'EL-04 KB-04'],
   ['BD-02', 'Ein/Aus-Taster', 'Kauf', 'Drucktaster IP67', 'Doppeltipp: Licht', 0.02, 'EL-01'],
@@ -1490,7 +1504,7 @@ const SRC = {
 };
 const PDB = {}; for (const [id, name, typ, ref, data, kg, links] of DB) PDB[id] = { id, name, typ, ref, data, kg, links: links ? links.split(' ') : [], asm: id.split('-')[0] === 'KB' ? 'EL' : id.split('-')[0] };
 // ---------- Jedem Mesh ein Bauteil zuordnen (ID + Seite) ----------
-const GROUPS = new Map([[G.torso, ['torso', -1]]]);
+const GROUPS = new Map([[G.torso, ['torso', -1]], [G.chest, ['torso', -1]]]);
 for (const n of ['shsw', 'swing', 'thigh', 'shank', 'brace', 'foot', 'upper', 'fore']) G[n].forEach((g, k) => GROUPS.set(g, [n, k]));
 const spoolSet = new Set(Object.values(spools)), drumSet = new Set(hipDrums);
 function ctx(m) {
@@ -1506,7 +1520,7 @@ function ctx(m) {
 function classify(m, key, c) {
   const b = m.userData.base, is = (...a) => a.includes(b), geo = m.geometry.type, hx = b && b.color ? b.color.getHex() : 0, g = c.g, yw = -D.fore;
   switch (key) {
-    case 'frame': if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
+    case 'frame': if (Math.abs(c.tl.y - 0.17) < 0.03 && !is(M.alu) && c.tl.x > -0.2) return 'RA-09'; if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
     case 'straps': if (is(M.chip, M.chrome)) return 'GU-03'; if (c.tl.y < 0.17) return 'GU-01'; return hx === 0x3A4148 ? 'GU-02' : 'GU-03';
     case 'drive': if (c.inSpool) return 'AN-T'; if (is(M.motor, M.motorDark, M.chip)) return c.tl.y < 0.26 ? 'AN-K' : c.tl.y < 0.36 ? 'AN-E' : 'AN-S'; return 'AN-01';
     case 'power':
@@ -1575,6 +1589,13 @@ function classify(m, key, c) {
 }
 const NO_SIDE = /^(EL|AN-01|RA-02|GU-01|KB-04|BD-01|BD-02)/;
 const PIDS = {};   // pid → { id, base, side, meshes: [], key }
+G.chest.position.copy(G.torso.position); G.chest.quaternion.copy(G.torso.quaternion); root.updateMatrixWorld(true);
+for (const ch of [...G.torso.children]) {
+  if (ch.isLight || ch === G.chest) continue;
+  const b = new THREE.Box3().setFromObject(ch); if (b.isEmpty()) { if (ch.position.y > 0.13) G.chest.attach(ch); continue; }
+  const c = G.torso.worldToLocal(b.getCenter(V())); if (c.y > 0.13) G.chest.attach(ch);
+}
+for (const ch of [...G.torso.children]) if (ch.isLight && ch.position.y > 0.13) G.chest.attach(ch);
 pose(0.016); root.updateMatrixWorld(true);
 for (const [k, arr] of Object.entries(parts)) for (const m of arr) {
   if (!m.isMesh) continue;
@@ -1695,12 +1716,12 @@ renderer.domElement.addEventListener('pointerleave', () => { tip.hidden = true; 
 const DRIVE = { hip: { i: 6.0, eta: 0.95 }, knee: { i: 3.33, eta: 0.7 }, sh: { i: 4.67, eta: 0.88 }, el: { i: 3.33, eta: 0.7 } };
 const kneeRatio = (qk) => kneeCam(deg(45) + qk) / 0.015;
 function wMax(j, tauJ, qk = 0) { const i = j === 'knee' ? kneeRatio(qk) : DRIVE[j].i, tm = Math.abs(tauJ) / (i * DRIVE[j].eta); return { w: Math.max(0.3, MOTOR.w0 - (MOTOR.w0 - MOTOR.wN) * tm / MOTOR.tauN) / i, i, tm }; }
-const SL = ['squat', 'arm', 'elb', 'abd', 'spread', 'loop'];
-const tgt = { ...st }; let mode = 'free', simT = 0, playing = true;
+const SL = ['squat', 'arm', 'elb', 'abd', 'spread', 'loop', 'lumb'];
+const tgt = { ...st }, vel = {}; let mode = 'free', simT = 0, playing = true, balT = 0;
 const smooth = (x) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 function keyframes(u, K) { for (let i = 1; i < K.length; i++) if (u <= K[i][0]) { const a = K[i - 1], b = K[i], f = smooth((u - a[0]) / (b[0] - a[0])); const o = {}; for (const s in b[1]) o[s] = a[1][s] + (b[1][s] - a[1][s]) * f; return o; } return K[K.length - 1][1]; }
-const LIFT = [[0, { squat: 0.2, arm: 0.2, elb: 0.35, loop: 0 }], [0.18, { squat: 0.85, arm: 0.12, elb: 0.5, loop: 0 }], [0.32, { squat: 0.85, arm: 0.12, elb: 0.5, loop: 1 }], [0.68, { squat: 0.1, arm: 0.55, elb: 0.95, loop: 1 }],
-  [0.82, { squat: 0.1, arm: 0.55, elb: 0.95, loop: 1 }], [0.92, { squat: 0.2, arm: 0.25, elb: 0.4, loop: 0 }], [1, { squat: 0.2, arm: 0.2, elb: 0.35, loop: 0 }]];
+const LIFT = [[0, { squat: 0.2, arm: 0.2, elb: 0.35, loop: 0, lumb: 0 }], [0.18, { squat: 0.85, arm: 0.12, elb: 0.5, loop: 0, lumb: 0.5 }], [0.32, { squat: 0.85, arm: 0.12, elb: 0.5, loop: 1, lumb: 0.5 }], [0.68, { squat: 0.1, arm: 0.55, elb: 0.95, loop: 1, lumb: 0 }],
+  [0.82, { squat: 0.1, arm: 0.55, elb: 0.95, loop: 1, lumb: 0 }], [0.92, { squat: 0.2, arm: 0.25, elb: 0.4, loop: 0, lumb: 0.2 }], [1, { squat: 0.2, arm: 0.2, elb: 0.35, loop: 0, lumb: 0 }]];
 function wish(t, f) {
   const P = (T) => 0.5 - 0.5 * Math.cos(2 * Math.PI * t * f / T);
   if (mode === 'squat') return { squat: 0.05 + 0.85 * P(3.5) };
@@ -1734,9 +1755,14 @@ function simStep(dt) {
   }
   const { qs, tau } = jointState();
   const wh = wMax('hip', tau.hip), wk = wMax('knee', tau.knee, qs.knee), ws = wMax('sh', tau.sh), we = wMax('el', tau.el);
-  const rate = { squat: Math.min(wh.w / deg(114), wk.w / deg(108)), arm: ws.w / deg(110), elb: we.w / deg(100), abd: 2.5 / deg(45), spread: 2.5 / deg(20), loop: 0.0168 / 0.126 };
+  const rate = { squat: Math.min(wh.w / deg(114), wk.w / deg(108)), arm: ws.w / deg(110), elb: we.w / deg(100), abd: 2.5 / deg(45), spread: 2.5 / deg(20), loop: 0.045 / 0.126, lumb: 1.5 / deg(30) };
   const lim = {};
-  for (const s of SL) { const d = tgt[s] - st[s], mx = rate[s] * sdt; lim[s] = Math.abs(d) > mx * 1.001 && Math.abs(d) > 0.002; st[s] += clamp(d, -mx, mx); }
+  for (const s of SL) {   // Wunschgeschwindigkeit aus dem Abstand, begrenzt durch Motorgeschwindigkeit und Beschleunigung (≈ 0,15 s bis voll)
+    const d = tgt[s] - st[s], vWant = clamp(d * 6, -rate[s], rate[s]), aMax = rate[s] / 0.15;
+    vel[s] = (vel[s] || 0) + clamp(vWant - (vel[s] || 0), -aMax * sdt, aMax * sdt);
+    if (Math.abs(d) < 1e-4 && Math.abs(vel[s]) < 1e-3) vel[s] = 0;
+    lim[s] = Math.abs(d * 6) > rate[s] * 1.001 && Math.abs(d) > 0.004; st[s] += vel[s] * sdt;
+  }
   // Gelenkwerte für Tabelle und Anzeige
   const now = jointState();
   for (const [j, w] of [['hip', wh], ['knee', wk], ['sh', ws], ['el', we]]) {
@@ -1755,11 +1781,11 @@ function renderJoints() {
 }
 const NOTES = { walk: 'Gehen: Beine abwechselnd nach typischen Ganglinien (Schritt 1,1 s bei Tempo 1). Standbein trägt, Schwungbein läuft frei; ist ein Motor zu langsam, verlangsamt sich der Schritt (Gelenke: „Motor am Limit“).', free: 'Frei: Die Regler geben deine Wunschhaltung vor; das Exo fährt mit der Geschwindigkeit hin, die seine Motoren bei der aktuellen Last schaffen.',
   squat: 'Kniebeuge im Wunschtempo. Hüfte und Knie werden von zwei getrennten Antrieben bewegt; begrenzt der langsamere, wartet die Bewegung auf ihn.',
-  armlift: 'Arm heben: Schultermotor über das offene Seilpaar (Übersetzung 4,67).', lift: 'Baum aufrichten (Use Case 1): in die Hocke, Schlaufen zu (Bandantrieb 16,8 mm/s, 7,5 s), aufstehen und Arm heben mit 15 kg Stamm, ablegen.',
+  armlift: 'Arm heben: Schultermotor über das offene Seilpaar (Übersetzung 4,67).', lift: 'Baum aufrichten (Use Case 1): in die Hocke, Schlaufen zu (Bandantrieb 45 mm/s, 2,8 s), aufstehen und Arm heben mit 15 kg Stamm, ablegen.',
   side: 'Seitlich: Arme und Beine abspreizen. Diese Achsen sind frei (Federn), die Geschwindigkeit setzt hier der Mensch.', max: 'Höchsttempo: Die Wunschbewegung springt zwischen den Endlagen. Die Tabelle „Gelenke“ zeigt die erreichte Geschwindigkeit und welcher Motor begrenzt.' };
 
 // ---------- Schwerpunkt und Standfläche ----------
-const HUMAN = [[G.torso, V(0, 0.25, 0), 0.578], ...SIDE.flatMap((sd, k) => [[G.thigh[k], V(0, -D.thigh * 0.433, sd * HH), 0.1], [G.shank[k], V(0, -D.shank * 0.433, sd * HH), 0.0465], [G.foot[k], V(0.05, -0.04, sd * HH), 0.0145], [BG.upper[k], V(0, -D.upper * 0.436, sd * D.shHalf), 0.028], [BG.fore[k], V(0, -0.14, sd * D.shHalf), 0.022]])];
+const HUMAN = [[G.torso, V(0, 0.05, 0), 0.142], [G.chest, V(0, 0.33, 0), 0.436], ...SIDE.flatMap((sd, k) => [[G.thigh[k], V(0, -D.thigh * 0.433, sd * HH), 0.1], [G.shank[k], V(0, -D.shank * 0.433, sd * HH), 0.0465], [G.foot[k], V(0.05, -0.04, sd * HH), 0.0145], [BG.upper[k], V(0, -D.upper * 0.436, sd * D.shHalf), 0.028], [BG.fore[k], V(0, -0.14, sd * D.shHalf), 0.022]])];
 const cgMat = new THREE.MeshBasicMaterial({ color: 0xE2A63B, depthTest: false }), cgExoMat = new THREE.MeshBasicMaterial({ color: 0x5FA8E8, depthTest: false });
 const cgDot = new THREE.Mesh(new THREE.SphereGeometry(0.022, 16, 12), cgMat); cgDot.renderOrder = 10; scene.add(cgDot);
 const cgExo = new THREE.Mesh(new THREE.SphereGeometry(0.016, 16, 12), cgExoMat); cgExo.renderOrder = 10; scene.add(cgExo);
@@ -1809,8 +1835,8 @@ dim(G.thigh[1], V(0, 0, 0.3), V(0, -D.thigh, 0.3), `${Math.round(D.thigh * 1000)
 dim(G.shank[1], V(0, 0, 0.26), V(0, -D.shank, 0.26), `${Math.round(D.shank * 1000)}`, V(0, 0, 0.04));
 dim(G.torso, V(-0.2, -0.04, -HH), V(-0.2, -0.04, HH), `${Math.round(2 * HH * 1000)} Abspreizachsen`, V(0, -0.05, 0));
 dim(G.torso, V(0, -0.08, -Z.hb), V(0, -0.08, Z.hb), `${Math.round(2 * Z.hb * 1000)} Hüftlager`, V(0, -0.04, 0));
-dim(G.torso, V(-0.32, 0.135, -0.145), V(-0.32, 0.485, -0.145), '350 Box', V(-0.05, 0, 0));
-dim(G.torso, V(0, D.torso, -D.exoSh), V(0, D.torso, D.exoSh), `${Math.round(2 * D.exoSh * 1000)} Schulterlager`, V(0, 0.2, 0));
+dim(G.chest, V(-0.32, 0.135, -0.145), V(-0.32, 0.485, -0.145), '350 Box', V(-0.05, 0, 0));
+dim(G.chest, V(0, D.torso, -D.exoSh), V(0, D.torso, D.exoSh), `${Math.round(2 * D.exoSh * 1000)} Schulterlager`, V(0, 0.2, 0));
 dim(G.upper[1], V(0, 0, 0.36), V(0, -D.upper, 0.36), `${Math.round(D.upper * 1000)}`, V(0, 0, 0.03));
 dim(G.fore[1], V(0, 0, 0.33), V(0, -D.fore, 0.33), `${Math.round(D.fore * 1000)}`, V(0, 0, 0.03));
 dim(G.torso, V(-0.25, 0.165, 0.23), V(-0.25, 0.345, 0.23), 'Akku 165', V(0, 0, 0.05));
@@ -1847,6 +1873,7 @@ $('log').addEventListener('change', () => { logs[1].visible = $('log').checked; 
 document.querySelectorAll('[data-env]').forEach((b) => b.addEventListener('click', () => { envMode = b.dataset.env; applyEnv(); }));
 for (const id of SL) $(id).addEventListener('input', () => { tgt[id] = Number($(id).value); if (mode !== 'free') setMode('free'); });
 function setMode(m) { mode = m; simT = 0; document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m))); $('simnote').textContent = NOTES[m];
+  if (m !== 'free') Object.assign(tgt, { squat: 0.15, arm: 0.2, elb: 0.35, abd: 0, spread: 0, loop: 0, lumb: 0 });
   if (m !== 'free' && m !== 'lift') { logs[1].visible = $('log').checked; } if (m === 'free') Object.assign(tgt, st); }
 document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
 $('play').addEventListener('click', () => { playing = !playing; $('play').textContent = playing ? 'Pause' : 'Weiter'; });
@@ -1882,13 +1909,14 @@ let last = performance.now(), slowT = 0, cgInfo = null;
 renderer.setAnimationLoop((now) => {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   const lim = simStep(dt);
+  bal.extra += (balT - bal.extra) * Math.min(1, dt * 3);   // Ausbalancieren weich nachführen
   feat.standT += ((feat.standOn ? 1 : 0) - feat.standT) * Math.min(1, dt * 5);
   pose(dt * Number($('slow').value));
   if (farm.visible && !reduced) { const p = snowGeo.attributes.position; for (let i = 0; i < SNOW_N; i++) { let y = p.getY(i) - dt * 0.55; if (y < 0) y += 6; p.setY(i, y); } p.needsUpdate = true; }
   { const busy = Math.abs(live.fUp) > 1.5 || Math.abs(live.fFo) > 1.5 || Math.abs(live.fTh) > 1.5, col = feat.standT > 0.5 ? 0xffc400 : busy ? 0x2f7dff : 0x10d060, n = Math.round(feat.akku * 12);
     ledMats.forEach((m, i) => { m.emissive.setHex(col); m.emissiveIntensity = i < n ? 1.6 : 0.08; }); }
   if ((slowT += dt) > 0.1) {
-    slowT = 0; drawDisplay(); renderJoints(); cgInfo = cog(); bal.extra = clamp(bal.extra + 2.0 * (0.03 - cgInfo.fwd), 0, deg(30)); renderCg(cgInfo);
+    slowT = 0; drawDisplay(); renderJoints(); cgInfo = cog(); balT = clamp(balT + 2.0 * (0.03 - cgInfo.fwd), 0, deg(30)); renderCg(cgInfo);
     for (const id of SL) if (document.activeElement !== $(id)) $(id).value = st[id];
     const anyLim = Object.values(lim).some(Boolean) || Object.values(J).some((v) => v.lim);
     $('live').innerHTML = `<b>${mode === 'free' ? 'Frei' : NOTES[mode].split(':')[0]}</b>${gait.on ? ` · Standbein ${gait.stance[1] ? 'rechts' : 'links'}` : ''} · t ${simT.toFixed(1)} s · ${anyLim ? '<span style="color:var(--crit)">Motor am Limit</span>' : 'folgt'}<br>Schwerpunkt ${(cgInfo.fwd * 100).toFixed(1)} cm vor Knöchel · ${cgInfo.inside ? 'steht' : 'kippt'}${selPid ? `<br>Auswahl <b>${selPid}</b> ${nameOf(selPid)}` : ''}`;

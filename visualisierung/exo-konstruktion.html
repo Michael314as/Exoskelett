@@ -1297,7 +1297,7 @@ function pose(dt) {
   for (let k = 0; k < 2; k++) {
     const sd = SIDE[k], Rsw = Rto.clone().multiply(mRx(-sd * aA)), Pl = V(0, D.torso, sd * D.shHalf), Pw = G.torso.localToWorld(Pl.clone());
     const Sw = G.shsw[k]; Sw.quaternion.setFromRotationMatrix(Rsw); Sw.position.copy(Pw).sub(Pl.clone().applyMatrix4(Rsw)); Sw.updateMatrixWorld();
-    for (const [U, F, psi, eps] of [[G.upper[k], G.fore[k], ex.psi, ex.eps], [BG.upper[k], BG.fore[k], hum.psi, hum.eps]]) {
+    for (const [U, F, psi, eps] of [[G.upper[k], G.fore[k], ex.psi, ex.eps], [BG.upper[k], BG.fore[k], ex.psi + clamp(hum.psi - ex.psi, -deg(1.5), deg(1.5)), ex.eps + clamp(hum.eps - ex.eps, -deg(1.5), deg(1.5))]]) {
       U.position.copy(Sw.localToWorld(V(0, D.torso, 0))); U.quaternion.copy(Sw.quaternion).multiply(qz(psi + lam)); U.updateMatrixWorld();
       F.position.copy(U.localToWorld(V(0, -D.upper, 0))); F.quaternion.copy(U.quaternion).multiply(qz(eps)); F.updateMatrixWorld();
     }
