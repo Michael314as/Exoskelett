@@ -11,15 +11,15 @@
 
 namespace exo {
 
-constexpr int kCells = 11;
+constexpr int kCells = 15;
 
 struct Settings {
   uint32_t magic = 0x45584F33;   // "EXO3"
-  uint16_t version = 4;          // 4: zwei Fußkontakt-Wägezellen dazu (11 Zellen)
+  uint16_t version = 5;          // 5: Rumpf (10 Gelenke, 15 Wägezellen)
   uint8_t level = 1;             // Unterstützungsstufe 0/1/2
-  uint8_t jointMask = 0xFF;      // aktive Gelenke (Bit = JointId); Prüfstand: nur Ellbogen rechts
-  CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1, 9/10 Fuß L/R
-  float joint0[8] = {};          // Motorwinkel bei gestreckter Grundstellung (Nullpunkt)
+  uint16_t jointMask = 0x3FF;    // aktive Gelenke (Bit = JointId, 10 Gelenke); Prüfstand: nur Ellbogen rechts
+  CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1, 9/10 Fuß L/R, 11/12 Schultergurt L/R, 13/14 Rückenpolster L/R
+  float joint0[10] = {};         // Motorwinkel bei gestreckter Grundstellung (Nullpunkt), je Gelenk
   float hours = 0.f;             // Betriebsstunden (für Wartungshinweise)
   uint32_t crc = 0;
 };
@@ -31,7 +31,7 @@ inline uint32_t crc32(const uint8_t* d, size_t n) {
 }
 inline void seal(Settings& s) { s.crc = crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc)); }
 inline bool valid(const Settings& s) {
-  return s.magic == 0x45584F33 && s.version == 4 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
+  return s.magic == 0x45584F33 && s.version == 5 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
 }
 
 // Wartungshinweis aus den Betriebsstunden (Intervalle laut docs/wartung.md)
@@ -77,7 +77,7 @@ inline bool runCommand(const char* line, Settings& s, const ConsoleIO& io) {
     std::snprintf(out, sizeof out, "Zelle %d: %.6f N/Schritt\n", a, double(s.cell[a].nPerCount)); say(out); return true;
   }
   if (!std::strcmp(cmd, "pruefstand")) { s.jointMask = 1u << 7; say("Prüfstand: nur Ellbogen rechts (Motor-ID 8)\n"); return true; }
-  if (!std::strcmp(cmd, "voll")) { s.jointMask = 0xFF; say("alle 8 Gelenke aktiv\n"); return true; }
+  if (!std::strcmp(cmd, "voll")) { s.jointMask = 0x3FF; say("alle 10 Gelenke aktiv\n"); return true; }
   if (!std::strcmp(cmd, "log") && n >= 2 && (a == 0 || a == 1)) { if (io.setLog) io.setLog(a == 1); say(a ? "Log an: t,q,qd,kraft,moment\n" : "Log aus\n"); return true; }
   if (!std::strcmp(cmd, "stufe") && n >= 2 && a >= 0 && a <= 2) { s.level = uint8_t(a); say("Stufe gesetzt\n"); return true; }
   if (!std::strcmp(cmd, "uhr") && n >= 3 && a >= 0 && a < 24 && b >= 0.f && b < 60.f) { if (io.setClock) io.setClock(a, int(b)); say("Uhr gestellt\n"); return true; }

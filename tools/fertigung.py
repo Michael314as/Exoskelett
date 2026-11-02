@@ -147,6 +147,12 @@ def hebel(r, zapfen, bohrung, lk, n, d, nabe):
     return p - circ(zapfen / 2, r, 0)
 laser('kniehebel', hebel(60.0, 8.2, 12.5, 32.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 2, 'Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen M8 bei 60 mm')
 laser('ellbogenhebel', hebel(50.0, 6.2, 8.5, 26.0, 3, M4, 20.0), 'Alu 6082 T6', 8, 2, 'Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen M6 bei 50 mm')
+# Rumpfantrieb (RA-13): Kurbeln an den Rumpfkapseln, Hebel am Lendengelenk, Träger am unteren Rahmen
+laser('kurbel_rumpf_beugen', kurbel(RS04, 50.0, 8.2, 27.0), 'Alu 6082 T6', 10, 1, 'Kurbel am RS04 des Rumpfs (Beugen), Zapfen M8 bei 50 mm')
+laser('hebel_lendengelenk', hebel(50.0, 8.2, 10.5, 30.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 1, 'Hebel am Lendengelenk (oberer Rahmen), Bolzen Ø 10, Zapfen M8 bei 50 mm')
+laser('kurbel_rumpf_drehen', kurbel(RS03, 40.0, 6.2, 23.0), 'Alu 6082 T6', 8, 1, 'Kurbel am RS03 des Rumpfs (Drehen), Zapfen M6 bei 40 mm')
+laser('traeger_rumpfkapsel', P(rrect(40, 120, 6)) - circ(M6 / 2, 0, 50) - circ(M6 / 2, 0, -50) - circ(M6 / 2, -10, 20) - circ(M6 / 2, 10, 20) - slot(20, M6, 0, -15, 90),
+      'Alu 6082 T6', 8, 3, 'Träger der Rumpfkapseln am unteren Rahmen (2 für Beugen, 1 Konsole für Drehen)')
 
 # Steigbügel (BE-11) unter der Sohlenmitte: Abwicklung, die beiden Laschen werden 90° hochgekantet (Biegelinie ±67,5 mm)
 def steigbuegel():
@@ -321,8 +327,8 @@ def kapselmantel(r_motor, laenge, name, n):
     m = m - Manifold.cylinder(t * 4, 8.1, 8.1, 32).rotate((90, 0, 0)).translate((0, -(ri - t), h / 2))   # M16 Kabel (unten)
     m = m - Manifold.cylinder(t * 4, 6.1, 6.1, 32).rotate((90, 0, 0)).rotate((0, 0, 40)).translate(((ri - t) * math.sin(math.radians(40)), -(ri - t) * math.cos(math.radians(40)), h / 2))   # M12 Druckausgleich
     druck(name, m, 'PETG-CF', n, f'Kapselmantel AN-02 für Motor Ø {2 * r_motor:.0f}: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten')
-kapselmantel(60.0, 52.0, 'kapselmantel_rs04', 6)
-kapselmantel(49.0, 54.0, 'kapselmantel_rs03', 2)
+kapselmantel(60.0, 52.0, 'kapselmantel_rs04', 7)
+kapselmantel(49.0, 54.0, 'kapselmantel_rs03', 3)
 
 def bohrschablone_kuehlkoerper(m, r_kk, name):
     """Aufsteckschablone für den gekauften Stiftkühlkörper: Lochbild des Motorgehäuses + 2 Löcher für die Wangen, mit Bohrbuchsen."""

@@ -61,7 +61,7 @@ Anteil je Stufe (sanft 50 %, normal 67 %, kräftig 80 %). Den Rest spürst du: S
 erhalten, und das Exo kann nie „mehr wollen“ als die Last.
 
 **c) Vorsteuerung im Stand (Beine).** Am belasteten Bein tragen Hüfte und Knie automatisch:
-Exo-Oberteil (25,5 kg laut Bauteilliste der technischen Ansicht; vorher mit 11 kg viel zu knapp angesetzt) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
+Exo-Oberteil (29,1 kg laut Bauteilliste der technischen Ansicht; vorher mit 11 kg viel zu knapp angesetzt) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
 die Vorneigung des Rumpfs aus (Lagesensor), das Knie die Beugung. Stehen beide Füße, teilen sich die Beine die Last.
 
 **c2) Der Rucksack zieht nach hinten.** Der Schwerpunkt des Exo-Oberteils liegt 22 cm über und 8 cm **hinter** der
@@ -159,6 +159,7 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 | Motoren | RobStride RS04 (Hüfte, Knie, Schulter), RS03 (Ellbogen), Übersetzung 1:1 (direkt bzw. Schubstange); Wertebereiche des CAN-Protokolls je Modell |
 | Wärmeschutz | wie 6a, mit dem Dauermoment in der Kühlkörper-Kapsel (RS04 28 Nm, RS03 16 Nm) statt dem Datenblattwert; Schulter hält 100 Nm ≈ 13 s mit voller Kraft, dann weich weniger |
 | Frostschutz | Heizbänder an der Abtriebsseite je Gruppe (Pin 42 Beine, Pin 43 Arme): an, wenn die kälteste gemessene Wicklung unter +3 °C fällt und die Gruppe kaum arbeitet; aus über +8 °C |
+| Rumpf beugen / drehen | Absicht aus 4 Rumpf-Wägezellen (Gurtanker ziehen = vor, Polster drücken = auf, Unterschied = drehen); Vorsteuerung beim Beugen wie an der Hüfte; Grenzen 80/20 Nm bzw. ±30 Nm; bei aktiver Lendensperre ist der Beugemotor stromlos |
 | Knie beugen | Software begrenzt auf 10 Nm, zusätzlich gibt das Federpaket in der Schubstange ab ≈ 11 Nm mechanisch nach |
 
 ## 7. Was schiefgehen kann, und was dagegen hilft

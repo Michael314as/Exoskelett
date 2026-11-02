@@ -381,9 +381,9 @@ function capsuleMotor(g, x, y, z, sd, geo, tag3) {
   if (geo.rf) { const f = put(g, mesh(cyl(geo.rf, geo.rf, 0.006, 32), M.motor), x, y, z - sd * (geo.len / 2 - 0.006), Math.PI / 2); f.userData.cap = tag3; }
   for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; const r = put(g, mesh(rgeo(0.004, 0.004, geo.len * 0.8, 0.001), M.motorDark), x + Math.cos(a) * (geo.r + 0.0015), y + Math.sin(a) * (geo.r + 0.0015), z); r.userData.cap = tag3; }
   const o = put(g, mesh(cyl(geo.r * 0.45, geo.r * 0.45, 0.006, 28), M.steel), x, y, z - sd * (geo.len / 2 + 0.003), Math.PI / 2); o.userData.cap = tag3;   // Abtrieb
-  const v = put(g, mesh(new THREE.TorusGeometry(geo.r * 0.48, 0.0025, 6, 28), M.tpu), x, y, z - sd * (geo.len / 2 + 0.004)); v.userData.seal = true;                 // V-Ring
-  const h = put(g, mesh(new THREE.TorusGeometry(geo.r * 0.72, 0.003, 6, 36), M.heat), x, y, z - sd * (geo.len / 2 - 0.006)); h.userData.heat = true;                   // Heizband 4 W an der Abtriebsseite: hält V-Ring und Lager in Pausen eisfrei (die Kühlkörperseite soll kühlen)
-  const vent = put(g, mesh(cyl(0.006, 0.006, 0.01, 12), M.chip), x - geo.r * 0.6, y - geo.r * 0.6, z + sd * (geo.len / 2 + 0.004), Math.PI / 2); vent.userData.vent = true;   // Druckausgleich
+  const v = put(g, mesh(new THREE.TorusGeometry(geo.r * 0.48, 0.0025, 6, 28), M.tpu), x, y, z - sd * (geo.len / 2 + 0.004)); v.userData.seal = true; v.userData.capTag = tag3;                 // V-Ring
+  const h = put(g, mesh(new THREE.TorusGeometry(geo.r * 0.72, 0.003, 6, 36), M.heat), x, y, z - sd * (geo.len / 2 - 0.006)); h.userData.heat = true; h.userData.capTag = tag3;                   // Heizband 4 W an der Abtriebsseite: hält V-Ring und Lager in Pausen eisfrei (die Kühlkörperseite soll kühlen)
+  const vent = put(g, mesh(cyl(0.006, 0.006, 0.01, 12), M.chip), x - geo.r * 0.6, y - geo.r * 0.6, z + sd * (geo.len / 2 + 0.004), Math.PI / 2); vent.userData.vent = true; vent.userData.capTag = tag3;   // Druckausgleich
   cur = prev; return m;
 }
 const capsules = [];   // Hauben: { g, x, y, z, r, len }
@@ -600,6 +600,28 @@ cur = 'frame';
   }
   for (const sd of SIDE) { const sp = spring(G.torso, P_T.x - Rt + 0.004, 0.124, sd * 0.03, 0.005, 0.03, 5, 0.0009); sp.rotation.x = Math.PI / 2; sp.userData.twist = true; }   // Zentrierfedern
 }
+
+/* ---------- Rumpfantrieb: zwei Kapseln hinter dem Kreuzbein am unteren Rahmen (bewegen sich nicht mit) ---------- */
+// Beugen: RS04, Achse quer, Kurbel 50 mm → Schubstange → Hebel 50 mm am Lendengelenk (Parallelogramm 1:1).
+// Drehen: RS03, Achse senkrecht, Kurbel 40 mm → Stange → Zapfen am Wagen der Bogenführung (≈ 1 : 1,8).
+const TRUNK = { lm: V(-0.19, 0.065, 0), zc: -0.034, hinge: V(-0.125, 0.17), lever: 0.05, tm: V(-0.215, 0.088, -0.1), ty: 0.122, tr: 0.04, pin: V(-0.146, 0.132, -0.040) };
+{
+  capsuleMotor(G.torso, TRUNK.lm.x, TRUNK.lm.y, TRUNK.lm.z, 1, RS04G, 'lumb');
+  capsules.push({ g: G.torso, x: TRUNK.lm.x, y: TRUNK.lm.y, z: TRUNK.lm.z, r: RS04G.r + 0.012, len: RS04G.len + 0.018, sd: 1, trunk: true });
+  const g2 = new THREE.Group(); g2.position.copy(TRUNK.tm); g2.rotation.x = -Math.PI / 2; G.torso.add(g2);   // lokale z-Achse = senkrecht
+  capsuleMotor(g2, 0, 0, 0, -1, RS03G, 'twist');
+  capsules.push({ g: g2, x: 0, y: 0, z: 0, r: RS03G.rf + 0.01, len: RS03G.len + 0.016, sd: -1, trunk: true });
+  const prev = cur; cur = 'trunkdrive';
+  for (const s2 of [-1, 1]) box(G.torso, 0.012, 0.11, 0.01, M.aluDark, TRUNK.lm.x, 0.06, s2 * 0.075);                     // Träger am unteren Rahmen
+  box(G.torso, 0.05, 0.012, 0.06, M.aluDark, TRUNK.tm.x + 0.03, 0.04, -0.085);                                               // Konsole Drehmotor
+  { const lv = mesh(rgeo(TRUNK.lever + 0.026, 0.022, 0.01, 0.005), M.alu); lv.position.set(TRUNK.hinge.x - TRUNK.lever / 2, TRUNK.hinge.y, TRUNK.zc); G.torso.add(lv); }   // Hebel am Lendengelenk
+  put(G.torso, mesh(cyl(0.006, 0.006, 0.02, 12), M.steel), TRUNK.pin.x, TRUNK.pin.y, TRUNK.pin.z);                          // Zapfen am Wagen
+  cur = prev;
+}
+
+// Rumpf-Wägezellen: oben in den Gurtankern (Gurte ziehen = vorbeugen) und hinter dem Schulterblattpolster (drücken = aufrichten)
+cur = 'sensor';
+for (const sd of SIDE) { box(G.torso, 0.012, 0.03, 0.012, M.cell, -0.135, D.torso + 0.012, sd * 0.05); box(G.torso, 0.012, 0.012, 0.03, M.cell, -0.128, 0.4, sd * 0.075); }
 
 /* ---------- 2 Gurtsystem/* ---------- 2 Gurtsystem: Hüftgurt trägt und führt, Schultergurte gegen Kippen, Brustgurt, Polster ---------- */
 // Band entlang einer Kurve, flach am Körper (Breite quer zum Verlauf, Fläche zeigt vom Körper weg)
@@ -983,6 +1005,20 @@ SIDE.forEach((sd, k) => {
   spr.m.userData.spring = true;
   crankPin['e' + k] = pushRod('bowden', M.alu, () => W(U, 0, Y_EM, zl), () => W(F, 0, 0, zl), () => W(F, Math.cos(PHI_E) * CR_E, Math.sin(PHI_E) * CR_E, zl), 0.007, 0.005);
 });
+// Rumpf beugen: Parallelogramm wie am Knie (Kurbel am Becken, Hebel am Lendengelenk)
+pushRod('trunkdrive', M.alu, () => W(G.torso, TRUNK.lm.x, TRUNK.lm.y, TRUNK.zc), () => W(G.torso, TRUNK.hinge.x, TRUNK.hinge.y, TRUNK.zc), () => W(G.torso, TRUNK.hinge.x - TRUNK.lever, TRUNK.hinge.y, TRUNK.zc), 0.009, 0.006);
+// Rumpf drehen: Kurbel in der waagerechten Ebene; Kurbelwinkel so, dass die Stangenlänge gleich bleibt
+{
+  const cr = (th) => V(TRUNK.tm.x + Math.cos(th) * TRUNK.tr, TRUNK.ty, TRUNK.tm.z + Math.sin(th) * TRUNK.tr);
+  const pinAt = (tw) => { const dx = TRUNK.pin.x - P_T.x, dz = TRUNK.pin.z - P_T.z; return V(P_T.x + dx * Math.cos(tw) + dz * Math.sin(tw), TRUNK.pin.y, P_T.z - dx * Math.sin(tw) + dz * Math.cos(tw)); };
+  const L = cr(0).distanceTo(pinAt(0));
+  const crankAt = () => { const P = pinAt(deg(15) * st.twist); let a = -1.2, b = 1.2, fa = cr(a).distanceTo(P) - L; for (let i = 0; i < 40; i++) { const m = (a + b) / 2, fm = cr(m).distanceTo(P) - L; if ((fm < 0) === (fa < 0)) { a = m; fa = fm; } else b = m; } return cr((a + b) / 2); };
+  const toW = (v) => G.torso.localToWorld(v.clone());
+  dynTube(M.alu, 0.007, 'trunkdrive', () => [toW(V(TRUNK.tm.x, TRUNK.ty, TRUNK.tm.z)), toW(crankAt())]);
+  dynTube(M.steel, 0.005, 'trunkdrive', () => { const a = toW(crankAt()), b = toW(pinAt(deg(15) * st.twist)); return [a.clone().lerp(b, 0.12), b.clone().lerp(a, 0.12)]; });
+  for (const end of [0, 1]) dynTube(M.chrome, 0.0085, 'trunkdrive', () => { const a = toW(crankAt()), b = toW(pinAt(deg(15) * st.twist)); return end ? [b.clone().lerp(a, 0.12), b] : [a, a.clone().lerp(b, 0.12)]; });
+}
+
 
 function layDyn() {
   for (const d of dyn) {
@@ -1151,17 +1187,17 @@ const capMat = new THREE.MeshPhysicalMaterial({ color: 0x3A4048, roughness: 0.5,
 for (const c of capsules) {
   const mlen = c.len - (c.r > 0.065 ? 0.018 : 0.016), zo = c.z + c.sd * (mlen / 2), rb = c.r > 0.065 ? 0.07 : 0.058;
   { const prev = cur; cur = 'drive';
-    const base = put(c.g, mesh(cyl(rb, rb, 0.008, 48), finMat), c.x, c.y, zo + c.sd * 0.004, Math.PI / 2); base.userData.fin = true;   // Boden des Kühlkörpers
+    const base = put(c.g, mesh(cyl(rb, rb, 0.008, 48), finMat), c.x, c.y, zo + c.sd * 0.004, Math.PI / 2); base.userData.fin = true; base.userData.trunkCap = !!c.trunk;   // Boden des Kühlkörpers
     const pins = [];
     for (let x = -rb; x <= rb; x += 0.0105) for (let y = -rb; y <= rb; y += 0.0105) if (x * x + y * y < (rb - 0.004) ** 2) pins.push([x, y]);
     const im = new THREE.InstancedMesh(cyl(0.0022, 0.0022, 0.03, 8), finMat, pins.length); im.castShadow = true; im.receiveShadow = true;
     const mm = new THREE.Matrix4(), qq = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
     pins.forEach(([x, y], i) => im.setMatrixAt(i, mm.compose(V(c.x + x, c.y + y, zo + c.sd * 0.023), qq, V(1, 1, 1))));
-    im.userData.fin = true; tag(im); c.g.add(im);
+    im.userData.fin = true; im.userData.trunkCap = !!c.trunk; tag(im); c.g.add(im);
     cur = prev; }
   cur = 'finish';
-  const h = mesh(new THREE.CylinderGeometry(c.r, c.r, mlen + 0.004, 44, 1, true), capMat); h.userData.capHood = true; put(c.g, h, c.x, c.y, c.z, Math.PI / 2);   // Mantel
-  for (const s2 of [-1, 1]) { const o = mesh(new THREE.TorusGeometry(c.r - 0.002, 0.002, 6, 40), M.tpu); o.userData.capHood = true; put(c.g, o, c.x, c.y, c.z + s2 * c.sd * (mlen / 2)); }   // O-Ringe
+  const h = mesh(new THREE.CylinderGeometry(c.r, c.r, mlen + 0.004, 44, 1, true), capMat); h.userData.capHood = true; h.userData.trunkCap = !!c.trunk; put(c.g, h, c.x, c.y, c.z, Math.PI / 2);   // Mantel
+  for (const s2 of [-1, 1]) { const o = mesh(new THREE.TorusGeometry(c.r - 0.002, 0.002, 6, 40), M.tpu); o.userData.capHood = true; o.userData.trunkCap = !!c.trunk; put(c.g, o, c.x, c.y, c.z + s2 * c.sd * (mlen / 2)); }   // O-Ringe
 }
 
 /* ================= 14–17 Komfort-Features ================= */
@@ -1414,6 +1450,7 @@ const DB = [
   ['RA-10', 'Gasfeder Lendengelenk', 'Kauf', 'Gasfeder 150 N, Ø 15/6 mm, Hub 80 mm, Einbaulänge 236 mm (Stabilus-Bauform), Kugelpfannen M6', 'zwei Stück; tragen das Exo-Oberteil beim Bücken (≈ 36 Nm um das Lendengelenk)', 0.12, 'RA-09 RA-01'],
   ['RA-11', 'Kurbelschutz', 'Druck', 'PETG transparent 1,5 mm, geschraubt', 'über den Kurbeln an Knie und Ellbogen: nichts kann zwischen Kurbel und Schiene geraten', 0.03, 'BA-01 AR-04'],
   ['RA-12', 'Rumpfdrehung', 'Kauf + Laser', 'Bogenwelle Edelstahl Ø 10, gebogen auf R 95 mm (Biegedienst), 4 Profilrollen INA LFR 5201-10-2Z (laufen auf Ø 10), Wagen Alu 8 mm, 2 Zentrierfedern, 2 TPU-Anschläge', 'Rumpf drehen ±15° um eine Achse in der Wirbelsäule (Bogenführung wie beim Abspreizgelenk); Federn holen zurück', 0.32, 'RA-01 RA-09'],
+  ['RA-13', 'Rumpfantrieb: Kurbeln, Hebel, Stangen', 'Laser + Halbzeug + Kauf', 'Kurbeln Alu 8 mm (r 50 / 40), Hebel am Lendengelenk, Stahlrohr Ø 12 × 2 und Ø 10 × 1,5, 4 Gelenkköpfe M8/M6, Träger und Konsole Alu 8 mm', 'starr, vereist nicht; Stangenkraft Beugen bis ≈ 2,3 kN', 0.45, 'AN-L AN-D RA-09 RA-12'],
   ['RA-04', 'Schutzbügel', 'Halbzeug + Kauf', 'CFK-Rundrohr Ø 22 × 1,5 (gewickelt), Alu-Eckverbinder geklebt', 'trifft bei Sturz nach hinten zuerst auf; CFK statt Alu spart 0,25 kg', 0.35, 'RA-01 RA-05 RA-07'],
   ['RA-05', 'Gummipuffer', 'Kauf', 'Gummipuffer Typ A Ø 40 × 30, M8', 'Shore 55', 0.03, 'RA-04'],
   ['RA-07', 'Parkstütze', 'Halbzeug + Kauf', 'Vierkant 20 × 20 × 2, Kugelsperrbolzen GN 113 Ø 6', 'abnehmbar: bleibt am Fahrzeug und wird nur zum Abstellen eingesteckt (beim Tragen nicht mitgerechnet); Endschalter meldet „unten“', 0.35, 'RA-04 EL-01'],
@@ -1442,6 +1479,9 @@ const DB = [
   ['AN-K', 'Kniekapsel-Motor', 'Kauf', MOT4, 'oben am Oberschenkel; treibt das Knie über Kurbel und Schubstange 1:1', MOTORS.RS04.kg, 'AN-04 AN-02 BA-01 KB-01'],
   ['AN-S', 'Schulterkapsel-Motor', 'Kauf', MOT4, 'direkt auf der Schulterachse; Gehäuse an der Schulterschwinge, Abtrieb an der Oberarmschiene; 100 Nm', MOTORS.RS04.kg, 'AN-04 AN-02 SC-09 KB-03'],
   ['AN-E', 'Ellbogenkapsel-Motor', 'Kauf', MOT3, 'oben am Oberarm; treibt den Ellbogen über Kurbel und Schubstange 1:1; 56 Nm', MOTORS.RS03.kg, 'AN-04 AN-02 AR-04 KB-03'],
+  ['AN-L', 'Rumpfkapsel Beugen', 'Kauf', MOT4, 'hinter dem Kreuzbein am unteren Rahmen; Kurbel 50 mm → Schubstange → Hebel am Lendengelenk (1:1); hilft bis 80 Nm beim Aufrichten, entlastet sich, wenn die Lendensperre trägt', MOTORS.RS04.kg, 'AN-06 RA-13 RA-09 KB-01'],
+  ['AN-D', 'Rumpfkapsel Drehen', 'Kauf', MOT3, 'hinter dem Kreuzbein, Achse senkrecht; Kurbel 40 mm → Stange → Wagen der Bogenführung (≈ 1 : 1,8); bis 30 Nm', MOTORS.RS03.kg, 'AN-06 RA-13 RA-12 KB-01'],
+  ['AN-06', 'Kapselteile Rumpf', 'Kauf + Druck', 'je Kapsel: Stiftkühlkörper (Ø 140 bzw. 120), Mantel PETG-CF, V-Ring, O-Ringe, Druckausgleich, Heizband', 'zwei Kapseln hinter dem Kreuzbein', 0.75, 'AN-L AN-D'],
   ['AN-02', 'Kapselmantel', 'Druck', 'PETG-CF-Ring, Wand 2 mm, zwei O-Ring-Nuten, Bohrungen M16 (Kabel) und M12 (Druckausgleich)', 'dichtet die Kapsel seitlich (Ziel IP65); keine Dämmung im Wärmeweg', 0.05, 'AN-03 AN-05'],
   ['AN-03', 'Dichtung und Heizung', 'Kauf', 'V-Ring am Abtrieb, Druckausgleichselement M12, Silikon-Heizband 12 V 4 W an der Abtriebsseite, Kabelverschraubung M16', 'kein Eis, kein Kondenswasser; Heizung nur unter +3 °C und in Ruhe (Firmware)', 0.03, 'AN-02 EL-01'],
   ['AN-05', 'Stiftkühlkörper', 'Kauf + Bohren', 'Fischer Elektronik ICK S R 140 × 50 (Ø 140, Alu schwarz eloxiert), Stifte auf 30 mm gekürzt; RS03: Ø 120; Wärmeleitpad 1 mm, 6 W/mK', 'Wärmeweg Wicklung → Gehäuse → Pad → Kühlkörper → Luft; 1,85 K/W ruhend, 0,4 K/W bei Luftstrom (Händlerangabe, ungekürzt)', 0.28, 'AN-H AN-K AN-S AN-E AN-04'],
@@ -1478,6 +1518,7 @@ const DB = [
   ['SE-04', 'Überlastpuffer, Halter', 'Druck + Laser', 'TPU, Alu', 'Spalt 1 mm', 0.02, 'SE-02'],
   ['SE-06', 'Fußkontakt', 'Kauf', '4 × Halbbrücken-Wägezelle 50 kg (Personenwaagen-Bauform 34 × 34 × 8 mm, 1,0 mV/V, Grenzlast 150 %) je Steigbügel, als Vollbrücke an einem HX711', 'misst die Fußlast (bis 200 kg, Grenzlast 300 kg) → Standbein / Schwungbein. Ein FSR 406 (0,2–20 N) wäre unter dem Körpergewicht überlastet.', 0.15, 'BE-11 KB-02'],
   ['SE-08', 'Drehring Unterarm-Manschette', 'Druck + Kauf', 'Gleitring PA6 / iglidur, Ø 100 mm', 'Unterarm dreht in der Manschette ±60° (Hand drehen ohne gegen das Exo zu arbeiten)', 0.03, 'SE-01 AR-02'],
+  ['SE-09', 'Rumpf-Wägezellen', 'Kauf', 'Biegebalken 20 kg (YZC-133) mit HX711, je 2 in den Gurtankern und hinter dem Schulterblattpolster', 'Absicht für den Rumpf: Gurte ziehen = vorbeugen, Polster drücken = aufrichten, Unterschied links/rechts = drehen', 0.04, 'GU-02 AN-L AN-D'],
   ['SE-07', 'Wägezelle Schlaufenkopf', 'Kauf', 'Biegebalken YZC-1B, 50 kg', 'Baumgewicht für die Vorsteuerung', 0.04, 'SG-02 KB-03'],
   ['SC-01', 'Schulterbügel', 'Halbzeug', '6082 Vierkant 30 × 30 × 3', 'Biegespannung Spitze 53 MPa', 0.3, 'RA-01 SC-02'],
   ['SC-02', 'Schultergabel', 'Laser', 'Alu 10 mm', 'Achse nach vorne durch das Schultergelenk', 0.12, 'SC-01 SC-03 SC-06'],
@@ -1507,7 +1548,7 @@ const DB = [
   ['BD-04', 'Arbeitslicht', 'Kauf', 'LED-Strahler 10 W, 12 V', 'zwei Stück am Rahmen', 0.12, 'RA-01 KB-04'],
 ];
 // Stückzahl je Seite bzw. gesamt (Teile, die im Modell als ein Körper zusammengefasst sind)
-const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-02': 4, 'AN-03': 4, 'AN-04': 4, 'AN-05': 4, 'RA-11': 2 };
+const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-02': 4, 'AN-03': 4, 'AN-04': 4, 'AN-05': 4, 'SE-09': 2, 'RA-11': 2 };
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const SRC = {
   'EL-01': ['PJRC Teensy 4.1 (Maße)', 'https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4'], 'EL-02': ['Mean Well DDR-60L-24 / Pololu D36V28F5', 'https://www.pololu.com/product/3782'], 'SE-06': ['50-kg-Halbbrücken-Wägezelle', 'https://www.sparkfun.com/products/10245'],
@@ -1584,7 +1625,7 @@ function classify(m, key, c) {
   switch (key) {
     case 'frame': if (m.userData.twist) return 'RA-12'; if (m.userData.gas) return 'RA-10'; if (m.userData.lock) return 'RA-09'; if (Math.abs(c.tl.y - 0.17) < 0.03 && !is(M.alu) && c.tl.x > -0.2) return 'RA-09'; if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
     case 'straps': if (is(M.chip, M.chrome)) return 'GU-03'; if (c.tl.y < 0.17) return 'GU-01'; return hx === 0x3A4148 ? 'GU-02' : 'GU-03';
-    case 'drive': if (m.userData.cap) return { hip: 'AN-H', knee: 'AN-K', sh: 'AN-S', el: 'AN-E' }[m.userData.cap]; if (m.userData.fin) return 'AN-05'; if (m.userData.seal || m.userData.heat || m.userData.vent) return 'AN-03'; if (is(M.aluDark)) return 'AN-04'; return 'AN-01';
+    case 'drive': if (m.userData.cap) return { hip: 'AN-H', knee: 'AN-K', sh: 'AN-S', el: 'AN-E', lumb: 'AN-L', twist: 'AN-D' }[m.userData.cap]; if (m.userData.trunkCap || m.userData.capTag === 'lumb' || m.userData.capTag === 'twist') return 'AN-06'; if (m.userData.fin) return 'AN-05'; if (m.userData.seal || m.userData.heat || m.userData.vent) return 'AN-03'; if (is(M.aluDark)) return 'AN-04'; return 'AN-01';
     case 'power':
       if (is(M.stihl, M.stihlGrey)) return 'EN-01';
       if (c.tl.x > 0.05) return is(M.chip) ? 'BD-02' : 'BD-01';
@@ -1623,6 +1664,7 @@ function classify(m, key, c) {
       if (is(M.steel) && c.big > 0.025) return 'BE-11';
       return 'BE-13';
     case 'sensor':
+      if (g === 'torso') return 'SE-09';
       if (m.userData.ring) return 'SE-08';
       if (g === 'foot') return 'SE-06';
       if (c.inHead || (g === 'fore' && c.lp.y < yw + 0.06)) return 'SE-07';
@@ -1648,11 +1690,12 @@ function classify(m, key, c) {
     case 'display': return 'BD-03';
     case 'light': return geo === 'SphereGeometry' && c.tl.x > 0.05 ? 'BD-01' : 'BD-04';
     case 'stand': return 'RA-07';
-    case 'finish': if (m.userData.capHood) return 'AN-02'; return m.userData.guard ? 'RA-11' : 'RA-08';
+    case 'trunkdrive': return 'RA-13';
+    case 'finish': if (m.userData.capHood) return m.userData.trunkCap ? 'AN-06' : 'AN-02'; return m.userData.guard ? 'RA-11' : 'RA-08';
   }
   return 'RA-03';
 }
-const NO_SIDE = /^(EL|AN-01|RA-02|GU-01|KB-04|BD-01|BD-02)/;
+const NO_SIDE = /^(EL|AN-01|AN-L|AN-D|AN-06|RA-02|RA-13|GU-01|KB-04|BD-01|BD-02)/;
 const PIDS = {};   // pid → { id, base, side, meshes: [], key }
 G.chest.position.copy(G.torso.position); G.chest.quaternion.copy(G.torso.quaternion); root.updateMatrixWorld(true);
 for (const ch of [...G.torso.children]) {
@@ -1678,7 +1721,7 @@ const nameOf = (pid) => { const p = PIDS[pid]; return p ? `${PDB[p.base].name}${
 
 // ---------- Ansichten, Durchsicht je Baugruppe, Auswahl ----------
 const PART_CAT = { frame: 'struct', hip: 'struct', leg: 'struct', knee: 'struct', foot: 'struct', stand: 'struct', shoulder: 'struct', elbow: 'struct', buckle: 'struct',
-  loop: 'grip', drive: 'drive', rope: 'drive', bowden: 'drive', power: 'elec', sensor: 'elec', display: 'elec', light: 'elec', wiring: 'elec', straps: 'straps', finish: 'covers' };
+  loop: 'grip', drive: 'drive', rope: 'drive', bowden: 'drive', trunkdrive: 'drive', power: 'elec', sensor: 'elec', display: 'elec', light: 'elec', wiring: 'elec', straps: 'straps', finish: 'covers' };
 const VIEW = { all: { struct: 1, grip: 1, drive: 1, elec: 1, straps: 1, covers: 1 }, mech: { struct: 1, grip: 1, drive: 1, elec: 0.25, straps: 0, covers: 0 },
   drive: { struct: 0.12, grip: 0.12, drive: 1, elec: 0.08, straps: 0, covers: 0 }, elec: { struct: 0.1, grip: 0.1, drive: 0.1, elec: 1, straps: 0, covers: 0 } };
 let viewMode = 'all', selPid = null;

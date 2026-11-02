@@ -10,7 +10,7 @@
 
 namespace exo {
 
-enum JointId : uint8_t { HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, NJ };
+enum JointId : uint8_t { HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, Lumb, Twist, NJ };   // Lumb: Rumpf beugen, Twist: Rumpf drehen
 enum LoopId : uint8_t { LoopR1, LoopR2, LoopL1, NL };   // R1 rechts unten, R2 rechts außen, L1 links unten
 enum Side : uint8_t { L, R };
 
@@ -19,8 +19,8 @@ struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 25.5f;                   // Exo-Oberteil (Entwurf 5): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
-  float exoComUp = 0.37f, exoComBack = 0.03f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
+  float exoUpperKg = 29.1f;                   // Exo-Oberteil (Entwurf 5): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
+  float exoComUp = 0.34f, exoComBack = 0.05f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
 
@@ -67,7 +67,13 @@ inline JointConfig defaultJoint(JointId id) {
     case ShL: case ShR:     // RS04 direkt
       c.name = "Schulter"; c.rCuff = 0.17f; c.tauMax = 100.f; c.tauMin = -100.f; c.frictionComp = 0.15f;
       c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 28.f; break;   // Exo-Arm ~2,3 kg mit Ellbogenmotor
-    default:                // RS03 über Schubstange, 60 Nm Spitze · 0,95
+    case Lumb:              // Rumpf beugen: RS04 am Becken, Schubstange 1:1 zum Hebel am Lendengelenk; Gasfedern tragen das Exo-Oberteil
+      c.name = "Rumpf beugen"; c.rCuff = 0.3f; c.tauMin = -80.f; c.tauMax = 20.f; c.qMin = -0.15f; c.qMax = 0.45f; c.wallWidth = 0.08f;
+      c.gravCoef = 0.f; c.slew = 400.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 28.f; break;
+    case Twist:             // Rumpf drehen: RS03 am Becken, Kurbel 40 mm → Stange → Wagen der Bogenführung (≈ 1 : 1,8); Federn zentrieren
+      c.name = "Rumpf drehen"; c.rCuff = 0.15f; c.tauMin = -30.f; c.tauMax = 30.f; c.qMin = -0.26f; c.qMax = 0.26f; c.wallWidth = 0.06f;
+      c.gravCoef = 0.f; c.slew = 300.f; c.frictionComp = 0.1f; c.motorPerJoint = 1.f / (1.8f * 0.93f); c.motorRatedNm = 16.f; break;
+    case ElL: case ElR: default:   // RS03 über Schubstange, 60 Nm Spitze · 0,95
       c.name = "Ellbogen"; c.rCuff = 0.15f; c.tauMax = 56.f; c.tauMin = -56.f; c.frictionComp = 0.15f;
       c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 16.f; break;
   }
@@ -87,7 +93,7 @@ class App {
   float bodyShare[3] = {0.1f, 0.2f, 0.3f};   // so viel vom Oberkörpergewicht tragen die Exo-Beine im Stand
   float kneeSynergy = 0.6f;                  // Oberschenkel-Druck hilft auch dem Knie (Aufstehen = Hüfte und Knie)
   int level = 1;
-  uint8_t jointMask = 0xFF;                  // nicht aktive Gelenke bleiben stromlos (Prüfstand)
+  uint16_t jointMask = 0x3FF;                // nicht aktive Gelenke bleiben stromlos (Prüfstand)
 
   App() { for (int i = 0; i < NJ; i++) joint[i] = Joint(defaultJoint(JointId(i))); setLevel(1); }
 
@@ -136,6 +142,7 @@ class App {
     const bool falling = sup.mode == Mode::SoftOff && sup.reason && !std::strcmp(sup.reason, "Sturz erkannt");
     if (falling && fallT_ < 0.f) fallT_ = 0.f;
     if (!falling) fallT_ = -1.f;
+    if (lockOn_ > 0.3f) ji[Lumb].limitScale = 0.f;   // Lendensperre trägt: Beugemotor entlasten (kühlt ab)
     for (int i = 0; i < NJ; i++) {
       if (falling && fallT_ < 1.5f && i <= KneeR) { o.tau[i] = clampf(-4.f * in.joint[i].qd, -60.f, 60.f) * (1.f - fallT_ / 1.5f); continue; }
       if (sup.scale <= 0.f || !((jointMask >> i) & 1u)) { joint[i].off(); o.tau[i] = 0.f; continue; }
@@ -158,7 +165,10 @@ class App {
     // (unter Last heizt der Motor selbst); aus über +8 °C. Kälteste Wicklungstemperatur aus der Motor-Rückmeldung.
     for (int gidx = 0; gidx < 2; gidx++) {
       float tMin = 1e9f, load = 0.f;
-      for (int i = gidx ? ShL : HipL; i <= (gidx ? ElR : KneeR); i++) { tMin = std::fmin(tMin, in.joint[i].motorTempC); load = std::fmax(load, heat_[i]); }
+      for (int i = 0; i < NJ; i++) {   // Gruppe Beine + Rumpf (Kapseln am Becken) bzw. Arme
+        const bool arm = i >= ShL && i <= ElR; if (arm != (gidx == 1)) continue;
+        tMin = std::fmin(tMin, in.joint[i].motorTempC); load = std::fmax(load, heat_[i]);
+      }
       bool& h = gidx ? heatArms_ : heatLegs_;
       if (tMin < 3.f && load < 0.3f) h = true;
       if (tMin > 8.f || load > 0.5f) h = false;
@@ -221,6 +231,10 @@ class App {
       ji[knee].tauMaxNow = (1.f - st) * joint[knee].cfg.tauMax;
       ji[hip].tauMaxNow = joint[hip].cfg.tauMax * (1.f - 0.85f * st);
     }
+    // Rumpf beugen: trägt einen Anteil deines Oberkörpers und der Baumlast (das Exo-Oberteil tragen die Gasfedern).
+    // Absicht aus den Rumpf-Wägezellen (main_teensy.cpp): Gurte ziehen = vorbeugen (+), ins Polster drücken = aufrichten (−).
+    ji[Lumb].ffNm = -personKg * g * 0.25f * std::sin(std::fmax(0.f, in.trunkPitch));
+    // Rumpf drehen: keine Vorsteuerung, nur Absicht (Unterschied links/rechts) und die Zentrierfedern
   }
 };
 

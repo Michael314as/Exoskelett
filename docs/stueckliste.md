@@ -12,7 +12,7 @@ Herstellweg:
 
 Preise sind Richtwerte (Stand November 2026). Motoren nach recherchierten Händlerpreisen, siehe [bestellung-prototyp.md](bestellung-prototyp.md).
 
-**Gesamt Material, ein Exo:** etwa **4.900–5.900 €**, davon Motoren (6 × RobStride RS04, 2 × RS03) 2.600–2.900 €, alles andere ≈ 2.100–2.700 €.
+**Gesamt Material, ein Exo:** etwa **5.700–6.800 €**, davon Motoren (7 × RobStride RS04, 3 × RS03) 3.200–3.600 €, alles andere ≈ 2.100–2.700 €.
 Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand (eine Kapsel) + Schlaufe ≈ 600 €.
 
 ---
@@ -46,8 +46,8 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 
 | Teil | Menge | Material, Maß | Herstellweg | etwa |
 |---|---|---|---|---|
-| Robotergelenk-Motor RobStride RS04 (Hüfte, Knie, Schulter) | 6 | 40 Nm Nenn / 120 Nm Spitze, 1,42 kg, Ø 120 × 52; ≈ 295–320 $ (China ¥ 1.199) | Kauf | 1.950–2.200 € |
-| Robotergelenk-Motor RobStride RS03 (Ellbogen) | 2 | 20 Nm Nenn / 60 Nm Spitze, 0,88 kg; ≈ 225–245 $ (China ¥ 999) | Kauf | 500–560 € |
+| Robotergelenk-Motor RobStride RS04 (Hüfte, Knie, Schulter, Rumpf beugen) | 7 | 40 Nm Nenn / 120 Nm Spitze, 1,42 kg, Ø 120 × 52; ≈ 295–320 $ (China ¥ 1.199) | Kauf | 1.950–2.200 € |
+| Robotergelenk-Motor RobStride RS03 (Ellbogen, Rumpf drehen) | 3 | 20 Nm Nenn / 60 Nm Spitze, 0,88 kg; ≈ 225–245 $ (China ¥ 999) | Kauf | 500–560 € |
 | (beides inkl. Versand, Einfuhrumsatzsteuer 19 %, Zoll ≈ 2,7 %) | | | | |
 | Stiftkühlkörper Fischer ICK S R 140 (RS04) / Ø 120 (RS03), Stifte auf 30 mm kürzen, nach Bohrschablone bohren | 6 + 2 | Alu schwarz eloxiert | Kauf + Bohren | 200–260 € |
 | Wärmeleitpads 1 mm, 6 W/mK | 8 | | Kauf | 25 € |
@@ -61,6 +61,8 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Schubstangen | 2 + 2 | Stahlrohr Ø 12 × 2 (Knie), Ø 10 × 1,5 (Ellbogen), Gewinde M8 / M6 | Säge + Kleben/Löten | 15 € |
 | Gelenkköpfe Edelstahl, DIN ISO 12240-4 | 4 × M8 + 4 × M6 | wartungsfrei (z. B. SKF SIKAC 8 M / 6 M) | Kauf | 70 € |
 | Federpaket Knie (Druckfeder mit Hülse in der Stange) | 2 | Federstahl | Kauf + Druck | 15 € |
+| Rumpfantrieb: Kurbeln, Hebel am Lendengelenk, Träger (Laser), Stangen Ø 12 / Ø 10, 4 Gelenkköpfe | 1 Satz | Laser + Kauf | 60 € |
+| Rumpf-Wägezellen 20 kg + HX711 (Gurtanker, Schulterblattpolster) | 4 | Kauf | 25 € |
 | Bremswiderstand mit Schaltung (ab 46 V, 10 Ω / 200 W) | 1 | Aluminium-Gehäusewiderstand, MOSFET, Komparator | Kauf + Löten | 30 € |
 
 *Warum keine Seile mehr:* siehe [konzept.md](konzept.md), Abschnitt 5.

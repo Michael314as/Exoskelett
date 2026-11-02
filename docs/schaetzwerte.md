@@ -59,7 +59,7 @@ erst zeigt, ob es nötig ist (Kosten ≈ 5 × 8 €, Firmware-Treiber nötig).
 
 | Größe | Wert | Quelle |
 |---|---|---|
-| Exo gesamt | 39,7 kg, davon 25,5 kg Oberteil, ≈ 7,2 kg je Bein (mit Hüft- und Kniekapsel) | Bauteilliste der technischen Ansicht |
+| Exo gesamt | 43,3 kg, davon 29,1 kg Oberteil (mit Rumpfkapseln), ≈ 7,2 kg je Bein (mit Hüft- und Kniekapsel) | Bauteilliste der technischen Ansicht |
 | Gewicht auf dem Körper | im Stand fast null: Exo-Beine und Motoren tragen es in den Boden | Firmware-Vorsteuerung |
 | Mehraufwand beim Gehen, falls nicht getragen | steigt etwa linear mit der Last (Rucksack) | [Legg & Ramsey](https://www.tandfonline.com/doi/abs/10.1080/00140139208967382), [Army LCDA-Modell](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8919998/) |
 | Masse am Bein | kostet pro kg deutlich mehr als am Rücken; ein Knöchel-Exo mit 2,1 kg Beinmasse brauchte gute Unterstützung, um überhaupt zu sparen | [Mooney et al.](https://link.springer.com/article/10.1186/1743-0003-11-80) |

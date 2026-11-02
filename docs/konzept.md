@@ -21,8 +21,8 @@ vereisen, sich dehnen und reißen konnten (Zugkräfte bis 2,4 kN, Bowdenzug-Wirk
 | Ellbogen | RS06 in der Box, Bowdenzug-Paar | **RS03 oben am Oberarm, Schubstange 1:1** |
 | Wetter | Seile und Rollen können vereisen | Kapsel mit Stiftkühlkörper, O-Ringen, V-Ring, Druckausgleich, Heizband 4 W für Pausen |
 | Rücken | Box mit 6 Motoren, Akkus seitlich | Akkus stehend oben im Schutzbügel, flache Elektronikbox darunter, Rucksack ≈ 12 cm tief; Rumpfdrehung ±15° |
-| Gewicht | 31,9 kg | **39,7 kg** (Motoren schwerer, Kapseln mit Kühlkörpern, Rumpfdrehung) |
-| Material | 3.800–4.400 € | ≈ 4.900–5.900 € |
+| Gewicht | 31,9 kg | **43,3 kg** (Motoren schwerer, Kapseln mit Kühlkörpern, Rumpf beugen und drehen mit Motor) |
+| Material | 3.800–4.400 € | ≈ 5.700–6.800 € |
 
 **Entwurf 4 im Vergleich zu Entwurf 3** (zur Nachverfolgung):
 
@@ -112,6 +112,8 @@ es tragen muss.**
 | Knie L/R | RobStride RS04 | oben am Oberschenkel (y −12 cm) | Kurbel 60 mm → Schubstange Ø 12 → Kniehebel 60 mm (1:1) | strecken 110 Nm, beugen 10 Nm (+ Federpaket ≈ 11 Nm mechanisch) | 114 Nm |
 | Schulter L/R | RobStride RS04 | auf der Schulterachse, Gehäuse an der Schulterschwinge | direkt | ±100 Nm | 116 Nm |
 | Ellbogen L/R | RobStride RS03 | oben am Oberarm (y −12 cm) | Kurbel 50 mm → Schubstange Ø 10 → Hebel 50 mm (1:1) | ±56 Nm | 57 Nm |
+| Rumpf beugen | RobStride RS04 | hinter dem Kreuzbein am unteren Rahmen | Kurbel 50 mm → Schubstange → Hebel am Lendengelenk (1:1) | aufrichten 80 Nm, vorbeugen 20 Nm | 114 Nm |
+| Rumpf drehen | RobStride RS03 | hinter dem Kreuzbein, Achse senkrecht | Kurbel 40 mm → Stange → Wagen der Bogenführung (≈ 1 : 1,8) | ±30 Nm | ≈ 100 Nm |
 
 **Schubstange statt Seil:** Kurbel und Hebel bilden ein Parallelogramm, die Stange läuft parallel zur Schiene. Der Hebel
 arbeitet im Bereich ±55° um die Querlage, die Stange kommt nie in eine Strecklage. Größte Stangenkraft ≈ 3,7 kN (Knie, 110 Nm
@@ -120,6 +122,22 @@ bei 60° Hebelstellung); Stahlrohr Ø 12 × 2 knickt erst bei ≈ 16 kN. Die Gel
 **Die Kapsel:** außen ein gekaufter Stiftkühlkörper direkt auf dem Motorgehäuse, seitlich ein dünner Mantel aus PETG-CF mit
 zwei O-Ringen, am drehenden Abtrieb ein V-Ring, unten ein Druckausgleichselement M12 gegen Kondenswasser. An der
 Abtriebsseite ein Heizband 4 W für Pausen bei Frost. Das Wärmemanagement steht in Abschnitt 5c.
+
+### 5d. Rumpf: beugen und drehen mit Motor
+
+Beide Rumpfmotoren sitzen in Kühlkörper-Kapseln **hinter dem Kreuzbein am unteren Rahmen**: Sie bewegen sich beim Bücken
+und Drehen nicht mit, machen den Rücken nicht breiter und stoßen nicht an die schwingenden Arme.
+
+- **Beugen (RS04):** Kurbel 50 mm → Schubstange → Hebel am Lendengelenk, Parallelogramm 1:1. Hilft beim Aufrichten bis 80 Nm,
+  beim Vorbeugen bis 20 Nm. Die Gasfedern tragen weiter das Exo-Oberteil, der Motor trägt einen Anteil deines Oberkörpers
+  (wie an der Hüfte: 10/20/30 % je Stufe) und der Baumlast. Hängt ein Baum in den Schlaufen, rastet die Lendensperre ein und
+  der Motor wird stromlos: Er kühlt ab, während die Sperre trägt.
+- **Drehen (RS03):** Kurbel 40 mm in der waagerechten Ebene → Stange → Zapfen am Wagen der Bogenführung (≈ 1 : 1,8). Bis 30 Nm,
+  die Zentrierfedern bleiben. Vor den Anschlägen (±15°) läuft die Hilfe weich aus.
+- **Woher das Exo deine Absicht kennt:** vier Wägezellen, je eine in den oberen Gurtankern und hinter dem Schulterblatt-
+  polster. Beugst du dich vor, ziehen die Gurte: Das Exo beugt mit. Richtest du dich auf, drückst du ins Polster: Es streckt.
+  Drehst du dich, wird es links und rechts unterschiedlich: Daraus folgt die Drehrichtung.
+- **Ohne Strom** laufen beide frei mit (rückdrehbar), die Federn zentrieren.
 
 ### 5c. Wärmemanagement
 
@@ -247,7 +265,7 @@ den Körper. Deshalb hat Entwurf 4 jetzt:
 
 | Gelenk | Bewegung | Wie | Warum |
 |---|---|---|---|
-| **Rumpfdrehung** unter dem Lendengelenk | Oberkörper drehen ±15° | Bogenführung: gebogene Edelstahlwelle Ø 10 (R 95 mm um die Wirbelsäule), Wagen mit 4 Profilrollen INA LFR 5201-10-2Z, 2 Zentrierfedern, Gummianschläge | Umschauen, Baum zur Seite ziehen, Hüfte drehen ohne dass Gurte scheuern; die Achse liegt in der Wirbelsäule, deshalb verschiebt sich nichts gegen den Körper |
+| **Rumpfdrehung** unter dem Lendengelenk (motorisiert, Abschnitt 5d) | Oberkörper drehen ±15° | Bogenführung: gebogene Edelstahlwelle Ø 10 (R 95 mm um die Wirbelsäule), Wagen mit 4 Profilrollen INA LFR 5201-10-2Z, 2 Zentrierfedern, Gummianschläge | Umschauen, Baum zur Seite ziehen, Hüfte drehen ohne dass Gurte scheuern; die Achse liegt in der Wirbelsäule, deshalb verschiebt sich nichts gegen den Körper |
 | **Lendengelenk** im Rückenrahmen, 17 cm über den Hüftgelenken | Rumpf beugen ±25°, seitlich ±10° | Scharnier mit Elastomerfeder, **zwei Gasfedern 150 N** tragen das Oberteil (≈ 36 Nm) | Bücken fühlt sich leicht an, das Exo-Oberteil zieht dich nicht nach vorne |
 | **Sperre** am Lendengelenk | rastet in 5 Stellungen (−25 … +25°) | Hubmagnet 24 V mit Sperrbolzen, Rastsegment Edelstahl | sobald > 5 kg in den Schlaufen hängen (0,3 s), sperrt die Firmware: dann trägt der Rahmen den Baum, nicht dein Kreuz. Hebel zum Sperren von Hand |
 | **Schulterschlitten** | Schulter hebt und senkt sich ±3 cm | 2 Wellen Ø 8 mit Linearlagern, Druckfeder | Schulterblatt kann sich bewegen: Arm über Kopf und Schulterzucken ohne Zwang |
@@ -273,13 +291,13 @@ Exo läuft frei mit, warnt aber bei Rückneigung und dämpft die Beine bei einem
 
 ## 8. Gewicht
 
-**Bauteilliste der technischen Ansicht: 39,7 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
+**Bauteilliste der technischen Ansicht: 43,3 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
 wiegen 10,3 kg (6 × RS04 je 1,42 kg, 2 × RS03 je 0,88 kg) statt 5,0 kg; Kühlkörper (8 × ≈ 0,28 kg), Mäntel, Dichtungen und Wangen kommen dazu.
 Seile, Rollen, Scheiben, Bowdenzüge und die Motorbox fallen weg.
 
 Was das für dich heißt:
-- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **25,5 kg
-  Exo-Oberteil**, dessen Schwerpunkt fast über der Hüfte liegt (37 cm darüber, 3 cm dahinter): Der Rucksack zieht
+- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **29,1 kg
+  Exo-Oberteil** (mit den Rumpfkapseln am Becken), Schwerpunkt 34 cm über und 5 cm hinter der Hüftachse: Der Rucksack zieht
   kaum nach hinten.
 - Mehr Masse sitzt an den Gliedern: je Bein 1,4 kg Kniemotor oben am Oberschenkel, je Arm 1,4 kg an der Schulter und
   0,9 kg oben am Oberarm. Beim schnellen Schwingen spürst du das; im Stand gleicht die Steuerung das Eigengewicht aus.
@@ -305,8 +323,8 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 
 | Posten | etwa |
 |---|---|
-| 6 × RobStride RS04 (≈ 295–320 $) + 2 × RS03 (≈ 225–245 $), mit Versand, Einfuhrumsatzsteuer, Zoll | 2 600 bis 2 900 € |
-| Kapseln: 8 Stiftkühlkörper, Wangen, Kurbeln, Hebel (Laser), Mäntel (Druck), Wärmeleitpads, V-Ringe, O-Ringe, Druckausgleich, Heizbänder, Schubstangen, Gelenkköpfe | 520 bis 640 € |
+| 7 × RobStride RS04 (≈ 295–320 $) + 3 × RS03 (≈ 225–245 $), mit Versand, Einfuhrumsatzsteuer, Zoll | 3 200 bis 3 600 € |
+| Kapseln (10): Stiftkühlkörper, Wangen, Kurbeln, Hebel (Laser), Mäntel (Druck), Wärmeleitpads, V-Ringe, O-Ringe, Druckausgleich, Heizbänder, Schubstangen, Gelenkköpfe | 520 bis 640 € |
 | 3 Schlaufenantriebe 5840-31ZY + 3 Treiber Pololu G2 | 180 bis 220 € |
 | Steuerung, CAN, 11 Wägezellen + Verstärker, Not-Aus, Relais, Stecker, Kabel, Anzeige, Licht | 400 bis 500 € |
 | Akku-Adapter für Stihl AP (Akku vorhanden) | 20 bis 80 € |
@@ -314,7 +332,8 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 | Lendengelenk, Gasfedern, Hubmagnet, Drehteller, Drehring, Schulterschlitten | 190 bis 220 € |
 | Steigbügel, Fersenbügel, Spikes, Gurtsystem, Manschetten, Polster | 300 bis 380 € |
 | Schutzbügel, Parkstütze, Haube Elektronikbox, Eloxieren, Filament | 230 bis 360 € |
-| **Summe Material** | **etwa 4 900 bis 5 900 €** (dazu Werkzeug einmalig 280 bis 500 €) |
+| Rumpfantrieb: Kurbeln, Hebel, Stangen, Gelenkköpfe, 4 Rumpf-Wägezellen + HX711 | 90 bis 120 € |
+| **Summe Material** | **etwa 5 700 bis 6 800 €** (dazu Werkzeug einmalig 280 bis 500 €) |
 
 Über einen Einkaufsagenten direkt aus China (RS04 ¥ 1.199, RS03 ¥ 999) wären die Motoren etwa 1.000 € billiger;
 Gewährleistung und Lieferung sind dann schwieriger.

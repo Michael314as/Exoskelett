@@ -21,6 +21,10 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `laser/kurbel_ellbogen.dxf` | Alu 6082 T6 | 8 mm | 2 | 83 × 46 | 8 | 5.6 mm | Kurbel AR-04: auf dem Abtrieb des Ellbogenmotors (6 × M4), Zapfen M6 bei 50 mm |
 | `laser/kniehebel.dxf` | Alu 6082 T6 | 10 mm | 2 | 96 × 48 | 5 | 5.7 mm | Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen M8 bei 60 mm |
 | `laser/ellbogenhebel.dxf` | Alu 6082 T6 | 8 mm | 2 | 80 × 40 | 5 | 4.7 mm | Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen M6 bei 50 mm |
+| `laser/kurbel_rumpf_beugen.dxf` | Alu 6082 T6 | 10 mm | 1 | 89 × 54 | 11 | 6.2 mm | Kurbel am RS04 des Rumpfs (Beugen), Zapfen M8 bei 50 mm |
+| `laser/hebel_lendengelenk.dxf` | Alu 6082 T6 | 10 mm | 1 | 86 × 48 | 5 | 6.7 mm | Hebel am Lendengelenk (oberer Rahmen), Bolzen Ø 10, Zapfen M8 bei 50 mm |
+| `laser/kurbel_rumpf_drehen.dxf` | Alu 6082 T6 | 8 mm | 1 | 73 × 46 | 8 | 5.6 mm | Kurbel am RS03 des Rumpfs (Drehen), Zapfen M6 bei 40 mm |
+| `laser/traeger_rumpfkapsel.dxf` | Alu 6082 T6 | 8 mm | 3 | 40 × 120 | 5 | 13.4 mm | Träger der Rumpfkapseln am unteren Rahmen (2 für Beugen, 1 Konsole für Drehen) |
 | `laser/steigbuegel.dxf` | Edelstahl 1.4301 | 4 mm | 2 | 60 × 205 | 11 | 14.7 mm | Steigbügel BE-11: Abwicklung 60 × 205, Laschen an den Linien ±67,5 mm 90° hochkanten (Kantdienstleister) |
 | `laser/drehteller_scheibe.dxf` | Edelstahl 1.4301 | 2 mm | 4 | 64 × 64 | 5 | 7.8 mm | Drehteller BE-14: Laufscheiben über und unter dem Axial-Nadellager AXK (2 je Fuß), M4 für die Wägezellen-Platte |
 | `laser/fersenbuegel_lasche.dxf` | Alu 6082 T6 | 8 mm | 2 | 40 × 50 | 3 | 7.9 mm | Fersenbügel BE-09 am Knöchellager (Rundstab Ø 16 wird eingeschweißt oder geklemmt) |
@@ -54,8 +58,8 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `druck/haube_rechts.stl` | PETG | 1 | 110 × 140 × 60 | 90 | ja | 9 | Deckel der flachen Elektronikbox, rechte Hälfte |
 | `druck/kurbelschutz_knie.stl` | PETG transparent | 2 | 101 × 198 × 18 | 27 | diagonal | 2 | Fingerschutz RA-11 über Scheibe Ø 156: nichts kann zwischen Seil und Scheibe geraten |
 | `druck/kurbelschutz_ellbogen.stl` | PETG transparent | 2 | 87 × 174 × 16 | 21 | ja | 2 | Fingerschutz RA-11 über Scheibe Ø 132: nichts kann zwischen Seil und Scheibe geraten |
-| `druck/kapselmantel_rs04.stl` | PETG-CF | 6 | 131 × 131 × 56 | 51 | ja | 3 | Kapselmantel AN-02 für Motor Ø 120: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
-| `druck/kapselmantel_rs03.stl` | PETG-CF | 2 | 109 × 109 × 58 | 44 | ja | 3 | Kapselmantel AN-02 für Motor Ø 98: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
+| `druck/kapselmantel_rs04.stl` | PETG-CF | 7 | 131 × 131 × 56 | 51 | ja | 3 | Kapselmantel AN-02 für Motor Ø 120: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
+| `druck/kapselmantel_rs03.stl` | PETG-CF | 3 | 109 × 109 × 58 | 44 | ja | 3 | Kapselmantel AN-02 für Motor Ø 98: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
 | `druck/bohrschablone_kuehlkoerper_rs04.stl` | PETG | 1 | 146 × 146 × 14 | 107 | ja | 13 | Bohrschablone für den Stiftkühlkörper (Lochkreis Ø 106, Motorgehäuse); Pad zwischen Motor und Kühlkörper |
 | `druck/bohrschablone_kuehlkoerper_rs03.stl` | PETG | 1 | 126 × 126 × 14 | 80 | ja | 11 | Bohrschablone für den Stiftkühlkörper (Lochkreis Ø 98, Motorgehäuse); Pad zwischen Motor und Kühlkörper |
 | `druck/akkuschacht_wand.stl` | PETG-CF | 4 | 116 × 176 × 10 | 87 | ja | 7 | Akkuschacht EN-02 stehend oben am Rücken: Rück- und Außenwand je Seite, Einstecken von oben (zweiter Schacht nur bei Bedarf bestücken) |

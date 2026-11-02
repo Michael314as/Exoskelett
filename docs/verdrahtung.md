@@ -54,8 +54,11 @@ Zellen: 0/1 Oberschenkel L/R, 2/3 Oberarm L/R, 4/5 Unterarm L/R, 6/7/8 Schlaufen
 | 3 / 4 | Knie links / rechts (Kniekapsel RS04, Schubstange) | 1 : 1 |
 | 5 / 6 | Schulter links / rechts (Schulterkapsel RS04, direkt) | 1 : 1 |
 | 7 / 8 | Ellbogen links / rechts (Ellbogenkapsel RS03, Schubstange) | 1 : 1 |
+| 9 | Rumpf beugen (Kapsel RS04 am Becken, Schubstange) | 1 : 1 |
+| 10 | Rumpf drehen (Kapsel RS03 am Becken, Kurbel) | ≈ 1,8 |
 
 IDs vor dem Einbau einzeln mit dem Hersteller-Tool setzen (CAN-USB-Adapter, RobStride-Software). Danach im Stand prüfen: Jeder Motor antwortet.
 
+**Rumpf-Wägezellen:** HX711 an Pin 44 / 45 (Gurtanker links / rechts) und 46 / 47 (Schulterblattpolster links / rechts), Lötpunkte auf der Unterseite; Takt gemeinsam an Pin 34.
 **Zusätzliche Ausgänge (Entwurf 5):** Pin 42 Heizfolien der Beinkapseln, Pin 43 Heizfolien der Armkapseln, je über einen Logic-MOSFET aus dem 12-V-Wandler (Lötpunkte auf der Unterseite des Teensy 4.1; die SD-Karte wird nicht benutzt).
 **Bremswiderstand:** zwischen Akku-Plus und Minus hinter dem Schütz, eigene Schaltung (Komparator + MOSFET, ein ab 46 V, aus ab 44 V), 10 Ω / 200 W am Rahmen gekühlt; arbeitet unabhängig von der Software.

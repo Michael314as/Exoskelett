@@ -275,7 +275,7 @@ int main() {
     in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);
     in.joint[ShR].cuffN = 40.f; in.joint[ShR].q = 0.8f; in.joint[ElR].cuffN = 40.f; in.joint[ElR].q = 1.0f; run(1.f);
     check(o.tau[ShR] == 0.f && std::fabs(o.tau[ElR]) > 3.f, "nur das Prüfstand-Gelenk bekommt Moment, die anderen bleiben stromlos");
-    check(runCommand("voll", c, io) && c.jointMask == 0xFF, "Konsole: voll schaltet alle 8 Gelenke frei");
+    check(runCommand("voll", c, io) && c.jointMask == 0x3FF, "Konsole: voll schaltet alle 10 Gelenke frei");
   }
 
   std::printf("13) Entwurf 4: Kopplung der Manschetten, Baumlast, Standbein/Schwungbein\n");
@@ -320,7 +320,7 @@ int main() {
     {
       App app; Inputs in; Outputs o; ready(app, in, o);
       in.trunkPitch = 0.f; run(app, in, o, 1.f);
-      const float exp = 0.5f * 25.5f * 9.81f * 0.03f;
+      const float exp = 0.5f * 29.1f * 9.81f * 0.05f;
       std::printf("     aufrecht im Stand: Hüfte %+.1f Nm je Seite (erwartet %+.1f: Rucksack hinter der Hüftachse)\n", o.ff[HipR], exp);
       check(std::fabs(o.ff[HipR] - exp) < 1.f && std::fabs(o.ff[HipL] - exp) < 1.f, "aufrecht: Hüftmotoren halten den Rucksack, der nach hinten kippen will");
       const float up0 = o.ff[HipR];
@@ -380,6 +380,31 @@ int main() {
     for (int i = 0; i < NJ; i++) ci.joint[i].motorTempC = 10.f;
     for (float t = 0; t < 0.5f; t += dt) co = cold.step(ci, dt);
     check(!co.heaterLegs && !co.heaterArms, "Kapseln warm (+10 °C): Heizung aus");
+  }
+
+  std::printf("16) Rumpf: beugen (RS04) und drehen (RS03) nach den Rumpf-Wägezellen\n");
+  {
+    const float dt = 0.005f;
+    auto ready = [&](App& app, Inputs& in, Outputs& o) { in.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o = app.step(in, dt); in.btnPower = false; for (float t = 0; t < 6.f; t += dt) o = app.step(in, dt); };
+    auto run = [&](App& app, Inputs& in, Outputs& o, float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
+    App app; Inputs in; Outputs o; ready(app, in, o);
+    in.joint[Lumb].q = 0.1f; run(app, in, o, 0.5f); const float l0 = o.tau[Lumb];
+    in.joint[Lumb].cuffN = 60.f; run(app, in, o, 1.f); const float fwd = o.tau[Lumb];
+    in.joint[Lumb].cuffN = -60.f; run(app, in, o, 1.f); const float back = o.tau[Lumb];
+    std::printf("     Rumpf: Gurte ziehen 60 N → %+.1f Nm, ins Polster drücken → %+.1f Nm (ohne Druck %+.1f)\n", fwd, back, l0);
+    check(fwd > l0 + 5.f && back < l0 - 5.f, "Rumpf beugen folgt den Gurten (vor) und dem Rückenpolster (auf)");
+    in.joint[Lumb].cuffN = 0.f; in.trunkPitch = 0.6f; run(app, in, o, 1.f);
+    std::printf("     35° vorgebeugt: Rumpf trägt %+.1f Nm (Anteil deines Oberkörpers)\n", o.ff[Lumb]);
+    check(o.ff[Lumb] < -5.f && o.tau[Lumb] >= -80.f - 1e-3f, "vorgebeugt: Rumpfmotor trägt einen Anteil, bleibt in der Grenze 80 Nm");
+    in.loopN[LoopR1] = 150.f; run(app, in, o, 1.5f);
+    check(o.lumbarLock && std::fabs(o.tau[Lumb]) < 0.01f, "Baum in der Schlaufe: Lendensperre trägt, Beugemotor stromlos (kühlt ab)");
+    in.loopN[LoopR1] = 0.f; in.trunkPitch = 0.f; run(app, in, o, 0.5f);
+    in.joint[Twist].cuffN = 40.f; run(app, in, o, 1.f); const float tw = o.tau[Twist];
+    in.joint[Twist].cuffN = 400.f; run(app, in, o, 1.f);
+    std::printf("     Drehen: 40 N Unterschied → %+.1f Nm, sehr stark → %+.1f Nm\n", tw, o.tau[Twist]);
+    check(tw > 2.f && o.tau[Twist] <= 30.f + 1e-3f, "Rumpf drehen folgt dem Unterschied links/rechts, höchstens 30 Nm");
+    in.joint[Twist].cuffN = 400.f; in.joint[Twist].q = 0.25f; run(app, in, o, 0.5f);
+    check(o.tau[Twist] < 10.f, "Drehen nahe am Anschlag (±15°): Hilfe läuft aus");
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);

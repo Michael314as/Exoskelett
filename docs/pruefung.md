@@ -50,6 +50,7 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | P34 | Komfort-Freiheitsgrade | Fuß drehen, Unterarm drehen, Schultern hochziehen, Oberkörper drehen | Drehteller ±20° mit Rückstellung, Drehring frei, Schulter folgt ±3 cm, Rumpf dreht ±15° ohne dass Gurte verrutschen, Federn holen zurück | ☐ |
 | P35 | Kapsel dicht | 10 min Gartenschlauch auf die Kapsel, Gelenk dabei bewegen; Haube öffnen | innen trocken, kein Wasser am Motor | ☐ |
 | P36 | Kapsel bei Frost | über Nacht in den Gefrierschrank (−18 °C), dann einschalten | Heizung springt an, Gelenk läuft sofort leicht, nach 10 min Wicklung > +3 °C | ☐ |
+| P38 | Rumpf | vorbeugen, aufrichten, drehen ohne Last; dann 10 kg in der Schlaufe | folgt ohne Verzögerung, die man merkt; mit Last rastet die Sperre und der Beugemotor wird stromlos; Drehen läuft vor ±15° weich aus | ☐ |
 | P37 | Bremsenergie | 20 kg am Holzarm schnell absenken, Spannung am Bus messen | bleibt unter 50 V, kein Motor schaltet ab | ☐ |
 
 Datum, Firmware-Version (Git-Commit), Prüfer: ____________________

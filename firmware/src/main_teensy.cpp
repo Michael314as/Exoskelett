@@ -28,7 +28,7 @@ constexpr int PIN_LED_RING = 20, PIN_VIBE = 21;                                /
 constexpr int PIN_LOOP_DIR[NL] = {24, 25, 26}, PIN_LOOP_END[NL] = {27, 28, 29};
 constexpr int PIN_HEAT_LEGS = 42, PIN_HEAT_ARMS = 43;                          // Heizfolien der Gelenkkapseln (MOSFET; Lötpunkte unten, SD-Karte nicht benutzt)
 constexpr int PIN_ESTOP_SENSE = 30, PIN_CONTACTOR = 31, PIN_STAND = 32, PIN_LIGHT = 33, PIN_HX_SCK = 34;
-constexpr int PIN_HX_DOUT[kCells] = {9, 35, 36, 37, 40, 41, 10, 11, 12, 38, 39};   // 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1, 9/10 Fuß L/R
+constexpr int PIN_HX_DOUT[kCells] = {9, 35, 36, 37, 40, 41, 10, 11, 12, 38, 39, 44, 45, 46, 47};   // 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1, 9/10 Fuß L/R, 11/12 Gurt L/R, 13/14 Rückenpolster L/R (Pins 44–47: Lötpunkte unten)
 constexpr float kFootContactN = 49.f;                                          // ≈ 5 kg auf dem Steigbügel = Standbein (am Prüfstand einstellen)
 
 static App app;
@@ -39,10 +39,10 @@ static volatile bool tick = false;
 
 // ---------- Motoren ----------
 static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can;
-static const MotorLimits kLim[NJ] = {kRS04, kRS04, kRS04, kRS04, kRS04, kRS04, kRS03, kRS03};   // Hüfte, Knie, Schulter: RS04; Ellbogen: RS03
-static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8};                    // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR
+static const MotorLimits kLim[NJ] = {kRS04, kRS04, kRS04, kRS04, kRS04, kRS04, kRS03, kRS03, kRS04, kRS03};   // Hüfte, Knie, Schulter, Rumpf beugen: RS04; Ellbogen, Rumpf drehen: RS03
+static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};             // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, Rumpf beugen, Rumpf drehen
 // Übersetzung Gelenk : Motor und Wirkungsgrad. Hüfte: Seilgetriebe 1:6. Knie: Kurvenscheibe 5 cm (gestreckt) / Trommel 1,5 cm, Bowdenzug.
-static const Transmission kTr[NJ] = {{1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}};   // direkt bzw. Schubstange 1:1
+static const Transmission kTr[NJ] = {{1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.8f, 0.93f}};   // direkt bzw. Schubstange 1:1; Rumpf drehen über Kurbel 1 : 1,8
 static MotorState motorState[NJ];
 static uint32_t lastReplyMs[NJ];
 static float powerOnTime = 0.f;                                                 // Zeit seit Schütz zu
@@ -91,6 +91,9 @@ static bool readCuffs(JointInput* j) {
   j[HipL].cuffN = cellN[0]; j[HipR].cuffN = cellN[1];                          // Knie: keine eigene Manschette (Kopplung in exo_app.h)
   j[ShL].cuffN = cellN[2]; j[ShR].cuffN = cellN[3]; j[ElL].cuffN = cellN[4]; j[ElR].cuffN = cellN[5];
   for (int i = 0; i < NL; i++) in.loopN[i] = fmaxf(0.f, cellN[6 + i]);
+  // Rumpf: Gurte ziehen (11/12) = vorbeugen, ins Rückenpolster drücken (13/14) = aufrichten; Drehen aus dem Unterschied rechts/links
+  j[Lumb].cuffN = (cellN[11] + cellN[12]) - (cellN[13] + cellN[14]);
+  j[Twist].cuffN = 0.5f * ((cellN[12] - cellN[11]) + (cellN[13] - cellN[14]));
   return ok;
 }
 
