@@ -1839,13 +1839,20 @@ function cog() {
   cgDot.position.copy(tot); cgExo.position.copy(exo); cgGround.position.set(tot.x, y, tot.z);
   cgLine.geometry.setFromPoints([tot, V(tot.x, y, tot.z)]); cgLine.computeLineDistances();
   const ank = G.foot[0].localToWorld(V(0, 0, -HH)).add(G.foot[1].localToWorld(V(0, 0, HH))).multiplyScalar(0.5);
-  return { m, me, logKg, tot, exo, inside, margin: inside ? dmin : -dmin, fwd: tot.x - ank.x };
+  // Exo-Oberteil (alles, was nicht am Bein hängt) im Rumpf-Koordinatensystem: Ursprung = Hüftachse, x vorne, y oben
+  const legGroups = new Set([...G.swing, ...G.thigh, ...G.shank, ...G.brace, ...G.foot]);
+  const onLeg = (o) => { for (let q = o; q; q = q.parent) if (legGroups.has(q)) return true; return false; };
+  const up = V(); let mu = 0;
+  for (const p of Object.values(PIDS)) { if (!worn(p) || onLeg(p.rep)) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); up.addScaledVector(G.torso.worldToLocal(p.rep.getWorldPosition(V())), kg); mu += kg; }
+  up.multiplyScalar(1 / mu);
+  return { m, me, logKg, tot, exo, inside, margin: inside ? dmin : -dmin, fwd: tot.x - ank.x, mu, up };
 }
 function renderCg(c) {
   $('cgout').innerHTML = `<dl class="kv"><dt>Gesamtmasse</dt><dd>${c.m.toFixed(1)} kg (Mensch 75 kg, Exo ${c.me.toFixed(1)} kg${c.logKg ? ', Stamm 15 kg' : ''})</dd>
     <dt>Schwerpunkt gesamt</dt><dd>${(c.tot.y * 100).toFixed(0)} cm hoch, ${(c.fwd * 100).toFixed(1)} cm vor der Knöchelmitte (gelber Punkt)</dd>
     <dt>Ausbalancieren</dt><dd>Rumpf ${(bal.extra * 180 / Math.PI).toFixed(0)}° zusätzlich vorgeneigt, damit das Lot ≈ 3 cm vor der Knöchelmitte liegt (so gleicht ein Mensch den Rucksack aus)</dd>
     <dt>Schwerpunkt Exo</dt><dd>${(c.exo.y * 100).toFixed(0)} cm hoch (blauer Punkt)</dd>
+    <dt>Exo-Oberteil</dt><dd>${c.mu.toFixed(1)} kg, Schwerpunkt ${(c.up.y * 100).toFixed(0)} cm über und ${(-c.up.x * 100).toFixed(0)} cm hinter der Hüftachse (Firmware-Vorsteuerung)</dd>
     <dt>Standsicherheit</dt><dd><span class="st ${c.inside && c.margin > 0.03 ? 'ok' : 'lim'}">${c.inside ? `Lot ${(c.margin * 100).toFixed(1)} cm innerhalb der Standfläche` : `Lot ${(-c.margin * 100).toFixed(1)} cm außerhalb: kippt ohne Ausfallschritt`}</span></dd></dl>
     <p class="note">Wohin das Gewicht geht: Die Exo-Beine leiten das Gewicht von Rahmen, Box und Akkus über die Steigbügel in den Boden (die Hüftmotoren tragen es im Stand mit). Auf Schultern und Hüfte lastet davon nur, was die Gurte zum Führen übertragen; spürbar bleibt die Trägheit beim Drehen und Bücken. Standfläche (grüne Linie) = beide Schuhe mit Steigbügel. Massen aus der Bauteilliste und Körpersegmenten nach Winter (75 kg). Das Exo hat keinen Fußmotor: die Balance hältst du selbst über die Füße, das Exo läuft frei mit.</p>`;
 }

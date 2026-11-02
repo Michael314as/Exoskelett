@@ -211,7 +211,7 @@ Gurte, Kabel, Hauben, Schutzbügel und Parkstütze eingerechnet; der zweite Akku
 17–20 kg waren ohne Kleinteile, Schutz und Komfortgelenke gerechnet.
 
 Was das für dich heißt: Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung rechnet
-im Stand mit **25 kg Exo-Oberteil** (alles über der Hüftachse) und lässt Hüft- und Kniemotoren diese Last tragen; die Motoren
+im Stand mit **21,5 kg Exo-Oberteil** (Schwerpunkt 8 cm hinter der Hüftachse, wird mit ausgeglichen) und lässt Hüft- und Kniemotoren diese Last tragen; die Motoren
 haben dafür genug Reserve (Knie in der Hocke ≈ 36 Nm je Bein gegen ≈ 44 Nm Dauermoment mit der Kurvenscheibe). Spürbar bleibt die **Trägheit** beim Drehen, Bücken und beim ersten Schritt.
 **Umgesetzt (ohne Abstrich an Sicherheit oder Funktion), jetzt 31,1 kg** (dazu Zählfehler in der Liste behoben: Schultergurte und Hauben waren dreifach gerechnet): Parkstütze abnehmbar, sie bleibt am Fahrzeug
 und wird nur zum Abstellen eingesteckt (−0,7 kg beim Tragen), Schutzbügel aus CFK-Rohr Ø 22 × 1,5 (−0,25 kg), Hauben mit

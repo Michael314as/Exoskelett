@@ -296,7 +296,7 @@ int main() {
       const float hip0 = o.tau[HipR], knee0 = o.tau[KneeR];
       in.loopN[LoopR1] = 300.f; run(app, in, o, 1.f);
       std::printf("     Hocke im Stand: Hüfte %+.1f Nm, Knie %+.1f Nm; mit Baum 300 N: %+.1f / %+.1f Nm\n", hip0, knee0, o.tau[HipR], o.tau[KneeR]);
-      check(hip0 < -10.f && knee0 < -10.f, "Hocke im Stand: Hüfte und Knie strecken von selbst (tragen Exo und einen Teil des Oberkörpers)");
+      check(hip0 < -8.f && knee0 < -10.f, "Hocke im Stand: Hüfte und Knie strecken von selbst (tragen Exo und einen Teil des Oberkörpers)");
       check(o.tau[KneeR] < knee0 - 5.f, "mit Baum tragen die Beine mehr");
       in.loopN[LoopR1] = 0.f; in.footContact[1] = false; run(app, in, o, 0.5f);
       check(std::fabs(o.ff[KneeR]) < 0.5f && o.stance[1] < 0.05f, "Schwungbein: keine Gewichtsvorsteuerung, Bein läuft frei");
@@ -306,6 +306,17 @@ int main() {
       check(o.tau[HipR] > 8.f && o.tau[KneeR] > 0.5f && o.tau[KneeR] <= 10.f, "Schwungbein: Hüfte und Knie helfen beim Anheben, Knie-Beugen begrenzt auf 10 Nm");
       in.footContact[1] = true; run(app, in, o, 0.5f);
       check(o.tau[KneeR] <= 0.001f && o.tau[HipR] <= 35.f * 0.15f + 0.01f, "Fuß wieder belastet: kein aktives Beugen mehr am Knie, Hüfte nur wenig");
+    }
+    {
+      App app; Inputs in; Outputs o; ready(app, in, o);
+      in.trunkPitch = 0.f; run(app, in, o, 1.f);
+      const float exp = 0.5f * 21.5f * 9.81f * 0.08f;
+      std::printf("     aufrecht im Stand: Hüfte %+.1f Nm je Seite (erwartet %+.1f: Rucksack hinter der Hüftachse)\n", o.ff[HipR], exp);
+      check(std::fabs(o.ff[HipR] - exp) < 1.f && std::fabs(o.ff[HipL] - exp) < 1.f, "aufrecht: Hüftmotoren halten den Rucksack, der nach hinten kippen will");
+      const float up0 = o.ff[HipR];
+      in.trunkPitch = 0.6f; run(app, in, o, 1.f);
+      std::printf("     35° vorgebeugt: Hüfte %+.1f Nm je Seite\n", o.ff[HipR]);
+      check(o.ff[HipR] < -10.f && up0 - o.ff[HipR] > 20.f, "vorgebeugt: Hüftmotoren tragen Oberkörper und Exo nach oben (Rucksack kippt jetzt nach vorne)");
     }
   }
 

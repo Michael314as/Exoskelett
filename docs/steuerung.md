@@ -61,8 +61,14 @@ Anteil je Stufe (sanft 50 %, normal 67 %, kräftig 80 %). Den Rest spürst du: S
 erhalten, und das Exo kann nie „mehr wollen“ als die Last.
 
 **c) Vorsteuerung im Stand (Beine).** Am belasteten Bein tragen Hüfte und Knie automatisch:
-Exo-Oberteil (≈ 25 kg laut Bauteilliste: alles über der Hüftachse; vorher zu knapp mit 11 kg angesetzt, dann hättest du 14 kg Exo selbst getragen) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
+Exo-Oberteil (21,5 kg laut Bauteilliste der technischen Ansicht; vorher mit 11 kg viel zu knapp angesetzt) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
 die Vorneigung des Rumpfs aus (Lagesensor), das Knie die Beugung. Stehen beide Füße, teilen sich die Beine die Last.
+
+**c2) Der Rucksack zieht nach hinten.** Der Schwerpunkt des Exo-Oberteils liegt 22 cm über und 8 cm **hinter** der
+Hüftachse (Anzeige „Exo-Oberteil“ in der technischen Ansicht). Aufrecht will er nach hinten kippen; ohne Ausgleich zögen
+dich die Schultergurte zurück. Die Hüft-Vorsteuerung rechnet Mensch und Exo deshalb getrennt: aufrecht halten die
+Hüftmotoren je Seite ≈ 8 Nm gegen das Kippen nach hinten, vorgebeugt (35°) tragen sie ≈ 14 Nm nach oben. So spürst du den
+Rucksack weder aufrecht noch beim Bücken.
 
 **d) Standbein und Schwungbein.** Die Fußlast aus den Wägezellen im Steigbügel entscheidet (geglättet über 80 ms, damit beim Aufsetzen
 nichts springt):

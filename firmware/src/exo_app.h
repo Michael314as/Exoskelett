@@ -19,7 +19,8 @@ struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 25.f;                    // alles über der Hüftachse: Rahmen, Box, 6 Motoren, Akku, Arme, Gurte (Bauteilliste 31 kg − Beine ≈ 6 kg)
+  float exoUpperKg = 21.5f;                   // Exo-Oberteil: Rahmen, Box, 6 Motoren, Akku, Arme, Gurte (technische Ansicht, Bauteilliste)
+  float exoComUp = 0.22f, exoComBack = 0.08f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m] (Rucksack zieht nach hinten)
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
 
@@ -182,14 +183,17 @@ class App {
     }
     // Beine: im Stand tragen sie einen Teil von Oberkörper, Exo und Baum; im Schwung laufen sie frei mit
     const float loadKg = (in.loopN[LoopR1] + in.loopN[LoopR2] + in.loopN[LoopL1]) / g;
-    const float carryKg = body.exoUpperKg + bodyShare[level] * body.bodyUpperKg + loadShare[level] * std::fmax(0.f, loadKg);
+    const float personKg = bodyShare[level] * body.bodyUpperKg + loadShare[level] * std::fmax(0.f, loadKg);
+    const float carryKg = body.exoUpperKg + personKg;
     const float stanceSum = std::fmax(0.5f, stance_[0] + stance_[1]);
     for (int k = 0; k < 2; k++) {
       const int hip = k ? HipR : HipL, knee = k ? KneeR : KneeL;
       const float st = stance_[k], share = st / stanceSum;                  // Last auf die belasteten Beine verteilen
-      const float w = carryKg * g * share;
-      // Hüfte: Oberkörper neigt sich vor → Exo streckt (negativ). Knie: Hebel des Gewichts wächst mit der Beugung.
-      ji[hip].ffNm = -w * body.trunkCom * std::sin(std::fmax(0.f, in.trunkPitch));
+      const float w = carryKg * g * share, wP = personKg * g * share, wE = body.exoUpperKg * g * share;
+      // Hüfte: Oberkörper neigt sich vor → Exo streckt (negativ). Der Rucksack-Schwerpunkt liegt hinter der Hüftachse: aufrecht
+      // kippt er nach hinten, das Exo hält ihn (positiv), sonst zögen die Schultergurte dich zurück.
+      const float th = in.trunkPitch;
+      ji[hip].ffNm = -wP * body.trunkCom * std::sin(std::fmax(0.f, th)) - wE * (body.exoComUp * std::sin(th) - body.exoComBack * std::cos(th));
       ji[knee].ffNm = -w * 0.5f * body.thigh * std::sin(clampf(in.joint[knee].q, 0.f, 1.6f));
       // Druck am Oberschenkel: Hüfte direkt, Knie mit (Aufstehen und Hinsetzen sind Hüfte und Knie zusammen)
       ji[knee].crossNm = kneeSynergy * cuffForce(hip) * joint[hip].cfg.rCuff;
