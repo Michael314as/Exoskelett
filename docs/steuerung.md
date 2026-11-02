@@ -92,6 +92,7 @@ etwa 11 Nm, auch wenn die Software versagt.
 | Geschwindigkeitsgrenze | 4 rad/s | schnelle Bewegung wird nicht weiter verstärkt |
 | Aufwachen | 2 s nullen, 3 s Rampe | nichts springt beim Einschalten |
 | Verstärkung K | 0,5 / 1 / 2 (Stufen) | stabil bis K ≈ 5,5 mit HX711: große Reserve |
+| Reaktionszeit | ≈ 35 ms (HX711 mit 80 Messungen/s, Filter, CAN) | merkt man beim Heben kaum; wem es zu träge ist: ADS1220 (bis 2 000 Messungen/s, gleicher Pin-Bedarf über SPI) senkt sie auf ≈ 10 ms |
 
 ## 3. Weitere Sensoren
 
