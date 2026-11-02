@@ -116,6 +116,7 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Schutzhauben Cordura | 1 Satz | Kauf/Nähen lassen | 30 € |
 | Eloxieren oder Pulverbeschichten | 1 Auftrag | Dienst | 60–150 € |
 | Lendengelenk: Scharnierlaschen, Rastsegment, Elastomerfeder, Bolzen Ø 10 | 1 Satz | Laser + Kauf | 35 € |
+| Rumpfdrehung: Edelstahlwelle Ø 10 auf R 95 mm gebogen (Biegedienst), 4 Profilrollen INA LFR 5201-10-2Z, Wagen und 2 Halter (Laser), 2 Zentrierfedern, TPU-Anschläge | 1 Satz | Kauf + Laser | 70 € |
 | Gasfedern 150 N, Ø 15/6, Hub 80 mm, L 236 mm, Kugelpfannen M6, Halter | 2 + 4 | Kauf + Laser | 30 € |
 | Hubmagnet Intertec ITS-LZ-3263-D-24VDC + Sperrbolzen Ø 8 (Lendensperre) | 1 | Kauf | 40 € |
 | Kurbelschutz Knie und Ellbogen | 4 | Druck PETG transparent | 5 € |

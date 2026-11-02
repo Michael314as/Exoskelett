@@ -199,6 +199,16 @@ def schlaufentraeger(koepfe):
 laser('schlaufentraeger_rechts', schlaufentraeger(2), 'Alu 6082 T6', 6, 1, 'Schlaufenträger rechts (2 Köpfe: unten + außen), kalt biegen nach Schablone')
 laser('schlaufentraeger_links', schlaufentraeger(1), 'Alu 6082 T6', 6, 1, 'Schlaufenträger links (1 Kopf unten)')
 
+# Rumpfdrehung (RA-12): Wagen mit 4 Profilrollen INA LFR 5201-10-2Z (Bolzen M5 exzentrisch zum Einstellen: Langlöcher), Halter der Bogenwelle Ø 10
+def rumpfwagen():
+    p = P(rrect(80, 48, 6))
+    for x in (-24, 24):
+        p = p - slot(9, 5.5, x, 14, 90) - slot(9, 5.5, x, -14, 90)       # Rollenbolzen oben/unten, Langloch stellt das Spiel ein
+    return p - circ(M6 / 2, -8, 0) - circ(M6 / 2, 8, 0)
+laser('rumpfdrehung_wagen', rumpfwagen(), 'Alu 6082 T6', 8, 1, 'Wagen der Rumpfdrehung RA-12 am oberen Rahmen: 4 Profilrollen auf der Bogenwelle (R 95 mm um die Wirbelsäule)')
+laser('rumpfdrehung_halter', P(rrect(36, 44, 5)) - circ(10.2 / 2, 0, 9) - circ(M6 / 2, -9, -11) - circ(M6 / 2, 9, -11),
+      'Alu 6082 T6', 8, 2, 'Halter der Bogenwelle Ø 10 am unteren Rahmen (2 Stück, an den Enden), Gummianschlag ±15°')
+
 # Parkstütze: Klappgelenk-Lasche mit Rastloch
 laser('parkstuetze_lasche', P(rrect(70, 56, 8)) - circ(M10 / 2, -20, -8) - circ(M6 / 2, 18, 10) - circ(M6 / 2, 18, -10) - circ(6.2 / 2, -20, 12),
       'Alu 5754', 4, 4, 'Klappgelenk Parkstütze (Rastbolzen Ø6 im oberen Loch)')
@@ -272,7 +282,7 @@ druck('tastergriff_links', tastergriff(1), 'PETG', 1, 'Daumentaster links (1 Sch
 
 def haube(seite):
     """Haube über der Antriebsbox, in zwei Hälften (je ≤ 180 mm), Lüftungsschlitze, Verschraubung in der Mitte."""
-    L, W, H, t = 155.0, 150.0, 50.0, 2.4
+    L, W, H, t = 110.0, 140.0, 60.0, 2.4
     outer = Manifold.cube((L, W, H)).translate((0, -W / 2, 0))
     inner = Manifold.cube((L - t + 0.01 if seite == 'links' else L - t, W - 2 * t, H - t)).translate((t if seite == 'rechts' else 0, -W / 2 + t, -0.01))
     m = outer - inner
@@ -283,8 +293,8 @@ def haube(seite):
     for y in (-50, 0, 50):
         m = m - Manifold.cylinder(30, 1.7, 1.7, 24).rotate((0, 90, 0)).translate((-5, y, H - t - 6))
     return m if seite == 'links' else m.mirror((1, 0, 0))
-druck('haube_links', haube('links'), 'PETG', 1, 'Haube Elektronikbox, linke Hälfte')
-druck('haube_rechts', haube('rechts'), 'PETG', 1, 'Haube Elektronikbox, rechte Hälfte')
+druck('haube_links', haube('links'), 'PETG', 1, 'Deckel der flachen Elektronikbox (60 × 140 × 220), linke Hälfte')
+druck('haube_rechts', haube('rechts'), 'PETG', 1, 'Deckel der flachen Elektronikbox, rechte Hälfte')
 
 def fingerschutz(R, breite, name, n, bogen=200):
     """Halbschale über einer Seilscheibe (RA-11): Mantel mit Abstand 6 mm, eine Seitenwand, Schraublaschen. Druck in transparentem PETG."""
@@ -341,7 +351,7 @@ def akkuschacht_wand():
     for y in (-30, 0, 30):                                                 # Wasserablauf / Lüftung
         m = m - Manifold.cube((60, 4, 20), True).translate((0, y, 0))
     return m
-druck('akkuschacht_wand', akkuschacht_wand(), 'PETG-CF', 4, 'Akkuschacht EN-02: Innen- und Außenwand je Seite (zweiter Schacht nur bei Bedarf bestücken)')
+druck('akkuschacht_wand', akkuschacht_wand(), 'PETG-CF', 4, 'Akkuschacht EN-02 stehend oben am Rücken: Rück- und Außenwand je Seite, Einstecken von oben (zweiter Schacht nur bei Bedarf bestücken)')
 
 def akkuschacht_stirn():
     """Stirnwand mit Kontaktträger: Fenster für die Stihl-Kontaktleiste, Dichtlippe aus TPU separat."""
@@ -354,7 +364,7 @@ def akkuschacht_stirn():
         for y in (-80, 80):
             m = m - Manifold.cylinder(20, M4 / 2, M4 / 2, 24).translate((x, y, -1))
     return m
-druck('akkuschacht_stirn', akkuschacht_stirn(), 'PETG-CF', 2, 'Stirnwand Akkuschacht mit Fenster für den Kontaktträger')
+druck('akkuschacht_stirn', akkuschacht_stirn(), 'PETG-CF', 2, 'Boden des Akkuschachts mit Fenster für den Kontaktträger (Kontakte unten, Wasser läuft ab)')
 
 def fersenschale():
     t, r, h = 4.0, 56.0, 50.0

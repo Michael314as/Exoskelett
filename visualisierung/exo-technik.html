@@ -152,6 +152,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
         <label class="sl" for="arm">Arm heben <input type="range" id="arm" min="0" max="1" step="0.01" value="0.25"></label>
         <label class="sl" for="elb">Ellbogen <input type="range" id="elb" min="0" max="1" step="0.01" value="0.35"></label>
         <label class="sl" for="lumb">Rumpf beugen <input type="range" id="lumb" min="0" max="1" step="0.01" value="0"></label>
+        <label class="sl" for="twist">Rumpf drehen <input type="range" id="twist" min="-1" max="1" step="0.01" value="0"></label>
         <label class="sl" for="abd">Arme seitlich <input type="range" id="abd" min="0" max="1" step="0.01" value="0"></label>
         <label class="sl" for="spread">Beine spreizen <input type="range" id="spread" min="0" max="1" step="0.01" value="0"></label>
         <label class="sl" for="loop">Schlaufen zu <input type="range" id="loop" min="0" max="1" step="0.01" value="0"></label>
@@ -217,6 +218,7 @@ const HH = D.hipHalf;                                 // Hüftgelenk seitlich (M
 const Z = { hb: 0.205, tp: 0.236, hm: 0.25, kn: 0.165, ks: 0.177, ek: 0.205, fk: 0.219, an: 0.155, br: 0.181 };
 const zRail = (y) => Z.tp + (Z.kn - Z.tp) * (-y / D.thigh);    // Oberschenkelschiene läuft zum Knie nach innen
 const zShank = (y) => Z.ks + (Z.an - Z.ks) * (-y / D.shank);   // Unterschenkelschiene zum Knöchel
+const P_T = V(-0.06, 0, 0);   // senkrechte Drehachse der Rumpfdrehung, liegt in der Wirbelsäule
 const zKc = (sd) => sd * (zRail(Y_KM) + 0.026), zKm = (sd) => sd * (zRail(Y_KM) + 0.058), zKl = (sd) => sd * (Z.ks + 0.022);   // Knie: Kurbelebene, Motormitte, Hebelebene
 
 /* ================= Szene ================= */
@@ -411,7 +413,7 @@ const PART_INFO = [
     care: 'Die Motoren selbst sind nicht wasserdicht (nur das kleine RS02 gibt es als IP67): die Kapsel dichtet. Vor dem Bau eine Kapsel am Prüfstand testen: 10 min Gartenschlauch, eine Nacht im Gefrierschrank, danach muss das Gelenk sofort leicht laufen.' },
   { key: 'power', name: 'Akku und Elektronik', dist: 0.8,
     what: 'Strom, Steuerung und Sicherheit: Stihl AP 500 S, Mikrocontroller, Sensor-Verstärker, Not-Aus.',
-    how: 'Zwei Stihl-Akkus AP 500 S stecken links und rechts neben der Box in gedruckten Schächten, von hinten eingeschoben, mit der Stihl-Rastung. Ein Ideal-Dioden-Modul schaltet sie parallel: Du kannst im Betrieb einen nach dem anderen wechseln, das Exo läuft weiter, und mit zwei Akkus etwa doppelt so lange. Die Schächte liegen innerhalb des Schutzbügels, tief und nah am Rücken: geschützt bei Stürzen und gut für den Schwerpunkt. Hauptsicherung, Not-Aus und Schütz trennen die Motoren. Ein Teensy 4.1 rechnet 200-mal pro Sekunde; eine Knopfzelle hält die Uhr. Am linken Schultergurt sitzen Ein/Aus und der Not-Aus.',
+    how: 'Zwei Stihl-Akkus AP 500 S stehen nebeneinander oben zwischen den Schulterblättern in gedruckten Schächten, rundum vom Schutzbügel umgeben und oben von seinem Bogen überdacht. Eingesteckt wird von oben wie aus einem Köcher, mit der Stihl-Rastung; die Kontakte liegen unten, Wasser läuft ab. Ein Ideal-Dioden-Modul schaltet sie parallel: Du kannst im Betrieb einen nach dem anderen wechseln. Darunter in Lendenhöhe die flache Elektronikbox (6 cm tief) mit Teensy 4.1, Wandlern, Sicherungen und Bremswiderstand. Der ganze Rucksack ist etwa 12 cm tief.',
     parts: 'Stihl AP 500 S (vorhanden), Adapter, Teensy 4.1 mit CAN-Transceiver und Knopfzelle, DC/DC-Wandler 24 V und 5 V, 3 Motortreiber für die Winden, Schütz, Sicherung, Pilz-Not-Aus, wasserdichte Rundstecker.',
     care: 'Not-Aus trennt hart, nicht nur per Software. Akkustrom am Tisch prüfen, bevor man weiterbaut.' },
   { key: 'hip', name: 'Hüfte: Abspreizgelenk und Hüftlager', dist: 0.6,
@@ -571,13 +573,35 @@ cur = 'frame'; fl = 3;
 /* ---------- Schutzbügel: hinten und seitlich um Box und Akkus (Sturz nach hinten, Anstoßen) ---------- */
 cur = 'frame';
 SIDE.forEach((sd) => {
-  const P = [V(-0.155, D.torso + 0.13, sd * 0.085), V(-0.32, D.torso + 0.08, sd * 0.13), V(-0.365, 0.42, sd * 0.25), V(-0.365, 0.15, sd * 0.25), V(-0.2, 0.2, sd * 0.25), V(-0.155, 0.3, sd * 0.1)];
+  // eng um Akkus und Box: hinten 3 cm Abstand, oben ein Bogen über die Akkus
+  const P = [V(-0.155, D.torso + 0.1, sd * 0.085), V(-0.255, D.torso + 0.06, sd * 0.11), V(-0.275, 0.44, sd * 0.15), V(-0.275, 0.22, sd * 0.15), V(-0.205, 0.17, sd * 0.14), V(-0.155, 0.2, sd * 0.1)];
   for (let i = 1; i < P.length; i++) { rod(G.torso, P[i - 1], P[i], 0.011, M.alu, 14); put(G.torso, mesh(new THREE.SphereGeometry(0.011, 12, 10), M.alu), P[i].x, P[i].y, P[i].z); }
-  for (const i of [2, 3]) put(G.torso, mesh(new THREE.SphereGeometry(0.02, 14, 10), M.tpu), P[i].x - 0.01, P[i].y, P[i].z + sd * 0.008);   // Gummipuffer
-  rod(G.torso, V(-0.365, 0.42, sd * 0.25), V(-0.365, 0.42, -sd * 0.0), 0.009, M.alu, 12);                                       // Querstrebe hinten
+  for (const i of [2, 3]) put(G.torso, mesh(new THREE.SphereGeometry(0.018, 14, 10), M.tpu), P[i].x - 0.008, P[i].y, P[i].z + sd * 0.006);   // Gummipuffer
+  rod(G.torso, V(-0.275, 0.44, sd * 0.15), V(-0.275, 0.44, 0), 0.009, M.alu, 12);                                       // Querstrebe hinten
+  rod(G.torso, V(-0.255, D.torso + 0.06, sd * 0.11), V(-0.255, D.torso + 0.06, 0), 0.009, M.alu, 12);                   // Bogen über den Akkus
 });
 
-/* ---------- 2 Gurtsystem: Hüftgurt trägt und führt, Schultergurte gegen Kippen, Brustgurt, Polster ---------- */
+/* ---------- Rumpfdrehung: Bogenführung um die Wirbelsäule (±15°) ---------- */
+// Wie beim Abspreizgelenk liegt die Drehachse im Körper: eine gebogene Edelstahlwelle Ø 10 (Radius 95 mm um die Wirbelsäule)
+// am unteren Rahmen, darauf ein Wagen mit vier Profilrollen am oberen Rahmen. Zentrierfedern holen den Rumpf zurück, Gummipuffer bei ±15°.
+cur = 'frame';
+{
+  const Rt = 0.095, yr = 0.118, a0 = deg(150), a1 = deg(210);
+  const arc = new THREE.TorusGeometry(Rt, 0.005, 10, 40, a1 - a0); arc.rotateZ(a0); arc.rotateX(Math.PI / 2);   // Bogen in der x-z-Ebene
+  const r = mesh(arc, M.chrome); r.position.set(P_T.x, yr, P_T.z); r.userData.twist = true; G.torso.add(r);
+  for (const a of [a0, a1]) { const c = put(G.torso, mesh(rgeo(0.014, 0.02, 0.014, 0.003), M.aluDark), P_T.x + Math.cos(a) * Rt, yr - 0.004, Math.sin(a) * Rt); c.userData.twist = true; }   // Halter am unteren Rahmen
+  for (const a of [a0 - deg(4), a1 + deg(4)]) { const t = put(G.torso, mesh(rgeo(0.012, 0.016, 0.012, 0.003), M.tpu), P_T.x + Math.cos(a) * Rt, yr, Math.sin(a) * Rt); t.userData.twist = true; }   // Anschläge
+  // Wagen am oberen Rahmen (hängt am Lendengelenk und dreht mit)
+  const wy = 0.135;
+  for (const a of [deg(170), deg(190)]) {
+    const x = P_T.x + Math.cos(a) * Rt, z = Math.sin(a) * Rt;
+    for (const dy of [-0.011, 0.011]) { const w = put(G.torso, mesh(cyl(0.01, 0.01, 0.008, 18), M.steel), x, yr + dy, z); w.userData.twist = true; w.position.y = wy + dy; }
+    const b = put(G.torso, mesh(rgeo(0.03, 0.036, 0.008, 0.003), M.aluDark), x - 0.012, wy, z); b.userData.twist = true;
+  }
+  for (const sd of SIDE) { const sp = spring(G.torso, P_T.x - Rt + 0.004, 0.124, sd * 0.03, 0.005, 0.03, 5, 0.0009); sp.rotation.x = Math.PI / 2; sp.userData.twist = true; }   // Zentrierfedern
+}
+
+/* ---------- 2 Gurtsystem/* ---------- 2 Gurtsystem: Hüftgurt trägt und führt, Schultergurte gegen Kippen, Brustgurt, Polster ---------- */
 // Band entlang einer Kurve, flach am Körper (Breite quer zum Verlauf, Fläche zeigt vom Körper weg)
 function ribbon(g, pts, w, t, mat, yc) {
   const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal'), n = Math.max(16, pts.length * 12), pos = [], idx = [];
@@ -617,32 +641,35 @@ cur = 'straps';
 const spools = {};
 cur = 'drive';
 {
-  const g = G.torso, bx = -0.27, by0 = 0.215, bh = 0.27;
-  const shell = put(g, mesh(rgeo(0.085, bh, 0.24, 0.01), M.glass, false), bx, by0 + bh / 2, 0);
-  shell.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.085, bh, 0.24)), new THREE.LineBasicMaterial({ color: 0x55666e })));
-  box(g, 0.004, bh, 0.24, M.alu, bx + 0.042, by0 + bh / 2, 0);
-  for (const sd of SIDE) for (const y of [by0, by0 + bh]) box(g, 0.03, 0.015, 0.04, M.tpu, bx, y, sd * 0.09);
+  // flach, direkt hinter dem Rahmen in Lendenhöhe (6 cm tief); darüber die Akkus
+  const g = G.torso, bx = -0.2, by0 = 0.19, bh = 0.14;
+  const shell = put(g, mesh(rgeo(0.06, bh, 0.22, 0.008), M.glass, false), bx, by0 + bh / 2, 0);
+  shell.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.06, bh, 0.22)), new THREE.LineBasicMaterial({ color: 0x55666e })));
+  box(g, 0.004, bh, 0.22, M.alu, bx + 0.028, by0 + bh / 2, 0);
+  for (const sd of SIDE) for (const y of [by0, by0 + bh]) box(g, 0.02, 0.012, 0.03, M.tpu, bx, y, sd * 0.09);
 }
 
 /* ---------- 4 Akku + Elektronik ---------- */
 cur = 'power';
 {
-  const g = G.torso, bx = -0.25;
-  // Zwei Akkuschächte links und rechts neben der Box: Akku von hinten einschieben, Stihl-Rastung, im Betrieb einzeln wechselbar
+  const g = G.torso, bx = -0.2;
+  // Zwei Akkus stehend oben zwischen den Schulterblättern: von oben eingesteckt (wie ein Köcher), Kontakte unten (Wasser läuft ab),
+  // Stihl-Rastung oben vorne. Rundum der Schutzbügel, oben drüber sein Bogen: Bei einem Sturz trifft zuerst der Bügel.
   for (const sd of SIDE) {
-    const zb = sd * 0.19, yb = 0.255;
-    box(g, 0.11, 0.006, 0.09, M.print, bx, yb - 0.09, zb); box(g, 0.11, 0.006, 0.09, M.print, bx, yb + 0.09, zb);      // Boden, Deckel
-    box(g, 0.11, 0.186, 0.006, M.print, bx, yb, zb + sd * 0.045);                                                  // Außenwand
-    box(g, 0.006, 0.186, 0.09, M.print, bx + 0.055, yb, zb);                                                       // Stirnwand mit Kontakten
-    for (const dy of [-0.06, 0.06]) box(g, 0.1, 0.004, 0.004, M.aluDark, bx - 0.005, yb + dy, zb - sd * 0.038);    // Führungsschienen
-    box(g, 0.116, 0.164, 0.07, M.stihl, bx - 0.003, yb, zb); box(g, 0.03, 0.166, 0.072, M.stihlGrey, bx + 0.042, yb, zb);   // Stihl AP 500 S
-    box(g, 0.012, 0.03, 0.012, M.red, bx - 0.052, yb + 0.07, zb + sd * 0.02);                                      // Rastung (Entriegeln)
-    for (const dy of [-0.015, 0, 0.015]) box(g, 0.004, 0.006, 0.01, M.chrome, bx + 0.052, yb + dy, zb);             // Kontakte
+    const zb = sd * 0.062, yb = 0.43, xb = -0.211;
+    const sh = (w, h, d, x, y, z) => { const m = box(g, w, h, d, M.print, x, y, z); m.userData.shaft = true; return m; };
+    sh(0.08, 0.006, 0.124, xb, yb - 0.087, zb);                                                     // Boden mit Kontakten
+    sh(0.006, 0.17, 0.124, xb - 0.04, yb - 0.003, zb);                                              // Rückwand
+    sh(0.08, 0.17, 0.005, xb, yb - 0.003, zb + sd * 0.062);                                         // Außenwand
+    for (const dx of [-0.02, 0.02]) { const r = box(g, 0.004, 0.15, 0.004, M.aluDark, xb + dx, yb, zb - sd * 0.056); r.userData.shaft = true; }   // Führungsschienen
+    box(g, 0.07, 0.164, 0.116, M.stihl, xb, yb, zb); box(g, 0.072, 0.03, 0.118, M.stihlGrey, xb, yb + 0.068, zb);   // Stihl AP 500 S, Griff oben
+    box(g, 0.012, 0.012, 0.03, M.red, xb + 0.032, yb + 0.084, zb);                                  // Rastung (Entriegeln)
+    for (const dz of [-0.015, 0, 0.015]) box(g, 0.01, 0.004, 0.004, M.chrome, xb, yb - 0.083, zb + dz);   // Kontakte unten
   }
-  box(g, 0.004, 0.03, 0.04, M.pcb, -0.311, 0.2, 0.07);                                                            // Ideal-Dioden-Modul: Akkus parallel
-  put(g, mesh(cyl(0.006, 0.006, 0.003, 16), std(0xC0C4C8, 0.3, 0.9)), bx - 0.0585, 0.455, 0.035, 0, 0, Math.PI / 2);   // Knopfzelle für die Uhr
-  box(g, 0.03, 0.04, 0.03, std(0x333a40, 0.5), bx - 0.03, 0.17, 0.1);
-  box(g, 0.02, 0.03, 0.015, M.red, bx - 0.035, 0.17, -0.1);
+  box(g, 0.004, 0.03, 0.04, M.pcb, -0.226, 0.3, 0.07);  box(g, 0.004, 0.03, 0.04, M.pcb, -0.311, 0.2, 0.07);                                                            // Ideal-Dioden-Modul: Akkus parallel
+  put(g, mesh(cyl(0.006, 0.006, 0.003, 16), std(0xC0C4C8, 0.3, 0.9)), -0.227, 0.31, 0.035, 0, 0, Math.PI / 2);   // Knopfzelle für die Uhr
+  box(g, 0.03, 0.04, 0.03, std(0x333a40, 0.5), -0.205, 0.215, 0.08);
+  box(g, 0.02, 0.03, 0.015, M.red, -0.205, 0.215, -0.08);
   put(g, mesh(cyl(0.022, 0.022, 0.012, 24), M.yellow), 0.13, D.torso - 0.08, -0.1, 0, 0, Math.PI / 2);
   put(g, mesh(cyl(0.02, 0.016, 0.02, 24), M.red), 0.146, D.torso - 0.08, -0.1, 0, 0, Math.PI / 2);
   box(g, 0.014, 0.03, 0.022, M.chip, 0.13, D.torso - 0.14, -0.1);
@@ -1050,34 +1077,34 @@ function showFlowText() {
 /* ---------- Elektronik in der Box, Stecker und Kabelbäume ---------- */
 cur = 'wiring';
 {
-  const g = G.torso, bx = -0.25, xw = -0.309;
-  // Rückwand innen: Hauptplatine mit Teensy, CAN-Transceiver, Stiftleisten; Windentreiber; Spannungswandler
-  box(g, 0.002, 0.1, 0.17, M.pcb, xw, 0.43, 0);
-  box(g, 0.004, 0.061, 0.018, M.pcb, xw + 0.004, 0.44, -0.045); box(g, 0.003, 0.012, 0.012, M.chip, xw + 0.0065, 0.44, -0.045);   // Teensy 4.1
-  box(g, 0.004, 0.008, 0.007, M.chrome, xw + 0.004, 0.473, -0.045);                                                                  // USB
-  box(g, 0.003, 0.01, 0.006, M.chip, xw + 0.004, 0.41, -0.012);                                                                      // CAN-Transceiver
-  for (let i = 0; i < 4; i++) box(g, 0.006, 0.008, 0.02, M.header, xw + 0.005, 0.395, 0.015 + i * 0.022);                         // Schraubklemmen
-  for (let i = 0; i < 3; i++) { box(g, 0.003, 0.03, 0.028, std(0xA02020, 0.5), xw + 0.002, 0.345, -0.05 + i * 0.035); box(g, 0.008, 0.016, 0.02, M.aluDark, xw + 0.007, 0.345, -0.05 + i * 0.035); }   // Windentreiber
-  for (const [y, z] of [[0.25, -0.06], [0.25, 0.06]]) { box(g, 0.016, 0.05, 0.08, M.aluDark, xw + 0.007, y, z); for (let i = 0; i < 6; i++) box(g, 0.006, 0.05, 0.002, M.alu, xw + 0.018, y, z - 0.035 + i * 0.014); }   // DC/DC 24 V und 5 V
-  // Leistung: Kupferschiene mit einer Sicherung je Motor, Leitungen zu den Motoren, CAN-Kette
-  box(g, 0.006, 0.006, 0.25, M.copper, bx + 0.04, 0.15, 0);
-  const mot = [];   // Leistung + CAN zu den Steckern: unten Beine (Hüft- und Kniekapsel), seitlich oben Arme (Schulter- und Ellbogenkapsel)
-  for (const [y, z] of [[0.13, -0.125], [0.13, 0.125], [0.45, -0.15], [0.45, 0.15]]) mot.push(V(-0.25, y, z));
+  const g = G.torso, bx = -0.2, xw = -0.226;
+  // Rückwand der flachen Box innen: Hauptplatine mit Teensy und CAN-Transceiver, Windentreiber, Spannungswandler, Bremswiderstand
+  box(g, 0.002, 0.07, 0.17, M.pcb, xw, 0.29, 0);
+  box(g, 0.004, 0.061, 0.018, M.pcb, xw + 0.004, 0.295, -0.045); box(g, 0.003, 0.012, 0.012, M.chip, xw + 0.0065, 0.295, -0.045);   // Teensy 4.1
+  box(g, 0.004, 0.008, 0.007, M.chrome, xw + 0.004, 0.327, -0.045);                                                                 // USB
+  box(g, 0.003, 0.01, 0.006, M.chip, xw + 0.004, 0.275, -0.012);                                                                    // CAN-Transceiver
+  for (let i = 0; i < 4; i++) box(g, 0.006, 0.008, 0.02, M.header, xw + 0.005, 0.262, 0.015 + i * 0.022);                         // Schraubklemmen
+  for (let i = 0; i < 3; i++) { box(g, 0.003, 0.03, 0.028, std(0xA02020, 0.5), xw + 0.002, 0.225, -0.05 + i * 0.035); box(g, 0.008, 0.016, 0.02, M.aluDark, xw + 0.007, 0.225, -0.05 + i * 0.035); }   // Windentreiber
+  for (const z of [-0.085, 0.085]) { box(g, 0.016, 0.05, 0.04, M.aluDark, xw + 0.008, 0.23, z); for (let i = 0; i < 4; i++) box(g, 0.006, 0.05, 0.002, M.alu, xw + 0.019, 0.23, z - 0.015 + i * 0.01); }   // DC/DC 24 V und 5 V
+  // Leistung: Kupferschiene mit einer Sicherung je Kapsel, Leitungen zu den Steckern, CAN-Kette
+  box(g, 0.006, 0.006, 0.2, M.copper, bx + 0.02, 0.2, 0);
+  const mot = [];   // Stecker: unten Beine (Hüft- und Kniekapsel), oben seitlich Arme (Schulter- und Ellbogenkapsel)
+  for (const [y, z] of [[0.19, -0.09], [0.19, 0.09], [0.33, -0.105], [0.33, 0.105]]) mot.push(V(-0.2, y, z));
   mot.forEach((m, i) => {
-    for (const dz of [0, 0.02]) box(g, 0.006, 0.012, 0.004, M.fuse, bx + 0.04, 0.16, -0.11 + i * 0.06 + dz);   // eine Sicherung je Kapsel
-    rod(g, V(bx + 0.04, 0.163, -0.1 + i * 0.04), V(bx + 0.02, m.y, m.z * 0.9), 0.0016, M.wireR);
-    rod(g, V(bx + 0.035, 0.163, -0.1 + i * 0.04 + 0.006), V(bx + 0.015, m.y, m.z * 0.9 + 0.006), 0.0016, M.wireB);
+    for (const dz of [0, 0.02]) box(g, 0.006, 0.012, 0.004, M.fuse, bx + 0.02, 0.21, -0.09 + i * 0.05 + dz);   // eine Sicherung je Kapsel
+    rod(g, V(bx + 0.02, 0.213, -0.09 + i * 0.05), V(bx + 0.005, m.y + (m.y > 0.25 ? -0.01 : 0.01), m.z * 0.9), 0.0016, M.wireR);
+    rod(g, V(bx + 0.015, 0.213, -0.09 + i * 0.05 + 0.006), V(bx, m.y + (m.y > 0.25 ? -0.01 : 0.01), m.z * 0.9 + 0.006), 0.0016, M.wireB);
   });
-  const canPts = [V(xw + 0.006, 0.41, -0.012), ...mot.map((m) => V(m.x, m.y, m.z))];
+  const canPts = [V(xw + 0.006, 0.275, -0.012), ...mot.map((m) => V(m.x, m.y, m.z))];
   for (let i = 1; i < canPts.length; i++) rod(g, canPts[i - 1], canPts[i], 0.0012, M.can);
-  // Akkuleitung: Akku → Hauptsicherung → (Not-Aus am Schultergurt) → Schütz → Kupferschiene
-  for (const sd of SIDE) for (const [dz, mat] of [[0, M.wireR], [0.012, M.wireB]]) rod(g, V(-0.193, 0.255 + dz, sd * 0.15), V(-0.3, 0.2 + dz, sd * 0.06), 0.0025, mat);   // Akkuleitungen zum Dioden-Modul
-  rod(g, V(-0.3, 0.2, 0.07), V(-0.282, 0.165, -0.095), 0.0025, M.wireR);
-  rod(g, V(-0.28, 0.17, 0.1), V(bx + 0.04, 0.15, 0.12), 0.0022, M.wireR);
-  // Rundstecker IP67: unten Hüftmotor (Leistung + CAN) und Bein-Sensoren, seitlich Arme, links Not-Aus/Taster, rechts Anzeige
+  // Akkuleitungen: von den Kontakten unter den Akkus zum Dioden-Modul, dann über Hauptsicherung, Not-Aus und Schütz zur Schiene
+  for (const sd of SIDE) for (const [dz, mat] of [[0, M.wireR], [0.012, M.wireB]]) rod(g, V(-0.211, 0.343, sd * 0.062 + dz), V(-0.224, 0.31, 0.07 + dz * 0.5), 0.0025, mat);
+  rod(g, V(-0.224, 0.29, 0.07), V(-0.205, 0.225, 0.08), 0.0025, M.wireR);
+  rod(g, V(-0.205, 0.205, 0.08), V(bx + 0.02, 0.2, 0.09), 0.0022, M.wireR);
+  // Rundstecker IP67: unten Beine (Leistung + CAN und Sensoren), oben seitlich Arme, links Not-Aus/Taster, rechts Anzeige
   const plug = (x, y, z, rx, rz, ring) => { put(g, mesh(cyl(0.008, 0.008, 0.016, 16), M.conn), x, y, z, rx, 0, rz); put(g, mesh(new THREE.TorusGeometry(0.0085, 0.0015, 6, 16), ring), x, y, z, rx + Math.PI / 2, 0, rz); };
-  for (const sd of SIDE) { plug(-0.25, 0.127, sd * 0.125, 0, 0, M.harnP); plug(-0.272, 0.127, sd * 0.095, 0, 0, M.harnS); plug(-0.27, 0.45, sd * 0.153, Math.PI / 2, 0, M.harnS); }
-  plug(-0.27, 0.475, -0.153, Math.PI / 2, 0, M.red); plug(-0.27, 0.475, 0.153, Math.PI / 2, 0, M.harnS);
+  for (const sd of SIDE) { plug(-0.2, 0.182, sd * 0.09, 0, 0, M.harnP); plug(-0.215, 0.182, sd * 0.055, 0, 0, M.harnS); plug(-0.2, 0.3, sd * 0.113, Math.PI / 2, 0, M.harnS); }
+  plug(-0.215, 0.32, -0.113, Math.PI / 2, 0, M.red); plug(-0.215, 0.32, 0.113, Math.PI / 2, 0, M.harnS);
   // Träger der Rollen über der Box
   cur = 'wiring';
   hotspot('wiring', g, -0.33, 0.3, 0.1);
@@ -1086,24 +1113,24 @@ cur = 'wiring';
 SIDE.forEach((sd, k) => {
   const zs = ZS(sd), zUp = zs + sd * 0.036, zFo = zs + sd * 0.014, zc = sd * D.shHalf, yw = -D.fore;
   const T = G.thigh[k], Sh = G.shank[k], Sw = G.swing[k], U = G.upper[k], Fo = G.fore[k];
-  dynTube(M.harnP, 0.0045, 'wiring', () => [W(G.torso, -0.25, 0.12, sd * 0.125), W(G.torso, -0.245, 0.06, sd * 0.14), W(G.torso, -0.215, 0.0, sd * 0.145),
+  dynTube(M.harnP, 0.0045, 'wiring', () => [W(G.torso, -0.2, 0.174, sd * 0.09), W(G.torso, -0.2, 0.1, sd * 0.13), W(G.torso, -0.215, 0.0, sd * 0.145),
     W(Sw, -0.172, -0.03, sd * 0.19), W(Sw, -0.08, -0.05, sd * 0.3), W(Sw, -0.04, -0.045, sd * 0.31), W(T, -0.07, -0.06, sd * 0.31), W(T, -0.05, Y_KM + 0.02, zKm(sd) + sd * 0.04)], true);   // Hüft- und Kniekapsel: Leistung + CAN
-  dynTube(M.harnS, 0.003, 'wiring', () => [W(G.torso, -0.272, 0.12, sd * 0.095), W(G.torso, -0.255, 0.04, sd * 0.118), W(G.torso, -0.225, -0.035, sd * 0.155),
+  dynTube(M.harnS, 0.003, 'wiring', () => [W(G.torso, -0.215, 0.174, sd * 0.055), W(G.torso, -0.21, 0.09, sd * 0.115), W(G.torso, -0.225, -0.035, sd * 0.155),
     W(Sw, -0.178, -0.042, sd * 0.208), W(Sw, -0.1, -0.078, sd * 0.216), W(T, -0.015, -0.1, sd * (zRail(-0.1) + 0.017)), W(T, 0.016, -0.17, sd * (zRail(-0.17) + 0.017)),
     W(T, 0.016, -D.thigh + 0.05, sd * (Z.kn + 0.02)), W(Sh, 0.02, -0.04, sd * (zShank(-0.04) + 0.018)), W(Sh, 0.016, -D.shank + 0.06, sd * (zShank(-D.shank + 0.06) + 0.016)),
     W(G.foot[k], 0.03, -D.ankle + 0.012, sd * (HH + 0.07))], true);                                                                  // Oberschenkel-Verstärker, Fußsensor
-  dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.45, sd * 0.16), W(G.torso, -0.21, D.torso + 0.035, sd * (D.shHalf - 0.025)),
+  dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.2, 0.3, sd * 0.121), W(G.torso, -0.19, 0.42, sd * 0.135), W(G.torso, -0.21, D.torso + 0.035, sd * (D.shHalf - 0.025)),
     W(G.shsw[k], -0.12, D.torso + 0.115, sd * 0.2), W(G.shsw[k], -0.03, D.torso + 0.115, zs - sd * 0.02), W(U, -0.022, -0.03, zUp + sd * 0.016), W(U, -0.022, -0.16, zUp + sd * 0.016), W(U, -0.022, -D.upper + 0.04, zUp + sd * 0.016),
     W(Fo, -0.024, -0.03, zFo + sd * 0.016), W(Fo, -0.03, -0.09, zFo + sd * 0.045), W(Fo, -0.03, -0.15, zFo + sd * 0.045), W(Fo, -0.012, yw + 0.07, zFo + sd * 0.02), W(Fo, 0.03, -D.fore - 0.02, zc + sd * 0.024)], true);   // Arm: Manschetten, Winden, Schlaufen-Wägezellen, Taster
-  dynTube(M.harnS, 0.0022, 'wiring', () => [W(G.torso, -0.27, 0.47, sd * 0.155), W(G.torso, -0.2, D.torso + 0.12, sd * 0.1), W(G.torso, -0.16, D.torso + 0.17, sd * 0.13)], true);   // Arbeitslicht
+  dynTube(M.harnS, 0.0022, 'wiring', () => [W(G.torso, -0.2, 0.31, sd * 0.121), W(G.torso, -0.185, 0.45, sd * 0.13), W(G.torso, -0.2, D.torso + 0.12, sd * 0.1), W(G.torso, -0.16, D.torso + 0.17, sd * 0.13)], true);   // Arbeitslicht
   if (k === 1) dynTube(M.harnS, 0.0025, 'wiring', () => [W(U, -0.022, -0.1, zUp + sd * 0.016), W(U, -0.02, -0.13, zUp + sd * 0.035), W(U, 0, -0.15, zs + sd * 0.082)], true);   // Anzeige
 });
-dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.475, -0.16), W(G.torso, -0.2, D.torso + 0.04, -0.11), W(G.torso, -0.1, D.torso + 0.058, -0.075),
+dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.215, 0.32, -0.121), W(G.torso, -0.19, 0.45, -0.13), W(G.torso, -0.2, D.torso + 0.04, -0.11), W(G.torso, -0.1, D.torso + 0.058, -0.075),
   W(G.torso, -0.01, D.torso + 0.098, -0.095), W(G.torso, 0.093, D.torso + 0.045, -0.1), W(G.torso, 0.134, D.torso - 0.05, -0.1)], true);   // Not-Aus, Ein/Aus, LED-Ring
 // Gasfedern am Lendengelenk: tragen das Exo-Oberteil beim Bücken (stretchen sich mit dem Rumpf)
 cur = 'frame';
 for (const sd of SIDE) {
-  const A = () => W(G.torso, -0.2, 0.09, sd * 0.055), B = () => W(G.torso, -0.205, 0.33, sd * 0.055);
+  const A = () => W(G.torso, -0.18, 0.09, sd * 0.125), B = () => W(G.torso, -0.185, 0.33, sd * 0.125);
   const gb = dynTube(M.steel, 0.009, 'frame', () => { const a = A(), b = B(); return [a, a.clone().lerp(b, 0.55)]; }); gb.m.userData.gas = true;
   const gr = dynTube(M.chrome, 0.004, 'frame', () => { const a = A(), b = B(); return [a.clone().lerp(b, 0.5), b]; }); gr.m.userData.gas = true;
   box(G.torso, 0.02, 0.025, 0.03, M.motorDark, -0.13, 0.13, sd * 0.06).userData.lock = true;   // Hubmagnet der Lendensperre
@@ -1142,14 +1169,14 @@ const feat = { standT: 0, standOn: false, light: true, akku: 0.82 };
 // 14 Parkstütze: zwei Klappstützen hinten am Rahmen, ausgeklappt steht das Exo allein
 cur = 'stand';
 SIDE.forEach((sd) => {
-  box(G.torso, 0.034, 0.03, 0.03, M.aluDark, -0.345, 0.1, sd * 0.12);
-  put(G.torso, mesh(cyl(0.006, 0.006, 0.045, 10), M.steel), -0.345, 0.1, sd * 0.12, Math.PI / 2);
-  put(G.torso, mesh(new THREE.TorusGeometry(0.009, 0.002, 6, 14), M.red), -0.345, 0.1, sd * 0.146);   // Rastbolzen
+  box(G.torso, 0.034, 0.03, 0.03, M.aluDark, -0.24, 0.1, sd * 0.12);
+  put(G.torso, mesh(cyl(0.006, 0.006, 0.045, 10), M.steel), -0.24, 0.1, sd * 0.12, Math.PI / 2);
+  put(G.torso, mesh(new THREE.TorusGeometry(0.009, 0.002, 6, 14), M.red), -0.24, 0.1, sd * 0.146);   // Rastbolzen
 });
 hotspot('stand', G.torso, -0.37, 0.1, 0.16);
 const standFeet = SIDE.map(() => { const m = mesh(new THREE.SphereGeometry(0.02, 14, 10), M.tpu); m.scale.set(1.4, 0.6, 1.4); scene.add(m); return m; });
 SIDE.forEach((sd, k) => dynTube(M.alu, 0.011, 'stand', () => {
-  const h = W(G.torso, -0.345, 0.1, sd * 0.12), up = W(G.torso, -0.355, 0.47, sd * 0.12);
+  const h = W(G.torso, -0.24, 0.1, sd * 0.12), up = W(G.torso, -0.25, 0.47, sd * 0.12);
   const down = V(h.x - 0.42, 0.012, h.z * 1.4), tip = up.lerp(down, feat.standT);
   standFeet[k].position.copy(tip); return [h, tip];
 }));
@@ -1203,9 +1230,9 @@ hotspot('buckle', G.torso, -0.118, D.torso + 0.03, D.shHalf + 0.03);
 cur = 'finish';
 hotspot('finish', G.torso, -0.25, 0.57, 0.15);
 const MC = new THREE.MeshPhysicalMaterial({ color: 0x2A2E33, roughness: 0.38, metalness: 0.1, clearcoat: 0.6, clearcoatRoughness: 0.35 });
-put(G.torso, mesh(rgeo(0.15, 0.05, 0.31, 0.02), MC), -0.25, 0.505, 0);                     // gedruckte Haube über der Box
-for (let i = 0; i < 6; i++) box(G.torso, 0.1, 0.003, 0.012, M.chip, -0.25, 0.531, -0.1 + i * 0.04);   // Lüftungsschlitze
-put(G.torso, mesh(rgeo(0.006, 0.34, 0.3, 0.003), MC), -0.318, 0.3, 0);                      // Rückwand
+put(G.torso, mesh(rgeo(0.012, 0.15, 0.235, 0.004), MC), -0.236, 0.26, 0);                    // gedruckter Deckel der Elektronikbox
+for (let i = 0; i < 5; i++) box(G.torso, 0.003, 0.012, 0.1, M.chip, -0.243, 0.2 + i * 0.025, 0);      // Lüftungsschlitze (Labyrinth)
+put(G.torso, mesh(rgeo(0.006, 0.18, 0.26, 0.003), MC), -0.25, 0.43, 0);                       // Rückenschale hinter den Akkus
 cur = null;
 function setFinish(anod) {
   M.alu.color.set(anod ? 0x7A838C : 0xC9D0D4); M.alu.roughness = anod ? 0.4 : 0.34; M.alu.metalness = anod ? 0.75 : 0.85;
@@ -1280,7 +1307,7 @@ function tourStep() { if (!tour) return; select(PART_INFO[tour.i % PART_INFO.len
 function stopTour() { if (!tour) return; clearTimeout(tour.t); tour = null; $('tour').textContent = 'Rundgang'; }
 
 /* ================= Haltung ================= */
-const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0, abd: 0, lumb: 0 };
+const st = { squat: 0.2, arm: 0.25, elb: 0.35, loop: 0, spread: 0, abd: 0, lumb: 0, twist: 0 };
 // Gang: Phase 0 = Fersenaufsatz; Hüft- und Kniewinkel nach typischen Ganglinien (Hüfte −10…+25°, Knie bis 60° im Schwung)
 const gait = { on: false, ph: 0, stance: [true, true] };
 const Y_L = 0.17, P_L = V(-0.07, 0.17, 0);   // Lendengelenk: Höhe über den Hüftgelenken, Drehachse auf Höhe der Lendenwirbel
@@ -1308,7 +1335,7 @@ function pose(dt) {
   legs.forEach((L, k) => { place(G.swing[k], L.Rsw, L.Hp, L.sd); place(G.thigh[k], L.Rth, L.Hp, L.sd); place(G.shank[k], L.Rsh, L.Kp, L.sd); place(G.brace[k], L.Rbr, L.Ap, L.sd); place(G.foot[k], L.Rft, L.Ap, L.sd); });
   G.torso.position.copy(off); G.torso.rotation.set(0, 0, -lam);
   G.torso.updateMatrixWorld();
-  { const lb = deg(30) * st.lumb, M4 = new THREE.Matrix4().copy(G.torso.matrix).multiply(new THREE.Matrix4().makeTranslation(P_L.x, P_L.y, P_L.z)).multiply(mRz(-lb)).multiply(new THREE.Matrix4().makeTranslation(-P_L.x, -P_L.y, -P_L.z));
+  { const lb = deg(30) * st.lumb, tw = deg(15) * st.twist, M4 = new THREE.Matrix4().copy(G.torso.matrix).multiply(new THREE.Matrix4().makeTranslation(P_T.x, 0, P_T.z)).multiply(mRy(tw)).multiply(new THREE.Matrix4().makeTranslation(-P_T.x, 0, -P_T.z)).multiply(new THREE.Matrix4().makeTranslation(P_L.x, P_L.y, P_L.z)).multiply(mRz(-lb)).multiply(new THREE.Matrix4().makeTranslation(-P_L.x, -P_L.y, -P_L.z));
     M4.decompose(G.chest.position, G.chest.quaternion, G.chest.scale); G.chest.updateMatrixWorld(); }
   const s2 = V(0, D.torso, 0).applyMatrix4(G.chest.matrixWorld);
   // Mensch führt, Exo folgt mit kleiner Verzögerung (wie die Regelung über die Manschetten)
@@ -1386,6 +1413,7 @@ const DB = [
   ['RA-09', 'Lendengelenk mit Sperre', 'Laser + Kauf', 'Scharnier Alu 8 mm, Elastomerfeder Ø 24 (Shore 70), Bolzen Ø 10, Hubmagnet Intertec ITS-LZ-3263-D-24VDC mit Sperrbolzen Ø 8', 'Rumpf beugen ±25° und seitlich ±10°; sperrt automatisch, sobald ein Baum > 5 kg in den Schlaufen hängt (Firmware), von Hand per Hebel', 0.45, 'RA-01 GU-01 GU-02'],
   ['RA-10', 'Gasfeder Lendengelenk', 'Kauf', 'Gasfeder 150 N, Ø 15/6 mm, Hub 80 mm, Einbaulänge 236 mm (Stabilus-Bauform), Kugelpfannen M6', 'zwei Stück; tragen das Exo-Oberteil beim Bücken (≈ 36 Nm um das Lendengelenk)', 0.12, 'RA-09 RA-01'],
   ['RA-11', 'Kurbelschutz', 'Druck', 'PETG transparent 1,5 mm, geschraubt', 'über den Kurbeln an Knie und Ellbogen: nichts kann zwischen Kurbel und Schiene geraten', 0.03, 'BA-01 AR-04'],
+  ['RA-12', 'Rumpfdrehung', 'Kauf + Laser', 'Bogenwelle Edelstahl Ø 10, gebogen auf R 95 mm (Biegedienst), 4 Profilrollen INA LFR 5201-10-2Z (laufen auf Ø 10), Wagen Alu 8 mm, 2 Zentrierfedern, 2 TPU-Anschläge', 'Rumpf drehen ±15° um eine Achse in der Wirbelsäule (Bogenführung wie beim Abspreizgelenk); Federn holen zurück', 0.32, 'RA-01 RA-09'],
   ['RA-04', 'Schutzbügel', 'Halbzeug + Kauf', 'CFK-Rundrohr Ø 22 × 1,5 (gewickelt), Alu-Eckverbinder geklebt', 'trifft bei Sturz nach hinten zuerst auf; CFK statt Alu spart 0,25 kg', 0.35, 'RA-01 RA-05 RA-07'],
   ['RA-05', 'Gummipuffer', 'Kauf', 'Gummipuffer Typ A Ø 40 × 30, M8', 'Shore 55', 0.03, 'RA-04'],
   ['RA-07', 'Parkstütze', 'Halbzeug + Kauf', 'Vierkant 20 × 20 × 2, Kugelsperrbolzen GN 113 Ø 6', 'abnehmbar: bleibt am Fahrzeug und wird nur zum Abstellen eingesteckt (beim Tragen nicht mitgerechnet); Endschalter meldet „unten“', 0.35, 'RA-04 EL-01'],
@@ -1394,7 +1422,7 @@ const DB = [
   ['GU-02', 'Schultergurte und Polster', 'Kauf / Nähen', 'S-Schultergurte, Abstandsgewirke 10 mm', 'Rückenlänge über Lochleiste RA-03; Satz (2 Gurte + Lendenpolster) ≈ 500 g wie ein Trekking-Ersatzgurt', 0.17, 'GU-01 GU-03 RA-03'],
   ['GU-03', 'Riemen und Schnallen', 'Kauf', 'Gurtband 20/25 mm, Leiterschnallen, Fidlock-Brustgurt', 'Lageverstellriemen, Brustgurt', 0.12, 'GU-02'],
   ['EN-01', 'Akku', 'Kauf', 'Stihl AP 500 S (36 V, 337 Wh, IPX4, 70 × 116 × 164 mm)', '2,0 kg; bis 2 500 Ladezyklen; zweiter Akku optional (Darstellung), parallel über EL-06, einzeln im Betrieb wechselbar', 2.0, 'EN-02 EL-06'],
-  ['EN-02', 'Akkuschacht', 'Druck + Halbzeug', 'PETG-CF, Führungsschienen Alu 4 × 4, Kontaktträger', 'Einschub von hinten, Stihl-Rastung', 0.25, 'EN-01 AN-01 RA-04'],
+  ['EN-02', 'Akkuschacht', 'Druck + Halbzeug', 'PETG-CF, Führungsschienen Alu 4 × 4, Kontaktträger unten', 'stehend oben zwischen den Schulterblättern; Akku von oben einstecken (Griff über die Schulter), Stihl-Rastung, Kontakte unten (Wasser läuft ab)', 0.25, 'EN-01 AN-01 RA-04'],
   ['EL-01', 'Hauptplatine', 'Kauf, bestückt', 'PJRC Teensy 4.1 (2,4 × 0,7 Zoll = 61 × 18 mm, ≈ 9 g), CAN-Transceiver SN65HVD230, CR2032', '200-Hz-Regeltakt, Watchdog, Uhr', 0.08, 'EL-10 EL-07 KB-03 KB-02'],
   ['EL-02', 'Spannungswandler', 'Kauf', 'Mean Well DDR-60L-24 (Eingang 18–75 V, 24 V / 2,5 A, 60 W, 92 %) + Pololu D36V28F5 (Eingang 5,3–50 V, 5 V / 3,2 A) + Pololu D36V28F12 für das Licht', '2,5 A reichen für eine Winde zur Zeit: die Steuerung schaltet die Winden nacheinander (Stillstrom 5840 ≈ 1,5 A). Größere DDR-120-Varianten passen nicht zum Akkubereich 30–42 V.', 0.25, 'EL-04 EL-01 EL-03'],
   ['EL-03', 'Windentreiber', 'Kauf', '3 × Pololu G2 18v17', 'je eine Schlaufenwinde SG-06', 0.03, 'SG-06 EL-02'],
@@ -1409,7 +1437,7 @@ const DB = [
   ['KB-02', 'Kabelbaum Bein', 'Fertigung', '6-adrig geschirmt', 'Oberschenkel-Verstärker, Fußkontakt', 0.1, 'SE-03 SE-06 EL-11'],
   ['KB-03', 'Kabelbaum Arm', 'Fertigung', '12-adrig, Gewebeschlauch', 'Manschetten, Winden, Schlaufen-Wägezellen, Bedienteil', 0.15, 'SG-06 SG-07 SE-07 EL-11'],
   ['KB-04', 'Kabel Licht, Anzeige, Not-Aus', 'Fertigung', 'LiYCY 4 × 0,25 mm²', '', 0.05, 'BD-01 BD-03 BD-04'],
-  ['AN-01', 'Elektronikbox', 'Laser + Druck', 'Alu 1,5 mm gekantet, PETG-Deckel, 85 × 270 × 240 mm', 'IP54; nur noch Steuerung, Wandler, Sicherungen (die Motoren sitzen in den Gelenkkapseln)', 0.45, 'RA-01 EN-02 EL-01'],
+  ['AN-01', 'Elektronikbox', 'Laser + Druck', 'Alu 1,5 mm gekantet, PETG-Deckel, 60 × 140 × 220 mm (tief × hoch × breit)', 'IP54; nur noch Steuerung, Wandler, Sicherungen (die Motoren sitzen in den Gelenkkapseln)', 0.45, 'RA-01 EN-02 EL-01'],
   ['AN-H', 'Hüftkapsel-Motor', 'Kauf', MOT4, 'direkt auf der Hüftachse; Gehäuse an der Hüftschwinge, Abtrieb am Oberschenkel; 110 Nm strecken', MOTORS.RS04.kg, 'AN-04 AN-02 HU-07 KB-01'],
   ['AN-K', 'Kniekapsel-Motor', 'Kauf', MOT4, 'oben am Oberschenkel; treibt das Knie über Kurbel und Schubstange 1:1', MOTORS.RS04.kg, 'AN-04 AN-02 BA-01 KB-01'],
   ['AN-S', 'Schulterkapsel-Motor', 'Kauf', MOT4, 'direkt auf der Schulterachse; Gehäuse an der Schulterschwinge, Abtrieb an der Oberarmschiene; 100 Nm', MOTORS.RS04.kg, 'AN-04 AN-02 SC-09 KB-03'],
@@ -1554,13 +1582,13 @@ function ctx(m) {
 function classify(m, key, c) {
   const b = m.userData.base, is = (...a) => a.includes(b), geo = m.geometry.type, hx = b && b.color ? b.color.getHex() : 0, g = c.g, yw = -D.fore;
   switch (key) {
-    case 'frame': if (m.userData.gas) return 'RA-10'; if (m.userData.lock) return 'RA-09'; if (Math.abs(c.tl.y - 0.17) < 0.03 && !is(M.alu) && c.tl.x > -0.2) return 'RA-09'; if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
+    case 'frame': if (m.userData.twist) return 'RA-12'; if (m.userData.gas) return 'RA-10'; if (m.userData.lock) return 'RA-09'; if (Math.abs(c.tl.y - 0.17) < 0.03 && !is(M.alu) && c.tl.x > -0.2) return 'RA-09'; if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
     case 'straps': if (is(M.chip, M.chrome)) return 'GU-03'; if (c.tl.y < 0.17) return 'GU-01'; return hx === 0x3A4148 ? 'GU-02' : 'GU-03';
     case 'drive': if (m.userData.cap) return { hip: 'AN-H', knee: 'AN-K', sh: 'AN-S', el: 'AN-E' }[m.userData.cap]; if (m.userData.fin) return 'AN-05'; if (m.userData.seal || m.userData.heat || m.userData.vent) return 'AN-03'; if (is(M.aluDark)) return 'AN-04'; return 'AN-01';
     case 'power':
       if (is(M.stihl, M.stihlGrey)) return 'EN-01';
       if (c.tl.x > 0.05) return is(M.chip) ? 'BD-02' : 'BD-01';
-      if (Math.abs(c.tl.z) > 0.13 && c.tl.y > 0.15 && c.tl.y < 0.36) return 'EN-02';
+      if (m.userData.shaft) return 'EN-02';
       if (is(M.pcb)) return c.tl.x > -0.2 ? 'EL-07' : 'EL-06';
       if (is(M.red) || hx === 0x333a40) return 'EL-04';
       return 'EL-01';
@@ -1760,7 +1788,7 @@ renderer.domElement.addEventListener('pointerleave', () => { tip.hidden = true; 
 const DRIVE = { hip: { i: 1, eta: 0.97, m: MOTORS.RS04 }, knee: { i: 1, eta: 0.95, m: MOTORS.RS04 }, sh: { i: 1, eta: 0.97, m: MOTORS.RS04 }, el: { i: 1, eta: 0.95, m: MOTORS.RS03 } };   // Entwurf 5: direkt bzw. Schubstange 1:1
 const kneeRatio = () => 1;
 function wMax(j, tauJ) { const D0 = DRIVE[j], Mo = D0.m, i = D0.i, tm = Math.abs(tauJ) / (i * D0.eta); return { w: Math.max(0.3, Mo.w0 - (Mo.w0 - Mo.wN) * tm / Mo.tauN) / i, i, tm, tp: Mo.tauP }; }
-const SL = ['squat', 'arm', 'elb', 'abd', 'spread', 'loop', 'lumb'];
+const SL = ['squat', 'arm', 'elb', 'abd', 'spread', 'loop', 'lumb', 'twist'];
 const tgt = { ...st }, vel = {}; let mode = 'free', simT = 0, playing = true, balT = 0;
 const smooth = (x) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 function keyframes(u, K) { for (let i = 1; i < K.length; i++) if (u <= K[i][0]) { const a = K[i - 1], b = K[i], f = smooth((u - a[0]) / (b[0] - a[0])); const o = {}; for (const s in b[1]) o[s] = a[1][s] + (b[1][s] - a[1][s]) * f; return o; } return K[K.length - 1][1]; }
@@ -1799,7 +1827,7 @@ function simStep(dt) {
   }
   const { qs, tau } = jointState();
   const wh = wMax('hip', tau.hip), wk = wMax('knee', tau.knee, qs.knee), ws = wMax('sh', tau.sh), we = wMax('el', tau.el);
-  const rate = { squat: Math.min(wh.w / deg(114), wk.w / deg(108)), arm: ws.w / deg(110), elb: we.w / deg(100), abd: 2.5 / deg(45), spread: 2.5 / deg(20), loop: 0.045 / 0.126, lumb: 1.5 / deg(30) };
+  const rate = { squat: Math.min(wh.w / deg(114), wk.w / deg(108)), arm: ws.w / deg(110), elb: we.w / deg(100), abd: 2.5 / deg(45), spread: 2.5 / deg(20), loop: 0.045 / 0.126, lumb: 1.5 / deg(30), twist: 1.5 / deg(15) };
   const lim = {};
   for (const s of SL) {   // Wunschgeschwindigkeit aus dem Abstand, begrenzt durch Motorgeschwindigkeit und Beschleunigung (≈ 0,15 s bis voll)
     const d = tgt[s] - st[s], vWant = clamp(d * 6, -rate[s], rate[s]), aMax = rate[s] / 0.15;
@@ -1926,7 +1954,7 @@ $('log').addEventListener('change', () => { logs[1].visible = $('log').checked; 
 document.querySelectorAll('[data-env]').forEach((b) => b.addEventListener('click', () => { envMode = b.dataset.env; applyEnv(); }));
 for (const id of SL) $(id).addEventListener('input', () => { tgt[id] = Number($(id).value); if (mode !== 'free') setMode('free'); });
 function setMode(m) { mode = m; simT = 0; document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m))); $('simnote').textContent = NOTES[m];
-  if (m !== 'free') Object.assign(tgt, { squat: 0.15, arm: 0.2, elb: 0.35, abd: 0, spread: 0, loop: 0, lumb: 0 });
+  if (m !== 'free') Object.assign(tgt, { squat: 0.15, arm: 0.2, elb: 0.35, abd: 0, spread: 0, loop: 0, lumb: 0, twist: 0 });
   if (m !== 'free' && m !== 'lift') { logs[1].visible = $('log').checked; } if (m === 'free') Object.assign(tgt, st); }
 document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
 $('play').addEventListener('click', () => { playing = !playing; $('play').textContent = playing ? 'Pause' : 'Weiter'; });

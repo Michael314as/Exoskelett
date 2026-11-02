@@ -320,7 +320,7 @@ int main() {
     {
       App app; Inputs in; Outputs o; ready(app, in, o);
       in.trunkPitch = 0.f; run(app, in, o, 1.f);
-      const float exp = 0.5f * 24.4f * 9.81f * 0.03f;
+      const float exp = 0.5f * 25.5f * 9.81f * 0.03f;
       std::printf("     aufrecht im Stand: Hüfte %+.1f Nm je Seite (erwartet %+.1f: Rucksack hinter der Hüftachse)\n", o.ff[HipR], exp);
       check(std::fabs(o.ff[HipR] - exp) < 1.f && std::fabs(o.ff[HipL] - exp) < 1.f, "aufrecht: Hüftmotoren halten den Rucksack, der nach hinten kippen will");
       const float up0 = o.ff[HipR];

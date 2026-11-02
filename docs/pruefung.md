@@ -47,7 +47,7 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | P31 | Lendengelenk | bücken leer, dann 10 kg in Schlaufe | leer frei ±25°, Gasfedern tragen das Oberteil; mit Last rastet die Sperre in < 0,5 s, löst nach dem Absetzen | ☐ |
 | P32 | Kurbelschutz, Quetschstellen | Finger/Jackenärmel an jede Kurbel, Lendengelenk, Schulterschlitten | nichts wird eingezogen oder eingeklemmt | ☐ |
 | P33 | Wärme der Kapsel | Holzarm mit 100 Nm halten, Wicklungstemperatur (CAN) und Kühlkörper messen; dann 30 Nm dauerhaft | ≥ 12 s volle Kraft, danach weich weniger; bei 30 Nm Wicklung stabil < 100 °C → Dauermoment in der Firmware (`motorRatedNm`) eintragen | ☐ |
-| P34 | Komfort-Freiheitsgrade | Fuß drehen, Unterarm drehen, Schultern hochziehen | Drehteller ±20° mit Rückstellung, Drehring frei, Schulter folgt ±3 cm | ☐ |
+| P34 | Komfort-Freiheitsgrade | Fuß drehen, Unterarm drehen, Schultern hochziehen, Oberkörper drehen | Drehteller ±20° mit Rückstellung, Drehring frei, Schulter folgt ±3 cm, Rumpf dreht ±15° ohne dass Gurte verrutschen, Federn holen zurück | ☐ |
 | P35 | Kapsel dicht | 10 min Gartenschlauch auf die Kapsel, Gelenk dabei bewegen; Haube öffnen | innen trocken, kein Wasser am Motor | ☐ |
 | P36 | Kapsel bei Frost | über Nacht in den Gefrierschrank (−18 °C), dann einschalten | Heizung springt an, Gelenk läuft sofort leicht, nach 10 min Wicklung > +3 °C | ☐ |
 | P37 | Bremsenergie | 20 kg am Holzarm schnell absenken, Spannung am Bus messen | bleibt unter 50 V, kein Motor schaltet ab | ☐ |

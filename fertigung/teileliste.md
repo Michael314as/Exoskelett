@@ -32,6 +32,8 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `laser/schulterschlitten.dxf` | Alu 6082 T6 | 8 mm | 2 | 70 × 55 | 4 | 14.6 mm | Schlitten SC-12: 2 Linearlager LM8UU (Ø 15) auf Wellen Ø 8, ±30 mm Hub |
 | `laser/schlaufentraeger_rechts.dxf` | Alu 6082 T6 | 6 mm | 1 | 200 × 30 | 9 | 9.2 mm | Schlaufenträger rechts (2 Köpfe: unten + außen), kalt biegen nach Schablone |
 | `laser/schlaufentraeger_links.dxf` | Alu 6082 T6 | 6 mm | 1 | 200 × 30 | 7 | 9.2 mm | Schlaufenträger links (1 Kopf unten) |
+| `laser/rumpfdrehung_wagen.dxf` | Alu 6082 T6 | 8 mm | 1 | 80 × 48 | 6 | 9.4 mm | Wagen der Rumpfdrehung RA-12 am oberen Rahmen: 4 Profilrollen auf der Bogenwelle (R 95 mm um die Wirbelsäule) |
+| `laser/rumpfdrehung_halter.dxf` | Alu 6082 T6 | 8 mm | 2 | 36 × 44 | 3 | 7.5 mm | Halter der Bogenwelle Ø 10 am unteren Rahmen (2 Stück, an den Enden), Gummianschlag ±15° |
 | `laser/parkstuetze_lasche.dxf` | Alu 5754 | 4 mm | 4 | 70 × 56 | 4 | 11.6 mm | Klappgelenk Parkstütze (Rastbolzen Ø6 im oberen Loch) |
 
 ## Druckteile (Bambu Lab A1 mini, 180 × 180 × 180 mm)
@@ -48,16 +50,16 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `druck/ueberlastpuffer.stl` | TPU 95A | 16 | 10 × 10 × 6 | 0 | ja | 1 | Überlastpuffer (2 je Wägezelle), 1 mm Spalt einstellen |
 | `druck/tastergriff_rechts.stl` | PETG | 1 | 60 × 38 × 34 | 46 | ja | 2 | Daumentaster rechts (2 Schlaufen) mit Heizfolie innen |
 | `druck/tastergriff_links.stl` | PETG | 1 | 60 × 38 × 34 | 47 | ja | 1 | Daumentaster links (1 Schlaufe) |
-| `druck/haube_links.stl` | PETG | 1 | 155 × 150 × 50 | 113 | ja | 6 | Haube Elektronikbox, linke Hälfte |
-| `druck/haube_rechts.stl` | PETG | 1 | 155 × 150 × 50 | 112 | ja | 9 | Haube Elektronikbox, rechte Hälfte |
+| `druck/haube_links.stl` | PETG | 1 | 110 × 140 × 60 | 90 | ja | 6 | Deckel der flachen Elektronikbox (60 × 140 × 220), linke Hälfte |
+| `druck/haube_rechts.stl` | PETG | 1 | 110 × 140 × 60 | 90 | ja | 9 | Deckel der flachen Elektronikbox, rechte Hälfte |
 | `druck/kurbelschutz_knie.stl` | PETG transparent | 2 | 101 × 198 × 18 | 27 | diagonal | 2 | Fingerschutz RA-11 über Scheibe Ø 156: nichts kann zwischen Seil und Scheibe geraten |
 | `druck/kurbelschutz_ellbogen.stl` | PETG transparent | 2 | 87 × 174 × 16 | 21 | ja | 2 | Fingerschutz RA-11 über Scheibe Ø 132: nichts kann zwischen Seil und Scheibe geraten |
 | `druck/kapselmantel_rs04.stl` | PETG-CF | 6 | 131 × 131 × 56 | 51 | ja | 3 | Kapselmantel AN-02 für Motor Ø 120: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
 | `druck/kapselmantel_rs03.stl` | PETG-CF | 2 | 109 × 109 × 58 | 44 | ja | 3 | Kapselmantel AN-02 für Motor Ø 98: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten |
 | `druck/bohrschablone_kuehlkoerper_rs04.stl` | PETG | 1 | 146 × 146 × 14 | 107 | ja | 13 | Bohrschablone für den Stiftkühlkörper (Lochkreis Ø 106, Motorgehäuse); Pad zwischen Motor und Kühlkörper |
 | `druck/bohrschablone_kuehlkoerper_rs03.stl` | PETG | 1 | 126 × 126 × 14 | 80 | ja | 11 | Bohrschablone für den Stiftkühlkörper (Lochkreis Ø 98, Motorgehäuse); Pad zwischen Motor und Kühlkörper |
-| `druck/akkuschacht_wand.stl` | PETG-CF | 4 | 116 × 176 × 10 | 87 | ja | 7 | Akkuschacht EN-02: Innen- und Außenwand je Seite (zweiter Schacht nur bei Bedarf bestücken) |
-| `druck/akkuschacht_stirn.stl` | PETG-CF | 2 | 76 × 176 × 6 | 74 | ja | 7 | Stirnwand Akkuschacht mit Fenster für den Kontaktträger |
+| `druck/akkuschacht_wand.stl` | PETG-CF | 4 | 116 × 176 × 10 | 87 | ja | 7 | Akkuschacht EN-02 stehend oben am Rücken: Rück- und Außenwand je Seite, Einstecken von oben (zweiter Schacht nur bei Bedarf bestücken) |
+| `druck/akkuschacht_stirn.stl` | PETG-CF | 2 | 76 × 176 × 6 | 74 | ja | 7 | Boden des Akkuschachts mit Fenster für den Kontaktträger (Kontakte unten, Wasser läuft ab) |
 | `druck/fersenschale.stl` | PETG | 2 | 50 × 118 × 50 | 31 | ja | 4 | Fersenschale BE-13 am Steigbügel, Schlitze für den Ratschenriemen |
 
 Druckeinstellungen: PETG 0,2 mm Schicht, 4 Wände, 30 % Gyroid, Manschetten liegend auf der Schnittkante; TPU 95A langsam (25 mm/s).

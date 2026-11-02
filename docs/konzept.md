@@ -20,8 +20,8 @@ vereisen, sich dehnen und reißen konnten (Zugkräfte bis 2,4 kN, Bowdenzug-Wirk
 | Schulter | RS06 in der Box, offenes Seilpaar über 4 Rollen | **RS04 direkt auf der Schulterachse** |
 | Ellbogen | RS06 in der Box, Bowdenzug-Paar | **RS03 oben am Oberarm, Schubstange 1:1** |
 | Wetter | Seile und Rollen können vereisen | Kapsel mit Stiftkühlkörper, O-Ringen, V-Ring, Druckausgleich, Heizband 4 W für Pausen |
-| Rücken | Box mit 6 Motoren | flache Elektronikbox, Schwerpunkt des Oberteils fast über der Hüfte |
-| Gewicht | 31,9 kg | **38,7 kg** (Motoren schwerer, Kapseln mit Kühlkörpern) |
+| Rücken | Box mit 6 Motoren, Akkus seitlich | Akkus stehend oben im Schutzbügel, flache Elektronikbox darunter, Rucksack ≈ 12 cm tief; Rumpfdrehung ±15° |
+| Gewicht | 31,9 kg | **39,7 kg** (Motoren schwerer, Kapseln mit Kühlkörpern, Rumpfdrehung) |
 | Material | 3.800–4.400 € | ≈ 4.900–5.900 € |
 
 **Entwurf 4 im Vergleich zu Entwurf 3** (zur Nachverfolgung):
@@ -170,13 +170,27 @@ einem guten Trekkingrucksack, angepasst an die Kräfte des Exos:
 Anziehen: rückwärts ins Exo auf der Parkstütze, Hüftgurt, Schultergurte, Lageverstellriemen, Brustgurt, Manschetten,
 Ristriemen. Der Not-Aus mit LED-Ring sitzt am linken Schultergurt.
 
-## 5a. Rucksack: zwei Akkus, Schutzbügel, Elektronikbox
+## 5a. Rucksack: kompakt, Akkus oben geschützt
 
-- **Zwei Stihl AP 500 S** links und rechts neben der Box in gedruckten Schächten, von hinten eingeschoben (Stihl-Rastung).
-  Ein Ideal-Dioden-Modul schaltet sie parallel: einzeln im Betrieb wechselbar, doppelte Laufzeit (etwa 4 bis 6 h).
-- **Schutzbügel** aus Alu-Rohr Ø 22 mit Gummipuffern hinten und seitlich um Box und Akkus. Bei einem Sturz nach hinten
-  oder seitlichem Anstoßen trifft zuerst der Bügel. Die Parkstütze klappt hinten am Bügel aus.
-- **Elektronikbox** (Entwurf 5): flach (85 mm), nur Steuerung, Wandler und Sicherungen; die Motoren sitzen in den Gelenkkapseln.
+```
+        Bogen des Schutzbügels
+     ┌──────────────────────────┐
+     │  Akku L  │  Akku R       │  stehend zwischen den Schulterblättern, von oben eingesteckt
+     │ (Stihl)  │ (Stihl)       │  Kontakte unten (Wasser läuft ab), Rastung oben vorne
+     ├──────────────────────────┤
+     │  Elektronikbox (6 cm tief)│  Lendenhöhe: Steuerung, Wandler, Sicherungen, Bremswiderstand
+     └──────────────────────────┘
+        Bogenführung der Rumpfdrehung, Lendengelenk, Hüftgabeln
+```
+
+- **Akkus oben:** Zwei Stihl AP 500 S stehen nebeneinander zwischen den Schulterblättern, direkt hinter dem Rahmen.
+  Rundum der Schutzbügel (CFK, Gummipuffer), oben drüber sein Bogen: Fällst du nach hinten, trifft zuerst der Bügel,
+  Akkus und Box liegen innen. Einstecken von oben wie aus einem Köcher (Griff über die Schulter); der zweite Akku
+  ist optional, beide parallel über Ideal-Dioden, im Betrieb einzeln wechselbar.
+- **Kompakt:** Ohne Motorbox ist der Rucksack nur noch etwa 12 cm tief (vorher gut 20 cm) und so breit wie dein Rücken.
+  Der Schwerpunkt des Exo-Oberteils liegt fast über der Hüfte (3 cm dahinter), der Rucksack zieht kaum nach hinten.
+- **Elektronikbox:** flach (60 × 140 × 220 mm), Stecker unten für die Beine, seitlich oben für die Arme.
+- **Gasfedern** des Lendengelenks sitzen jetzt seitlich neben der Box.
 - **Festigkeit:** Rohrgrößen nach [festigkeit.md](festigkeit.md).
 
 ## 5b. Schulter: seitlich heben
@@ -233,6 +247,7 @@ den Körper. Deshalb hat Entwurf 4 jetzt:
 
 | Gelenk | Bewegung | Wie | Warum |
 |---|---|---|---|
+| **Rumpfdrehung** unter dem Lendengelenk | Oberkörper drehen ±15° | Bogenführung: gebogene Edelstahlwelle Ø 10 (R 95 mm um die Wirbelsäule), Wagen mit 4 Profilrollen INA LFR 5201-10-2Z, 2 Zentrierfedern, Gummianschläge | Umschauen, Baum zur Seite ziehen, Hüfte drehen ohne dass Gurte scheuern; die Achse liegt in der Wirbelsäule, deshalb verschiebt sich nichts gegen den Körper |
 | **Lendengelenk** im Rückenrahmen, 17 cm über den Hüftgelenken | Rumpf beugen ±25°, seitlich ±10° | Scharnier mit Elastomerfeder, **zwei Gasfedern 150 N** tragen das Oberteil (≈ 36 Nm) | Bücken fühlt sich leicht an, das Exo-Oberteil zieht dich nicht nach vorne |
 | **Sperre** am Lendengelenk | rastet in 5 Stellungen (−25 … +25°) | Hubmagnet 24 V mit Sperrbolzen, Rastsegment Edelstahl | sobald > 5 kg in den Schlaufen hängen (0,3 s), sperrt die Firmware: dann trägt der Rahmen den Baum, nicht dein Kreuz. Hebel zum Sperren von Hand |
 | **Schulterschlitten** | Schulter hebt und senkt sich ±3 cm | 2 Wellen Ø 8 mit Linearlagern, Druckfeder | Schulterblatt kann sich bewegen: Arm über Kopf und Schulterzucken ohne Zwang |
@@ -258,13 +273,13 @@ Exo läuft frei mit, warnt aber bei Rückneigung und dämpft die Beine bei einem
 
 ## 8. Gewicht
 
-**Bauteilliste der technischen Ansicht: 38,7 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
+**Bauteilliste der technischen Ansicht: 39,7 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
 wiegen 10,3 kg (6 × RS04 je 1,42 kg, 2 × RS03 je 0,88 kg) statt 5,0 kg; Kühlkörper (8 × ≈ 0,28 kg), Mäntel, Dichtungen und Wangen kommen dazu.
 Seile, Rollen, Scheiben, Bowdenzüge und die Motorbox fallen weg.
 
 Was das für dich heißt:
-- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **24,4 kg
-  Exo-Oberteil**, dessen Schwerpunkt fast über der Hüfte liegt (36 cm darüber, 3 cm dahinter): Der Rucksack zieht
+- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **25,5 kg
+  Exo-Oberteil**, dessen Schwerpunkt fast über der Hüfte liegt (37 cm darüber, 3 cm dahinter): Der Rucksack zieht
   kaum nach hinten.
 - Mehr Masse sitzt an den Gliedern: je Bein 1,4 kg Kniemotor oben am Oberschenkel, je Arm 1,4 kg an der Schulter und
   0,9 kg oben am Oberarm. Beim schnellen Schwingen spürst du das; im Stand gleicht die Steuerung das Eigengewicht aus.
