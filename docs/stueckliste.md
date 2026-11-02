@@ -10,7 +10,10 @@ Herstellweg:
 - **Säge + Bohren:** Profil ablängen, nach gedruckter Bohrschablone bohren.
 - **Dienst:** Oberfläche beim Betrieb um die Ecke.
 
-Preise sind grobe Richtwerte.
+Preise sind Richtwerte (Stand November 2026). Motoren nach recherchierten Händlerpreisen, siehe [bestellung-prototyp.md](bestellung-prototyp.md).
+
+**Gesamt Material, ein Exo:** etwa **5.100–6.800 €**, davon Motoren 3.000–4.600 € (≈ 65 %), alles andere ≈ 2.100–2.200 €.
+Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand + Schlaufe ≈ 850 €.
 
 ---
 
@@ -43,7 +46,7 @@ Preise sind grobe Richtwerte.
 
 | Teil | Menge | Material, Maß | Herstellweg | etwa |
 |---|---|---|---|---|
-| Robotergelenk-Motoren (CAN, 24–48 V) | 8 | QDD-Klasse, ~9 Nm dauernd / 25 Nm Spitze (2 an den Hüften, 6 in der Box) | Kauf | 1.200–4.000 € |
+| Robotergelenk-Motoren CubeMars AK70-10 (CAN, 24–48 V) | 8 | 8,3 Nm Nenn / 24,8 Nm Spitze (2 an den Hüften, 6 in der Box); EU ≈ 570 €/Stück, USA 399–549 $ + Zoll/Einfuhrumsatzsteuer | Kauf | 3.000–4.600 € |
 | Seiltrommeln | 6 + 2 | Alu-Rohr Ø 30 (Box) bzw. Ø 20 (Hüfte) + Bordscheiben | Säge + Bohren, Bordscheiben Laser | 35 € |
 | Montageplatte Box | 1 | Alu 4 mm | Laser | 20 € |
 | Seilscheibe Hüftmotor Ø 12 cm, zwei Rillen | 2 | Alu, 3 Lagen + 2 Zwischenlagen | Laser | 25 € |
@@ -83,12 +86,12 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 |---|---|---|---|
 | Teensy 4.1 + CAN-Transceiver | 1 | Kauf | 50 € |
 | ESP32-C3 (Funk zum Handy) | 1 | Kauf | 8 € |
-| Lagesensor (IMU, BNO085) | 1 | Kauf | 20 € |
+| Lagesensor (IMU, Adafruit BNO085 #4754) | 1 | Kauf | 30 € |
 | Wägezellen 20 kg (Manschetten) / 50 kg (Schlaufenköpfe) + HX711 | 6 + 3 | Kauf | 45 € |
 | Fußkontakt: Halbbrücken-Wägezellen 50 kg (34 × 34 mm) + HX711 | 8 + 2 | Kauf | 20 € |
 | Knopfzelle CR2032 + Halter (Uhr) | 1 | Kauf | 3 € |
 | DC/DC 36→24 V, 36→5 V | 2 | Kauf | 30 € |
-| Motortreiber für Winden | 3 | Kauf | 15 € |
+| Motortreiber für Winden (Pololu G2 18v17, 44,95 $) | 3 | Kauf | 125 € |
 | Hauptsicherung, Schütz, Pilz-Not-Aus | 1 Satz | Kauf | 50 € |
 | Stihl-Akku-Adapter | 1 | Druck oder Kauf | 20–80 € |
 | Stecker IP67, Kabel, Gewebeschlauch | 1 Satz | Kauf, crimpen | 60 € |
@@ -109,8 +112,8 @@ Durchmesser verschrauben. Der Spalt dazwischen ist die Rille.
 | Schutzhauben Cordura | 1 Satz | Kauf/Nähen lassen | 30 € |
 | Eloxieren oder Pulverbeschichten | 1 Auftrag | Dienst | 60–150 € |
 | Lendengelenk: Scharnierlaschen, Rastsegment, Elastomerfeder, Bolzen Ø 10 | 1 Satz | Laser + Kauf | 35 € |
-| Gasfedern 150 N, Hub 50 mm, Kugelpfannen M6, Halter | 2 + 4 | Kauf + Laser | 30 € |
-| Hubmagnet 24 V mit Sperrbolzen Ø 8 (Lendensperre) | 1 | Kauf | 15 € |
+| Gasfedern 150 N, Ø 15/6, Hub 80 mm, L 236 mm, Kugelpfannen M6, Halter | 2 + 4 | Kauf + Laser | 30 € |
+| Hubmagnet Intertec ITS-LZ-3263-D-24VDC + Sperrbolzen Ø 8 (Lendensperre) | 1 | Kauf | 40 € |
 | Fingerschutz Seilscheiben (Hüfte, Knie, Schulter, Ellbogen) | 8 | Druck PETG transparent | 10 € |
 | Drehteller Steigbügel: Axial-Nadellager AXK 3047, 2 Laufscheiben, Zentrierfeder | 2 Satz | Kauf + Laser | 25 € |
 | Drehring Unterarm (Dünnring- oder Kunststoff-Kugellager Ø 80–90) | 2 | Kauf | 30 € |

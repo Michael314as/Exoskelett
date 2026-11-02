@@ -238,14 +238,15 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 
 | Posten | etwa |
 |---|---|
-| 8 Robotergelenk-Motoren | 1 200 bis 4 000 € |
-| 3 Schlaufenwinden (Schneckengetriebemotor, Treiber) | 80 bis 130 € |
-| Steuerung, CAN, 9 Wägezellen + Verstärker, 2 Fußsensoren, Not-Aus, Kabel, Anzeige | 230 bis 360 € |
+| 8 Robotergelenk-Motoren CubeMars AK70-10 (EU ≈ 570 €, USA 399–549 $ + Einfuhr) | 3 000 bis 4 600 € |
+| 3 Schlaufenantriebe 5840-31ZY + 3 Treiber Pololu G2 | 180 bis 220 € |
+| Steuerung, CAN, 11 Wägezellen + Verstärker, Not-Aus, Relais, Stecker, Kabel, Anzeige, Licht | 400 bis 500 € |
 | Akku-Adapter für Stihl AP (Akku vorhanden) | 20 bis 80 € |
-| Alu-Profile, Lager, Bolzen, Rollen, Seilscheiben, Dyneema, Bowdenzüge | 300 bis 450 € |
-| Steigbügel, Fersenbügel, Spikes, Gurtsystem | 160 bis 280 € |
-| Filament (PETG, TPU) | 50 bis 100 € |
-| **Summe** | **etwa 2 100 bis 5 500 €** |
+| Alu-Profile, Lager, Bolzen, Rollen, Seilscheiben, Laserteile, Dyneema, Bowdenzüge | 600 bis 700 € |
+| Lendengelenk, Gasfedern, Hubmagnet, Drehteller, Drehring, Schulterschlitten, Fingerschutz | 200 bis 230 € |
+| Steigbügel, Fersenbügel, Spikes, Gurtsystem, Manschetten, Polster | 300 bis 380 € |
+| Schutzbügel, Parkstütze, Hauben, Eloxieren, Filament | 250 bis 380 € |
+| **Summe Material** | **etwa 5 100 bis 6 800 €** (dazu Werkzeug einmalig 280 bis 500 €) |
 
 ## 12. Bauen in Stufen
 
