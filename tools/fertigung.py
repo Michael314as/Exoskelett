@@ -28,9 +28,12 @@ SEG = 96
 # ------------------------------------------------------------------ Parameter (vom Kaufteil abhängig) ----
 # Flanschlager 2-Loch (Händlerdaten, vor der Bestellung am gelieferten Teil prüfen): Bohrung, Lochabstand, Schraubenloch
 KFL = {'KFL08': (8, 37.0, 4.8), 'KFL001': (12, 48.0, 6.6), 'KFL002': (15, 53.0, 7.0)}
-MOTOR_LOCHKREIS = 70.0       # Befestigungslochkreis des Motors (AK70-10: laut Datenblatt prüfen)
+# Motor RobStride RS06 (Maßzeichnung im RS06 User Manual, github.com/RobStride/Product_Information):
+#   Gehäuse 8 × M3 (8,5 tief) auf Ø 82 ± 0,2, außen Ø 88, Länge 49; Abtrieb 6 × M4 auf Ø 24, 3 Stifte Ø 4, drehender Bund Ø 52
+MOTOR_LOCHKREIS = 82.0
 MOTOR_LOCH = 3.4             # Durchgang M3
-MOTOR_ZENTRIER = 40.0        # Zentrierbund Ø
+MOTOR_LOECHER = 8
+MOTOR_ZENTRIER = 53.6        # Freigang für den drehenden Abtriebsbund Ø 52
 M10, M6, M5_GEWINDE, M4, M3 = 10.5, 6.6, 4.2, 4.5, 3.4   # Durchgänge bzw. Kernloch M5 (Spikes in Edelstahl schneiden)
 STEG_MIN = 4.0               # kleinster Abstand Loch–Rand bzw. Loch–Loch (Laser-Faustregel ~ 1 × Blechdicke)
 
@@ -106,11 +109,11 @@ laser('lagerplatte_kfl001', lagerplatte('KFL001', 80, 64), 'Alu 6082 T6', 6, 8, 
 laser('lagerplatte_kfl08', lagerplatte('KFL08', 66, 56), 'Alu 6082 T6', 6, 8, 'Gelenkplatten Ellbogen und Knöchel für KFL08 (Lochabstand 37 mm), 2 je Gelenk')
 laser('lagerplatte_kfl002', lagerplatte('KFL002', 86, 66), 'Alu 6082 T6', 8, 2, 'Hüftlager KFL002 an der Hüftschwinge (Lochabstand 53 mm)')
 
-def motorbild(cs, x, y, dreh=45.0):
-    """Zentrierbund + 4 Schrauben auf dem Motor-Lochkreis (Winkel so, dass die Schrauben nicht an den Plattenrand kommen)."""
-    cs = cs - circ(MOTOR_ZENTRIER / 2 + 0.2, x, y)
-    for i in range(4):
-        a = math.radians(dreh + 90 * i)
+def motorbild(cs, x, y, dreh=22.5):
+    """Freigang für den Abtrieb + 8 Schrauben M3 auf dem Motor-Lochkreis Ø 82 (um 22,5° gedreht: keine Schraube am Plattenrand)."""
+    cs = cs - circ(MOTOR_ZENTRIER / 2, x, y)
+    for i in range(MOTOR_LOECHER):
+        a = math.radians(dreh + 360.0 / MOTOR_LOECHER * i)
         cs = cs - circ(MOTOR_LOCH / 2, x + MOTOR_LOCHKREIS / 2 * math.cos(a), y + MOTOR_LOCHKREIS / 2 * math.sin(a))
     return cs
 
@@ -223,14 +226,14 @@ laser('schlaufentraeger_links', schlaufentraeger(1), 'Alu 6082 T6', 6, 1, 'Schla
 def motorplatte():
     cs = P(rrect(290, 350, 10))
     for y in (-100, 0, 100):
-        for x in (-105, 105):
+        for x in (-100, 100):
             cs = motorbild(cs, x, y)
     for x in (-135, 135):
         for y in (-160, -50, 50, 160):
             cs = cs - circ(M6 / 2, x, y)
     cs = cs - slot(60, 10, 0, -160, 0) - slot(60, 10, 0, 160, 0)
     return cs
-laser('motorplatte', motorplatte(), 'Alu 5754', 4, 1, 'Montageplatte Antriebsbox (Lochkreis Motor vor Bestellung prüfen)')
+laser('motorplatte', motorplatte(), 'Alu 5754', 4, 1, 'Montageplatte Antriebsbox für 6 × RobStride RS06 (8 × M3 auf Ø 82 laut Herstellerzeichnung)')
 
 # Parkstütze: Klappgelenk-Lasche mit Rastloch
 laser('parkstuetze_lasche', P(rrect(70, 56, 8)) - circ(M10 / 2, -20, -8) - circ(M6 / 2, 18, 10) - circ(M6 / 2, 18, -10) - circ(6.2 / 2, -20, 12),
@@ -442,7 +445,7 @@ def main():
     # Teileliste
     md = ['# Teileliste Fertigung (erzeugt mit tools/fertigung.py)', '',
           'Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: Druckteile, Einheit mm.', '',
-          '**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochkreis der Motoren (`MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm) mit den Datenblättern der gekauften Teile.', '',
+          '**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochkreis der Motoren (RobStride RS06: `MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm, 8 × M3) mit den Datenblättern der gekauften Teile.', '',
           '## Laserteile', '', '| Datei | Material | Dicke | Stück | Größe | Löcher | kleinster Steg | Zweck |', '|---|---|---|---|---|---|---|---|']
     md += [f'| `laser/{r[0]}.dxf` | {r[1]} | {r[2]} mm | {r[3]} | {r[4]} | {r[5]} | {r[6]} mm | {r[7]} |' for r in rows_l]
     md += ['', '## Druckteile (Bambu Lab A1 mini, 180 × 180 × 180 mm)', '', '| Datei | Material | Stück | Größe | Volumen cm³ | passt | Genus | Zweck |', '|---|---|---|---|---|---|---|---|']

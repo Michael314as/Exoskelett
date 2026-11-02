@@ -23,18 +23,17 @@ Stämme bis 12 cm. Risiko: Die Werte stammen von Händlern, nicht vom Hersteller
 
 | Größe | Wert | Quelle |
 |---|---|---|
-| AK70-10: Nennmoment / Nennstrom | 8,3 Nm / 7,2 A (CubeMars-Shop nennt 10 Nm) | [RobotShop](https://www.robotshop.com/products/cubemars-ak70-10-kv100-ak-series-robotic-actuator), [CubeMars](https://www.cubemars.com/product/ak70-10-kv100-robotic-actuator.html) |
-| Spitze | 24,8 Nm / 23,2 A | [CubeMars](https://www.cubemars.com/product/ak70-10-kv100-robotic-actuator.html) |
-| Wicklungswiderstand, Isolation | 0,272 Ω (Phase-Phase), Klasse H (180 °C), Umgebung −20 … 50 °C, Temperatursensor eingebaut | [AIFit Lab](https://aifitlab.com/products/cubemars-ak70-10-motor), [MAB Robotics](https://www.mabrobotics.pl/product-page/ak70-10-cubemars-t-motor) |
-| Kupferverlust | ≈ 14 W bei Nennstrom, ≈ 145 W bei Spitze | I² · R |
+| RobStride RS06: Nennmoment | 11 Nm (bei 100 U/min, Kühlplatte 130 × 160 mm) | [RS06-Handbuch](https://github.com/RobStride/Product_Information) |
+| Spitze | 36 Nm / 57 A Phasenstrom | RS06-Handbuch |
+| Wicklung, Schutz | Isolationsklasse B, Grenze 145 °C, Thermistor; die Temperatur kommt in jeder CAN-Rückmeldung, die Firmware regelt ab 100 °C zurück | RS06-Handbuch |
 
 Was das für die Arbeit heißt (Motormoment / Nennmoment, Firmware-Wärmemodell mit Zeitkonstante 3 min):
 
 | Situation | Motor | Last | Einschätzung |
 |---|---|---|---|
-| Hocke halten, Exo + 20 % Oberkörper | Knie | ≈ 6,8 Nm ≈ 82 % Nenn | dauerhaft möglich |
-| aufrecht stehen | Hüfte | ≈ 1,4 Nm (8 Nm / 6) | kalt |
-| Baum 15 kg aufrichten, 5 s | Schulter | bis 24 Nm ≈ 3 × Nenn | kurz ok; das Modell erlaubt etwa 20 s, dann sinkt die Hilfe |
+| Hocke halten, Exo + 20 % Oberkörper | Knie | ≈ 6,8 Nm ≈ 62 % Nenn | dauerhaft möglich |
+| aufrecht stehen | Hüfte | ≈ 1,5 Nm (8,7 Nm / 6) | kalt |
+| Baum 15 kg aufrichten, 5 s | Schulter | bis 24 Nm ≈ 2,2 × Nenn | kurz ok; das Modell erlaubt etwa 40 s, dann sinkt die Hilfe |
 | Baum 100 m schleifen | Schulter | ≈ 4–6 Nm | dauerhaft |
 
 Die Kälte im Einsatz (Frost) hilft: Ein Kelvin weniger Umgebung ist ein Kelvin mehr Reserve. Die tatsächliche
@@ -57,7 +56,7 @@ erst zeigt, ob es nötig ist (Kosten ≈ 5 × 8 €, Firmware-Treiber nötig).
 
 | Größe | Wert | Quelle |
 |---|---|---|
-| Exo gesamt | 31,1 kg, davon 21,5 kg Oberteil, ≈ 4,8 kg je Bein | Bauteilliste der technischen Ansicht |
+| Exo gesamt | 31,9 kg, davon 22,1 kg Oberteil, ≈ 4,9 kg je Bein | Bauteilliste der technischen Ansicht |
 | Gewicht auf dem Körper | im Stand fast null: Exo-Beine und Motoren tragen es in den Boden | Firmware-Vorsteuerung |
 | Mehraufwand beim Gehen, falls nicht getragen | steigt etwa linear mit der Last (Rucksack) | [Legg & Ramsey](https://www.tandfonline.com/doi/abs/10.1080/00140139208967382), [Army LCDA-Modell](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8919998/) |
 | Masse am Bein | kostet pro kg deutlich mehr als am Rücken; ein Knöchel-Exo mit 2,1 kg Beinmasse brauchte gute Unterstützung, um überhaupt zu sparen | [Mooney et al.](https://link.springer.com/article/10.1186/1743-0003-11-80) |

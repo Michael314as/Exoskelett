@@ -1,7 +1,7 @@
 // Teensy 4.1: liest die Hardware, ruft App::step() 200-mal pro Sekunde auf und schreibt die Ausgänge.
 // Bauen: pio run (siehe platformio.ini). Pinbelegung: docs/verdrahtung.md (muss mit PIN_* unten übereinstimmen).
 //
-// Motoren: 8 × CubeMars AK70-10 (oder baugleich) im MIT-Modus über CAN1, 1 Mbit/s: 2 Hüftmotoren an der Hüftschwinge,
+// Motoren: 8 × RobStride RS06 im „Operation Control“-Modus (29-Bit-CAN-ID) über CAN1, 1 Mbit/s: 2 Hüftmotoren an der Hüftschwinge,
 // 6 in der Box (Knie, Schulter, Ellbogen). Wägezellen: 9 × HX711 (6 Manschetten, 3 Schlaufenköpfe). Fußkontakt: 2 × HX711 mit je 4 Halbbrücken-Zellen 50 kg.
 // Lagesensor: BNO085 (I2C), liefert Kippgeschwindigkeit (Sturz) und Vorneigung des Rumpfs. Uhr: RTC des Teensy mit Knopfzelle. LED-Ring: 12 × WS2812. Watchdog: WDOG1 des i.MX RT1062 (direkt über Register, 0,5 s).
 // Anzeige und Handy-Funk macht ein ESP32-C3 an Serial1: Der Teensy schickt ihm jede Sekunde eine Statuszeile.
@@ -38,7 +38,7 @@ static volatile bool tick = false;
 
 // ---------- Motoren ----------
 static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can;
-static const MotorLimits kLim;                                                  // AK70-10
+static const MotorLimits kLim;                                                  // RobStride RS06
 static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8};                    // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR
 // Übersetzung Gelenk : Motor und Wirkungsgrad. Hüfte: Seilgetriebe 1:6. Knie: Kurvenscheibe 5 cm (gestreckt) / Trommel 1,5 cm, Bowdenzug.
 static const Transmission kTr[NJ] = {{6.f, 0.95f}, {6.f, 0.95f}, {3.33f, 0.7f}, {3.33f, 0.7f}, {4.67f, 0.88f}, {4.67f, 0.88f}, {3.33f, 0.7f}, {3.33f, 0.7f}};
@@ -48,26 +48,28 @@ static float powerOnTime = 0.f;                                                 
 static bool motorsOn = false;
 
 static void motorsEnable(bool on) {
-  for (int i = 0; i < NJ; i++) { CAN_message_t m; m.id = kCanId[i]; m.len = 8; packSpecial(on ? kEnterMotorMode : kExitMotorMode, m.buf); can.write(m); }
+  for (int i = 0; i < NJ; i++) { CAN_message_t m; m.flags.extended = 1; m.len = 8; m.id = packSpecial(on ? kTypeEnable : kTypeStop, kCanId[i], m.buf); can.write(m); }
   motorsOn = on;
 }
 static bool readMotors(JointInput* j) {
   CAN_message_t m;
   while (can.read(m)) {
-    if (m.len < 6) continue;
-    const MotorState s = unpackReply(m.buf, kLim);
+    if (!m.flags.extended || m.len < 8) continue;
+    const MotorState s = unpackReply(m.id, m.buf, kLim);
+    if (!s.valid) continue;
     for (int i = 0; i < NJ; i++) if (kCanId[i] == s.id) { motorState[i] = s; lastReplyMs[i] = millis(); }
   }
   bool ok = true;
   for (int i = 0; i < NJ; i++) {
     j[i].q = kTr[i].jointAngleFrom(motorState[i].pos - cfg.joint0[i]); j[i].qd = kTr[i].jointVelFrom(motorState[i].vel);
-    if (((cfg.jointMask >> i) & 1u) && millis() - lastReplyMs[i] > 50) ok = false;   // nur eingebaute Motoren prüfen
+    if (((cfg.jointMask >> i) & 1u) && (millis() - lastReplyMs[i] > 50 || motorState[i].fault)) ok = false;   // nur eingebaute Motoren prüfen; Motorfehler (Übertemperatur, Überstrom …) = Sensorfehler
+    j[i].motorTempC = motorState[i].tempC;
   }
   return powerOnTime < 0.6f ? true : ok;          // Motoren brauchen nach dem Schütz einen Moment zum Hochfahren
 }
 static void motorSendTorque(int id, float tauJoint) {
-  CAN_message_t m; m.id = kCanId[id]; m.len = 8;
-  packTorqueCommand(kTr[id].motorTorqueFor(tauJoint), kLim, m.buf);
+  CAN_message_t m; m.flags.extended = 1; m.len = 8;
+  m.id = packTorqueCommand(kCanId[id], kTr[id].motorTorqueFor(tauJoint), kLim, m.buf);
   can.write(m);
 }
 

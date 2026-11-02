@@ -2,7 +2,7 @@
 
 Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: Druckteile, Einheit mm.
 
-**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochkreis der Motoren (`MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm) mit den Datenblättern der gekauften Teile.
+**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochkreis der Motoren (RobStride RS06: `MOTOR_LOCHKREIS` = {MOTOR_LOCHKREIS:.0f} mm, 8 × M3) mit den Datenblättern der gekauften Teile.
 
 ## Laserteile
 
@@ -15,7 +15,7 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `laser/abspreizgabel_wange.dxf` | Alu 6082 T6 | 8 mm | 4 | 60 × 100 | 4 | 14.7 mm | Abspreizgabel HU-01: 2 Wangen je Seite; Ø 16,2 für Passschraube/Kugelsperrbolzen, M6 zum Rahmen, M5 Federhalter |
 | `laser/abspreizgabel_steg.dxf` | Alu 6082 T6 | 6 mm | 2 | 82 × 60 | 5 | 9.2 mm | Steg zwischen den Gabelwangen (oben), Langloch für den Zentrierfeder-Halter |
 | `laser/zentrierfeder_halter.dxf` | Edelstahl 1.4301 | 3 mm | 4 | 28 × 30 | 2 | 7.6 mm | Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder |
-| `laser/hueftmotor_platte.dxf` | Alu 6082 T6 | 8 mm | 2 | 130 × 110 | 9 | 9.2 mm | Motorplatte an der Hüftschwinge HU-05; Langlöcher ±5 mm spannen das Seil Trommel → Scheibe Ø 120 |
+| `laser/hueftmotor_platte.dxf` | Alu 6082 T6 | 8 mm | 2 | 130 × 110 | 13 | 9.2 mm | Motorplatte an der Hüftschwinge HU-05; Langlöcher ±5 mm spannen das Seil Trommel → Scheibe Ø 120 |
 | `laser/seilscheibe_schulter_bord.dxf` | Alu 5754 | 4 mm | 4 | 140 × 140 | 11 | 4.9 mm | Seilscheibe schulter Ø140: Bordscheiben außen |
 | `laser/seilscheibe_schulter_rille.dxf` | Alu 5754 | 3 mm | 4 | 132 × 132 | 12 | 4.9 mm | Seilscheibe schulter: Rillenlagen, 3 mm für Seil Ø 3 |
 | `laser/seilscheibe_schulter_trenn.dxf` | Alu 5754 | 2 mm | 2 | 140 × 140 | 11 | 4.9 mm | Seilscheibe schulter: Trennlage zwischen den beiden Rillen |
@@ -40,7 +40,7 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `laser/schulterschlitten.dxf` | Alu 6082 T6 | 8 mm | 2 | 70 × 55 | 4 | 14.6 mm | Schlitten SC-12: 2 Linearlager LM8UU (Ø 15) auf Wellen Ø 8, ±30 mm Hub |
 | `laser/schlaufentraeger_rechts.dxf` | Alu 6082 T6 | 6 mm | 1 | 200 × 30 | 9 | 9.2 mm | Schlaufenträger rechts (2 Köpfe: unten + außen), kalt biegen nach Schablone |
 | `laser/schlaufentraeger_links.dxf` | Alu 6082 T6 | 6 mm | 1 | 200 × 30 | 7 | 9.2 mm | Schlaufenträger links (1 Kopf unten) |
-| `laser/motorplatte.dxf` | Alu 5754 | 4 mm | 1 | 290 × 350 | 40 | 7.9 mm | Montageplatte Antriebsbox (Lochkreis Motor vor Bestellung prüfen) |
+| `laser/motorplatte.dxf` | Alu 5754 | 4 mm | 1 | 290 × 350 | 64 | 7.9 mm | Montageplatte Antriebsbox für 6 × RobStride RS06 (8 × M3 auf Ø 82 laut Herstellerzeichnung) |
 | `laser/parkstuetze_lasche.dxf` | Alu 5754 | 4 mm | 4 | 70 × 56 | 4 | 11.6 mm | Klappgelenk Parkstütze (Rastbolzen Ø6 im oberen Loch) |
 
 ## Druckteile (Bambu Lab A1 mini, 180 × 180 × 180 mm)

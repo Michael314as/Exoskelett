@@ -138,13 +138,13 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
         <table class="perf">
           <thead><tr><th>Gelenk</th><th>Moment Spitze</th><th>schnellste Bewegung</th><th>feinste Stufe</th></tr></thead>
           <tbody>
-            <tr><td>Hüfte</td><td>140 Nm</td><td>4,2 rad/s (240°/s)</td><td>0,07 Nm</td></tr>
-            <tr><td>Knie</td><td>95–115 Nm</td><td>4,7–7,5 rad/s</td><td>0,05 Nm</td></tr>
-            <tr><td>Schulter</td><td>100 Nm</td><td>5,4 rad/s (310°/s)</td><td>0,06 Nm</td></tr>
-            <tr><td>Ellbogen</td><td>58 Nm</td><td>7,5 rad/s (430°/s)</td><td>0,04 Nm</td></tr>
+            <tr><td>Hüfte</td><td>140 Nm (Motor könnte 205)</td><td>4,2 rad/s (240°/s)</td><td>0,006 Nm</td></tr>
+            <tr><td>Knie</td><td>110 Nm (Motor könnte 84–134)</td><td>4,7–7,5 rad/s</td><td>0,005 Nm</td></tr>
+            <tr><td>Schulter</td><td>100 Nm (Motor könnte 148)</td><td>5,4 rad/s (310°/s)</td><td>0,005 Nm</td></tr>
+            <tr><td>Ellbogen</td><td>58 Nm (Motor könnte 84)</td><td>7,5 rad/s (430°/s)</td><td>0,003 Nm</td></tr>
           </tbody>
         </table>
-        <p class="note">Gehen braucht an der Hüfte etwa 3,5 rad/s, am Knie im Schwung etwa 6 rad/s; Greifbewegungen 2–4 rad/s. Reaktionszeit vom Druck an der Manschette bis zum Motor etwa 35 ms (mit schnellerem Wägezellen-Wandler etwa 15 ms). Ohne Strom laufen alle Gelenke frei mit; die Balance hältst du selbst über deine Füße, das Exo hat bewusst keinen Fußmotor. Der Rucksack verschiebt den Schwerpunkt um etwa 3 cm nach hinten, ein Baum vorne gleicht das aus.</p>
+        <p class="note">Gehen braucht an der Hüfte etwa 3,5 rad/s, am Knie im Schwung etwa 6 rad/s; Greifbewegungen 2–4 rad/s. Motoren RobStride RS06 (11 Nm dauernd, 36 Nm Spitze): Die Momente sind in der Firmware auf das begrenzt, was Körper und Rahmen sicher vertragen; der Rest ist Reserve gegen Wärme. Reaktionszeit vom Druck an der Manschette bis zum Motor etwa 35 ms (mit schnellerem Wägezellen-Wandler etwa 15 ms). Ohne Strom laufen alle Gelenke frei mit; die Balance hältst du selbst über deine Füße, das Exo hat bewusst keinen Fußmotor. Der Rucksack verschiebt den Schwerpunkt um etwa 3 cm nach hinten, ein Baum vorne gleicht das aus.</p>
       </section>
       <section class="block">
         <h3>Farben</h3>
@@ -370,7 +370,7 @@ const PART_INFO = [
     what: 'Antrieb für Knie, Schultern und Ellbogen. Die zwei Hüftmotoren sitzen direkt an der Hüfte (Nummer 8).',
     how: 'Bürstenlose Robotergelenk-Motoren mit Planetengetriebe und Encoder, jeder mit Doppeltrommel: ein Zug wird auf-, der andere abgewickelt. Angeordnet nach dem Weg ihrer Züge: unten die Kniemotoren (Züge gehen nach unten zu den Beinen), in der Mitte Ellbogen, oben Schulter (Seile gehen nach oben zur Schulter). So ist jeder Zug so kurz und gerade wie möglich.',
     parts: '6 Motoren (CAN-Bus, 24 bis 48 V), Trommeln Ø 3 cm, Montageplatte Alu 4 mm, dichte Box mit Deckel und Dichtung, Hüllenanschläge mit Spannschrauben.',
-    care: 'Die Motoren dieser Klasse (z. B. CubeMars AK70-10) haben keine Schutzart gegen Wasser. Deshalb sitzen sie in der gedichteten Box (IP54: Deckeldichtung, Zug-Durchführungen mit Faltenbalg, Lüftung nach unten mit Labyrinth); die Hüftmotoren bekommen gedichtete Hauben. Trommeln mit Bordscheiben, Züge sauber lagenweise wickeln.' },
+    care: 'Die Motoren (RobStride RS06) haben keine Schutzart gegen Wasser. Deshalb sitzen sie in der gedichteten Box (IP54: Deckeldichtung, Zug-Durchführungen mit Faltenbalg, Lüftung nach unten mit Labyrinth); die Hüftmotoren bekommen gedichtete Hauben. Trommeln mit Bordscheiben, Züge sauber lagenweise wickeln.' },
   { key: 'power', name: 'Akku und Elektronik', dist: 0.8,
     what: 'Strom, Steuerung und Sicherheit: Stihl AP 500 S, Mikrocontroller, Sensor-Verstärker, Not-Aus.',
     how: 'Zwei Stihl-Akkus AP 500 S stecken links und rechts neben der Box in gedruckten Schächten, von hinten eingeschoben, mit der Stihl-Rastung. Ein Ideal-Dioden-Modul schaltet sie parallel: Du kannst im Betrieb einen nach dem anderen wechseln, das Exo läuft weiter, und mit zwei Akkus etwa doppelt so lange. Die Schächte liegen innerhalb des Schutzbügels, tief und nah am Rücken: geschützt bei Stürzen und gut für den Schwerpunkt. Hauptsicherung, Not-Aus und Schütz trennen die Motoren. Ein Teensy 4.1 rechnet 200-mal pro Sekunde; eine Knopfzelle hält die Uhr. Am linken Schultergurt sitzen Ein/Aus und der Not-Aus.',

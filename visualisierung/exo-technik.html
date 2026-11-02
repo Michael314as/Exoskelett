@@ -391,7 +391,7 @@ const PART_INFO = [
     what: 'Antrieb für Knie, Schultern und Ellbogen. Die zwei Hüftmotoren sitzen direkt an der Hüfte (Nummer 8).',
     how: 'Bürstenlose Robotergelenk-Motoren mit Planetengetriebe und Encoder, jeder mit Doppeltrommel: ein Zug wird auf-, der andere abgewickelt. Angeordnet nach dem Weg ihrer Züge: unten die Kniemotoren (Züge gehen nach unten zu den Beinen), in der Mitte Ellbogen, oben Schulter (Seile gehen nach oben zur Schulter). So ist jeder Zug so kurz und gerade wie möglich.',
     parts: '6 Motoren (CAN-Bus, 24 bis 48 V), Trommeln Ø 3 cm, Montageplatte Alu 4 mm, dichte Box mit Deckel und Dichtung, Hüllenanschläge mit Spannschrauben.',
-    care: 'Die Motoren dieser Klasse (z. B. CubeMars AK70-10) haben keine Schutzart gegen Wasser. Deshalb sitzen sie in der gedichteten Box (IP54: Deckeldichtung, Zug-Durchführungen mit Faltenbalg, Lüftung nach unten mit Labyrinth); die Hüftmotoren bekommen gedichtete Hauben. Trommeln mit Bordscheiben, Züge sauber lagenweise wickeln.' },
+    care: 'Die RobStride RS06 haben keine Schutzart gegen Wasser (nur das kleinere RS02 gibt es als IP67). Deshalb sitzen sie in der gedichteten Box (IP54: Deckeldichtung, Zug-Durchführungen mit Faltenbalg, Lüftung nach unten mit Labyrinth); die Hüftmotoren bekommen gedichtete Hauben. Trommeln mit Bordscheiben, Züge sauber lagenweise wickeln.' },
   { key: 'power', name: 'Akku und Elektronik', dist: 0.8,
     what: 'Strom, Steuerung und Sicherheit: Stihl AP 500 S, Mikrocontroller, Sensor-Verstärker, Not-Aus.',
     how: 'Zwei Stihl-Akkus AP 500 S stecken links und rechts neben der Box in gedruckten Schächten, von hinten eingeschoben, mit der Stihl-Rastung. Ein Ideal-Dioden-Modul schaltet sie parallel: Du kannst im Betrieb einen nach dem anderen wechseln, das Exo läuft weiter, und mit zwei Akkus etwa doppelt so lange. Die Schächte liegen innerhalb des Schutzbügels, tief und nah am Rücken: geschützt bei Stürzen und gut für den Schwerpunkt. Hauptsicherung, Not-Aus und Schütz trennen die Motoren. Ein Teensy 4.1 rechnet 200-mal pro Sekunde; eine Knopfzelle hält die Uhr. Am linken Schultergurt sitzen Ein/Aus und der Not-Aus.',
@@ -607,7 +607,7 @@ cur = 'drive';
   const rows = [['knee', by0 + 0.075, M.cable], ['el', by0 + 0.175, M.cable], ['sh', by0 + 0.275, M.rope]];   // Knie unten, Ellbogen Mitte, Schulter oben: jeder Zug nimmt den kürzesten Weg
   for (const [key, y, wmat] of rows) for (const [k, sd] of SIDE.entries()) {
     const z = sd * 0.07;
-    put(g, mesh(cyl(0.0445, 0.0445, 0.05, 32), M.motor), bx, y, z + sd * 0.035, Math.PI / 2);
+    put(g, mesh(cyl(0.044, 0.044, 0.049, 32), M.motor), bx, y, z + sd * 0.035, Math.PI / 2);
     put(g, mesh(cyl(0.036, 0.036, 0.004, 32), M.motorDark), bx, y, z + sd * 0.057, Math.PI / 2);
     for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; put(g, mesh(rgeo(0.004, 0.004, 0.036, 0.001), M.motorDark), bx + Math.cos(a) * 0.047, y + Math.sin(a) * 0.047, z + sd * 0.035); }
     box(g, 0.012, 0.012, 0.012, M.chip, bx - 0.03, y - 0.03, z + sd * 0.05);
@@ -693,7 +693,7 @@ SIDE.forEach((sd, k) => {
     box(g, 0.13, 0.11, 0.008, M.alu, -0.115, 0, sd * 0.222);                                       // Motorplatte
     box(g, 0.026, 0.026, 0.026, M.aluDark, XHUB, 0, sd * 0.207);
     for (const a of [0.5, 2.6, 4.7]) rod(g, V(XM + Math.cos(a) * 0.036, Math.sin(a) * 0.036, sd * 0.226), V(XM + Math.cos(a) * 0.036, Math.sin(a) * 0.036, sd * 0.262), 0.003, M.steel);
-    put(g, mesh(cyl(0.0445, 0.0445, 0.05, 32), M.motor), XM, 0, sd * 0.282, Math.PI / 2);
+    put(g, mesh(cyl(0.044, 0.044, 0.049, 32), M.motor), XM, 0, sd * 0.282, Math.PI / 2);
     put(g, mesh(cyl(0.036, 0.036, 0.004, 32), M.motorDark), XM, 0, sd * 0.304, Math.PI / 2);
     for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; put(g, mesh(rgeo(0.004, 0.004, 0.046, 0.001), M.motorDark), XM + Math.cos(a) * 0.047, Math.sin(a) * 0.047, sd * 0.282); }
     box(g, 0.012, 0.012, 0.012, M.chip, XM - 0.03, -0.03, sd * 0.295);
@@ -1029,7 +1029,7 @@ cur = null;
   for (const [x, z] of [[-0.2, -0.2], [0.8, -0.2], [-0.2, 0.2], [0.8, 0.2]]) box(bench, 0.04, 0.7, 0.04, M.bench, x, 0.35, z);
   // a) Arm-Antrieb: Motor, Doppeltrommel, zwei Hüllen mit Spannschrauben
   const a = new THREE.Group(); a.position.set(-0.02, 0.84, 0); a.scale.setScalar(1.8); bench.add(a);
-  put(a, mesh(cyl(0.0445, 0.0445, 0.05, 32), M.motor), 0, 0, -0.07, Math.PI / 2);
+  put(a, mesh(cyl(0.044, 0.044, 0.049, 32), M.motor), 0, 0, -0.07, Math.PI / 2);
   put(a, mesh(cyl(0.03, 0.03, 0.006, 24), M.steel), 0, 0, -0.035, Math.PI / 2);
   for (let i = 0; i < 6; i++) { const ang = i / 6 * Math.PI * 2; bolt(a, Math.cos(ang) * 0.022, Math.sin(ang) * 0.022, -0.022, 0.016, 0.0025); }
   put(a, mesh(cyl(R_DRUM, R_DRUM, 0.03, 24), M.alu), 0, 0, 0.01, Math.PI / 2);
@@ -1404,10 +1404,11 @@ function pose(dt) {
 /* ================= Technische Ansicht ================= */
 let tween = null, flowOn = false;
 // ---------- Kaufteile und Antriebsdaten (Richtwerte; vor Bestellung mit dem Datenblatt abgleichen) ----------
-const MOTOR = { ref: 'CubeMars AK70-10 KV100 (Planetengetriebe 10:1, CAN, Encoder)', d: 89, h: 50.25, kg: 0.521, tauN: 8.3, tauP: 24.8, w0: 360 * Math.PI / 30, wN: 229 * Math.PI / 30 };
-// Datenblatt: Leerlauf 240 / 480 U/min, Nenndrehzahl 148 / 310 U/min bei 8,3 Nm (24 / 48 V) → bei 36 V linear: Leerlauf 360, Nenn 229 U/min.
-// Kennlinie: ω(τ) = w0 − (w0 − wN) · τ / τN; das Spitzenmoment 24,8 Nm ist nur kurz und bei kleiner Drehzahl verfügbar.
-const MOT = `${MOTOR.ref}; Ø 89 × 50,25 mm; 521 g; Nennmoment 8,3 Nm, Spitze 24,8 Nm; Leerlauf 240 U/min (24 V) / 480 U/min (48 V), Nenndrehzahl 148 / 310 U/min → bei 36 V gerechnet 360 / 229 U/min`;
+const MOTOR = { ref: 'RobStride RS06 (Planetengetriebe 9:1, CAN 2.0, zwei 14-Bit-Encoder, Treiber integriert)', d: 88, h: 49, kg: 0.621, tauN: 11, tauP: 36, w0: 360 * Math.PI / 30, wN: 200 * Math.PI / 30 };
+// Datenblatt RS06 (48 V): Leerlauf 480 U/min ± 10 %, Nennmoment 11 Nm (geprüft bei 100 U/min), Spitze 36 Nm, Kt 1,09 Nm/A.
+// Bei 36 V (Stihl-Akku) linear: Leerlauf 360 U/min (wie AK70-10). Drehzahl bei 11 Nm geschätzt 200 U/min (Kennlinie nur als Bild im Handbuch).
+// Kennlinie: ω(τ) = w0 − (w0 − wN) · τ / τN; das Spitzenmoment 36 Nm ist nur kurz und bei kleiner Drehzahl verfügbar.
+const MOT = `${MOTOR.ref}; Ø 88 × 49 mm; 621 g; Nennmoment 11 Nm, Spitze 36 Nm; Leerlauf 480 U/min (48 V) → bei 36 V 360 U/min; Befestigung 8 × M3 auf Ø 82, Abtrieb 6 × M4 auf Ø 24`;
 const ASM = [
   ['RA', 'Rahmen und Schutz'], ['GU', 'Gurtsystem'], ['EN', 'Energie'], ['EL', 'Elektronik und Kabel'], ['AN', 'Antriebsbox'],
   ['HU', 'Hüfte'], ['BA', 'Beinantrieb'], ['BE', 'Bein, Knie, Fuß'], ['SE', 'Sensorik'], ['SC', 'Schulter'], ['AR', 'Arm und Ellbogen'],
@@ -1525,16 +1526,17 @@ const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SC-0
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const SRC = {
   'EL-01': ['PJRC Teensy 4.1 (Maße)', 'https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4'], 'EL-02': ['Mean Well DDR-60L-24 / Pololu D36V28F5', 'https://www.pololu.com/product/3782'], 'SE-06': ['50-kg-Halbbrücken-Wägezelle', 'https://www.sparkfun.com/products/10245'],
-  'AN-K': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'AN-E': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'AN-S': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'], 'BA-01': ['CubeMars AK70-10', 'https://www.cubemars.com/goods-1031-AK70-10.html'],
+  'AN-K': ['RobStride RS06', 'https://github.com/RobStride/Product_Information'], 'AN-E': ['RobStride RS06', 'https://github.com/RobStride/Product_Information'], 'AN-S': ['RobStride RS06', 'https://github.com/RobStride/Product_Information'], 'BA-01': ['RobStride RS06', 'https://github.com/RobStride/Product_Information'],
   'EN-01': ['STIHL AP 500 S (Gewicht, Wh)', 'https://stihl.com.fj/en/p/batteries-chargers-ap-500-s-battery-124181'], 'BA-04': ['LIROS D-Pro 3 mm, 950 daN', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m'], 'SC-11': ['LIROS D-Pro 3 mm, 950 daN', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m'],
   'SG-06': ['5840-31ZY 24 V 10 U/min', 'https://probots.co.in/pb-5840-31zy-24v-10-rpm-dc-worm-gear-reduction-motor.html'],
 };
 
 // ---------- Reale Kaufteile: Hersteller, Typ, Kenndaten, Quellen (Recherche Nov. 2026; Händlerangaben sind als solche markiert) ----------
-const AK = { mfr: 'CubeMars', typ: 'AK70-10 KV100 (Robotergelenk mit Planetengetriebe 10:1, Treiber und Encoder integriert)',
-  dat: [['Nennmoment', '8,3 Nm (CubeMars-Shop nennt 10 Nm)'], ['Spitzenmoment', '24,8 Nm bei 23,2 A'], ['Nennstrom', '7,2 A'], ['Drehmomentkonstante', '0,123 Nm/A (Abtrieb)'], ['Wicklung', '0,272 Ω Phase–Phase, Isolationsklasse H, Temperatursensor eingebaut'],
-    ['Spannung', '24 / 48 V (hier 36 V Stihl-Akku)'], ['Drehzahl', 'Leerlauf 240 / 480 U/min, Nenn 148 / 310 U/min (24 / 48 V)'], ['Bus', 'CAN 1 Mbit/s, MIT-Modus (Position, Geschwindigkeit, Moment)'], ['Maße, Masse', 'Ø 89 × 50,25 mm, 521 g'], ['Umgebung', '−20 … 50 °C'], ['Einbaumaße', 'Stator-Lochbild aus der 2D-Zeichnung von CubeMars übernehmen; in tools/fertigung.py ist der Lochkreis 70 mm noch eine Annahme'], ['Preis', '≈ 570 € (EU), 399–549 $ (USA)']],
-  src: [['CubeMars Produktseite', 'https://www.cubemars.com/product/ak70-10-kv100-robotic-actuator.html'], ['RobotShop (Daten)', 'https://www.robotshop.com/products/cubemars-ak70-10-kv100-ak-series-robotic-actuator'], ['openelab EU (Preis)', 'https://openelab.io/nl/products/cubemars-ak70-10-actuator-motor'], ['AIFit Lab (Wicklung)', 'https://aifitlab.com/products/cubemars-ak70-10-motor'], ['AK-Handbuch (Einbau, CAN)', 'https://store.tmotor.com/images/file/202208/251661393360838805.pdf'], ['2D/3D-Zeichnung (openelab)', 'https://openelab.io/products/cubemars-ak70-10-actuator-motor']] };
+const AK = { mfr: 'RobStride Dynamics (Peking)', typ: 'RS06 (Robotergelenk mit Planetengetriebe 9:1, FOC-Treiber und zwei 14-Bit-Encodern integriert)',
+  dat: [['Nennmoment', '11 Nm (geprüft bei 100 U/min, mit Kühlplatte 130 × 160 mm)'], ['Spitzenmoment', '36 Nm (57 A Phasenstrom)'], ['Drehmomentkonstante', '1,09 Nm/A (Abtrieb)'], ['Spannung', '48 V Nenn, 15–60 V (hier 36 V Stihl-Akku)'],
+    ['Drehzahl', 'Leerlauf 480 U/min ± 10 % bei 48 V → 360 U/min bei 36 V'], ['Wicklung', 'Isolationsklasse B, Grenze 145 °C, Temperatursensor; Temperatur kommt in jeder Rückmeldung'], ['Bus', 'CAN 2.0, 1 Mbit/s, 29-Bit-ID; Betriebsmodus Typ 1 (Moment, p, v, Kp, Kd), Rückmeldung Typ 2'],
+    ['Maße', 'Ø 88 × 49 mm; Gehäuse 8 × M3 (8,5 tief) auf Ø 82; Abtrieb 6 × M4 auf Ø 24, 3 Stifte Ø 4, Bund Ø 37'], ['Masse', '621 g'], ['Umgebung', '−20 … 50 °C'], ['Preis', '¥ 849 in China (≈ 108 €), international ≈ 197–255 $ (Händler)']],
+  src: [['RS06-Handbuch (GitHub)', 'https://github.com/RobStride/Product_Information'], ['RobStride Produktseite', 'https://robstride.com/products/robStride06'], ['Händler (Preis)', 'https://www.roboticscenter.ai/store/product/robstride-06/'], ['eBay DE (Preis aus Shenzhen)', 'https://www.ebay.de/itm/388958235556']] };
 const LIROS = { mfr: 'LIROS', typ: 'D-Pro 3 mm (Dyneema SK78, Kern-Mantel)', dat: [['Bruchlast', '950 daN'], ['Dehnung', 'sehr gering (Dyneema), kriecht unter Dauerlast: Vorspannung nachstellen (Wartung)'], ['Spitzenlast hier', '≈ 1,7 kN (Schulter) → Sicherheit ≈ 5']], src: [['AWN (Daten)', 'https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m']] };
 const KEB = { mfr: 'Jagwire', typ: 'Pro Compressionless Brake Housing 5 mm, KEB-SL (Kevlar-verstärkt, Stahllitzen längs, Slick-Lube-Liner)', dat: [['Außen-Ø', '5 mm'], ['Liner', 'PTFE-ähnlich (Slick-Lube), für Innenzug bis Ø 2 mm'], ['Lieferform', '10-m-Rolle mit Endkappen'], ['Hinweis', 'für Bremszüge ausgelegt; Zugkraft am Knie bis ≈ 1,6 kN: Endkappen aus Alu, Hülle am Prüfstand auf Stauchung prüfen']], src: [['Performance Bike (Daten)', 'https://www.performancebike.com/jagwire-pro-compressionless-brake-housing-black-5mm-10-meters-zhb905/p1371813']] };
 const KFL = (b, d, l, h, m, kg, url) => ({ mfr: 'AMI / FYH / NIS (Normbauform)', typ: `KFL${b} Flanschlager, 2-Loch, Zinkdruckguss, Rillenkugellager mit Madenschraube, 2RS`, dat: [['Bohrung', `${d} mm`], ['Lochabstand', `${l} mm (Lochplatten in fertigung/ angepasst)`], ['Länge', `${h} mm`], ['Schrauben', m], ['Masse', kg]], src: [['Händlerdaten', url]] });

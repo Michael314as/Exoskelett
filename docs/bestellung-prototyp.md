@@ -8,7 +8,7 @@ Erzeugt aus der Bauteilliste der technischen Ansicht ([exo-technik.html](../visu
 
 | Stufe | Bestellen | Damit prüfst du |
 |---|---|---|
-| 1 Prüfstand | 1 Motor AK70-10, Teensy 4.1 + CAN-Transceiver, 1 Wägezelle + HX711, 1 Manschette (Druck), Seilscheibe Ellbogen (Laser), Dyneema, 1 Bowdenzug-Paar, Not-Aus, Netzteil 36 V oder Akku-Adapter | Regelgefühl, Reaktionszeit, Rauschen, Wärme (P10–P17, P33 am Holzarm) |
+| 1 Prüfstand | 1 Motor RobStride RS06 + CAN-USB-Adapter, Teensy 4.1 + CAN-Transceiver, 1 Wägezelle + HX711, 1 Manschette (Druck), Seilscheibe Ellbogen (Laser), Dyneema, 1 Bowdenzug-Paar, Not-Aus, Netzteil 36 V oder Akku-Adapter | Regelgefühl, Reaktionszeit, Rauschen, Wärme (P10–P17, P33 am Holzarm) |
 | 2 Schlaufe | 1 Bandantrieb 5840-31ZY + Treiber, Lochband, Schlaufenkopf, Wägezelle 50 kg | Haltekraft mit 20-kg-Sandsack (P20) — prüft die Schätzung ≈ 150–200 N Schließkraft und > 400 N Haltekraft ([schaetzwerte.md](schaetzwerte.md)) |
 | 3 Rahmen passiv | Halbzeug, Laserteile Rahmen/Hüfte/Beine/Fuß, Lager, Gurte | Passform, Achsen, Lendengelenk (P1–P4, P31, P34) |
 | 4 Beine aktiv | 4 Motoren (Hüfte, Knie), Fußkontakt-Wägezellen, Bowdenzüge | Aufstehen, Gehen (P20b, P21, P23) |
@@ -20,7 +20,7 @@ Recherchierte Preise sind mit Quelle verlinkt, die übrigen sind Erfahrungswerte
 
 | Teil | Stück | Preis | Quelle |
 |---|---|---|---|
-| CubeMars AK70-10 KV100 mit Treiber (CAN) | 1 | 572 € (EU, Angebot) / 399–549 $ (USA) | [openelab EU](https://openelab.io/nl/products/cubemars-ak70-10-actuator-motor), [RobotShop](https://robotshop.com/products/cubemars-cubemars-ak70-10kv100-brushless-dc-motor-high-torque-module-highly-integrated), [CubeMars Store](https://store.cubemars.com/) |
+| RobStride RS06 (36 Nm Spitze, CAN) | 1 | ≈ 170–220 € inkl. Versand und Einfuhr | [RS06-Handbuch](https://github.com/RobStride/Product_Information), [eBay DE](https://www.ebay.de/itm/388958235556), [Händler](https://www.roboticscenter.ai/store/product/robstride-06/) |
 | PJRC Teensy 4.1 | 1 | ≈ 40–42 € | [Geizhals](https://geizhals.at/teensy-4-1-a2738866.html) |
 | CAN-Transceiver SN65HVD230 (Modul) | 1 | ≈ 5 € | Elektronik-Händler |
 | Wägezelle 20 kg + HX711 | 1 | ≈ 6 € | Elektronik-Händler |
@@ -28,13 +28,13 @@ Recherchierte Preise sind mit Quelle verlinkt, die übrigen sind Erfahrungswerte
 | Dyneema 3 mm, Bowdenzug-Paar mit Hüllen | 1 Satz | ≈ 35 € | Segel-/Fahrradhandel |
 | Seilscheibe Ellbogen (3 DXF) + Lagerplatten | 1 Satz | ≈ 40 € | Laserdienst |
 | Manschette Unterarm, Zellenhalter, Puffer | 1 Satz | ≈ 3 € Filament | eigener Druck |
-| **Stufe 1 gesamt** | | **≈ 740 €** | |
+| **Stufe 1 gesamt** | | **≈ 370 €** | |
 | Schneckengetriebemotor 5840-31ZY 24 V, **27 U/min** | 1 | ≈ 18,50 $ | [RobotShop 27 U/min](https://www.robotshop.com/es/products/dyna-engine-high-torque-24v-27rpm-double-axis-worm-gear-motor-5840-31zy) |
 | Motortreiber Pololu G2 18v17 | 1 | ≈ 40 € | Pololu-Händler |
 | Edelstahl-Lochband 20 × 0,3, Gummi, Schnappschäkel, Wägezelle 50 kg | 1 Satz | ≈ 45 € | Handel |
 | **Stufe 2 gesamt** | | **≈ 105 €** | |
 
-Mit diesen rund 850 € sind die beiden größten Unbekannten messbar: Fühlt sich die Regelung gut an (P15–P17, Reaktionszeit, Wärme P33), und hält die Schlaufe einen 20-kg-Sandsack (P20)? Erst danach lohnt die Bestellung der restlichen 7 Motoren.
+Mit diesen rund 480 € sind die beiden größten Unbekannten messbar: Fühlt sich die Regelung gut an (P15–P17, Reaktionszeit, Wärme P33), und hält die Schlaufe einen 20-kg-Sandsack (P20)? Erst danach lohnt die Bestellung der restlichen 7 Motoren (≈ 1.200–1.550 €).
 
 ## Kaufteile
 
@@ -59,13 +59,13 @@ Mit diesen rund 850 € sind die beiden größten Unbekannten messbar: Fühlt si
 | EL-09 | Leistungsleitungen | Silikonlitze 4 mm² / 1,5 mm² | 1 | 0.20 kg | Händler nach Ausführung |
 | EL-10 | CAN-Bus | geschirmte Twisted-Pair-Leitung | 1 | 0.05 kg | Händler nach Ausführung |
 | EL-11 | Rundstecker | M16 IP67 (Binder Serie 423) | 7 | 0.21 kg | Händler nach Ausführung |
-| AN-E | Ellbogenmotor | CubeMars AK70-10 KV100 (Planetengetriebe 10:1, CAN, Encoder) | 2 | 1.04 kg | [CubeMars AK70-10](https://www.cubemars.com/goods-1031-AK70-10.html) |
-| AN-K | Kniemotor | CubeMars AK70-10 KV100 (Planetengetriebe 10:1, CAN, Encoder) | 2 | 1.04 kg | [CubeMars AK70-10](https://www.cubemars.com/goods-1031-AK70-10.html) |
-| AN-S | Schultermotor | CubeMars AK70-10 KV100 (Planetengetriebe 10:1, CAN, Encoder) | 2 | 1.04 kg | [CubeMars AK70-10](https://www.cubemars.com/goods-1031-AK70-10.html) |
+| AN-E | Ellbogenmotor | RobStride RS06 (Planetengetriebe 9:1, CAN 2.0, 2 Encoder) | 2 | 1.24 kg | [RobStride RS06](https://github.com/RobStride/Product_Information) |
+| AN-K | Kniemotor | RobStride RS06 (Planetengetriebe 9:1, CAN 2.0, 2 Encoder) | 2 | 1.24 kg | [RobStride RS06](https://github.com/RobStride/Product_Information) |
+| AN-S | Schultermotor | RobStride RS06 (Planetengetriebe 9:1, CAN 2.0, 2 Encoder) | 2 | 1.24 kg | [RobStride RS06](https://github.com/RobStride/Product_Information) |
 | HU-02 | Achsbolzen | Passschraube Ø 16 + Kugelsperrbolzen GN 113.3-16 | 2 | 0.20 kg | Händler nach Ausführung |
 | HU-03 | Zentrierfeder | Druckfeder 1,1 × 13 × 25 (z. B. Gutekunst D-218) | 2 | 0.02 kg | Händler nach Ausführung |
 | HU-06 | Hüftlager | Flanschlager KFL002 (Bohrung 15 mm, 2RS) | 2 | 0.40 kg | Händler nach Ausführung |
-| BA-01 | Hüftmotor | CubeMars AK70-10 KV100 (Planetengetriebe 10:1, CAN, Encoder) | 2 | 1.04 kg | [CubeMars AK70-10](https://www.cubemars.com/goods-1031-AK70-10.html) |
+| BA-01 | Hüftmotor | RobStride RS06 (Planetengetriebe 9:1, CAN 2.0, 2 Encoder) | 2 | 1.24 kg | [RobStride RS06](https://github.com/RobStride/Product_Information) |
 | BA-04 | Seilschleife Hüfte | Liros D-Pro 3 mm (Dyneema SK78) | 4 | 0.04 kg | [LIROS D-Pro 3 mm, 950 daN](https://awn.de/en/products/liros-d-pro-tauwerk-meterware-1-m) |
 | BA-07 | Federpatrone | Druckfeder 2 × 16 × 40 mit Hülse | 2 | 0.10 kg | Händler nach Ausführung |
 | BA-11 | Bowdenhülle Knie | Jagwire LEX-SL 5 mm (kompressionsarm, PTFE-Liner) | 4 | 0.24 kg | Händler nach Ausführung |

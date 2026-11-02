@@ -198,23 +198,29 @@ int main() {
     check(allZero && o.led == Led::Red, "Not-Aus: alle Momente sofort 0, Ring rot");
   }
 
-  std::printf("9) Treiber: Motor-Protokoll (MIT) und Wägezellen-Verstärker\n");
+  std::printf("9) Treiber: Motor-Protokoll (RobStride RS06) und Wägezellen-Verstärker\n");
   {
     MotorLimits L; uint8_t b[8];
-    packTorqueCommand(10.f, L, b);
-    const uint32_t t = (uint32_t(b[6] & 0xF) << 8) | b[7];
-    const float back = uintToFloat(t, -L.tMax, L.tMax, 12);
-    std::printf("     10 Nm verpackt und zurück: %.3f Nm\n", back);
-    check(std::fabs(back - 10.f) < 0.02f, "Momentbefehl: Auflösung besser als 0,02 Nm");
-    packTorqueCommand(99.f, L, b); const uint32_t tc = (uint32_t(b[6] & 0xF) << 8) | b[7];
-    check(tc == 4095, "zu großes Moment wird auf die Motorgrenze begrenzt");
-    // Antwort bauen: Position 1,0 rad, Geschwindigkeit -2 rad/s, Moment 3 Nm
-    const uint32_t p = floatToUint(1.f, -L.pMax, L.pMax, 16), v = floatToUint(-2.f, -L.vMax, L.vMax, 12), i = floatToUint(3.f, -L.tMax, L.tMax, 12);
-    const uint8_t r[6] = {3, uint8_t(p >> 8), uint8_t(p & 0xFF), uint8_t(v >> 4), uint8_t(((v & 0xF) << 4) | (i >> 8)), uint8_t(i & 0xFF)};
-    const MotorState ms = unpackReply(r, L);
-    check(ms.id == 3 && std::fabs(ms.pos - 1.f) < 0.001f && std::fabs(ms.vel + 2.f) < 0.03f && std::fabs(ms.torque - 3.f) < 0.02f, "Motorantwort richtig entpackt");
+    uint32_t id = packTorqueCommand(5, 10.f, L, b);
+    const float back = uintToFloat((id >> 8) & 0xFFFF, -L.tMax, L.tMax, 16);
+    std::printf("     10 Nm verpackt und zurück: %.4f Nm, ID 0x%08X\n", back, unsigned(id));
+    check((id >> 24) == kTypeControl && (id & 0xFF) == 5 && std::fabs(back - 10.f) < 0.002f, "Momentbefehl Typ 1: Moment in der 29-Bit-ID, Auflösung besser als 0,002 Nm");
+    check(b[4] == 0 && b[5] == 0 && b[6] == 0 && b[7] == 0, "Kp = Kd = 0: reiner Momentbetrieb");
+    id = packTorqueCommand(5, 99.f, L, b);
+    check(((id >> 8) & 0xFFFF) == 0xFFFF, "zu großes Moment wird auf die Motorgrenze 36 Nm begrenzt");
+    id = packSpecial(kTypeEnable, 7, b);
+    check((id >> 24) == kTypeEnable && ((id >> 8) & 0xFF) == kHostId && (id & 0xFF) == 7, "Einschalten Typ 3 an Motor 7");
+    // Rückmeldung bauen: Motor 3, Position 1,0 rad, Geschwindigkeit -2 rad/s, Moment 3 Nm, 41,5 °C
+    const uint32_t p = floatToUint(1.f, -L.pMax, L.pMax, 16), v = floatToUint(-2.f, -L.vMax, L.vMax, 16), t = floatToUint(3.f, -L.tMax, L.tMax, 16);
+    const uint8_t r[8] = {uint8_t(p >> 8), uint8_t(p), uint8_t(v >> 8), uint8_t(v), uint8_t(t >> 8), uint8_t(t), uint8_t(415 >> 8), uint8_t(415 & 0xFF)};
+    const uint32_t rid = (uint32_t(kTypeFeedback) << 24) | (2u << 22) | (3u << 8) | kHostId;
+    const MotorState ms = unpackReply(rid, r, L);
+    check(ms.valid && ms.id == 3 && ms.fault == 0 && std::fabs(ms.pos - 1.f) < 0.001f && std::fabs(ms.vel + 2.f) < 0.002f && std::fabs(ms.torque - 3.f) < 0.002f && std::fabs(ms.tempC - 41.5f) < 0.01f,
+          "Motorantwort Typ 2 richtig entpackt (inkl. Temperatur)");
+    const MotorState bad = unpackReply(rid | (1u << 18), r, L);
+    check(bad.fault != 0, "Fehlerbit (Übertemperatur) aus der ID erkannt");
     Transmission tr; tr.ratio = 4.67f; tr.eta = 0.88f;
-    std::printf("     100 Nm an der Schulter brauchen %.1f Nm am Motor (Grenze 25 Nm)\n", tr.motorTorqueFor(100.f));
+    std::printf("     100 Nm an der Schulter brauchen %.1f Nm am Motor (Grenze 36 Nm)\n", tr.motorTorqueFor(100.f));
     check(tr.motorTorqueFor(100.f) <= L.tMax, "Schulter-Spitzenmoment liegt im Motorbereich");
     int32_t want = -12345; uint32_t bits = uint32_t(want) & 0xFFFFFF; int k = 23;
     const int32_t got = hx711ReadRaw([&] { return k >= 0 ? ((bits >> k--) & 1u) != 0 : false; });
@@ -310,7 +316,7 @@ int main() {
     {
       App app; Inputs in; Outputs o; ready(app, in, o);
       in.trunkPitch = 0.f; run(app, in, o, 1.f);
-      const float exp = 0.5f * 21.5f * 9.81f * 0.08f;
+      const float exp = 0.5f * 22.1f * 9.81f * 0.08f;
       std::printf("     aufrecht im Stand: Hüfte %+.1f Nm je Seite (erwartet %+.1f: Rucksack hinter der Hüftachse)\n", o.ff[HipR], exp);
       check(std::fabs(o.ff[HipR] - exp) < 1.f && std::fabs(o.ff[HipL] - exp) < 1.f, "aufrecht: Hüftmotoren halten den Rucksack, der nach hinten kippen will");
       const float up0 = o.ff[HipR];
@@ -357,6 +363,10 @@ int main() {
     for (float t = 0; t < 600.f; t += dt) ho = hot.step(hi, dt);
     std::printf("     Schulter Dauerlast: anfangs %.0f Nm, nach 10 min %.0f Nm (Wärme %.2f)\n", t0, ho.tau[ShR], ho.heat[ShR]);
     check(ho.heat[ShR] > 1.f && ho.tau[ShR] < t0 * 0.95f && ho.tau[ShR] >= 0.4f * 100.f - 1.f, "warmer Motor: Moment wird zurückgenommen, nicht abgeschaltet");
+    App hot2; Inputs h2; Outputs o2; h2.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o2 = hot2.step(h2, dt); h2.btnPower = false; for (float t = 0; t < 6.f; t += dt) o2 = hot2.step(h2, dt);
+    h2.joint[ShR].cuffN = 700.f; h2.joint[ShR].q = 0.8f; h2.joint[ShR].motorTempC = 124.f; for (float t = 0; t < 2.f; t += dt) o2 = hot2.step(h2, dt);
+    std::printf("     Wicklung 124 °C gemessen: Schulter %.0f Nm statt %.0f Nm\n", o2.tau[ShR], t0);
+    check(o2.tau[ShR] < 0.45f * t0 && o2.tau[ShR] > 0.f, "gemessene Motortemperatur 124 °C: Moment auf 40 % zurück, bevor der Motor bei 135 °C selbst abschaltet");
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);

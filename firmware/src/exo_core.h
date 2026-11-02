@@ -64,6 +64,7 @@ struct JointInput {
   float gravScale = 1.f;       // Anteil Schwerkraftausgleich der Schiene (Bein im Stand: 0)
   float tauMaxNow = 1e9f;      // zusätzliche obere Grenze in diesem Takt (Standbein: nicht beugen)
   float limitScale = 1.f;      // Abregelung bei warmem Motor (1 = volle Grenzen)
+  float motorTempC = 25.f;     // Wicklungstemperatur aus der Motor-Rückmeldung (RS06 meldet sie in jedem Antwortrahmen)
 };
 
 class Joint {

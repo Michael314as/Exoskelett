@@ -13,13 +13,14 @@ namespace exo {
 enum JointId : uint8_t { HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, NJ };
 enum LoopId : uint8_t { LoopR1, LoopR2, LoopL1, NL };   // R1 rechts unten, R2 rechts außen, L1 links unten
 enum Side : uint8_t { L, R };
+constexpr float kMotorRatedNm = 11.f;   // RobStride RS06: Nennmoment 11 Nm (Spitze 36 Nm)
 
 // Körper- und Exo-Maße für die Vorsteuerung (aus docs/kraftverteilung.md; am Prüfstand abgleichen)
 struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 21.5f;                   // Exo-Oberteil: Rahmen, Box, 6 Motoren, Akku, Arme, Gurte (technische Ansicht, Bauteilliste)
+  float exoUpperKg = 22.1f;                   // Exo-Oberteil: Rahmen, Box, 6 Motoren, Akku, Arme, Gurte (technische Ansicht, Bauteilliste)
   float exoComUp = 0.22f, exoComBack = 0.08f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m] (Rucksack zieht nach hinten)
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
@@ -121,11 +122,13 @@ class App {
     for (int i = 0; i < NJ; i++) ji[i] = in.joint[i];
     computeCoupling(in, ji);
 
-    // Wärmeschätzung je Motor: folgt (Motormoment / Nennmoment 8,3 Nm)² mit 3 min Zeitkonstante; über 1 wird die Grenze zurückgenommen
+    // Wärmeschutz je Motor, zweifach: Schätzung (Motormoment / Nennmoment RS06 11 Nm)² mit 3 min Zeitkonstante, und die gemessene
+    // Wicklungstemperatur aus der Motor-Rückmeldung (ab 100 °C zurücknehmen, der Motor selbst schaltet bei 135–145 °C ab).
     for (int i = 0; i < NJ; i++) {
-      const float r = joint[i].lastTau() * joint[i].cfg.motorPerJoint / 8.3f;
+      const float r = joint[i].lastTau() * joint[i].cfg.motorPerJoint / kMotorRatedNm;
       heat_[i] += (r * r - heat_[i]) * clampf(dt / 180.f, 0.f, 1.f); o.heat[i] = heat_[i];
-      ji[i].limitScale = clampf(1.f - 0.6f * (heat_[i] - 1.f), 0.4f, 1.f);
+      const float byModel = clampf(1.f - 0.6f * (heat_[i] - 1.f), 0.4f, 1.f), byTemp = clampf(1.f - (in.joint[i].motorTempC - 100.f) / 40.f, 0.4f, 1.f);
+      ji[i].limitScale = std::fmin(byModel, byTemp);
     }
     // Schutz bei Sturz: Beine nicht schlaff, sondern 1,5 s weich gedämpft (bremst das Hinsetzen), dann aus
     const bool falling = sup.mode == Mode::SoftOff && sup.reason && !std::strcmp(sup.reason, "Sturz erkannt");

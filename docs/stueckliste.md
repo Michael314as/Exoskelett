@@ -12,8 +12,8 @@ Herstellweg:
 
 Preise sind Richtwerte (Stand November 2026). Motoren nach recherchierten Händlerpreisen, siehe [bestellung-prototyp.md](bestellung-prototyp.md).
 
-**Gesamt Material, ein Exo:** etwa **5.100–6.800 €**, davon Motoren 3.000–4.600 € (≈ 65 %), alles andere ≈ 2.100–2.200 €.
-Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand + Schlaufe ≈ 850 €.
+**Gesamt Material, ein Exo:** etwa **3.800–4.400 €**, davon Motoren RobStride RS06 1.700–2.200 €, alles andere ≈ 2.100–2.200 €.
+Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand + Schlaufe ≈ 480 €.
 
 ---
 
@@ -46,7 +46,7 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 
 | Teil | Menge | Material, Maß | Herstellweg | etwa |
 |---|---|---|---|---|
-| Robotergelenk-Motoren CubeMars AK70-10 (CAN, 24–48 V) | 8 | 8,3 Nm Nenn / 24,8 Nm Spitze (2 an den Hüften, 6 in der Box); EU ≈ 570 €/Stück, USA 399–549 $ + Zoll/Einfuhrumsatzsteuer | Kauf | 3.000–4.600 € |
+| Robotergelenk-Motoren RobStride RS06 (CAN 2.0, 15–60 V) | 8 | 11 Nm Nenn / 36 Nm Spitze, 621 g (2 an den Hüften, 6 in der Box); ≈ 197–255 $/Stück (China ¥ 849) + Versand, Einfuhrumsatzsteuer 19 %, Zoll ≈ 2,7 % | Kauf | 1.700–2.200 € |
 | Seiltrommeln | 6 + 2 | Alu-Rohr Ø 30 (Box) bzw. Ø 20 (Hüfte) + Bordscheiben | Säge + Bohren, Bordscheiben Laser | 35 € |
 | Montageplatte Box | 1 | Alu 4 mm | Laser | 20 € |
 | Seilscheibe Hüftmotor Ø 12 cm, zwei Rillen | 2 | Alu, 3 Lagen + 2 Zwischenlagen | Laser | 25 € |

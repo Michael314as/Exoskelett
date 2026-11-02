@@ -99,7 +99,7 @@ es tragen muss.**
 | Schulter L/R | Box | heben und senken | offenes Seilpaar über Rollen auf Scheibe Ø 14 cm | ~100 Nm |
 | Ellbogen L/R | Box | beugen und strecken | Bowdenzug-Paar auf Scheibe Ø 10 cm | ~58 Nm |
 
-8 bürstenlose Robotergelenk-Motoren (QDD-Klasse, CAN, 9 Nm dauernd / 25 Nm Spitze), von Hand rückdrehbar: Ohne Strom
+8 bürstenlose Robotergelenk-Motoren **RobStride RS06** (CAN, 11 Nm dauernd / 36 Nm Spitze, 621 g, Ø 88 × 49 mm), von Hand rückdrehbar: Ohne Strom
 laufen alle Gelenke frei mit. Die Rechnung zum Mischweg: [kraftverteilung.md](kraftverteilung.md), Abschnitt 3.
 
 ## 6. Oberkörper: Gurtsystem
@@ -211,9 +211,9 @@ Gurte, Kabel, Hauben, Schutzbügel und Parkstütze eingerechnet; der zweite Akku
 17–20 kg waren ohne Kleinteile, Schutz und Komfortgelenke gerechnet.
 
 Was das für dich heißt: Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung rechnet
-im Stand mit **21,5 kg Exo-Oberteil** (Schwerpunkt 8 cm hinter der Hüftachse, wird mit ausgeglichen) und lässt Hüft- und Kniemotoren diese Last tragen; die Motoren
+im Stand mit **22,1 kg Exo-Oberteil** (Schwerpunkt 8 cm hinter der Hüftachse, wird mit ausgeglichen) und lässt Hüft- und Kniemotoren diese Last tragen; die Motoren
 haben dafür genug Reserve (Knie in der Hocke ≈ 36 Nm je Bein gegen ≈ 44 Nm Dauermoment mit der Kurvenscheibe). Spürbar bleibt die **Trägheit** beim Drehen, Bücken und beim ersten Schritt.
-**Umgesetzt (ohne Abstrich an Sicherheit oder Funktion), jetzt 31,1 kg** (dazu Zählfehler in der Liste behoben: Schultergurte und Hauben waren dreifach gerechnet): Parkstütze abnehmbar, sie bleibt am Fahrzeug
+**Umgesetzt (ohne Abstrich an Sicherheit oder Funktion), jetzt 31,9 kg mit RobStride RS06** (je Motor 100 g mehr als AK70-10) (dazu Zählfehler in der Liste behoben: Schultergurte und Hauben waren dreifach gerechnet): Parkstütze abnehmbar, sie bleibt am Fahrzeug
 und wird nur zum Abstellen eingesteckt (−0,7 kg beim Tragen), Schutzbügel aus CFK-Rohr Ø 22 × 1,5 (−0,25 kg), Hauben mit
 1,2 mm Wand und Rippen (−0,15 kg), Boxgehäuse aus 1,5 mm Alu, die Motorplatte trägt (−0,15 kg).
 **Bewusst nicht gespart:** Die tragenden Rohre liegen bei etwa 60 MPa Spitze gegen 125 MPa zulässig, also Sicherheit ≈ 2
@@ -238,7 +238,7 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 
 | Posten | etwa |
 |---|---|
-| 8 Robotergelenk-Motoren CubeMars AK70-10 (EU ≈ 570 €, USA 399–549 $ + Einfuhr) | 3 000 bis 4 600 € |
+| 8 Robotergelenk-Motoren RobStride RS06 (≈ 197–255 $ je Stück + Versand, Einfuhrumsatzsteuer, Zoll) | 1 700 bis 2 200 € |
 | 3 Schlaufenantriebe 5840-31ZY + 3 Treiber Pololu G2 | 180 bis 220 € |
 | Steuerung, CAN, 11 Wägezellen + Verstärker, Not-Aus, Relais, Stecker, Kabel, Anzeige, Licht | 400 bis 500 € |
 | Akku-Adapter für Stihl AP (Akku vorhanden) | 20 bis 80 € |
@@ -246,7 +246,7 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 | Lendengelenk, Gasfedern, Hubmagnet, Drehteller, Drehring, Schulterschlitten, Fingerschutz | 200 bis 230 € |
 | Steigbügel, Fersenbügel, Spikes, Gurtsystem, Manschetten, Polster | 300 bis 380 € |
 | Schutzbügel, Parkstütze, Hauben, Eloxieren, Filament | 250 bis 380 € |
-| **Summe Material** | **etwa 5 100 bis 6 800 €** (dazu Werkzeug einmalig 280 bis 500 €) |
+| **Summe Material** | **etwa 3 800 bis 4 400 €** (dazu Werkzeug einmalig 280 bis 500 €) |
 
 ## 12. Bauen in Stufen
 

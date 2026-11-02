@@ -1,4 +1,4 @@
-// Treiber: Motor-Protokoll (MIT-Modus, CubeMars AK70-10 und baugleiche Robotergelenk-Motoren) und Wägezellen-Verstärker HX711.
+// Treiber: Motor-Protokoll (RobStride RS06, CAN 2.0 mit 29-Bit-ID, „Operation Control“-Modus) und Wägezellen-Verstärker HX711.
 // Hardwareunabhängig geschrieben: Das Verpacken/Entpacken der CAN-Daten und das Einlesen der Bits ist hier,
 // das eigentliche Senden/Empfangen (FlexCAN_T4, digitalWrite) in main_teensy.cpp. Dadurch auf dem PC testbar.
 #pragma once
@@ -8,9 +8,13 @@
 
 namespace exo {
 
-/* ----------------------------------------------------------- MIT-Protokoll ----- */
-// Grenzen laut Datenblatt AK70-10 (bei anderem Motor hier anpassen)
-struct MotorLimits { float pMax = 12.5f, vMax = 50.f, tMax = 25.f, kpMax = 500.f, kdMax = 5.f; };
+/* ------------------------------------------------- RobStride-Protokoll (RS06) ----- */
+// Quelle: RS06 User Manual (github.com/RobStride/Product_Information), Abschnitt 4.1. CAN 2.0, 1 Mbit/s, erweiterte 29-Bit-ID:
+//   Bit 28–24 Befehlstyp, Bit 23–8 Daten (Typ 1: Moment, sonst Host-ID), Bit 7–0 Ziel-ID. Daten High-Byte zuerst.
+// Typ 1 Betrieb: t_ref = Kd·(v_soll − v) + Kp·(p_soll − p) + t_ff. Hier reines Moment: Kp = Kd = 0.
+struct MotorLimits { float pMax = 12.57f, vMax = 50.f, tMax = 36.f, kpMax = 5000.f, kdMax = 100.f; };   // RS06: ±4π, ±50 rad/s, ±36 Nm
+constexpr uint8_t kHostId = 0xFD;                                  // eigene ID am Bus
+enum : uint8_t { kTypeGetId = 0, kTypeControl = 1, kTypeFeedback = 2, kTypeEnable = 3, kTypeStop = 4, kTypeSetZero = 6 };
 
 inline uint32_t floatToUint(float x, float lo, float hi, int bits) {
   x = clampf(x, lo, hi);
@@ -18,24 +22,30 @@ inline uint32_t floatToUint(float x, float lo, float hi, int bits) {
 }
 inline float uintToFloat(uint32_t v, float lo, float hi, int bits) { return float(v) * (hi - lo) / float((1u << bits) - 1) + lo; }
 
-// Befehl: reines Moment (kp = kd = 0). 8 Byte: p16 | v12 kp12 | kd12 t12
-inline void packTorqueCommand(float torqueNm, const MotorLimits& L, uint8_t out[8]) {
-  const uint32_t p = floatToUint(0, -L.pMax, L.pMax, 16), v = floatToUint(0, -L.vMax, L.vMax, 12);
-  const uint32_t kp = floatToUint(0, 0, L.kpMax, 12), kd = floatToUint(0, 0, L.kdMax, 12), t = floatToUint(torqueNm, -L.tMax, L.tMax, 12);
-  out[0] = p >> 8; out[1] = p & 0xFF; out[2] = v >> 4; out[3] = ((v & 0xF) << 4) | (kp >> 8);
-  out[4] = kp & 0xFF; out[5] = kd >> 4; out[6] = ((kd & 0xF) << 4) | (t >> 8); out[7] = t & 0xFF;
+// Befehl Typ 1 (reines Moment): Moment steckt in der ID, die 8 Datenbytes tragen p, v, Kp, Kd (alle 0 bzw. Mitte).
+inline uint32_t packTorqueCommand(uint8_t motorId, float torqueNm, const MotorLimits& L, uint8_t out[8]) {
+  const uint32_t t = floatToUint(torqueNm, -L.tMax, L.tMax, 16), p = floatToUint(0, -L.pMax, L.pMax, 16), v = floatToUint(0, -L.vMax, L.vMax, 16);
+  out[0] = p >> 8; out[1] = p & 0xFF; out[2] = v >> 8; out[3] = v & 0xFF; out[4] = out[5] = out[6] = out[7] = 0;   // Kp = Kd = 0
+  return (uint32_t(kTypeControl) << 24) | (t << 8) | motorId;
 }
-// Antwort des Motors: id | p16 | v12 | i12 (Moment)
-struct MotorState { uint8_t id = 0; float pos = 0, vel = 0, torque = 0; };
-inline MotorState unpackReply(const uint8_t in[6], const MotorLimits& L) {
-  MotorState s; s.id = in[0];
-  const uint32_t p = (uint32_t(in[1]) << 8) | in[2], v = (uint32_t(in[3]) << 4) | (in[4] >> 4), i = (uint32_t(in[4] & 0xF) << 8) | in[5];
-  s.pos = uintToFloat(p, -L.pMax, L.pMax, 16); s.vel = uintToFloat(v, -L.vMax, L.vMax, 12); s.torque = uintToFloat(i, -L.tMax, L.tMax, 12);
+// Sonderbefehle Typ 3 (einschalten), 4 (stoppen; Byte 0 = 1 löscht Fehler), 6 (Nullpunkt setzen, Byte 0 = 1)
+inline uint32_t packSpecial(uint8_t type, uint8_t motorId, uint8_t out[8]) {
+  for (int i = 0; i < 8; i++) out[i] = 0;
+  if (type == kTypeStop || type == kTypeSetZero) out[0] = 1;
+  return (uint32_t(type) << 24) | (uint32_t(kHostId) << 8) | motorId;
+}
+// Rückmeldung Typ 2: ID-Bit 15–8 Motor-ID, Bit 21–16 Fehler, Bit 23–22 Modus; Daten p16 v16 t16 Temperatur·10
+struct MotorState { uint8_t id = 0, fault = 0; float pos = 0, vel = 0, torque = 0, tempC = 0; bool valid = false; };
+inline MotorState unpackReply(uint32_t canId, const uint8_t in[8], const MotorLimits& L) {
+  MotorState s;
+  if (((canId >> 24) & 0x1F) != kTypeFeedback) return s;
+  s.id = (canId >> 8) & 0xFF; s.fault = (canId >> 16) & 0x3F; s.valid = true;
+  s.pos = uintToFloat((uint32_t(in[0]) << 8) | in[1], -L.pMax, L.pMax, 16);
+  s.vel = uintToFloat((uint32_t(in[2]) << 8) | in[3], -L.vMax, L.vMax, 16);
+  s.torque = uintToFloat((uint32_t(in[4]) << 8) | in[5], -L.tMax, L.tMax, 16);
+  s.tempC = float(int16_t((uint16_t(in[6]) << 8) | in[7])) / 10.f;
   return s;
 }
-// Sonderbefehle: Motor einschalten / ausschalten / Nullpunkt
-inline void packSpecial(uint8_t last, uint8_t out[8]) { for (int i = 0; i < 7; i++) out[i] = 0xFF; out[7] = last; }
-constexpr uint8_t kEnterMotorMode = 0xFC, kExitMotorMode = 0xFD, kSetZero = 0xFE;
 
 // Gelenk ↔ Motor über die Seilübersetzung (Trommel ↔ Scheibe/Hebel) und den Wirkungsgrad
 struct Transmission {

@@ -8,7 +8,7 @@ leicht, weich, ohne Zittern, mit spürbarer Verstärkung und sicherem Abschalten
 |---|---|
 | `src/exo_core.h` | Gelenkregler (Manschettenkraft → Moment), Taster-Erkennung, Schlaufenwinde, Sicherheits-Zustandsmaschine |
 | `src/exo_app.h` | Gesamtsteuerung: 8 Gelenke, Kopplung der Manschetten über die Hebel, Vorsteuerung aus Baumlast und Körpergewicht, Standbein/Schwungbein, 3 Winden, Bedienung, LED-Ring |
-| `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (MIT-Modus, CubeMars AK70-10 oder baugleich), Wägezellen-Verstärker HX711, Kalibrierung, Seilübersetzung |
+| `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (RobStride RS06, 29-Bit-ID, Betriebsmodus Typ 1 / Rückmeldung Typ 2 mit Temperatur), Wägezellen-Verstärker HX711, Kalibrierung, Seilübersetzung |
 | `src/settings.h` | Einstellungen und Kalibrierung im EEPROM (mit Prüfsumme), Werkstatt-Konsole, Wartungshinweise |
 | `src/main_teensy.cpp` | Teensy 4.1: Pinplan, 200-Hz-Takt, Schütz, Motoren über CAN, 8 Wägezellen, Lagesensor, LED-Ring, Watchdog, Statuszeile an den ESP32-C3 |
 | `esp32/` | ESP32-C3: E-Paper-Anzeige und Bluetooth zum Handy |
@@ -56,7 +56,7 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Beine im Stand** | Hocke: Hüfte −14 Nm, Knie −20 Nm von selbst; mit Baum 300 N: −29 / −40 Nm |
 | **Schwungbein** | keine Gewichtsvorsteuerung, Bein anheben: Hüfte +10 Nm, Knie +5 Nm (Beugen begrenzt 10 Nm); Standbein beugt nie aktiv |
 | **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Motorantwort richtig gelesen, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
-| **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: passt zum AK70-10 (25 Nm) |
+| **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: RobStride RS06 schafft 36 Nm (Reserve 48 %) |
 | **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (87 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern |
 | **Einstellungen, Konsole** | Prüfsumme erkennt kaputtes EEPROM, Kalibrierung mit Gewicht, Fehlbedienung abgewiesen |
 | **Statuszeile** | Teensy → ESP32-C3: Modus, Akku, Stufe, Restzeit, Uhrzeit, Stunden, Grund; kaputte Zeilen werden verworfen |
