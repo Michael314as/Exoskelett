@@ -14,6 +14,28 @@ Erzeugt aus der Bauteilliste der technischen Ansicht ([exo-technik.html](../visu
 | 4 Beine aktiv | 4 Motoren (Hüfte, Knie), Fußkontakt-Wägezellen, Bowdenzüge | Aufstehen, Gehen (P20b, P21, P23) |
 | 5 Arme aktiv | 4 Motoren (Schulter, Ellbogen), restliche Manschetten, Schlaufen | Bäume (P22, P27, P28) |
 
+## Stufe 1 und 2 konkret (Preisstand November 2026)
+
+Recherchierte Preise sind mit Quelle verlinkt, die übrigen sind Erfahrungswerte (≈). Preise schwanken, verbindlich ist der Shop beim Kauf.
+
+| Teil | Stück | Preis | Quelle |
+|---|---|---|---|
+| CubeMars AK70-10 KV100 mit Treiber (CAN) | 1 | 572 € (EU, Angebot) / 399–549 $ (USA) | [openelab EU](https://openelab.io/nl/products/cubemars-ak70-10-actuator-motor), [RobotShop](https://robotshop.com/products/cubemars-cubemars-ak70-10kv100-brushless-dc-motor-high-torque-module-highly-integrated), [CubeMars Store](https://store.cubemars.com/) |
+| PJRC Teensy 4.1 | 1 | ≈ 40–42 € | [Geizhals](https://geizhals.at/teensy-4-1-a2738866.html) |
+| CAN-Transceiver SN65HVD230 (Modul) | 1 | ≈ 5 € | Elektronik-Händler |
+| Wägezelle 20 kg + HX711 | 1 | ≈ 6 € | Elektronik-Händler |
+| Not-Aus-Pilz, Lastrelais, Sicherung | 1 Satz | ≈ 35 € | Elektronik-Händler |
+| Dyneema 3 mm, Bowdenzug-Paar mit Hüllen | 1 Satz | ≈ 35 € | Segel-/Fahrradhandel |
+| Seilscheibe Ellbogen (3 DXF) + Lagerplatten | 1 Satz | ≈ 40 € | Laserdienst |
+| Manschette Unterarm, Zellenhalter, Puffer | 1 Satz | ≈ 3 € Filament | eigener Druck |
+| **Stufe 1 gesamt** | | **≈ 740 €** | |
+| Schneckengetriebemotor 5840-31ZY 24 V, **27 U/min** | 1 | ≈ 18,50 $ | [RobotShop 27 U/min](https://www.robotshop.com/es/products/dyna-engine-high-torque-24v-27rpm-double-axis-worm-gear-motor-5840-31zy) |
+| Motortreiber Pololu G2 18v17 | 1 | ≈ 40 € | Pololu-Händler |
+| Edelstahl-Lochband 20 × 0,3, Gummi, Schnappschäkel, Wägezelle 50 kg | 1 Satz | ≈ 45 € | Handel |
+| **Stufe 2 gesamt** | | **≈ 105 €** | |
+
+Mit diesen rund 850 € sind die beiden größten Unbekannten messbar: Fühlt sich die Regelung gut an (P15–P17, Reaktionszeit, Wärme P33), und hält die Schlaufe einen 20-kg-Sandsack (P20)? Erst danach lohnt die Bestellung der restlichen 7 Motoren.
+
 ## Kaufteile
 
 | ID | Teil | Ausführung | Stück | Masse | Quelle |
