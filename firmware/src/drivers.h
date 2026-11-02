@@ -1,4 +1,4 @@
-// Treiber: Motor-Protokoll (RobStride RS06, CAN 2.0 mit 29-Bit-ID, „Operation Control“-Modus) und Wägezellen-Verstärker HX711.
+// Treiber: Motor-Protokoll (RobStride RS03/RS04/RS06, CAN 2.0 mit 29-Bit-ID, „Operation Control“-Modus) und Wägezellen-Verstärker HX711.
 // Hardwareunabhängig geschrieben: Das Verpacken/Entpacken der CAN-Daten und das Einlesen der Bits ist hier,
 // das eigentliche Senden/Empfangen (FlexCAN_T4, digitalWrite) in main_teensy.cpp. Dadurch auf dem PC testbar.
 #pragma once
@@ -13,6 +13,10 @@ namespace exo {
 //   Bit 28–24 Befehlstyp, Bit 23–8 Daten (Typ 1: Moment, sonst Host-ID), Bit 7–0 Ziel-ID. Daten High-Byte zuerst.
 // Typ 1 Betrieb: t_ref = Kd·(v_soll − v) + Kp·(p_soll − p) + t_ff. Hier reines Moment: Kp = Kd = 0.
 struct MotorLimits { float pMax = 12.57f, vMax = 50.f, tMax = 36.f, kpMax = 5000.f, kdMax = 100.f; };   // RS06: ±4π, ±50 rad/s, ±36 Nm
+// Wertebereiche je Modell laut Handbuch (Kommunikationstyp 1/2): Kodierung hängt vom Modell ab, deshalb je Motor die richtigen nehmen
+constexpr MotorLimits kRS04{12.57f, 15.f, 120.f, 5000.f, 100.f};   // RS04: ±15 rad/s, ±120 Nm
+constexpr MotorLimits kRS03{12.57f, 20.f, 60.f, 5000.f, 100.f};    // RS03: ±20 rad/s, ±60 Nm
+constexpr MotorLimits kRS06{12.57f, 50.f, 36.f, 5000.f, 100.f};    // RS06: ±50 rad/s, ±36 Nm
 constexpr uint8_t kHostId = 0xFD;                                  // eigene ID am Bus
 enum : uint8_t { kTypeGetId = 0, kTypeControl = 1, kTypeFeedback = 2, kTypeEnable = 3, kTypeStop = 4, kTypeSetZero = 6 };
 

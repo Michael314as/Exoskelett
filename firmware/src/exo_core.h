@@ -52,6 +52,7 @@ struct JointConfig {
   float gravPhase = 0.0f;
   float slew = 400.f;          // max. Momentänderung [Nm/s] – nichts ruckt
   float motorPerJoint = 1.f;   // Motormoment je Nm am Gelenk = 1 / (Übersetzung · Wirkungsgrad), für die Wärmeschätzung
+  float motorRatedNm = 25.f;   // Dauermoment des Motors in der Gelenkkapsel (kleiner als im Datenblatt: wenig Kühlfläche)
 };
 
 struct JointInput {

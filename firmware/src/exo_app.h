@@ -13,7 +13,6 @@ namespace exo {
 enum JointId : uint8_t { HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, NJ };
 enum LoopId : uint8_t { LoopR1, LoopR2, LoopL1, NL };   // R1 rechts unten, R2 rechts außen, L1 links unten
 enum Side : uint8_t { L, R };
-constexpr float kMotorRatedNm = 11.f;   // RobStride RS06: Nennmoment 11 Nm (Spitze 36 Nm)
 
 // Körper- und Exo-Maße für die Vorsteuerung (aus docs/kraftverteilung.md; am Prüfstand abgleichen)
 struct BodyModel {
@@ -51,23 +50,26 @@ struct Outputs {
   float lumbarDuty = 0.f;              // PWM für den Hubmagneten: 0,2 s voll anziehen, dann 35 % halten (0,54 → 0,19 A am 24-V-Wandler)
   bool warnBackward = false;           // Rücklage: Rumpf zu weit nach hinten
   float heat[NJ] = {};                 // Wärmeschätzung je Motor (1 = Dauerbetrieb mit Nennmoment)
+  bool heaterLegs = false, heaterArms = false;   // Heizfolien der Gelenkkapseln (Beine: Hüfte + Knie, Arme: Schulter + Ellbogen)
 };
 
 inline JointConfig defaultJoint(JointId id) {
   JointConfig c;
   switch (id) {
-    case HipL: case HipR:   // Hüftmotor mit Seilgetriebe 1:6: stark strecken, schwach beugen
-      c.name = "Hüfte"; c.rCuff = 0.15f; c.tauMin = -140.f; c.tauMax = 35.f; c.qMin = -0.35f; c.qMax = 2.0f;
-      c.gravCoef = 2.0f; c.slew = 600.f; c.motorPerJoint = 1.f / (6.f * 0.95f); break;   // Exo-Bein ~2,5 kg, wirkt nur im Schwung
-    case KneeL: case KneeR: // Bowdenzug-Paar; Beugen mechanisch durch die Federpatrone begrenzt (~11 Nm)
+    // Entwurf 5: Gelenkkapseln. Hüfte und Schulter: RobStride RS04 direkt auf der Gelenkachse. Knie: RS04 oben am Oberschenkel,
+    // Schubstange 1:1 (Parallelogramm). Ellbogen: RS03 oben am Oberarm, Schubstange 1:1. Keine Seile, keine Bowdenzüge.
+    case HipL: case HipR:   // stark strecken, schwach beugen; RS04 120 Nm Spitze · 0,97
+      c.name = "Hüfte"; c.rCuff = 0.15f; c.tauMin = -110.f; c.tauMax = 35.f; c.qMin = -0.35f; c.qMax = 2.0f;
+      c.gravCoef = 2.0f; c.slew = 600.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 25.f; break;
+    case KneeL: case KneeR: // Beugen zusätzlich mechanisch begrenzt: Federpaket in der Schubstange gibt ab ≈ 11 Nm nach
       c.name = "Knie"; c.rCuff = 0.f; c.tauMin = -110.f; c.tauMax = 10.f; c.qMin = 0.05f; c.qMax = 2.0f;
-      c.gravCoef = 0.f; c.frictionComp = 0.4f; c.slew = 600.f; c.motorPerJoint = 1.f / (4.f * 0.7f); break;
-    case ShL: case ShR:
-      c.name = "Schulter"; c.rCuff = 0.17f; c.tauMax = 100.f; c.tauMin = -100.f;
-      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; c.motorPerJoint = 1.f / (4.67f * 0.88f); break;   // Exo-Arm ~1,4 kg
-    default:
-      c.name = "Ellbogen"; c.rCuff = 0.15f; c.tauMax = 58.f; c.tauMin = -58.f;
-      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / (3.33f * 0.7f); break;
+      c.gravCoef = 0.f; c.frictionComp = 0.2f; c.slew = 600.f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 25.f; break;
+    case ShL: case ShR:     // RS04 direkt
+      c.name = "Schulter"; c.rCuff = 0.17f; c.tauMax = 100.f; c.tauMin = -100.f; c.frictionComp = 0.15f;
+      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 25.f; break;   // Exo-Arm ~2,3 kg mit Ellbogenmotor
+    default:                // RS03 über Schubstange, 60 Nm Spitze · 0,95
+      c.name = "Ellbogen"; c.rCuff = 0.15f; c.tauMax = 56.f; c.tauMin = -56.f; c.frictionComp = 0.15f;
+      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 14.f; break;
   }
   return c;
 }
@@ -122,10 +124,10 @@ class App {
     for (int i = 0; i < NJ; i++) ji[i] = in.joint[i];
     computeCoupling(in, ji);
 
-    // Wärmeschutz je Motor, zweifach: Schätzung (Motormoment / Nennmoment RS06 11 Nm)² mit 3 min Zeitkonstante, und die gemessene
+    // Wärmeschutz je Motor, zweifach: Schätzung (Motormoment / Dauermoment in der Kapsel)² mit 3 min Zeitkonstante, und die gemessene
     // Wicklungstemperatur aus der Motor-Rückmeldung (ab 100 °C zurücknehmen, der Motor selbst schaltet bei 135–145 °C ab).
     for (int i = 0; i < NJ; i++) {
-      const float r = joint[i].lastTau() * joint[i].cfg.motorPerJoint / kMotorRatedNm;
+      const float r = joint[i].lastTau() * joint[i].cfg.motorPerJoint / joint[i].cfg.motorRatedNm;
       heat_[i] += (r * r - heat_[i]) * clampf(dt / 180.f, 0.f, 1.f); o.heat[i] = heat_[i];
       const float byModel = clampf(1.f - 0.6f * (heat_[i] - 1.f), 0.4f, 1.f), byTemp = clampf(1.f - (in.joint[i].motorTempC - 100.f) / 40.f, 0.4f, 1.f);
       ji[i].limitScale = std::fmin(byModel, byTemp);
@@ -152,6 +154,16 @@ class App {
     // Lendengelenk sperren, solange ein Baum (> 5 kg) in den Schlaufen hängt; Rücklage-Warnung
     const float loadN = in.loopN[LoopR1] + in.loopN[LoopR2] + in.loopN[LoopL1];
     lockT_ = loadN > 49.f ? lockT_ + dt : 0.f; o.lumbarLock = lockT_ > 0.3f && sup.mode == Mode::Active;
+    // Frostschutz der Gelenkkapseln: Heizfolie an, wenn eine Kapsel der Gruppe unter +3 °C fällt und die Gruppe kaum arbeitet
+    // (unter Last heizt der Motor selbst); aus über +8 °C. Kälteste Wicklungstemperatur aus der Motor-Rückmeldung.
+    for (int gidx = 0; gidx < 2; gidx++) {
+      float tMin = 1e9f, load = 0.f;
+      for (int i = gidx ? ShL : HipL; i <= (gidx ? ElR : KneeR); i++) { tMin = std::fmin(tMin, in.joint[i].motorTempC); load = std::fmax(load, heat_[i]); }
+      bool& h = gidx ? heatArms_ : heatLegs_;
+      if (tMin < 3.f && load < 0.3f) h = true;
+      if (tMin > 8.f || load > 0.5f) h = false;
+    }
+    o.heaterLegs = heatLegs_; o.heaterArms = heatArms_;
     lockOn_ = o.lumbarLock ? lockOn_ + dt : 0.f; o.lumbarDuty = !o.lumbarLock ? 0.f : lockOn_ < 0.2f ? 1.f : 0.35f;
     o.warnBackward = sup.mode == Mode::Active && in.trunkPitch < -0.15f;
     if (o.warnBackward) { warnT_ += dt; if (std::fmod(warnT_, 0.6f) < 0.15f) vibe_ = std::fmax(vibe_, 0.05f); } else warnT_ = 0.f;
@@ -166,6 +178,7 @@ class App {
   float both_ = 0.f, vibe_ = 0.f, stance_[2] = {1.f, 1.f};
   int activeWinch_ = -1;
   float heat_[NJ] = {}, fallT_ = -1.f, lockT_ = 0.f, lockOn_ = 0.f, warnT_ = 0.f;
+  bool heatLegs_ = false, heatArms_ = false;
   bool levelSent_ = false, comboActive_ = false, comboRelease_ = false;
 
   // Gefilterte Manschettenkraft eines Gelenks (aus dem letzten Takt) ohne Totband-Anteil

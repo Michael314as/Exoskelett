@@ -26,6 +26,7 @@ constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8}, PIN_LUMB_LOCK = 13;              // 
 constexpr int PIN_LOOP_CUR[NL] = {14, 15, 16}, PIN_VBAT = 17;                  // analog A0–A3; I2C: 18 SDA, 19 SCL
 constexpr int PIN_LED_RING = 20, PIN_VIBE = 21;                                // CAN1: 22 TX, 23 RX
 constexpr int PIN_LOOP_DIR[NL] = {24, 25, 26}, PIN_LOOP_END[NL] = {27, 28, 29};
+constexpr int PIN_HEAT_LEGS = 42, PIN_HEAT_ARMS = 43;                          // Heizfolien der Gelenkkapseln (MOSFET; Lötpunkte unten, SD-Karte nicht benutzt)
 constexpr int PIN_ESTOP_SENSE = 30, PIN_CONTACTOR = 31, PIN_STAND = 32, PIN_LIGHT = 33, PIN_HX_SCK = 34;
 constexpr int PIN_HX_DOUT[kCells] = {9, 35, 36, 37, 40, 41, 10, 11, 12, 38, 39};   // 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1, 9/10 Fuß L/R
 constexpr float kFootContactN = 49.f;                                          // ≈ 5 kg auf dem Steigbügel = Standbein (am Prüfstand einstellen)
@@ -38,10 +39,10 @@ static volatile bool tick = false;
 
 // ---------- Motoren ----------
 static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can;
-static const MotorLimits kLim;                                                  // RobStride RS06
+static const MotorLimits kLim[NJ] = {kRS04, kRS04, kRS04, kRS04, kRS04, kRS04, kRS03, kRS03};   // Hüfte, Knie, Schulter: RS04; Ellbogen: RS03
 static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8};                    // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR
 // Übersetzung Gelenk : Motor und Wirkungsgrad. Hüfte: Seilgetriebe 1:6. Knie: Kurvenscheibe 5 cm (gestreckt) / Trommel 1,5 cm, Bowdenzug.
-static const Transmission kTr[NJ] = {{6.f, 0.95f}, {6.f, 0.95f}, {3.33f, 0.7f}, {3.33f, 0.7f}, {4.67f, 0.88f}, {4.67f, 0.88f}, {3.33f, 0.7f}, {3.33f, 0.7f}};
+static const Transmission kTr[NJ] = {{1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}};   // direkt bzw. Schubstange 1:1
 static MotorState motorState[NJ];
 static uint32_t lastReplyMs[NJ];
 static float powerOnTime = 0.f;                                                 // Zeit seit Schütz zu
@@ -55,9 +56,8 @@ static bool readMotors(JointInput* j) {
   CAN_message_t m;
   while (can.read(m)) {
     if (!m.flags.extended || m.len < 8) continue;
-    const MotorState s = unpackReply(m.id, m.buf, kLim);
-    if (!s.valid) continue;
-    for (int i = 0; i < NJ; i++) if (kCanId[i] == s.id) { motorState[i] = s; lastReplyMs[i] = millis(); }
+    const uint8_t from = (m.id >> 8) & 0xFF;
+    for (int i = 0; i < NJ; i++) if (kCanId[i] == from) { const MotorState s = unpackReply(m.id, m.buf, kLim[i]); if (s.valid) { motorState[i] = s; lastReplyMs[i] = millis(); } }
   }
   bool ok = true;
   for (int i = 0; i < NJ; i++) {
@@ -69,7 +69,7 @@ static bool readMotors(JointInput* j) {
 }
 static void motorSendTorque(int id, float tauJoint) {
   CAN_message_t m; m.flags.extended = 1; m.len = 8;
-  m.id = packTorqueCommand(kCanId[id], kTr[id].motorTorqueFor(tauJoint), kLim, m.buf);
+  m.id = packTorqueCommand(kCanId[id], kTr[id].motorTorqueFor(tauJoint), kLim[id], m.buf);
   can.write(m);
 }
 
@@ -194,7 +194,7 @@ static void pollConsole() {
 void setup() {
   pinMode(PIN_BTN_POWER, INPUT_PULLUP);
   for (int i = 0; i < NL; i++) { pinMode(PIN_BTN_LOOP[i], INPUT_PULLUP); pinMode(PIN_LOOP_PWM[i], OUTPUT); pinMode(PIN_LOOP_DIR[i], OUTPUT); pinMode(PIN_LOOP_END[i], INPUT_PULLUP); }
-  pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_LUMB_LOCK, OUTPUT); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
+  pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_LUMB_LOCK, OUTPUT); pinMode(PIN_HEAT_LEGS, OUTPUT); pinMode(PIN_HEAT_ARMS, OUTPUT); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
   digitalWrite(PIN_CONTACTOR, LOW);                                             // Schütz erst mit dem Einschalten
   pinMode(PIN_HX_SCK, OUTPUT); for (int c = 0; c < kCells; c++) pinMode(PIN_HX_DOUT[c], INPUT);
   Serial.begin(115200); Serial1.begin(115200);
@@ -238,6 +238,7 @@ void loop() {
   if (logOn) logLine(o);
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
   digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate); analogWrite(PIN_LUMB_LOCK, (int)(o.lumbarDuty * 255.f + 0.5f));
+  digitalWrite(PIN_HEAT_LEGS, o.heaterLegs); digitalWrite(PIN_HEAT_ARMS, o.heaterArms);
 
   // Betriebsstunden: gespeichert wird nur, wenn das Exo aus ist (Flash-Schreiben kann den Regeltakt stören)
   static bool dirty = false;

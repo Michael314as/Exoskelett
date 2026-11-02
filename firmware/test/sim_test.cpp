@@ -219,9 +219,13 @@ int main() {
           "Motorantwort Typ 2 richtig entpackt (inkl. Temperatur)");
     const MotorState bad = unpackReply(rid | (1u << 18), r, L);
     check(bad.fault != 0, "Fehlerbit (Übertemperatur) aus der ID erkannt");
-    Transmission tr; tr.ratio = 4.67f; tr.eta = 0.88f;
-    std::printf("     100 Nm an der Schulter brauchen %.1f Nm am Motor (Grenze 36 Nm)\n", tr.motorTorqueFor(100.f));
-    check(tr.motorTorqueFor(100.f) <= L.tMax, "Schulter-Spitzenmoment liegt im Motorbereich");
+    Transmission tr; tr.ratio = 1.f; tr.eta = 0.97f;
+    std::printf("     Gelenkkapsel: 100 Nm an der Schulter brauchen %.1f Nm am RS04 (Grenze 120 Nm)\n", tr.motorTorqueFor(100.f));
+    check(tr.motorTorqueFor(100.f) <= kRS04.tMax && tr.motorTorqueFor(110.f) <= kRS04.tMax, "Schulter 100 Nm und Hüfte 110 Nm liegen im Bereich des RS04 (direkt)");
+    Transmission te; te.ratio = 1.f; te.eta = 0.95f;
+    check(te.motorTorqueFor(56.f) <= kRS03.tMax, "Ellbogen 56 Nm über Schubstange liegt im Bereich des RS03");
+    const uint32_t id4 = packTorqueCommand(2, 100.f, kRS04, b);
+    check(std::fabs(uintToFloat((id4 >> 8) & 0xFFFF, -kRS04.tMax, kRS04.tMax, 16) - 100.f) < 0.01f, "RS04: Moment mit dem eigenen Wertebereich (±120 Nm) verpackt");
     int32_t want = -12345; uint32_t bits = uint32_t(want) & 0xFFFFFF; int k = 23;
     const int32_t got = hx711ReadRaw([&] { return k >= 0 ? ((bits >> k--) & 1u) != 0 : false; });
     check(got == want, "HX711: negativer 24-Bit-Wert richtig gelesen");
@@ -367,6 +371,13 @@ int main() {
     h2.joint[ShR].cuffN = 700.f; h2.joint[ShR].q = 0.8f; h2.joint[ShR].motorTempC = 124.f; for (float t = 0; t < 2.f; t += dt) o2 = hot2.step(h2, dt);
     std::printf("     Wicklung 124 °C gemessen: Schulter %.0f Nm statt %.0f Nm\n", o2.tau[ShR], t0);
     check(o2.tau[ShR] < 0.45f * t0 && o2.tau[ShR] > 0.f, "gemessene Motortemperatur 124 °C: Moment auf 40 % zurück, bevor der Motor bei 135 °C selbst abschaltet");
+    App cold; Inputs ci; Outputs co; ci.btnPower = true; for (float t = 0; t < 0.15f; t += dt) co = cold.step(ci, dt); ci.btnPower = false; for (float t = 0; t < 6.f; t += dt) co = cold.step(ci, dt);
+    for (int i = 0; i < NJ; i++) ci.joint[i].motorTempC = -8.f;
+    for (float t = 0; t < 0.5f; t += dt) co = cold.step(ci, dt);
+    check(co.heaterLegs && co.heaterArms, "Frost (−8 °C) in Ruhe: Heizfolien der Gelenkkapseln an");
+    for (int i = 0; i < NJ; i++) ci.joint[i].motorTempC = 10.f;
+    for (float t = 0; t < 0.5f; t += dt) co = cold.step(ci, dt);
+    check(!co.heaterLegs && !co.heaterArms, "Kapseln warm (+10 °C): Heizung aus");
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);
