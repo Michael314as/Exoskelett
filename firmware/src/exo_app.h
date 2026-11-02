@@ -6,6 +6,7 @@
 // Vorzeichen: positiv = in +q-Richtung. Hüfte und Knie: +q = beugen, also Strecken = negatives Moment.
 #pragma once
 #include "exo_core.h"
+#include <cstring>
 
 namespace exo {
 
@@ -44,6 +45,9 @@ struct Outputs {
   bool vibrate = false;                // kurzer Impuls bei Schlaufe zu/auf
   float ff[NJ] = {};                   // Anteil Vorsteuerung (für Log und Tests)
   float stance[2] = {};                // 0 = Schwungbein, 1 = Standbein (geglättet)
+  bool lumbarLock = false;             // Lendengelenk sperren (Hubmagnet): Baum in den Schlaufen
+  bool warnBackward = false;           // Rücklage: Rumpf zu weit nach hinten
+  float heat[NJ] = {};                 // Wärmeschätzung je Motor (1 = Dauerbetrieb mit Nennmoment)
 };
 
 inline JointConfig defaultJoint(JointId id) {
@@ -51,16 +55,16 @@ inline JointConfig defaultJoint(JointId id) {
   switch (id) {
     case HipL: case HipR:   // Hüftmotor mit Seilgetriebe 1:6: stark strecken, schwach beugen
       c.name = "Hüfte"; c.rCuff = 0.15f; c.tauMin = -140.f; c.tauMax = 35.f; c.qMin = -0.35f; c.qMax = 2.0f;
-      c.gravCoef = 2.0f; c.slew = 600.f; break;            // Exo-Bein ~2,5 kg, wirkt nur im Schwung
+      c.gravCoef = 2.0f; c.slew = 600.f; c.motorPerJoint = 1.f / (6.f * 0.95f); break;   // Exo-Bein ~2,5 kg, wirkt nur im Schwung
     case KneeL: case KneeR: // Bowdenzug-Paar; Beugen mechanisch durch die Federpatrone begrenzt (~11 Nm)
       c.name = "Knie"; c.rCuff = 0.f; c.tauMin = -110.f; c.tauMax = 10.f; c.qMin = 0.05f; c.qMax = 2.0f;
-      c.gravCoef = 0.f; c.frictionComp = 0.4f; c.slew = 600.f; break;
+      c.gravCoef = 0.f; c.frictionComp = 0.4f; c.slew = 600.f; c.motorPerJoint = 1.f / (4.f * 0.7f); break;
     case ShL: case ShR:
       c.name = "Schulter"; c.rCuff = 0.17f; c.tauMax = 100.f; c.tauMin = -100.f;
-      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; break;              // Exo-Arm ~1,4 kg
+      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; c.motorPerJoint = 1.f / (4.67f * 0.88f); break;   // Exo-Arm ~1,4 kg
     default:
       c.name = "Ellbogen"; c.rCuff = 0.15f; c.tauMax = 58.f; c.tauMin = -58.f;
-      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; break;
+      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / (3.33f * 0.7f); break;
   }
   return c;
 }
@@ -115,7 +119,18 @@ class App {
     for (int i = 0; i < NJ; i++) ji[i] = in.joint[i];
     computeCoupling(in, ji);
 
+    // Wärmeschätzung je Motor: folgt (Motormoment / Nennmoment 8,3 Nm)² mit 3 min Zeitkonstante; über 1 wird die Grenze zurückgenommen
     for (int i = 0; i < NJ; i++) {
+      const float r = joint[i].lastTau() * joint[i].cfg.motorPerJoint / 8.3f;
+      heat_[i] += (r * r - heat_[i]) * clampf(dt / 180.f, 0.f, 1.f); o.heat[i] = heat_[i];
+      ji[i].limitScale = clampf(1.f - 0.6f * (heat_[i] - 1.f), 0.4f, 1.f);
+    }
+    // Schutz bei Sturz: Beine nicht schlaff, sondern 1,5 s weich gedämpft (bremst das Hinsetzen), dann aus
+    const bool falling = sup.mode == Mode::SoftOff && sup.reason && !std::strcmp(sup.reason, "Sturz erkannt");
+    if (falling && fallT_ < 0.f) fallT_ = 0.f;
+    if (!falling) fallT_ = -1.f;
+    for (int i = 0; i < NJ; i++) {
+      if (falling && fallT_ < 1.5f && i <= KneeR) { o.tau[i] = clampf(-4.f * in.joint[i].qd, -60.f, 60.f) * (1.f - fallT_ / 1.5f); continue; }
       if (sup.scale <= 0.f || !((jointMask >> i) & 1u)) { joint[i].off(); o.tau[i] = 0.f; continue; }
       o.tau[i] = joint[i].step(ji[i], dt, sup.scale);
       o.ff[i] = ji[i].ffNm;
@@ -128,6 +143,12 @@ class App {
     for (int i = 0; i < NL; i++) o.winch[i] = (i == activeWinch_) ? loop[i].step(in.loopCurrentA[i], in.loopOpenSwitch[i], dt) : 0.f;
     if (activeWinch_ >= 0 && !loop[activeWinch_].moving()) activeWinch_ = -1;
     // Anzeige
+    if (fallT_ >= 0.f) fallT_ += dt;
+    // Lendengelenk sperren, solange ein Baum (> 5 kg) in den Schlaufen hängt; Rücklage-Warnung
+    const float loadN = in.loopN[LoopR1] + in.loopN[LoopR2] + in.loopN[LoopL1];
+    lockT_ = loadN > 49.f ? lockT_ + dt : 0.f; o.lumbarLock = lockT_ > 0.3f && sup.mode == Mode::Active;
+    o.warnBackward = sup.mode == Mode::Active && in.trunkPitch < -0.15f;
+    if (o.warnBackward) { warnT_ += dt; if (std::fmod(warnT_, 0.6f) < 0.15f) vibe_ = std::fmax(vibe_, 0.05f); } else warnT_ = 0.f;
     o.led = sup.led(s);
     o.ledCount = int(std::round(12.f * exo::clampf((in.safety.batteryV - 30.f) / (41.f - 30.f), 0.f, 1.f)));
     o.workLight = light;
@@ -138,6 +159,7 @@ class App {
  private:
   float both_ = 0.f, vibe_ = 0.f, stance_[2] = {1.f, 1.f};
   int activeWinch_ = -1;
+  float heat_[NJ] = {}, fallT_ = -1.f, lockT_ = 0.f, warnT_ = 0.f;
   bool levelSent_ = false, comboActive_ = false, comboRelease_ = false;
 
   // Gefilterte Manschettenkraft eines Gelenks (aus dem letzten Takt) ohne Totband-Anteil

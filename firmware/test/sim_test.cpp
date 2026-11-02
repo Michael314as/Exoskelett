@@ -322,6 +322,31 @@ int main() {
     check(app.loop[LoopL1].state == LoopState::Closing, "Wartezeit zählt nicht zur Zeitüberwachung (12 s ab Start)");
   }
 
+  std::printf("15) Sicherheit und Komfort: Sturzdämpfung, Lendensperre, Rücklage, Wärme\n");
+  {
+    const float dt = 0.005f;
+    App app; Inputs in; Outputs o;
+    auto run = [&](float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
+    in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);
+    in.loopN[LoopR1] = 150.f; run(0.5f);
+    check(o.lumbarLock, "Baum 15 kg in der Schlaufe: Lendengelenk gesperrt");
+    in.loopN[LoopR1] = 0.f; run(0.5f);
+    check(!o.lumbarLock, "Baum abgelegt: Lendengelenk wieder frei");
+    in.trunkPitch = -0.25f; bool vib = false; for (float t = 0; t < 1.f; t += dt) { o = app.step(in, dt); vib |= o.vibrate; }
+    check(o.warnBackward && vib, "Rücklage: Warnung und Vibration");
+    in.trunkPitch = 0.f;
+    in.joint[KneeR].qd = 3.f; in.safety.trunkTiltRate = 3.f; run(0.05f);
+    check(app.sup.mode == Mode::SoftOff && o.tau[KneeR] < -5.f, "Sturz: Knie bremst die Bewegung (Dämpfung), statt schlaff zu werden");
+    run(2.f);
+    check(o.tau[KneeR] == 0.f, "nach 1,5 s Sturzdämpfung: stromlos");
+    in.safety.trunkTiltRate = 0.f;
+    App hot; Inputs hi; Outputs ho; hi.btnPower = true; for (float t = 0; t < 0.15f; t += dt) ho = hot.step(hi, dt); hi.btnPower = false; for (float t = 0; t < 6.f; t += dt) ho = hot.step(hi, dt);
+    hi.joint[ShR].cuffN = 700.f; hi.joint[ShR].q = 0.8f; for (float t = 0; t < 2.f; t += dt) ho = hot.step(hi, dt); const float t0 = ho.tau[ShR];
+    for (float t = 0; t < 600.f; t += dt) ho = hot.step(hi, dt);
+    std::printf("     Schulter Dauerlast: anfangs %.0f Nm, nach 10 min %.0f Nm (Wärme %.2f)\n", t0, ho.tau[ShR], ho.heat[ShR]);
+    check(ho.heat[ShR] > 1.f && ho.tau[ShR] < t0 * 0.95f && ho.tau[ShR] >= 0.4f * 100.f - 1.f, "warmer Motor: Moment wird zurückgenommen, nicht abgeschaltet");
+  }
+
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);
   return fails ? 1 : 0;
 }

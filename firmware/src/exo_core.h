@@ -51,6 +51,7 @@ struct JointConfig {
   float gravCoef = 0.0f;       // Schwerkraftausgleich der Exo-Schiene: gravCoef · sin(q + gravPhase) [Nm]
   float gravPhase = 0.0f;
   float slew = 400.f;          // max. Momentänderung [Nm/s] – nichts ruckt
+  float motorPerJoint = 1.f;   // Motormoment je Nm am Gelenk = 1 / (Übersetzung · Wirkungsgrad), für die Wärmeschätzung
 };
 
 struct JointInput {
@@ -62,6 +63,7 @@ struct JointInput {
   float ffNm = 0.f;            // Vorsteuerung: Baumlast, Körpergewicht im Stand [Nm], nicht verstärkt
   float gravScale = 1.f;       // Anteil Schwerkraftausgleich der Schiene (Bein im Stand: 0)
   float tauMaxNow = 1e9f;      // zusätzliche obere Grenze in diesem Takt (Standbein: nicht beugen)
+  float limitScale = 1.f;      // Abregelung bei warmem Motor (1 = volle Grenzen)
 };
 
 class Joint {
@@ -85,7 +87,7 @@ class Joint {
     const float fric = cfg.frictionComp * std::tanh(in.qd / 0.05f);   // weich um den Stillstand, damit nichts zittert
     float tau = scale * (grav + in.ffNm + assist + fric - cfg.damping * in.qd);
     if (cfg.pullOnly) tau = std::fmax(tau, cfg.pretension * scale);
-    tau = clampf(tau, cfg.pullOnly ? 0.f : cfg.tauMin, std::fmin(cfg.tauMax, in.tauMaxNow));
+    tau = clampf(tau, cfg.pullOnly ? 0.f : cfg.tauMin * in.limitScale, std::fmin(cfg.tauMax * in.limitScale, in.tauMaxNow));
     // Änderungsrate begrenzen
     const float maxStep = cfg.slew * dt;
     tau = clampf(tau, last_ - maxStep, last_ + maxStep);

@@ -22,7 +22,7 @@ using namespace exo;
 
 // ---------- Pins (Teensy 4.1) ----------
 constexpr int PIN_BTN_POWER = 2,              /* Serial1 zum ESP32-C3: 0 RX, 1 TX */ PIN_BTN_LOOP[NL] = {3, 4, 5};
-constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8};                                   // 13 frei
+constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8}, PIN_LUMB_LOCK = 13;              // 13: Hubmagnet der Lendensperre (über MOSFET)
 constexpr int PIN_LOOP_CUR[NL] = {14, 15, 16}, PIN_VBAT = 17;                  // analog A0–A3; I2C: 18 SDA, 19 SCL
 constexpr int PIN_LED_RING = 20, PIN_VIBE = 21;                                // CAN1: 22 TX, 23 RX
 constexpr int PIN_LOOP_DIR[NL] = {24, 25, 26}, PIN_LOOP_END[NL] = {27, 28, 29};
@@ -192,7 +192,7 @@ static void pollConsole() {
 void setup() {
   pinMode(PIN_BTN_POWER, INPUT_PULLUP);
   for (int i = 0; i < NL; i++) { pinMode(PIN_BTN_LOOP[i], INPUT_PULLUP); pinMode(PIN_LOOP_PWM[i], OUTPUT); pinMode(PIN_LOOP_DIR[i], OUTPUT); pinMode(PIN_LOOP_END[i], INPUT_PULLUP); }
-  pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
+  pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_LUMB_LOCK, OUTPUT); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
   digitalWrite(PIN_CONTACTOR, LOW);                                             // Schütz erst mit dem Einschalten
   pinMode(PIN_HX_SCK, OUTPUT); for (int c = 0; c < kCells; c++) pinMode(PIN_HX_DOUT[c], INPUT);
   Serial.begin(115200); Serial1.begin(115200);
@@ -235,7 +235,7 @@ void loop() {
   if (motorsOn) for (int i = 0; i < NJ; i++) if ((cfg.jointMask >> i) & 1u) motorSendTorque(i, o.tau[i]);
   if (logOn) logLine(o);
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
-  digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate);
+  digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate); digitalWrite(PIN_LUMB_LOCK, o.lumbarLock);
 
   // Betriebsstunden: gespeichert wird nur, wenn das Exo aus ist (Flash-Schreiben kann den Regeltakt stören)
   static bool dirty = false;

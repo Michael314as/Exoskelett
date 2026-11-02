@@ -175,7 +175,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
         <label class="chk"><input type="checkbox" id="stand"> Parkstütze ausgeklappt</label>
         <label class="chk"><input type="checkbox" id="anod" checked> Eloxiert</label>
         <label class="chk"><input type="checkbox" id="bench"> Werkbank</label>
-        <label class="chk"><input type="checkbox" id="bat2" checked> Zweiter Akku (links)</label>
+        <label class="chk"><input type="checkbox" id="bat2"> Zweiter Akku (links, Reserve)</label>
         <label class="sl" for="xray">Rahmen durchsichtig <input type="range" id="xray" min="0" max="1" step="0.05" value="0"></label>
         <span class="grp" role="group" aria-label="Umgebung"><em>Umgebung</em><button class="btn" data-env="work" aria-pressed="true">Werkstatt</button><button class="btn" data-env="farm" aria-pressed="false">Plantage</button></span>
       </div>
@@ -800,7 +800,8 @@ SIDE.forEach((sd, k) => {
     tube(g, V(-0.072, yg + 0.042, zf), V(-0.084, 0, zf), 0.012);                                       // Lasche zum Kippgelenk
     put(g, mesh(new THREE.TorusGeometry(0.06, 0.008, 6, 20, Math.PI), M.strap), 0.045, yg + 0.035, zf, 0, Math.PI / 2, 0);
     box(g, 0.022, 0.014, 0.014, M.steel, 0.045, yg + 0.06, zf + sd * 0.05);
-    cur = 'sensor'; box(g, 0.05, 0.003, 0.1, M.pcb, 0.035, yg + 0.0015, zf);                         // Fußkontakt (Drucksensor)
+    put(g, mesh(cyl(0.032, 0.032, 0.005, 32), M.chrome), 0.035, yg + 0.0005, zf).userData.turn = true;   // Drehteller ±20° mit Zentrierfeder
+    cur = 'sensor'; box(g, 0.05, 0.003, 0.1, M.pcb, 0.035, yg + 0.004, zf);                         // Fußkontakt (Drucksensor)
     cur = 'foot';
     if (k === 1) hotspot('foot', g, 0.15, yg + 0.01, zf + sd * 0.1);
   }
@@ -817,6 +818,7 @@ SIDE.forEach((sd, k) => {
     const g = G.torso;
     tube(g, V(-0.155, D.torso + 0.07, sd * 0.085), V(-0.165, yA + 0.045, zA - sd * 0.02), 0.03);       // Schulterbügel 30 × 30 × 3
     for (const x of [-0.192, -0.133]) box(g, 0.01, 0.075, 0.055, M.alu, x, yA + 0.012, zA);              // Gabel
+    for (const dz of [-0.018, 0.018]) { const r = rod(g, V(-0.172, yA + 0.05, zA + dz), V(-0.172, yA + 0.11, zA + dz), 0.004, M.chrome); r.userData.slide = true; }   // Gleitführung: Schulter hebt sich ±3 cm mit dem Schulterblatt
     box(g, 0.069, 0.012, 0.055, M.alu, -0.1625, yA + 0.05, zA);
     for (const x of [-0.2, -0.125]) put(g, mesh(cyl(0.011, 0.011, 0.012, 18), M.steel), x, yA, zA, 0, 0, Math.PI / 2);   // Hohlachse
     put(g, mesh(new THREE.TorusGeometry(0.012, 0.0025, 6, 16), M.red), -0.118, yA, zA, 0, Math.PI / 2, 0);              // Kugelsperrbolzen
@@ -874,6 +876,7 @@ SIDE.forEach((sd, k) => {
     tube(g, V(0, -0.02, zFo), V(0, -D.fore + 0.01, zFo), 0.025);
     fl = null;
     sensorCuff(g, -0.07, sd * D.shHalf, 0.042, 0.05, zFo, sd, k === 1 ? 'fore' : null);
+    { const prev = cur; cur = 'sensor'; const ring = put(g, mesh(new THREE.TorusGeometry(0.05, 0.004, 8, 40), M.chrome), 0, -0.07, sd * D.shHalf, Math.PI / 2); ring.userData.ring = true; cur = prev; }   // Drehring: Unterarm dreht in der Manschette ±60°
     if (k === 1) hotspot('elbow', g, 0.0, R_EL + 0.02, zDisc + sd * 0.03);
   }
 });
@@ -1145,6 +1148,24 @@ SIDE.forEach((sd, k) => {
 });
 dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.475, -0.16), W(G.torso, -0.2, D.torso + 0.04, -0.11), W(G.torso, -0.1, D.torso + 0.058, -0.075),
   W(G.torso, -0.01, D.torso + 0.098, -0.095), W(G.torso, 0.093, D.torso + 0.045, -0.1), W(G.torso, 0.134, D.torso - 0.05, -0.1)], true);   // Not-Aus, Ein/Aus, LED-Ring
+// Gasfedern am Lendengelenk: tragen das Exo-Oberteil beim Bücken (stretchen sich mit dem Rumpf)
+cur = 'frame';
+for (const sd of SIDE) {
+  const A = () => W(G.torso, -0.2, 0.09, sd * 0.055), B = () => W(G.torso, -0.205, 0.33, sd * 0.055);
+  const gb = dynTube(M.steel, 0.009, 'frame', () => { const a = A(), b = B(); return [a, a.clone().lerp(b, 0.55)]; }); gb.m.userData.gas = true;
+  const gr = dynTube(M.chrome, 0.004, 'frame', () => { const a = A(), b = B(); return [a.clone().lerp(b, 0.5), b]; }); gr.m.userData.gas = true;
+  box(G.torso, 0.02, 0.025, 0.03, M.motorDark, -0.13, 0.13, sd * 0.06).userData.lock = true;   // Hubmagnet der Lendensperre
+}
+// Fingerschutz: durchsichtige Ringe über allen Seilscheiben (Schutz vor Einklemmen)
+const guardMat = new THREE.MeshPhysicalMaterial({ color: 0xBFD6E6, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
+function guard(g, x, y, z, r, w) { const prev = catNow; catNow = 'struct'; const m = mesh(new THREE.CylinderGeometry(r, r, w, 40, 1, true), guardMat, false); m.userData.guard = true; put(g, m, x, y, z, Math.PI / 2); const lid = mesh(new THREE.CircleGeometry(r, 40), guardMat, false); lid.userData.guard = true; put(g, lid, x, y, z + Math.sign(z) * w / 2); catNow = prev; }
+cur = 'finish';
+SIDE.forEach((sd, k) => {
+  guard(G.swing[k], 0, 0, sd * Z.hm, R_HM + 0.012, 0.03);
+  guard(G.thigh[k], 0, -D.thigh, sd * (Z.ek + Z.fk) / 2, 0.092, 0.04);
+  guard(G.shsw[k], 0, D.torso, ZS(sd) + sd * 0.054, R_SH + 0.012, 0.026);
+  guard(G.upper[k], 0, -D.upper, ZS(sd) + sd * 0.054, R_EL + 0.012, 0.024);
+});
 // Hauben (Schalter „Hauben“): Hüftmotor mit Seilgetriebe
 cur = 'finish';
 SIDE.forEach((sd, k) => {
@@ -1396,7 +1417,9 @@ const DB = [
   ['RA-01', 'Rahmenrohr senkrecht', 'Halbzeug', 'EN AW-6082 T6 Vierkantrohr 30 × 30 × 2', 'L 600 mm; Biegespannung Spitze 59 MPa', 0.36, 'RA-02 RA-03 HU-01 SC-01'],
   ['RA-02', 'Querrohr', 'Halbzeug', 'EN AW-6082 T6 Vierkantrohr 20 × 20 × 2', 'L 220 mm', 0.09, 'RA-01 RA-03'],
   ['RA-03', 'Eck-Doppelplatte, Lochleiste', 'Laser', 'AlMg3 4 mm', '60 × 60 mm, M6 DIN 912 A2 + DIN 985', 0.04, 'RA-01 RA-02 GU-02'],
-  ['RA-09', 'Lendengelenk', 'Laser + Kauf', 'Scharnier Alu 8 mm, Elastomerfeder Ø 24 (Shore 70), Bolzen Ø 10, Sperrhebel', 'Rumpf beugen ±25° und seitlich ±10° (Elastomer); Sperre zum schweren Heben; die Achse liegt auf Höhe der Lendenwirbel', 0.35, 'RA-01 GU-01 GU-02'],
+  ['RA-09', 'Lendengelenk mit Sperre', 'Laser + Kauf', 'Scharnier Alu 8 mm, Elastomerfeder Ø 24 (Shore 70), Bolzen Ø 10, Hubmagnet 24 V mit Sperrbolzen', 'Rumpf beugen ±25° und seitlich ±10°; sperrt automatisch, sobald ein Baum > 5 kg in den Schlaufen hängt (Firmware), von Hand per Hebel', 0.45, 'RA-01 GU-01 GU-02'],
+  ['RA-10', 'Gasfeder Lendengelenk', 'Kauf', 'Gasfeder 150 N, Hub 50 mm, Ø 15/6 mm, Kugelpfannen M6 (Katalogteil)', 'zwei Stück; tragen das Exo-Oberteil beim Bücken (≈ 36 Nm um das Lendengelenk)', 0.12, 'RA-09 RA-01'],
+  ['RA-11', 'Fingerschutz Seilscheiben', 'Druck', 'Polycarbonat 1,5 mm, durchsichtig, geschraubt', 'über Hüft-, Knie-, Schulter- und Ellbogenscheiben: nichts kann eingezogen werden', 0.05, 'BA-05 BA-09 SC-10 AR-04'],
   ['RA-04', 'Schutzbügel', 'Halbzeug, gebogen', 'Alu-Rundrohr Ø 22 × 2 (EN AW-6060)', 'Biegeradius ≥ 60 mm; trifft bei Sturz nach hinten zuerst auf', 0.6, 'RA-01 RA-05 RA-07'],
   ['RA-05', 'Gummipuffer', 'Kauf', 'Gummipuffer Typ A Ø 40 × 30, M8', 'Shore 55', 0.03, 'RA-04'],
   ['RA-07', 'Parkstütze', 'Halbzeug + Kauf', 'Vierkant 20 × 20 × 2, Kugelsperrbolzen GN 113 Ø 6', 'Endschalter meldet „unten“ an die Steuerung', 0.35, 'RA-04 EL-01'],
@@ -1456,12 +1479,14 @@ const DB = [
   ['BE-10', 'Kippgelenk', 'Kauf', 'Bolzen Ø 8 mit Gummibuchse', 'Achse nach vorne durch den Knöchel', 0.03, 'BE-09 BE-11'],
   ['BE-11', 'Steigbügel', 'Laser + Kanten', 'Edelstahl 1.4301, 4 mm', 'unter der Sohlenmitte (Lastlinie durch die Abspreizachse)', 0.25, 'BE-10 BE-12 BE-13 SE-06'],
   ['BE-12', 'Spikes', 'Kauf', 'Schraubspikes M5, Hartmetallspitze', '6 je Fuß, tauschbar', 0.005, 'BE-11'],
+  ['BE-14', 'Drehteller Steigbügel', 'Kauf + Laser', 'Axial-Nadellager AXK 3047 + Zentrierfeder, Edelstahlscheiben', 'Fußspitze drehen ±20° (Wenden, Fuß nach außen stellen) ohne das Knie zu verdrehen', 0.08, 'BE-11 SE-06'],
   ['BE-13', 'Fersenschale, Ristriemen', 'Druck + Kauf', 'PETG, Steigeisen-Ratschenriemen', '', 0.1, 'BE-11'],
   ['SE-01', 'Manschette', 'Druck', 'PETG-Schale 5 mm, Polster 6 mm, Klett', 'Oberarm, Unterarm, Oberschenkel', 0.1, 'SE-02 BE-01 AR-01 AR-02'],
   ['SE-02', 'Wägezelle Manschette', 'Kauf', 'Biegebalken YZC-133, 20 kg, 80 × 12,7 × 12,7 mm', 'misst nur quer zur Schiene', 0.03, 'SE-01 SE-03 SE-04'],
   ['SE-03', 'Messverstärker', 'Kauf', 'HX711-Modul 24 × 16 mm, vergossen (Ausbau: ADS1220)', '80 Messungen/s', 0.005, 'SE-02 KB-02 KB-03'],
   ['SE-04', 'Überlastpuffer, Halter', 'Druck + Laser', 'TPU, Alu', 'Spalt 1 mm', 0.02, 'SE-02'],
   ['SE-06', 'Fußkontakt', 'Kauf', '4 × Halbbrücken-Wägezelle 50 kg (Personenwaagen-Bauform 34 × 34 × 8 mm, 1,0 mV/V, Grenzlast 150 %) je Steigbügel, als Vollbrücke an einem HX711', 'misst die Fußlast (bis 200 kg, Grenzlast 300 kg) → Standbein / Schwungbein. Ein FSR 406 (0,2–20 N) wäre unter dem Körpergewicht überlastet.', 0.15, 'BE-11 KB-02'],
+  ['SE-08', 'Drehring Unterarm-Manschette', 'Druck + Kauf', 'Gleitring PA6 / iglidur, Ø 100 mm', 'Unterarm dreht in der Manschette ±60° (Hand drehen ohne gegen das Exo zu arbeiten)', 0.03, 'SE-01 AR-02'],
   ['SE-07', 'Wägezelle Schlaufenkopf', 'Kauf', 'Biegebalken YZC-1B, 50 kg', 'Baumgewicht für die Vorsteuerung', 0.04, 'SG-02 KB-03'],
   ['SC-01', 'Schulterbügel', 'Halbzeug', '6082 Vierkant 30 × 30 × 3', 'Biegespannung Spitze 53 MPa', 0.3, 'RA-01 SC-02'],
   ['SC-02', 'Schultergabel', 'Laser', 'Alu 10 mm', 'Achse nach vorne durch das Schultergelenk', 0.12, 'SC-01 SC-03 SC-06'],
@@ -1473,6 +1498,7 @@ const DB = [
   ['SC-08', 'Schulterschwinge', 'Halbzeug', '6082 Vierkant 30 × 30 × 3', 'über die Schulter zum Schulterlager', 0.35, 'SC-06 SC-09 SC-05'],
   ['SC-09', 'Schulterlager', 'Kauf', 'Flanschlager KFL001 (12 mm)', '', 0.12, 'SC-08 SC-10'],
   ['SC-10', 'Seilscheibe Schulter Ø 140', 'Laser', '3 Lagen Alu', 'Übersetzung 4,67 zur Trommel', 0.15, 'SC-11 AR-01'],
+  ['SC-12', 'Gleitführung Schulterblatt', 'Kauf', '2 Führungswellen Ø 8 h6 + Linearlager LM8UU, Druckfeder', 'Schulter hebt und senkt sich ±3 cm mit dem Schulterblatt', 0.1, 'SC-01 SC-02'],
   ['SC-11', 'Seilpaar Schulter', 'Kauf', 'Liros D-Pro 3 mm (Bruchlast 950 daN)', 'oben heben, unten senken; Spitze ≈ 1,7 kN', 0.01, 'AN-S SC-04 SC-10'],
   ['AR-01', 'Oberarmschiene', 'Halbzeug', '6082 Vierkant 25 × 25 × 3', '', 0.2, 'SC-10 AR-03 SE-01 BD-03'],
   ['AR-02', 'Unterarmschiene', 'Halbzeug', '6082 Vierkant 25 × 25 × 3', 'trägt den Schlaufenträger', 0.18, 'AR-03 SG-01 SE-01'],
@@ -1520,7 +1546,7 @@ function ctx(m) {
 function classify(m, key, c) {
   const b = m.userData.base, is = (...a) => a.includes(b), geo = m.geometry.type, hx = b && b.color ? b.color.getHex() : 0, g = c.g, yw = -D.fore;
   switch (key) {
-    case 'frame': if (Math.abs(c.tl.y - 0.17) < 0.03 && !is(M.alu) && c.tl.x > -0.2) return 'RA-09'; if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
+    case 'frame': if (m.userData.gas) return 'RA-10'; if (m.userData.lock) return 'RA-09'; if (Math.abs(c.tl.y - 0.17) < 0.03 && !is(M.alu) && c.tl.x > -0.2) return 'RA-09'; if (is(M.tpu)) return 'RA-05'; if (geo === 'CylinderGeometry' || geo === 'SphereGeometry') return 'RA-04'; if (is(M.alu)) return c.sz.y > 0.3 ? 'RA-01' : 'RA-02'; return 'RA-03';
     case 'straps': if (is(M.chip, M.chrome)) return 'GU-03'; if (c.tl.y < 0.17) return 'GU-01'; return hx === 0x3A4148 ? 'GU-02' : 'GU-03';
     case 'drive': if (c.inSpool) return 'AN-T'; if (is(M.motor, M.motorDark, M.chip)) return c.tl.y < 0.26 ? 'AN-K' : c.tl.y < 0.36 ? 'AN-E' : 'AN-S'; return 'AN-01';
     case 'power':
@@ -1556,17 +1582,20 @@ function classify(m, key, c) {
     case 'foot':
       if (g === 'shank') return 'BE-08';
       if (g === 'brace') return is(M.steel, M.tpu) ? 'BE-10' : 'BE-09';
+      if (m.userData.turn) return 'BE-14';
       if (is(M.chrome) && geo === 'ConeGeometry') return 'BE-12';
       if (is(M.alu)) return 'BE-10';
       if (is(M.steel) && c.big > 0.025) return 'BE-11';
       return 'BE-13';
     case 'sensor':
+      if (m.userData.ring) return 'SE-08';
       if (g === 'foot') return 'SE-06';
       if (c.inHead || (g === 'fore' && c.lp.y < yw + 0.06)) return 'SE-07';
       if (is(M.cell, M.gauge)) return 'SE-02'; if (is(M.pcb)) return 'SE-03';
       if (is(M.print, M.foam, M.strap)) return 'SE-01'; return 'SE-04';
     case 'shoulder':
       if (c.inPulley) return 'SC-04';
+      if (m.userData.slide) return 'SC-12';
       if (g === 'torso') { if (is(M.aluDark)) return 'SC-05'; if (is(M.steel, M.red)) return 'SC-03'; return Math.min(c.gsz.x, c.gsz.y, c.gsz.z) < 0.016 ? 'SC-02' : 'SC-01'; }
       if (g === 'shsw') { if (geo === 'TubeGeometry') return 'SC-07'; if (is(M.aluDark)) return 'SC-05'; if (is(M.steel, M.chrome)) return 'SC-09'; if (c.big < 0.06 && c.lp.x < -0.13) return 'SC-06'; if (c.big < 0.08) return 'SC-09'; return 'SC-08'; }
       if (g === 'upper') return c.big < 0.07 && is(M.alu) && geo !== 'ExtrudeGeometry' ? 'SC-09' : 'SC-10';
@@ -1583,7 +1612,7 @@ function classify(m, key, c) {
     case 'display': return 'BD-03';
     case 'light': return geo === 'SphereGeometry' && c.tl.x > 0.05 ? 'BD-01' : 'BD-04';
     case 'stand': return 'RA-07';
-    case 'finish': return 'RA-08';
+    case 'finish': return m.userData.guard ? 'RA-11' : 'RA-08';
   }
   return 'RA-03';
 }
@@ -1903,6 +1932,7 @@ function buildBom() {
 }
 $('bomt').addEventListener('click', (e) => { const r = e.target.closest('[data-pid]'); if (r) select(r.dataset.pid, true); });
 resize(); buildTree(); buildBom(); insp(); setMode('free');
+PIDS['EN-01-L'].meshes.forEach((m) => { m.userData.off = true; }); paint();
 camera.position.copy(CAMS.iso); controls.target.set(0, 0.95, 0);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let last = performance.now(), slowT = 0, cgInfo = null;

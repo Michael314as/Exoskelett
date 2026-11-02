@@ -37,7 +37,7 @@ Pulldown 10 kΩ hält das Schütz dann sicher offen.
 | 6 / 7 / 8 | Winde R1 / R2 / L1 PWM | 27 / 28 / 29 | Winde R1 / R2 / L1 Endschalter offen |
 | 9 | HX711 Daten Zelle 0 (Oberschenkel L) | 30 | Not-Aus-Rückmeldung |
 | 10 / 11 / 12 | HX711 Daten Zellen 6 / 7 / 8 (Schlaufen R1 / R2 / L1) | 31 | Schütz |
-| 13 | frei | 38 / 39 | Fußsensor (FSR) links / rechts, 10 kΩ nach Masse |
+| 13 | Hubmagnet Lendensperre (MOSFET, Freilaufdiode; stromlos = frei) | 38 / 39 | Fußsensor (FSR) links / rechts, 10 kΩ nach Masse |
 | 14 / 15 / 16 | Windenstrom R1 / R2 / L1 (0,5 V/A) | 32 | Parkstütze unten (Endschalter) |
 | 17 | Akkuspannung (Teiler 1:15) | 33 | Arbeitslicht (MOSFET) |
 | 18 / 19 | I2C SDA / SCL → BNO085 | 34 | HX711 Takt (alle 9) |
