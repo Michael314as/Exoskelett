@@ -1423,9 +1423,9 @@ const DB = [
   ['RA-04', 'Schutzbügel', 'Halbzeug + Kauf', 'CFK-Rundrohr Ø 22 × 1,5 (gewickelt), Alu-Eckverbinder geklebt', 'trifft bei Sturz nach hinten zuerst auf; CFK statt Alu spart 0,25 kg', 0.35, 'RA-01 RA-05 RA-07'],
   ['RA-05', 'Gummipuffer', 'Kauf', 'Gummipuffer Typ A Ø 40 × 30, M8', 'Shore 55', 0.03, 'RA-04'],
   ['RA-07', 'Parkstütze', 'Halbzeug + Kauf', 'Vierkant 20 × 20 × 2, Kugelsperrbolzen GN 113 Ø 6', 'abnehmbar: bleibt am Fahrzeug und wird nur zum Abstellen eingesteckt (beim Tragen nicht mitgerechnet); Endschalter meldet „unten“', 0.35, 'RA-04 EL-01'],
-  ['RA-08', 'Hauben', 'Druck', 'PETG matt, Wand 1,2 mm mit Rippen, Dichtung EPDM', 'Box IP54, Hüftmotor mit Labyrinth', 0.25, 'AN-01 BA-01'],
+  ['RA-08', 'Hauben', 'Druck', 'PETG matt, Wand 1,2 mm mit Rippen, Dichtung EPDM', 'Box IP54 (2 Hälften ≈ 2 × 85 g), Hüftmotor mit Labyrinth (je ≈ 60 g)', 0.1, 'AN-01 BA-01'],
   ['GU-01', 'Hüftgurt', 'Kauf', 'Hüftflossen eines Trekkingrucksacks (Ersatzteil), 100 mm', 'Magnet-Schnalle Fidlock; trägt kaum, führt das Exo', 0.45, 'RA-01 GU-02'],
-  ['GU-02', 'Schultergurte und Polster', 'Kauf / Nähen', 'S-Schultergurte, Abstandsgewirke 10 mm', 'Rückenlänge über Lochleiste RA-03', 0.5, 'GU-01 GU-03 RA-03'],
+  ['GU-02', 'Schultergurte und Polster', 'Kauf / Nähen', 'S-Schultergurte, Abstandsgewirke 10 mm', 'Rückenlänge über Lochleiste RA-03; Satz (2 Gurte + Lendenpolster) ≈ 500 g wie ein Trekking-Ersatzgurt', 0.17, 'GU-01 GU-03 RA-03'],
   ['GU-03', 'Riemen und Schnallen', 'Kauf', 'Gurtband 20/25 mm, Leiterschnallen, Fidlock-Brustgurt', 'Lageverstellriemen, Brustgurt', 0.12, 'GU-02'],
   ['EN-01', 'Akku', 'Kauf', 'Stihl AP 500 S (36 V, 337 Wh, IPX4, 70 × 116 × 164 mm)', '2,0 kg; bis 2 500 Ladezyklen; zweiter Akku optional (Darstellung), parallel über EL-06, einzeln im Betrieb wechselbar', 2.0, 'EN-02 EL-06'],
   ['EN-02', 'Akkuschacht', 'Druck + Halbzeug', 'PETG-CF, Führungsschienen Alu 4 × 4, Kontaktträger', 'Einschub von hinten, Stihl-Rastung', 0.25, 'EN-01 AN-01 RA-04'],
@@ -1828,7 +1828,7 @@ function convex(pts) { pts = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
 function cog() {
   const tot = V(), exo = V(); let m = 0, me = 0;
   for (const [g, p, f] of HUMAN) { const w = g.localToWorld(p.clone()); tot.addScaledVector(w, 75 * f); m += 75 * f; }
-  for (const p of Object.values(PIDS)) { if (p.id === 'EN-01-L' && !$('bat2').checked) continue; if (p.base === 'RA-07' && !$('stand').checked) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
+  for (const p of Object.values(PIDS)) { if (!worn(p)) continue; const kg = PDB[p.base].kg * multOf(p.base, p.side); const c = p.rep.getWorldPosition(V()); tot.addScaledVector(c, kg); exo.addScaledVector(c, kg); m += kg; me += kg; }
   let logKg = 0; if (logs[1].visible) { logKg = 15; const c = logs[1].children[0].getWorldPosition(V()); tot.addScaledVector(c, 15); m += 15; }
   tot.multiplyScalar(1 / m); exo.multiplyScalar(1 / me);
   const fp = []; for (let k = 0; k < 2; k++) for (const [x, z] of [[-0.075, -0.055], [0.21, -0.055], [0.21, 0.055], [-0.075, 0.055]]) { const w = G.foot[k].localToWorld(V(x, -D.ankle, SIDE[k] * HH + z)); fp.push(new THREE.Vector2(w.x, w.z)); }
@@ -1894,10 +1894,10 @@ $('dims').addEventListener('change', () => dimObjs.forEach((o) => { o.visible = 
 $('cog').addEventListener('change', () => { for (const o of [cgDot, cgExo, cgLine, hull, cgGround]) o.visible = $('cog').checked; });
 $('body').addEventListener('change', () => bodyParts.forEach((m) => { m.visible = $('body').checked; }));
 $('bench').addEventListener('change', () => setBench($('bench').checked && envMode === 'work'));
-$('stand').addEventListener('change', () => { feat.standOn = $('stand').checked; paint(); });
+$('stand').addEventListener('change', () => { feat.standOn = $('stand').checked; buildBom(); paint(); });
 $('light').addEventListener('change', () => setLight($('light').checked));
 $('anod').addEventListener('change', () => setFinishT($('anod').checked));
-$('bat2').addEventListener('change', () => { PIDS['EN-01-L'].meshes.forEach((m) => { m.userData.off = !$('bat2').checked; }); paint(); });
+$('bat2').addEventListener('change', () => { PIDS['EN-01-L'].meshes.forEach((m) => { m.userData.off = !$('bat2').checked; }); buildBom(); paint(); });
 $('log').addEventListener('change', () => { logs[1].visible = $('log').checked; logs[0].visible = false; });
 document.querySelectorAll('[data-env]').forEach((b) => b.addEventListener('click', () => { envMode = b.dataset.env; applyEnv(); }));
 for (const id of SL) $(id).addEventListener('input', () => { tgt[id] = Number($(id).value); if (mode !== 'free') setMode('free'); });
@@ -1918,12 +1918,13 @@ document.querySelectorAll('[data-tab]').forEach((t) => t.addEventListener('click
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); labelR.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(stage);
 envMode = 'work'; envReady = true; applyEnv(); setFinishT(true); setBench(false);
+function worn(p) { return !(p.id === 'EN-01-L' && !$('bat2').checked) && !(p.base === 'RA-07' && !$('stand').checked); }   // getragen: zweiter Akku und Parkstütze nur, wenn gewählt
 function buildBom() {
   const rows = [], tot = {}; let all = 0, n = 0;
   for (const [a, an] of ASM) {
     const bases = [...new Set(Object.values(PIDS).filter((p) => PDB[p.base].asm === a).map((p) => p.base))].sort();
     let sa = 0; const body = [];
-    for (const b of bases) { const ps = Object.values(PIDS).filter((p) => p.base === b), cnt = ps.reduce((s, p) => s + multOf(b, p.side), 0), d = PDB[b], kg = d.kg * cnt; sa += kg; n += cnt;
+    for (const b of bases) { const ps = Object.values(PIDS).filter((p) => p.base === b && worn(p)); if (!ps.length) continue; const cnt = ps.reduce((s, p) => s + multOf(b, p.side), 0), d = PDB[b], kg = d.kg * cnt; sa += kg; n += cnt;
       body.push(`<tr data-pid="${ps.find((p) => p.side === 'R')?.id || ps[0].id}" style="cursor:pointer"><td style="color:var(--accent)">${b}</td><td style="text-align:left">${d.name}</td><td style="text-align:left">${d.typ}</td><td style="text-align:left;white-space:normal;max-width:360px">${d.ref.split(';')[0]}</td><td>${cnt}</td><td>${(d.kg * 1000).toFixed(0)} g</td><td>${kg.toFixed(2)} kg</td></tr>`); }
     all += sa; rows.push(`<tr><td colspan="6" style="text-align:left;color:var(--muted);padding-top:10px">${a} · ${an}</td><td style="color:var(--muted);padding-top:10px">${sa.toFixed(2)} kg</td></tr>`, ...body);
   }

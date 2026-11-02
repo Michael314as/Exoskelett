@@ -19,7 +19,7 @@ struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 11.f;                    // Rahmen, Box, Akku, Arme
+  float exoUpperKg = 25.f;                    // alles über der Hüftachse: Rahmen, Box, 6 Motoren, Akku, Arme, Gurte (Bauteilliste 31 kg − Beine ≈ 6 kg)
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
 
