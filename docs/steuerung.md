@@ -155,6 +155,8 @@ trägst 40 / 30 / 20 % in den Stufen sanft / normal / kräftig (vorher 67 / 50 /
 Bei sehr schnellen Schritten braucht der Exo-Unterschenkel allein etwa 12 Nm zum Beschleunigen; den Rest (≈ 10 N an der
 Schienbein-Manschette) spürst du. Beim normalen Gehen im Wald liegt das weit darunter. Wer es leichter will, kann die
 Grenze nach dem Prüfstand auf 15 Nm anheben (Federpaket entsprechend), das ist eine Sicherheitsabwägung.
+**Entscheidung (3. November 2026):** 10 Nm bleiben. Die Simulation gilt für die Planung als Nachweis, der echte
+Nachweis kommt mit P39 (Log mit `log 1` aufnehmen, auswerten, nachstellen).
 
 **Was bewiesen ist und was nicht:** Die Zahlen stammen aus der Simulation (Firmware-Tests, `make test`) mit geschätzten
 Trägheiten. Die Tests zeigen, dass es auch bei Faktor 2 falsch geschätzten Trägheiten, weicher oder straffer Manschette,
