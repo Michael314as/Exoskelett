@@ -70,7 +70,7 @@ Moment = Schwerkraft der Exo-Schiene                    (das Exo trägt sich sel
        + K · Druck an den Manschetten · Hebel            (das Exo folgt dir, verstärkt)
        + Reibungsausgleich (nach der Sollgeschwindigkeit)
        + Kd · (Sollgeschwindigkeit − Geschwindigkeit)    (MITGEHEN: rechnet der Motor selbst, ≈ 10 kHz)
-Sollgeschwindigkeit = admit · Druck an den Manschetten  (0,6 rad/s je N an den Gliedern)
+Sollgeschwindigkeit = admit · Druck an den Manschetten  (0,9 rad/s je N an den Gliedern, bis 8 rad/s)
 ```
 
 **a) Druck → Moment, für alle Gelenke, die ihn bewegen können.** Eine Kraft an der Unterarm-Manschette wirkt
@@ -115,13 +115,13 @@ etwa 11 Nm, auch wenn die Software versagt.
 |---|---|---|
 | Regeltakt | 500 Hz, Befehl ≤ 1 ms auf dem Bus | darunter wird Mitgehen an Schulter und Knie unruhig (Studie [tools/transparenz.cpp](../tools/transparenz.cpp)) |
 | Messung | 1000/s, Tiefpass 40 Hz, Totband 0,3 N | schnell genug fürs Mitgehen, Rauschen (≈ 0,05–0,15 N) löst nichts aus |
-| Mitgehen (admit) | 0,6 rad/s je N (Rumpf beugen 0,25, drehen 0,35) | 5 N Druck = ≈ 3 rad/s: zügige Armbewegung mit einem Fingerdruck |
+| Mitgehen (admit) | 0,9 rad/s je N (Rumpf beugen 0,25, drehen 0,35) | 3 N Druck = ≈ 2,7 rad/s: zügige Armbewegung mit einem Fingerdruck |
 | Dämpfung im Motor (Kd) | Ellbogen 0,75 · Schulter 2,3 · Knie 2,9 · Hüfte 4 · Rumpf 10 / 7 Nm·s/rad | ≈ 0,75 × Trägheit des Exo-Glieds / 0,065 s; doppelt so viel geht noch, halb so viel auch (Simulation) |
 | Reibungsausgleich | 0,1–0,2 Nm + 0,25–0,5 Nm·s/rad | nach der Sollgeschwindigkeit, nicht der gemessenen: zittert nicht im Stillstand |
 | Schwingungswächter | Anteil > 6 Hz in der Kraft: über 2 N → Mitgehen schnell bis 25 % zurück, unter 1 N langsam wieder frei | fängt zu straffe Manschette, Busverzug, Kälte ab; Gehen (1–2 Hz) löst ihn nicht aus |
 | Momentänderung | höchstens 300–600 Nm/s (Vorsteuer-Anteil) | nichts ruckt |
 | Weiche Wände | 0,15 rad vor jedem Anschlag, quadratisch | Mitgehen und Verstärkung laufen vor dem Anschlag aus |
-| Geschwindigkeitsgrenze | 4 rad/s | schneller geht das Exo nicht mit |
+| Geschwindigkeitsgrenze | 8 rad/s an den Gliedern, 2 rad/s am Rumpf | zügiges Gehen und Armschwung erreichen 5–7 rad/s; mit der alten Grenze von 4 rad/s blieb das Exo bei schnellen Schritten zurück (Simulation: 21–23 N statt 5 N) |
 | Aufwachen | 2 s nullen, 3 s Rampe | nichts springt beim Einschalten |
 | Verstärkung K | 0,5 / 1 / 2 (Stufen) | wie bisher; dazu kommt beim Halten der Mitgeh-Anteil (siehe 2f) |
 | Rückfallebene | admit = 0 → reiner Momentbetrieb wie bis Rev. T2 | stabil bis K = 5,5 auch mit langsamer Messung |
@@ -133,20 +133,32 @@ das Gelenk mitgehen soll, und der Motor regelt diese Geschwindigkeit selbst mit 
 „Operation Control“: Moment, Sollgeschwindigkeit und Kd in einem Befehl). So reagiert er sofort auf sein eigenes
 Geschwindigkeitssignal, ohne auf den Bus zu warten.
 
-| Simulation 1,2 Hz ±20° (zügig) | ohne Regelung | bisher (T2) | Mitgehen (M2) |
-|---|---|---|---|
-| Ellbogen | 12 N | 6 N | **2,6–3,6 N** |
-| Schulter | 27 N | 11–12 N | **2,9–3,5 N** |
-| Knie (Schwungbein) | 27 N | 12–13 N | **3,1–3,6 N** |
+| Simulation (Firmware-Test, Manschette 2–15 kN/m) | bisher (T2) | Mitgehen (M2) |
+|---|---|---|
+| Ellbogen 0,5 Hz ±29° / 1,2 Hz ±20° | 3,0 / 4,9 N | **1,3 / 1,9 N** |
+| Schulter 1,2 Hz ±20° | bis 12,2 N | **bis 2,7 N** |
+| Knie (Schwungbein) 1,2 Hz ±20° | bis 12,8 N | **bis 3,0 N** |
+| Schulter, schneller Schwung 1,4 Hz ±34° | 24 N | **4,8 N** |
+| Knie, schneller Schwung 1,4 Hz ±34° | 26 N | **9,7 N** (Rest = Sicherheitsgrenze 10 Nm beim Knie-Beugen; ohne sie 4,9 N) |
+| Trägheit und Reibung des Exo-Glieds halb oder doppelt so groß wie geschätzt | – | **bis 3,6 N (Schulter), 5,0 N (Knie)** |
 
-Werte: Effektivwert der Kraft an der Manschette über alle Manschetten-Steifigkeiten 2–15 kN/m; 3 N ≈ das Gewicht von
-300 g. Störfälle (Dämpfung doppelt, Busverzug 2 ms, Rauschen 0,6 N, Reibung doppelt bei Kälte, Schwerkraft ±30 % falsch
+Werte: Effektivwert der Kraft an der Manschette; 3 N ≈ das Gewicht von 300 g. Die Studie
+([tools/transparenz.cpp](../tools/transparenz.cpp)) mit anderem Menschmodell kommt auf dieselbe Größenordnung. Störfälle (Dämpfung doppelt, Busverzug 2 ms, Rauschen 0,6 N, Reibung doppelt bei Kälte, Schwerkraft ±30 % falsch
 geschätzt) bleiben unter 4 N, mit Schwingungswächter im schlimmsten Fall unter 11 N, nie aufschaukelnd.
 
 **Beim Halten** (ruhig, Last am Arm) wirkt der Mitgeh-Anteil zusätzlich als Verstärkung: Motor = (K + Kd · admit / r) ×
-dein Moment, aber nur bis zur Geschwindigkeitsgrenze (Kd × 4 rad/s, am Ellbogen 3 Nm). Kleine Lasten trägt das Exo
+dein Moment, aber nur bis zur Geschwindigkeitsgrenze (Kd × 8 rad/s, am Ellbogen 6 Nm). Kleine Lasten trägt das Exo
 damit fast ganz, große wie bisher nach der Stufe K und der Baumlast-Vorsteuerung. Simulation Ellbogen, 20 Nm Last: du
-trägst 53 / 40 / 27 % in den Stufen sanft / normal / kräftig (vorher 67 / 50 / 33 %).
+trägst 40 / 30 / 20 % in den Stufen sanft / normal / kräftig (vorher 67 / 50 / 33 %).
+
+**Knie-Beugen bleibt auf 10 Nm begrenzt** (Software und Federpaket 11 Nm), damit das Exo nie kräftig ins Knie tritt.
+Bei sehr schnellen Schritten braucht der Exo-Unterschenkel allein etwa 12 Nm zum Beschleunigen; den Rest (≈ 10 N an der
+Schienbein-Manschette) spürst du. Beim normalen Gehen im Wald liegt das weit darunter. Wer es leichter will, kann die
+Grenze nach dem Prüfstand auf 15 Nm anheben (Federpaket entsprechend), das ist eine Sicherheitsabwägung.
+
+**Was bewiesen ist und was nicht:** Die Zahlen stammen aus der Simulation (Firmware-Tests, `make test`) mit geschätzten
+Trägheiten. Die Tests zeigen, dass es auch bei Faktor 2 falsch geschätzten Trägheiten, weicher oder straffer Manschette,
+Busverzug und Kälte leicht und stabil bleibt. Wie es sich anfühlt, zeigt erst der Prüfstand (P39) und dann der Körper.
 
 **Was das für dich heißt:** Arm heben, umgreifen, Bein über einen Ast steigen: Das Exo ist praktisch nicht zu spüren.
 Wenn du stehen bleibst, bleibt es stehen (kein Nachlaufen: Sollgeschwindigkeit 0 = Motor bremst). Drückst du gegen

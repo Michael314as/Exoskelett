@@ -42,11 +42,13 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 
 | Test | Ergebnis |
 |---|---|
-| **Leichtgängigkeit Ellbogen** (Mitgehen, M2) | Kraft an der Manschette 0,5 Hz: ohne Regelung 5,7 N (rms), alter Momentbetrieb 3,0 N, **Mitgehen 1,7 N**; 1,2 Hz: 7,4 / 4,9 / **3,1 N** |
-| **Leichtgängigkeit Schulter, Knie** (1,2 Hz, Manschette 2–15 kN/m) | alt bis 12,2 / 12,8 N, **Mitgehen bis 3,5 / 3,6 N** |
-| **Störfall** Kd doppelt + 2 ms Busverzug, straffe Manschette | Schwingungswächter regelt zurück: 5,8 / 6,7 N rms, kein Aufschaukeln |
+| **Leichtgängigkeit Ellbogen** (Mitgehen, M2) | Kraft an der Manschette 0,5 Hz: ohne Regelung 5,7 N (rms), alter Momentbetrieb 3,0 N, **Mitgehen 1,3 N**; 1,2 Hz: 7,4 / 4,9 / **1,9 N** |
+| **Leichtgängigkeit Schulter, Knie** (1,2 Hz, Manschette 2–15 kN/m) | alt bis 12,2 / 12,8 N, **Mitgehen bis 2,7 / 3,0 N** |
+| **Schneller Schwung** 1,4 Hz ±34° | Schulter alt 24 N → **4,8 N**; Knie alt 26 N → **9,7 N** (Beugegrenze 10 Nm; ohne sie 4,9 N) |
+| **Trägheit/Reibung falsch geschätzt** (×0,5 … ×2) | Schulter bis 3,6 N, Knie bis 5,0 N: bleibt leicht und stabil |
+| **Störfall** Kd doppelt + 2 ms Busverzug, straffe Manschette | Schwingungswächter regelt zurück: 5,7 / 6,7 N rms, kein Aufschaukeln |
 | **Schwingungswächter** | 15-Hz-Zittern → Mitgehen auf 25 %; erholt sich nach Ruhe; normale Bewegung 1 Hz löst ihn nicht aus |
-| **Verstärkung:** 20 Nm Baumlast halten | K = 0,5 / 1 / 2: du trägst 53 / 40 / 27 % (Stufe + gedeckelter Mitgeh-Anteil, erwartet 57 / 42 / 28 %) |
+| **Verstärkung:** 20 Nm Baumlast halten | K = 0,5 / 1 / 2: du trägst 40 / 30 / 20 % (Stufe + gedeckelter Mitgeh-Anteil, erwartet 47 / 35 / 23 %) |
 | **Stabilität** | Mitgehen: kein Schwingen bei Manschette 2 / 6 / 15 kN/m in allen Stufen. Rückfallebene Momentbetrieb: stabil bis K = 5,5 |
 | **Weichheit:** plötzliche Bewegung | Vorsteuer-Moment ändert sich höchstens 0,8 Nm je Takt (nichts ruckt), kein Überschwingen |
 | **Knie mit Schienbein-Manschette** | Schwungbein: geht beim Strecken und Beugen mit; Standbein: Schienbein-Druck beugt nie |
@@ -62,7 +64,7 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Schwungbein** | keine Gewichtsvorsteuerung, Bein anheben: Hüfte +10 Nm, Knie +5 Nm (Beugen begrenzt 10 Nm); Standbein beugt nie aktiv |
 | **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Mitgeh-Befehl (v_soll, Kd, Kp = 0) richtig, Kd/Geschwindigkeit über die Übersetzung umgerechnet, Motorantwort richtig gelesen, ADS131M04-Register und -Rahmen (Vorzeichen) richtig, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
 | **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: RobStride RS06 schafft 36 Nm (Reserve 48 %) |
-| **Teensy-Code** | PC-Lauf mit Platzhaltern (SPI, zwei CAN-Busse). Rev. M2 noch nicht mit ARM-GCC gebaut (PlatformIO-Server in dieser Umgebung gesperrt); Rev. T2 baute mit 87 KB ohne Warnung |
+| **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (`tools/build_teensy.sh`, 102 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern (SPI, zwei CAN-Busse) |
 | **Einstellungen, Konsole** | Prüfsumme erkennt kaputtes EEPROM, Kalibrierung mit Gewicht, Fehlbedienung abgewiesen |
 | **Statuszeile** | Teensy → ESP32-C3: Modus, Akku, Stufe, Restzeit, Uhrzeit, Stunden, Grund; kaputte Zeilen werden verworfen |
 | **ESP32-Sketch** | kompiliert auf dem PC mit Platzhaltern; jede gültige Zeile geht ans Handy, E-Paper zeichnet nur bei Änderung (auch bei neuem Fehlergrund), überlange Zeilen laufen nicht über |

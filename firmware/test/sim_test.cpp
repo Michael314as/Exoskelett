@@ -335,7 +335,8 @@ int main() {
       std::printf("     Schwungbein, Bein anheben (60 N am Oberschenkel): Hüfte %+.1f Nm, Knie %+.1f Nm\n", o.tauTotal[HipR], o.tauTotal[KneeR]);
       check(o.tauTotal[HipR] > 8.f && o.tauTotal[KneeR] > 0.5f && o.tauTotal[KneeR] <= 10.f, "Schwungbein: Hüfte und Knie helfen beim Anheben, Knie-Beugen begrenzt auf 10 Nm");
       in.footContact[1] = true; run(app, in, o, 0.5f);
-      check(o.tauTotal[KneeR] <= 0.001f && o.tauTotal[HipR] <= 35.f * 0.15f + 0.01f, "Fuß wieder belastet: kein aktives Beugen mehr am Knie, Hüfte nur wenig");
+      std::printf("     Fuß wieder belastet: Knie %+.2f Nm, Hüfte %+.2f Nm\n", o.tauTotal[KneeR], o.tauTotal[HipR]);
+      check(o.tauTotal[KneeR] <= 0.001f && o.tauTotal[HipR] <= 35.f * 0.15f + 0.1f, "Fuß wieder belastet: kein aktives Beugen mehr am Knie, Hüfte nur wenig");
       // Schienbein-Manschette (M2): im Schwung folgt das Knie dem Unterschenkel in beide Richtungen, im Stand nie aktiv beugen
       in.joint[HipR].cuffN = 0.f; in.footContact[1] = false; in.joint[KneeR].cuffN = -15.f; run(app, in, o, 0.5f);
       const float kExt = o.tauTotal[KneeR], vExt = o.vDes[KneeR];
@@ -453,6 +454,26 @@ int main() {
       }
       std::printf("     %s 1,2 Hz ±0,35 rad, Manschette 2–15 kN/m: alt bis %.1f N rms, Mitgehen bis %.1f N rms\n", g.n, worstAlt, worst);
       check(worst < 5.0 && worst < 0.6 * worstAlt, "Mitgehen: unter 5 N rms bei jeder Manschettensteifigkeit, deutlich leichter als bisher");
+      // Schätzfehler: echte Trägheit und Reibung des Exo-Glieds halb bzw. doppelt so groß wie angenommen
+      double worstJ = 0;
+      for (double fJ : {0.5, 2.0}) for (double kt : {2000.0, 15000.0}) {
+        Plant pj = mk(kt); pj.J *= fJ; pj.coul *= fJ; pj.visc *= fJ;
+        worstJ = std::fmax(worstJ, run(c, 8, qd, 0, 1000, true, 0.0, pj).rmsCuffN);
+      }
+      std::printf("     %s, Trägheit und Reibung falsch geschätzt (×0,5 … ×2): bis %.1f N rms\n", g.n, worstJ);
+      check(worstJ < 6.0, "Mitgehen bleibt leicht, auch wenn Trägheit und Reibung des Exo-Glieds um Faktor 2 falsch geschätzt sind");
+      // Schritt: Knie/Schulter schnell 1,4 Hz ±0,6 rad (≈ Schwungphase beim zügigen Gehen)
+      auto qg = [](double t) { return 1.0 + 0.6 * std::sin(2 * M_PI * 1.4 * t); };
+      const Result Rg = run(c, 8, qg, 0, 1000, true, 0.0, mk(6000));
+      const Result Rga = run(a, 8, qg, 0, 80, true, 0.0, mk(6000));
+      std::printf("     %s, schnelle Schwungbewegung 1,4 Hz ±34°: alt %.1f N rms (max %.1f), Mitgehen %.1f N rms (max %.1f)\n", g.n, Rga.rmsCuffN, Rga.maxCuffN, Rg.rmsCuffN, Rg.maxCuffN);
+      if (g.id == KneeR) {   // Knie-Beugen ist aus Sicherheitsgründen auf 10 Nm begrenzt (Federpaket 11 Nm); die Trägheit des Exo-Unterschenkels braucht hier ≈ 12 Nm
+        check(Rg.ok && Rg.rmsCuffN < 0.5 * Rga.rmsCuffN, "schnelle Schwungbewegung Knie: weniger als halb so viel wie bisher (Rest = 10-Nm-Beugegrenze)");
+        JointConfig hi = c; hi.tauMax = 30.f;
+        const Result Rh = run(hi, 8, qg, 0, 1000, true, 0.0, mk(6000));
+        std::printf("     zum Vergleich ohne 10-Nm-Beugegrenze: %.1f N rms (max %.1f)\n", Rh.rmsCuffN, Rh.maxCuffN);
+        check(Rh.rmsCuffN < 8.0, "ohne Beugegrenze wäre auch das Knie unter 8 N: die Grenze, nicht die Regelung, setzt den Rest");
+      } else check(Rg.ok && Rg.rmsCuffN < 8.0 && Rg.rmsCuffN < 0.5 * Rga.rmsCuffN, "schnelle Schwungbewegung: unter 8 N rms, weniger als halb so viel wie bisher");
       // Störfall: Dämpfung im Motor doppelt so groß und 2 ms Busverzug (z. B. Bus überlastet): darf nicht aufschaukeln
       JointConfig bad = c; bad.kdJoint *= 2.f;
       Result R = run(bad, 10, qd, 0, 1000, true, 0.0, mk(15000), 0.002);

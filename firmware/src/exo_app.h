@@ -83,13 +83,14 @@ inline JointConfig defaultJoint(JointId id) {
   }
   // Mitgehen (Rev. M2, Studie tools/transparenz.cpp): schnelle Manschetten (ADS131M04, 1 kHz), 40-Hz-Filter, kleines Totband.
   // vSoll = admit · Kraft; Kd im Motor ≈ 0,75 · Segmentträgheit / 0,065 (Trägheit Exo-Segment geschätzt, am Prüfstand P39 einstellen).
-  c.filterHz = 40.f; c.deadbandN = 0.3f; c.admit = 0.6f;
+  // Glieder: 0,9 rad/s je N, bis 8 rad/s (zügiges Gehen und Armschwung erreichen 5–7 rad/s; RS04/RS03 schaffen am 36-V-Akku ≈ 15 rad/s).
+  c.filterHz = 40.f; c.deadbandN = 0.3f; c.admit = 0.9f; c.velMax = 8.f;
   switch (id) {
     case HipL: case HipR:   c.kdJoint = 4.0f; c.viscComp = 0.4f; break;    // Bein mit Kniekapsel ≈ 0,35 kg·m²
     case KneeL: case KneeR: c.kdJoint = 2.9f; c.viscComp = 0.5f; break;    // Unterschenkel-Schiene ≈ 0,25 kg·m²
     case ShL: case ShR:     c.kdJoint = 2.3f; c.viscComp = 0.4f; break;    // Exo-Arm mit Ellbogenkapsel ≈ 0,20 kg·m²
-    case Lumb:              c.kdJoint = 10.f; c.viscComp = 0.5f; c.admit = 0.25f; break;   // Oberteil träge, Gasfedern tragen: langsam mitgehen
-    case Twist:             c.kdJoint = 7.f;  c.viscComp = 0.3f; c.admit = 0.35f; break;   // Rucksack drehen ≈ 0,6 kg·m²
+    case Lumb:              c.kdJoint = 10.f; c.viscComp = 0.5f; c.admit = 0.25f; c.velMax = 2.f; break;   // Oberteil träge, Gasfedern tragen: langsam mitgehen
+    case Twist:             c.kdJoint = 7.f;  c.viscComp = 0.3f; c.admit = 0.35f; c.velMax = 2.f; break;   // Rucksack drehen ≈ 0,6 kg·m²
     case ElL: case ElR: default: c.kdJoint = 0.75f; c.viscComp = 0.25f; break;   // Unterarm-Schiene ≈ 0,065 kg·m²
   }
   return c;
