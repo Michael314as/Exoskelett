@@ -281,9 +281,9 @@ h3{margin:0;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;text-tran
           <input type="range" id="body" min="45" max="130" step="1" value="75">
         </div>
         <div class="ctl">
-          <label for="exoKg">Gewicht des Exos</label><output id="exoKgOut" for="exoKg">43 kg</output>
-          <input type="range" id="exoKg" min="0" max="60" step="1" value="43">
-          <div class="scale" aria-hidden="true"><span>43 kg laut Bauteilliste (Entwurf 5, ein Akku, ohne Parkstütze); geht über die Exo-Beine in den Boden</span></div>
+          <label for="exoKg">Gewicht des Exos</label><output id="exoKgOut" for="exoKg">44 kg</output>
+          <input type="range" id="exoKg" min="0" max="60" step="1" value="44">
+          <div class="scale" aria-hidden="true"><span>44 kg laut Bauteilliste (Entwurf 5, Manschetten M2, ein Akku, ohne Parkstütze); geht über die Exo-Beine in den Boden</span></div>
         </div>
         <label class="switch" for="labels"><input type="checkbox" id="labels" checked><span>Beschriftungen in 3D</span></label>
       </section>
@@ -877,7 +877,7 @@ function analyseDrag(P, TL) {
 
 /* ================= Zustand ================= */
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 43, foot: 0,
+const state = { scen: 'load', n: 2, mu: 0.6, H: 1.75, L: 2.0, hp: 1.75, mass: massTypical(2.0), massManual: false, body: 75, exoKg: 44, foot: 0,
   labels: true, t: 0, playing: !reduced, view: 'oblique', env: 'dusk', trees: 0 };
 let P, TL, PK;
 

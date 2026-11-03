@@ -1,42 +1,64 @@
-# Steuerung: so merkt das Exo, was du willst (Entwurf 4)
+# Steuerung: so merkt das Exo, was du willst (Entwurf 5, Manschetten M2)
 
 Das wichtigste Gefühl beim Tragen: **Du bewegst dich, das Exo folgt, und schwere Lasten werden leichter.** Kein
 Joystick, keine Knöpfe zum Bewegen. Dafür braucht das Exo drei Arten von Information:
 
 | Frage | Sensor | Wofür |
 |---|---|---|
-| Wohin willst du? | **Sensor-Manschetten** (Wägezellen) an Oberarm, Unterarm, Oberschenkel | Bewegung: Das Exo folgt deinem Druck |
+| Wohin willst du? | **Sensor-Manschetten** (Wägezellen) an Oberarm, Unterarm, Oberschenkel, Schienbein; 4 Rumpf-Wägezellen | Bewegung: Das Exo geht mit deinem Druck mit |
 | Was muss es tragen? | **Wägezellen in den Schlaufenköpfen**, Gelenkwinkel, Rumpfneigung | Last: Das Exo trägt seinen Anteil von selbst |
 | Welches Bein steht? | **Wägezellen im Steigbügel** | Standbein trägt, Schwungbein läuft frei |
 
-Die Antwort darauf rechnet der Teensy 200-mal pro Sekunde und schickt jedem der 8 Motoren ein Moment.
+Die Antwort darauf rechnet der Teensy 500-mal pro Sekunde und schickt jedem der 10 Motoren ein Moment, eine
+Sollgeschwindigkeit und eine Dämpfung. Die Dämpfung auf die Sollgeschwindigkeit rechnet der Motor selbst, ohne Umweg über
+den Bus.
+
+> **Rev. M2 – warum neu?** Mit der bisherigen Regelung (Druck × Verstärkung = Moment, HX711 mit 80 Messungen/s) hättest du
+> gegen die Trägheit der Exo-Glieder anschieben müssen: In der Simulation bis 12 N an Schulter und Knie bei zügiger Bewegung.
+> Das fühlt sich an wie ein Arm im Wasser. Ziel ist, dass du dich **spielend leicht** bewegst und das Exo mitgeht.
+> Drei Änderungen schaffen das: schnelle Messung (Abschnitt 1), **Mitgehen** statt nur Verstärken (Abschnitt 2f) und
+> eine straffe, mitgleitende Manschette (Abschnitt 1). Ergebnis in der Simulation: **2,5–4 N** an jeder Manschette, egal ob
+> sie straff über dem Pulli oder weich über der Winterjacke sitzt.
 
 ---
 
-## 1. Die Sensor-Manschette
+## 1. Die Sensor-Manschette (M2)
 
 ```
-   Arm / Bein (Polster)
-        │
-   ┌────┴──────┐   blaue PETG-Schale, umschließt das Glied vorne, Klettgurt hinten
-   │  Schale   │
-   └────┬──────┘
+   Arm / Bein
+        │  Viskopolster 4 mm (dicht, perforiert, Wechselbezug)
+   ┌────┴────────────┐   PETG-CF-Schale 4 mm, 45 % breiter als vorher, umschließt 210°
+   │     Schale      │   hinten 2 Bänder mit BOA-Drehverschluss (statt Klett)
+   └────┬────────────┘
         │  Steg
+   ═════╪═════  Längsschlitten: 2 Stangen Ø 5 längs zum Glied, iglidur-Buchsen, Zentrierfedern, ±12 mm
+        │
    ╔════╧════╗    Wägezelle (Biegebalken 20 kg), misst nur quer zur Schiene
    ╚════╤════╝    zwei TPU-Puffer mit 1 mm Spalt: Überlastschutz
         │
-   Halter an der Schiene
+   Halter an der Schiene          → geschirmtes Kabel → ADS131M04 in der Elektronikbox (1000 Messungen/s)
 ```
 
-- **Gemessen wird nur die Kraft quer zur Schiene**, in der Bewegungsrichtung des Gelenks. Gurtzug längs und Verdrehen
-  sieht die Zelle nicht.
-- **Straff, dünn gepolstert:** Jeder Millimeter Weichteil zwischen dir und der Zelle macht die Regelung schwammiger.
-  Polster 5–6 mm, Schale eng.
+| Was | Vorher (bis Rev. T2) | Jetzt (M2) | Warum |
+|---|---|---|---|
+| Messung | HX711 an jeder Zelle, 80/s, Filter 8 Hz, ≈ 35 ms Verzug | **3 × ADS131M04** (je 4 Kanäle gleichzeitig), 1000/s, Filter 40 Hz, ≈ 3 ms | Mitgehen braucht frische Kraftwerte; bei 35 ms läuft das Exo deiner Bewegung hinterher |
+| Verschluss | Klettgurt | **BOA-Drehverschluss**, 2 Bänder | gleichmäßig straff in feinen Rasten, mit Handschuhen bedienbar, Ziehen = sofort auf; Klett gibt nach, sammelt Schnee und vereist |
+| Schale | 5 mm PETG, schmal, 6 mm Polster | **4 mm PETG-CF, 45 % breiter, 4 mm dichtes Viskopolster**, 3 Größen | breiter = weniger Druck je cm² bei gleicher Kraft; dünn und dicht = kaum Nachgeben zwischen dir und der Zelle |
+| Längsrichtung | starr | **Längsschlitten ±12 mm** | Die Achsen von Mensch und Exo liegen nie genau übereinander (± 1–2 cm). Beim Beugen wandert die Manschette sonst über die Haut (Scheuern, Druckstellen) und drückt längs auf die Zelle; das las die Steuerung als „du willst“ |
+| Schienbein | Schale ohne Sensor | **Sensor-Manschette** | Das Knie geht jetzt selbst mit. Früher hätte eine Zelle dort vor allem das Schwingen des Exo-Beins gemessen; mit Mitgehen ist genau diese Kraft das, was die Regelung klein hält |
+| Unterarm | Drehring | bleibt | Hand drehen, ohne gegen das Exo zu arbeiten |
+
+- **Gemessen wird nur die Kraft quer zur Schiene**, in der Bewegungsrichtung des Gelenks. Längs nimmt der Schlitten,
+  Verdrehen der Drehring bzw. die Schale.
+- **Straff, aber nicht eng:** Die Regelung ist für weiche (2 kN/m, Winterjacke) bis straffe (15 kN/m, dünner Pulli)
+  Ankopplung ausgelegt und getestet. Über der Jacke wirkt sie nur etwas weicher; schwingen kann sie nicht (Schwingungswächter,
+  Abschnitt 2f).
 - **Wo die Manschetten sitzen:** Oberarm (Schulter), Unterarm kurz vor dem Handgelenk (Ellbogen), Oberschenkel über dem
-  Knie (Hüfte und Knie). Am Unterschenkel sitzt nur eine einfache Schale **ohne** Sensor: Dort misst eine Zelle beim
-  Gehen hauptsächlich das Schwingen des Exo-Beins, nicht deine Absicht.
+  Knie (Hüfte, mit 60 % auch Knie), Schienbein unter dem Knie (Knie). Dazu 4 Rumpf-Wägezellen (Gurtanker, Rückenpolster).
 - **Die Baumlast geht nicht durch die Manschetten**, sondern über die Schlaufen direkt in die Unterarmschiene. Sonst
   würde das Exo jeden Baum als „du willst nach unten“ deuten.
+- **Nullen:** Beim Einschalten (2 s ruhig stehen) nullt das Exo; die Zellen kalibriert man in der Werkstatt
+  (Konsole `null` / `kal`, Zellen 0–16).
 
 ## 2. Das Regelgesetz
 
@@ -46,7 +68,9 @@ Für jedes Gelenk:
 Moment = Schwerkraft der Exo-Schiene                    (das Exo trägt sich selbst)
        + Vorsteuerung: Baumlast, Körpergewicht im Stand  (das Exo trägt seinen Anteil, ohne dass du drückst)
        + K · Druck an den Manschetten · Hebel            (das Exo folgt dir, verstärkt)
-       + Reibungsausgleich − kleine Dämpfung             (leichtgängig, aber ruhig)
+       + Reibungsausgleich (nach der Sollgeschwindigkeit)
+       + Kd · (Sollgeschwindigkeit − Geschwindigkeit)    (MITGEHEN: rechnet der Motor selbst, ≈ 10 kHz)
+Sollgeschwindigkeit = admit · Druck an den Manschetten  (0,6 rad/s je N an den Gliedern)
 ```
 
 **a) Druck → Moment, für alle Gelenke, die ihn bewegen können.** Eine Kraft an der Unterarm-Manschette wirkt
@@ -61,7 +85,7 @@ Anteil je Stufe (sanft 50 %, normal 67 %, kräftig 80 %). Den Rest spürst du: S
 erhalten, und das Exo kann nie „mehr wollen“ als die Last.
 
 **c) Vorsteuerung im Stand (Beine).** Am belasteten Bein tragen Hüfte und Knie automatisch:
-Exo-Oberteil (29,1 kg laut Bauteilliste der technischen Ansicht; vorher mit 11 kg viel zu knapp angesetzt) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
+Exo-Oberteil (29,5 kg laut Bauteilliste der technischen Ansicht; vorher mit 11 kg viel zu knapp angesetzt) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
 die Vorneigung des Rumpfs aus (Lagesensor), das Knie die Beugung. Stehen beide Füße, teilen sich die Beine die Last.
 
 **c2) Der Rucksack zieht nach hinten.** Der Schwerpunkt des Exo-Oberteils liegt 22 cm über und 8 cm **hinter** der
@@ -87,18 +111,46 @@ etwa 11 Nm, auch wenn die Software versagt.
 
 **e) Feinheiten, die das Gefühl ausmachen** (in der Simulation getestet, [firmware/README.md](../firmware/README.md)):
 
-| Baustein | Wert | Warum |
+| Baustein | Wert (M2) | Warum |
 |---|---|---|
-| Totband | 2 N | Rauschen (≈ 0,6 N) löst nichts aus; darüber setzt die Hilfe stetig ein, ohne Sprung |
-| Tiefpass | 8 Hz | ruhig, aber schnell genug für Armbewegungen |
-| Reibungsausgleich | 0,15 Nm (Knie 0,2) | Getriebe und Gelenkköpfe verschwinden fast; weich um den Stillstand, damit nichts zittert |
-| Dämpfung | 0,3 Nm·s/rad | klein: mehr machte das Exo in der Simulation zäh |
-| Momentänderung | höchstens 400–600 Nm/s | nichts ruckt |
-| Weiche Wände | 0,15 rad vor jedem Anschlag | Hilfe läuft vor dem Anschlag aus |
-| Geschwindigkeitsgrenze | 4 rad/s | schnelle Bewegung wird nicht weiter verstärkt |
+| Regeltakt | 500 Hz, Befehl ≤ 1 ms auf dem Bus | darunter wird Mitgehen an Schulter und Knie unruhig (Studie [tools/transparenz.cpp](../tools/transparenz.cpp)) |
+| Messung | 1000/s, Tiefpass 40 Hz, Totband 0,3 N | schnell genug fürs Mitgehen, Rauschen (≈ 0,05–0,15 N) löst nichts aus |
+| Mitgehen (admit) | 0,6 rad/s je N (Rumpf beugen 0,25, drehen 0,35) | 5 N Druck = ≈ 3 rad/s: zügige Armbewegung mit einem Fingerdruck |
+| Dämpfung im Motor (Kd) | Ellbogen 0,75 · Schulter 2,3 · Knie 2,9 · Hüfte 4 · Rumpf 10 / 7 Nm·s/rad | ≈ 0,75 × Trägheit des Exo-Glieds / 0,065 s; doppelt so viel geht noch, halb so viel auch (Simulation) |
+| Reibungsausgleich | 0,1–0,2 Nm + 0,25–0,5 Nm·s/rad | nach der Sollgeschwindigkeit, nicht der gemessenen: zittert nicht im Stillstand |
+| Schwingungswächter | Anteil > 6 Hz in der Kraft: über 2 N → Mitgehen schnell bis 25 % zurück, unter 1 N langsam wieder frei | fängt zu straffe Manschette, Busverzug, Kälte ab; Gehen (1–2 Hz) löst ihn nicht aus |
+| Momentänderung | höchstens 300–600 Nm/s (Vorsteuer-Anteil) | nichts ruckt |
+| Weiche Wände | 0,15 rad vor jedem Anschlag, quadratisch | Mitgehen und Verstärkung laufen vor dem Anschlag aus |
+| Geschwindigkeitsgrenze | 4 rad/s | schneller geht das Exo nicht mit |
 | Aufwachen | 2 s nullen, 3 s Rampe | nichts springt beim Einschalten |
-| Verstärkung K | 0,5 / 1 / 2 (Stufen) | stabil bis K ≈ 5,5 mit HX711: große Reserve |
-| Reaktionszeit | ≈ 35 ms (HX711 mit 80 Messungen/s, Filter, CAN) | nach Haptik-Studien fühlt sich eine Last bei 25–50 ms Verzögerung 10–20 % schwerer an ([schaetzwerte.md](schaetzwerte.md)); Upgrade: ADS1220 (2 Kanäle je Chip, 5 Chips am SPI-Bus mit eigenem CS-Pin) senkt sie auf ≈ 10 ms |
+| Verstärkung K | 0,5 / 1 / 2 (Stufen) | wie bisher; dazu kommt beim Halten der Mitgeh-Anteil (siehe 2f) |
+| Rückfallebene | admit = 0 → reiner Momentbetrieb wie bis Rev. T2 | stabil bis K = 5,5 auch mit langsamer Messung |
+
+**f) Mitgehen (Admittanz), Rev. M2.** Bisher galt: Du drückst, das Exo gibt ein Moment dazu. Das Exo-Glied selbst
+(Ellbogenkapsel, Schiene, Schubstange) musst du dabei trotzdem beschleunigen und abbremsen, und weil die Messung langsam
+war, lief das Exo immer etwas hinterher. Jetzt rechnet die Steuerung aus deinem Druck eine **Geschwindigkeit**, mit der
+das Gelenk mitgehen soll, und der Motor regelt diese Geschwindigkeit selbst mit seiner internen Dämpfung (RobStride
+„Operation Control“: Moment, Sollgeschwindigkeit und Kd in einem Befehl). So reagiert er sofort auf sein eigenes
+Geschwindigkeitssignal, ohne auf den Bus zu warten.
+
+| Simulation 1,2 Hz ±20° (zügig) | ohne Regelung | bisher (T2) | Mitgehen (M2) |
+|---|---|---|---|
+| Ellbogen | 12 N | 6 N | **2,6–3,6 N** |
+| Schulter | 27 N | 11–12 N | **2,9–3,5 N** |
+| Knie (Schwungbein) | 27 N | 12–13 N | **3,1–3,6 N** |
+
+Werte: Effektivwert der Kraft an der Manschette über alle Manschetten-Steifigkeiten 2–15 kN/m; 3 N ≈ das Gewicht von
+300 g. Störfälle (Dämpfung doppelt, Busverzug 2 ms, Rauschen 0,6 N, Reibung doppelt bei Kälte, Schwerkraft ±30 % falsch
+geschätzt) bleiben unter 4 N, mit Schwingungswächter im schlimmsten Fall unter 11 N, nie aufschaukelnd.
+
+**Beim Halten** (ruhig, Last am Arm) wirkt der Mitgeh-Anteil zusätzlich als Verstärkung: Motor = (K + Kd · admit / r) ×
+dein Moment, aber nur bis zur Geschwindigkeitsgrenze (Kd × 4 rad/s, am Ellbogen 3 Nm). Kleine Lasten trägt das Exo
+damit fast ganz, große wie bisher nach der Stufe K und der Baumlast-Vorsteuerung. Simulation Ellbogen, 20 Nm Last: du
+trägst 53 / 40 / 27 % in den Stufen sanft / normal / kräftig (vorher 67 / 50 / 33 %).
+
+**Was das für dich heißt:** Arm heben, umgreifen, Bein über einen Ast steigen: Das Exo ist praktisch nicht zu spüren.
+Wenn du stehen bleibst, bleibt es stehen (kein Nachlaufen: Sollgeschwindigkeit 0 = Motor bremst). Drückst du gegen
+einen Anschlag, laufen Mitgehen und Verstärkung vorher weich aus.
 
 ## 3. Weitere Sensoren
 
@@ -128,17 +180,21 @@ Sturz erkannt ──▶ AUSLAUF in 0,1 s     Parkstütze unten ──▶ keine U
 ## 6. Elektronik
 
 ```
-Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 8 Gelenkkapseln (CAN-Bus): RS04 an Hüften, Knien, Schultern; RS03 an den Ellbogen; Bremswiderstand ab 46 V
+Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 10 Gelenkkapseln an 2 CAN-Bussen (CAN1: Hüften, Knie, Rumpf beugen; CAN3: Schultern, Ellbogen, Rumpf drehen)
+                                                               │   RS04 an Hüften, Knien, Schultern, Rumpf beugen; RS03 an Ellbogen, Rumpf drehen; Bremswiderstand ab 46 V
                                                                ├── DC/DC 24 V ── 3 Motortreiber ── 3 Schlaufenwinden
                                                                └── DC/DC 5 V ── Steuerung, Display
-Teensy 4.1 + CAN-Transceiver + Knopfzelle (Uhr)
-   ├── 9 Wägezellen-Verstärker (6 Manschetten, 3 Schlaufenköpfe)
-   ├── 2 × 4 Wägezellen in den Steigbügeln (je ein HX711)
+Teensy 4.1 + 2 CAN-Transceiver + Knopfzelle (Uhr), Regeltakt 500 Hz
+   ├── 3 × ADS131M04 an SPI0 (1000/s): 8 Manschetten (Oberschenkel, Schienbein, Oberarm, Unterarm) + 4 Rumpf-Wägezellen
+   ├── 5 × HX711: 3 Schlaufenköpfe, 2 Steigbügel (je 4 Zellen)
    ├── Lagesensor am Rücken
-   ├── Taster, LED-Ring, Vibration, Licht
+   ├── Taster, LED-Ring, Vibration, Licht, Heizbänder
    ├── Statuszeile → ESP32-C3 mit E-Paper am rechten Oberarm (und Bluetooth zum Handy)
    └── Watchdog: hängt die Software, fällt das Schütz ab
 ```
+
+Buslast: 5 Motoren × 500 Hz × (Befehl + Antwort) ≈ 5000 Rahmen/s × ≈ 140 Bit ≈ 70 % je Bus (1 Mbit/s). Wird es eng,
+geht der Takt auf 400 Hz (Simulation: noch stabil) oder ein dritter Bus (CAN2, Pins 0/1, dann Display an Serial8).
 
 Pinplan: [verdrahtung.md](verdrahtung.md).
 
@@ -148,7 +204,7 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 |---|---|---|
 | **Wärmeschutz** | Wärmemodell je Motor: Strom² über die Zeit (Zeitkonstante 3 min) | ab 100 % Wärme sinkt die Momentgrenze stufenlos bis auf 40 %; das Exo wird schwächer statt abzuschalten, Anzeige „Motor warm“ |
 | **Sturzdämpfung** | Sturz erkannt (Kippgeschwindigkeit) | Arme stromlos, Beine 1,5 s mit Dämpfung (−4 Nm·s/rad): das Exo sackt langsam statt zu treten oder zu klappen |
-| **Lendensperre** | > 5 kg in den Schlaufen für 0,3 s | Hubmagnet (Pin 13) sperrt das Lendengelenk, der Rahmen trägt den Baum; nach dem Absetzen frei |
+| **Lendensperre** | > 5 kg in den Schlaufen für 0,3 s | Hubmagnet (Pin 9, ab Rev. M2) sperrt das Lendengelenk, der Rahmen trägt den Baum; nach dem Absetzen frei |
 | **Rückneigung** | Rumpf mehr als 9° nach hinten | Vibrationspulse: „lehn dich nach vorne“, bevor der Baum dich umzieht |
 | **Winden nacheinander** | mehrere Schlaufen gleichzeitig gedrückt | eine Winde nach der anderen (24-V-Wandler 2,5 A), Zeitgrenze 12 s je Bewegung |
 
@@ -166,7 +222,9 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 
 | Problem | Ursache | Abhilfe |
 |---|---|---|
-| Exo zittert oder schaukelt | K zu hoch, Polster zu weich | Stufe senken, Manschetten straffer, dünner gepolstert |
+| Exo zittert oder schaukelt | Bus überlastet / verzögert, Kd zu hoch, Polster durchgesessen | Schwingungswächter nimmt Mitgehen zurück (Anzeige im Log); Buslast prüfen, Kd am Prüfstand (P39) senken, Polster tauschen |
+| Exo fühlt sich zäh an | Wächter hat zurückgeregelt, Messwandler verrauscht, Kälte (Reibung) | 2 s still halten → Wächter erholt sich; Schirmung der Manschettenkabel prüfen; Kapselheizung |
+| Manschette scheuert beim Beugen | Schlitten klemmt (Schmutz, Eis) | Stangen abwischen; iglidur läuft trocken, kein Fett (bindet Schmutz) |
 | Exo „läuft weg“ | Nullpunkt verschoben (Kälte, Gurt nachgezogen) | Nullen bei jedem Einschalten |
 | Baum fühlt sich zu leicht oder zu schwer an | Lastanteil der Stufe | Stufe wechseln (beide rechten Taster 2 s) |
 | Bein streckt beim Gehen | Fußsensor meldet falsch | Schwelle am Prüfstand einstellen, Sensor prüfen |
@@ -177,12 +235,14 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 
 ## 8. So baut man es auf
 
-1. **Am Tisch:** eine Wägezelle an den Teensy, mit Gewichten kalibrieren, Rauschen anschauen.
-2. **Prüfstand:** eine Gelenkkapsel (RS04) mit Kurbel und Schubstange an einem Holzarm, eine Manschette. Zuerst Dichtheit und Frost testen (P35, P36).
+1. **Am Tisch:** ADS131M04-Platine und eine Wägezelle an den Teensy, mit Gewichten kalibrieren, Rauschen anschauen (Ziel < 0,15 N).
+2. **Prüfstand:** eine Gelenkkapsel (RS04) mit Kurbel und Schubstange an einem Holzarm, eine Manschette M2. Zuerst Dichtheit und Frost testen (P35, P36), dann Mitgehen einstellen (P39: erst Momentbetrieb, dann admit und Kd schrittweise).
 3. **Am Körper:** erst ein Arm, dann Schulter, dann Hüfte im Stand (Fußsensor), dann Knie, zuletzt Gehen.
 4. **Unter Last:** Sandsack in den Schlaufen (prüft die Last-Vorsteuerung), dann leichte, dann schwerere Bäume.
 
 ## 9. Firmware
 
 Umgesetzt und in der Simulation getestet: [firmware/README.md](../firmware/README.md). Die Kopplung der Gelenke, die
-Vorsteuerung und die Standbein-Logik stehen in `firmware/src/exo_app.h`, der Gelenkregler in `firmware/src/exo_core.h`.
+Vorsteuerung und die Standbein-Logik stehen in `firmware/src/exo_app.h`, der Gelenkregler mit Mitgehen und
+Schwingungswächter in `firmware/src/exo_core.h`, der Motorbefehl mit Sollgeschwindigkeit und Kd in `firmware/src/drivers.h`
+(`packMitCommand`). Die Studie, aus der die Werte stammen: [tools/transparenz.cpp](../tools/transparenz.cpp).

@@ -230,22 +230,36 @@ def ring_sector(r_in, r_out, a0, a1):
     return CS([pts])
 
 def manschette(r, h, name, n):
-    """Halbschale (200°) mit Boss für die Wägezelle an der Seite und Schlitzen für den Klettgurt."""
-    t = 5.0
-    shell = Manifold.extrude(ring_sector(r, r + t, -100, 100), h)
-    boss = Manifold.cube((14, 22, 26), True).translate((0, r + t + 7, h / 2))
+    """Manschette M2: Halbschale 210°, 4 mm PETG-CF, 45 % breiter als Rev. T2. Seitlich ein Boss mit 2 × M3 für den
+    Schlitten des Längsschlittens, an den Schalenenden je 2 Ösen für die BOA-Seilbänder, an einem Ende 2 Löcher für die
+    BOA-Drehrad-Basis (Nieten / M3)."""
+    t = 4.0
+    H = h * 1.45
+    shell = Manifold.extrude(ring_sector(r, r + t, -105, 105), H)
+    boss = Manifold.cube((16, 22, 26), True).translate((0, r + t + 7, H / 2))
     m = shell + boss
-    for z in (h / 2 - 6, h / 2 + 6):                                             # 2 × M3 in den Boss (Wägezelle)
+    for z in (H / 2 - 7, H / 2 + 7):                                             # 2 × M3 in den Boss (Schlitten)
         m = m - Manifold.cylinder(30, 1.6, 1.6, 24).rotate((90, 0, 0)).translate((0, r + t + 20, z))
-    for a in (-92, 92):                                                          # Gurtschlitze an beiden Enden
+    for a in (-100, 100):                                                        # BOA-Seilösen: 2 Bänder je Ende
         x, y = (r + t / 2) * math.cos(math.radians(a)), (r + t / 2) * math.sin(math.radians(a))
-        m = m - Manifold.cube((t * 3, 4, h * 0.6), True).rotate((0, 0, a)).translate((x, y, h / 2))
-    druck(name, m, 'PETG', n, f'Manschette r = {r:.0f} mm, Höhe {h:.0f} mm; Polster (Abstandsgewirke) innen einkleben')
+        for z in (H * 0.22, H * 0.78):
+            m = m - Manifold.cube((t * 3, 3.2, 8), True).rotate((0, 0, a)).translate((x, y, z))
+    x, y = (r + t / 2) * math.cos(math.radians(-90)), (r + t / 2) * math.sin(math.radians(-90))
+    for z in (H / 2 - 9, H / 2 + 9):                                             # Basis des BOA-Drehrads
+        m = m - Manifold.cylinder(t * 3, 1.6, 1.6, 16).rotate((0, 90, 0)).rotate((0, 0, -90)).translate((x, y, z))
+    druck(name, m, 'PETG-CF', n, f'Manschette M2 r = {r:.0f} mm, Breite {H:.0f} mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss')
 
 manschette(72, 70, 'manschette_oberschenkel', 2)
-manschette(55, 60, 'manschette_unterschenkel', 2)
+manschette(55, 60, 'manschette_schienbein', 2)
 manschette(50, 60, 'manschette_oberarm', 2)
 manschette(42, 50, 'manschette_unterarm', 2)
+
+# Längsschlitten M2: Schlitten (Alu 4) mit 2 Gleitbuchsen iglidur JSM-0506 (Ø 6 H7 gerieben) und 2 × M3 zur Schale,
+# Stangenhalter (Alu 5) an beiden Enden: 2 × Ø 5 für die Edelstahlstangen (Loctite), 2 × M4 an den Wägezellen-Halter.
+laser('manschette_schlitten', P(rrect(40, 34, 4)) - circ(5.9 / 2, -11, 0) - circ(5.9 / 2, 11, 0) - circ(3.2 / 2, 0, -9) - circ(3.2 / 2, 0, 9),
+      'Alu 6082 T6', 4, 8, 'Längsschlitten der Manschette M2: Gleitbuchsen einpressen (Bohrung auf 6 H7 reiben), M3 zum Boss der Schale')
+laser('manschette_stangenhalter', P(rrect(36, 14, 3)) - circ(4.9 / 2, -11, 0) - circ(4.9 / 2, 11, 0) - circ(M4 / 2, 0, 0),
+      'Alu 6082 T6', 5, 16, 'Stangenhalter des Längsschlittens, 2 je Manschette: Stangen Ø 5 eingeklebt, M4 am Wägezellen-Halter; Federn zwischen Halter und Schlitten')
 
 def bohrschablone(profil, n_loecher=7, pitch=20.0, loch=6.6):
     """U-Schablone zum Aufschieben auf das Vierkantrohr, Bohrbuchsen-Löcher im 20-mm-Raster."""

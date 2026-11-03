@@ -8,7 +8,7 @@ Erzeugt aus der Bauteilliste der technischen Ansicht ([exo-technik.html](../visu
 
 | Stufe | Bestellen | Damit prüfst du |
 |---|---|---|
-| 1 Prüfstand | 1 × RobStride RS04 + CAN-USB-Adapter, Kapselteile (Stiftkühlkörper, Wärmeleitpad, Mantel, V-Ring, O-Ringe, Druckausgleich, Heizband), Kurbel, Schubstange mit Gelenkköpfen, Kniehebel, Teensy 4.1 + CAN-Transceiver, 1 Wägezelle + HX711, Not-Aus, Bremswiderstand | Kapsel dicht und eisfrei (P35, P36), Regelgefühl, Reaktionszeit, Wärme (P10–P17, P33) |
+| 1 Prüfstand | 1 × RobStride RS04 + CAN-USB-Adapter, Kapselteile (Stiftkühlkörper, Wärmeleitpad, Mantel, V-Ring, O-Ringe, Druckausgleich, Heizband), Kurbel, Schubstange mit Gelenkköpfen, Kniehebel, Teensy 4.1 + CAN-Transceiver, Manschetten-Messplatine (ADS131M04) + 1 Wägezelle, 1 Manschette M2 (Schale, BOA, Schlitten), Not-Aus, Bremswiderstand | Kapsel dicht und eisfrei (P35, P36), Mitgehen einstellen (P39), Wärme (P10–P17, P33) |
 | 2 Schlaufe | 1 Bandantrieb 5840-31ZY + Treiber, Lochband, Schlaufenkopf, Wägezelle 50 kg | Haltekraft mit 20-kg-Sandsack (P20) |
 | 3 Rahmen passiv | Halbzeug, Laserteile Rahmen/Hüfte/Beine/Fuß, Lager, Gurte | Passform, Achsen, Lendengelenk (P1–P4, P31, P34) |
 | 4 Beine aktiv | 3 weitere RS04 (Hüften, zweites Knie), Fußkontakt-Wägezellen | Aufstehen, Gehen (P20b, P21, P23) |
@@ -25,8 +25,9 @@ Recherchierte Preise mit Quelle, sonst Erfahrungswerte (≈). Verbindlich ist de
 | PJRC Teensy 4.1 + CAN-Transceiver SN65HVD230 | 1 | ≈ 47 € | [Geizhals](https://geizhals.at/teensy-4-1-a2738866.html) |
 | Kapselteile: Stiftkühlkörper Fischer ICK S R 140 × 50, Wärmeleitpad, Wangen (Laser), Mantel (Druck), V-Ring, O-Ringe, Druckausgleich M12, Heizband 4 W, Kabelverschraubung | 1 Satz | ≈ 75 € | [Kühlkörper (DigiKey)](https://www.digikey.de/en/products/detail/fischer-elektronik/ICK-S-R-140-x-50/26281855), Laserdienst, Handel |
 | Kurbel, Kniehebel (Laser), Stahlrohr Ø 12 × 2, 2 Gelenkköpfe M8, Federpaket | 1 Satz | ≈ 45 € | Laserdienst, Handel |
-| Wägezelle 20 kg + HX711, Not-Aus, Lastrelais, Sicherung, Bremswiderstand | 1 Satz | ≈ 75 € | Elektronik-Händler |
-| **Stufe 1 gesamt** | | **≈ 560–660 €** | |
+| Wägezelle 20 kg, Manschetten-Messplatine (3 × ADS131M04, Platine bestückt), Not-Aus, Lastrelais, Sicherung, Bremswiderstand | 1 Satz | ≈ 125 € | Elektronik-Händler, Platinenfertiger |
+| Manschette M2 zum Testen: BOA-Verschluss, Schlitten (2 Stangen Ø 5, 2 iglidur-Buchsen), Viskopolster, Druck PETG-CF | 1 Satz | ≈ 40 € | [BOA](https://www.boafit.com/), [igus](https://www.igus.de/product/iglidur_J) |
+| **Stufe 1 gesamt** | | **≈ 650–750 €** | |
 | Schneckengetriebemotor 5840-31ZY 24 V, **27 U/min** | 1 | ≈ 18,50 $ | [RobotShop 27 U/min](https://www.robotshop.com/es/products/dyna-engine-high-torque-24v-27rpm-double-axis-worm-gear-motor-5840-31zy) |
 | Motortreiber Pololu G2 18v17 | 1 | ≈ 40 € | [Pololu #2991](https://www.pololu.com/product/2991) |
 | Edelstahl-Lochband 20 × 0,3, Gummi, Schnappschäkel, Wägezelle 50 kg | 1 Satz | ≈ 45 € | Handel |
@@ -46,7 +47,7 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | GU-02 | Schultergurte und Polster | S-Schultergurte, Abstandsgewirke 10 mm | 3 | 0.51 kg | Händler nach Ausführung |
 | GU-03 | Riemen und Schnallen | Gurtband 20/25 mm, Leiterschnallen, Fidlock-Brustgurt | 3 | 0.36 kg | Händler nach Ausführung |
 | EN-01 | Akku | Stihl AP 500 S (36 V, 337 Wh, IPX4, 70 × 116 × 164 mm) | 1 | 2.00 kg | [STIHL AP 500 S (Gewicht, Wh)](https://stihl.com.fj/en/p/batteries-chargers-ap-500-s-battery-124181) |
-| EL-01 | Hauptplatine | PJRC Teensy 4.1 (2,4 × 0,7 Zoll = 61 × 18 mm, ≈ 9 g), CAN-Transceiver SN65HVD230, CR2032 | 1 | 0.08 kg | [PJRC Teensy 4.1 (Maße)](https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4) |
+| EL-01 | Hauptplatine | PJRC Teensy 4.1 (2,4 × 0,7 Zoll = 61 × 18 mm, ≈ 9 g), 2 × CAN-Transceiver SN65HVD230 (CAN1 Beine + Rumpf beugen, CAN3 Arme + Rumpf drehen), CR2032 | 1 | 0.08 kg | [PJRC Teensy 4.1 (Maße)](https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4) |
 | EL-02 | Spannungswandler | Mean Well DDR-60L-24 (Eingang 18–75 V, 24 V / 2,5 A, 60 W, 92 %) + Pololu D36V28F5 (Eingang 5,3–50 V, 5 V / 3,2 A) + Pololu D36V28F12 für das Licht | 1 | 0.25 kg | [Mean Well DDR-60L-24 / Pololu D36V28F5](https://www.pololu.com/product/3782) |
 | EL-03 | Windentreiber | 3 × Pololu G2 18v17 | 3 | 0.09 kg | Händler nach Ausführung |
 | EL-04 | Schütz, Hauptsicherung | HELLA Hochstromrelais 24 V / 80 A (Schließer), Midi-Sicherung 40 A | 1 | 0.20 kg | Händler nach Ausführung |
@@ -54,7 +55,7 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | EL-07 | Lagesensor | BNO085 (Adafruit 4754) | 1 | 0.01 kg | Händler nach Ausführung |
 | EL-08 | Stromschiene mit Sicherungen | Cu 6 × 6, 8 × Flachsicherung 15 A | 1 | 0.12 kg | Händler nach Ausführung |
 | EL-09 | Leistungsleitungen | Silikonlitze 4 mm² / 1,5 mm² | 1 | 0.20 kg | Händler nach Ausführung |
-| EL-10 | CAN-Bus | geschirmte Twisted-Pair-Leitung | 1 | 0.05 kg | Händler nach Ausführung |
+| EL-10 | CAN-Bus | geschirmte Twisted-Pair-Leitung, 2 Stränge | 1 | 0.05 kg | Händler nach Ausführung |
 | EL-11 | Rundstecker | M16 IP67 (Binder Serie 423) | 7 | 0.21 kg | Händler nach Ausführung |
 | AN-03 | Dichtung und Heizung | V-Ring am Abtrieb, Druckausgleichselement M12, Heizfolie Silikon 12 V 4 W mit NTC, Kabelverschraubung M16 | 8 | 0.24 kg | Händler nach Ausführung |
 | AN-E | Ellbogenkapsel-Motor | RobStride RS03 (Planetengetriebe 9:1, CAN 2.0, zwei 14-Bit-Encoder) | 2 | 1.76 kg | [RobStride-Handbuch](https://github.com/RobStride/Product_Information) |
@@ -73,11 +74,13 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | BE-12 | Spikes | Schraubspikes M5, Hartmetallspitze | 12 | 0.06 kg | Händler nach Ausführung |
 | BE-13 | Fersenschale, Ristriemen | PETG, Steigeisen-Ratschenriemen | 2 | 0.20 kg | Händler nach Ausführung |
 | BE-14 | Drehteller Steigbügel | Axial-Nadellager AXK 3047 + Zentrierfeder, Edelstahlscheiben | 2 | 0.16 kg | Händler nach Ausführung |
-| SE-02 | Wägezelle Manschette | Biegebalken YZC-133, 20 kg, 80 × 12,7 × 12,7 mm | 6 | 0.18 kg | Händler nach Ausführung |
-| SE-03 | Messverstärker | HX711-Modul 24 × 16 mm, vergossen (Ausbau: ADS1220) | 6 | 0.03 kg | Händler nach Ausführung |
+| SE-02 | Wägezelle Manschette | Biegebalken YZC-133, 20 kg, 80 × 12,7 × 12,7 mm | 8 | 0.24 kg | Händler nach Ausführung |
+| SE-03 | Messwandler Manschetten | TI ADS131M04 (4 Kanäle gleichzeitig, 24 Bit, SPI), 3 Stück auf einer Platine in der Elektronikbox, gemeinsamer 8,192-MHz-Takt | 3 | 0.02 kg | [TI ADS131M04](https://www.ti.com/product/ADS131M04) |
 | SE-06 | Fußkontakt | 4 × Halbbrücken-Wägezelle 50 kg (Personenwaagen-Bauform 34 × 34 × 8 mm, 1,0 mV/V, Grenzlast 150 %) je Steigbügel, als Vollbrücke an einem HX711 | 2 | 0.30 kg | [50-kg-Halbbrücken-Wägezelle](https://www.sparkfun.com/products/10245) |
 | SE-07 | Wägezelle Schlaufenkopf | Biegebalken YZC-1B, 50 kg | 3 | 0.12 kg | Händler nach Ausführung |
 | SE-08 | Drehring Unterarm-Manschette | Gleitring PA6 / iglidur, Ø 100 mm | 2 | 0.06 kg | Händler nach Ausführung |
+| SE-10 | BOA-Drehverschluss | BOA Fit System, Orthesen-Drehverschluss mit Stahlseil-Schnürung (z. B. Typ L6 / H+), 2 Bänder je Manschette | 8 | 0.24 kg | [BOA Fit System](https://www.boafit.com/) |
+| SE-11 | Längsschlitten Manschette | 2 × Edelstahlstange Ø 5 mm, 2 Gleitbuchsen iglidur JSM-0506 (Trockenlauf, kältefest), Alu-Schlitten, 2 Zentrierfedern ≈ 0,5 N/mm, ±12 mm Weg | 8 | 0.40 kg | [igus iglidur J](https://www.igus.de/product/iglidur_J) |
 | SC-03 | Achse Schulter | Stahlrohr Ø 22 × 3, Kugelsperrbolzen | 2 | 0.16 kg | Händler nach Ausführung |
 | SC-07 | Armfeder | Schenkelfeder ≈ 0,05 Nm/°, Edelstahl (Katalogteil nach Federrechner auslegen) | 2 | 0.06 kg | Händler nach Ausführung |
 | SC-09 | Schulterlager, Abtriebsflansch | Flanschlager KFL001 (12 mm, Lochabstand 48 mm), Flansch 9 × M5 auf Ø 36 | 2 | 0.28 kg | Händler nach Ausführung |
@@ -126,7 +129,7 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | BA-04 | Kniehebel | EN AW-6082 10 mm, r 60 mm, Nabe auf dem Kniebolzen | 2 | 0.12 kg | Händler nach Ausführung |
 | BE-03 | Knieplatten | Alu 6 mm | 2 | 0.12 kg | Händler nach Ausführung |
 | BE-11 | Steigbügel | Edelstahl 1.4301, 4 mm | 2 | 0.50 kg | Händler nach Ausführung |
-| SE-04 | Überlastpuffer, Halter | TPU, Alu | 6 | 0.12 kg | Händler nach Ausführung |
+| SE-04 | Überlastpuffer, Halter | TPU, Alu | 8 | 0.16 kg | Händler nach Ausführung |
 | SC-02 | Schultergabel | Alu 10 mm | 2 | 0.24 kg | Händler nach Ausführung |
 | AR-04 | Kurbel Ellbogen | EN AW-6082 8 mm, r 50 mm, auf dem Abtrieb (6 × M4) | 2 | 0.08 kg | Händler nach Ausführung |
 | AR-08 | Ellbogenhebel | EN AW-6082 8 mm, r 50 mm, Nabe auf dem Ellbogenbolzen | 2 | 0.08 kg | Händler nach Ausführung |
@@ -141,8 +144,7 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | EN-02 | Akkuschacht | PETG-CF, Führungsschienen Alu 4 × 4, Kontaktträger | 2 | 0.50 kg | Händler nach Ausführung |
 | AN-02 | Kapselhaube | PETG-CF, Wand 2 mm, O-Ring, 5 mm Dämmung innen | 8 | 0.72 kg | Händler nach Ausführung |
 | BE-05 | Knieanschlag | TPU 95A | 2 | 0.02 kg | Händler nach Ausführung |
-| BE-07 | Schienbeinschale | PETG, Polster 6 mm, Klett | 2 | 0.24 kg | Händler nach Ausführung |
-| SE-01 | Manschette | PETG-Schale 5 mm, Polster 6 mm, Klett | 6 | 0.60 kg | Händler nach Ausführung |
+| SE-01 | Manschette M2 | PETG-CF-Schale 4 mm, 45 % breiter (Oberarm 87, Unterarm 73, Oberschenkel 102, Schienbein 87 mm), Viskopolster 4 mm perforiert mit Wechselbezug, 3 Größen | 8 | 1.04 kg | Händler nach Ausführung |
 
 ## Selbst fertigen
 

@@ -19,8 +19,8 @@ struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 29.1f;                   // Exo-Oberteil (Entwurf 5): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
-  float exoComUp = 0.34f, exoComBack = 0.05f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
+  float exoUpperKg = 29.5f;                   // Exo-Oberteil (Entwurf 5, Manschetten M2): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
+  float exoComUp = 0.34f, exoComBack = 0.04f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
 
@@ -38,7 +38,11 @@ struct Inputs {
 };
 
 struct Outputs {
-  float tau[NJ] = {};                  // Moment je Gelenk [Nm] → Motor über CAN
+  float tau[NJ] = {};                  // Moment je Gelenk [Nm] → Motor über CAN (Vorsteuer-Anteil t_ff)
+  float vDes[NJ] = {};                 // Mitgehen: Sollgeschwindigkeit je Gelenk [rad/s] → Motor (Typ 1, v_soll)
+  float kd[NJ] = {};                   // Mitgehen: Dämpfung im Motor, aufs Gelenk bezogen [Nm·s/rad] (0 = reines Moment)
+  float guard[NJ] = {};                // Schwingungswächter je Gelenk (1 = volles Mitgehen)
+  float tauTotal[NJ] = {};             // Gesamtmoment am Gelenk, wie es der Motor rechnet: tau + Kd·(vSoll − v) (Tests, Log)
   float winch[NL] = {};                // −1…+1
   Led led = Led::Off;
   int ledCount = 0;                    // leuchtende LEDs (Akku)
@@ -62,7 +66,7 @@ inline JointConfig defaultJoint(JointId id) {
       c.name = "Hüfte"; c.rCuff = 0.15f; c.tauMin = -110.f; c.tauMax = 35.f; c.qMin = -0.35f; c.qMax = 2.0f;
       c.gravCoef = 2.0f; c.slew = 600.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 28.f; break;
     case KneeL: case KneeR: // Beugen zusätzlich mechanisch begrenzt: Federpaket in der Schubstange gibt ab ≈ 11 Nm nach
-      c.name = "Knie"; c.rCuff = 0.f; c.tauMin = -110.f; c.tauMax = 10.f; c.qMin = 0.05f; c.qMax = 2.0f;
+      c.name = "Knie"; c.rCuff = 0.2f; c.tauMin = -110.f; c.tauMax = 10.f; c.qMin = 0.05f; c.qMax = 2.0f;
       c.gravCoef = 0.f; c.frictionComp = 0.2f; c.slew = 600.f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 28.f; break;
     case ShL: case ShR:     // RS04 direkt
       c.name = "Schulter"; c.rCuff = 0.17f; c.tauMax = 100.f; c.tauMin = -100.f; c.frictionComp = 0.15f;
@@ -76,6 +80,17 @@ inline JointConfig defaultJoint(JointId id) {
     case ElL: case ElR: default:   // RS03 über Schubstange, 60 Nm Spitze · 0,95
       c.name = "Ellbogen"; c.rCuff = 0.15f; c.tauMax = 56.f; c.tauMin = -56.f; c.frictionComp = 0.15f;
       c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 16.f; break;
+  }
+  // Mitgehen (Rev. M2, Studie tools/transparenz.cpp): schnelle Manschetten (ADS131M04, 1 kHz), 40-Hz-Filter, kleines Totband.
+  // vSoll = admit · Kraft; Kd im Motor ≈ 0,75 · Segmentträgheit / 0,065 (Trägheit Exo-Segment geschätzt, am Prüfstand P39 einstellen).
+  c.filterHz = 40.f; c.deadbandN = 0.3f; c.admit = 0.6f;
+  switch (id) {
+    case HipL: case HipR:   c.kdJoint = 4.0f; c.viscComp = 0.4f; break;    // Bein mit Kniekapsel ≈ 0,35 kg·m²
+    case KneeL: case KneeR: c.kdJoint = 2.9f; c.viscComp = 0.5f; break;    // Unterschenkel-Schiene ≈ 0,25 kg·m²
+    case ShL: case ShR:     c.kdJoint = 2.3f; c.viscComp = 0.4f; break;    // Exo-Arm mit Ellbogenkapsel ≈ 0,20 kg·m²
+    case Lumb:              c.kdJoint = 10.f; c.viscComp = 0.5f; c.admit = 0.25f; break;   // Oberteil träge, Gasfedern tragen: langsam mitgehen
+    case Twist:             c.kdJoint = 7.f;  c.viscComp = 0.3f; c.admit = 0.35f; break;   // Rucksack drehen ≈ 0,6 kg·m²
+    case ElL: case ElR: default: c.kdJoint = 0.75f; c.viscComp = 0.25f; break;   // Unterarm-Schiene ≈ 0,065 kg·m²
   }
   return c;
 }
@@ -133,7 +148,7 @@ class App {
     // Wärmeschutz je Motor, zweifach: Schätzung (Motormoment / Dauermoment in der Kapsel)² mit 3 min Zeitkonstante, und die gemessene
     // Wicklungstemperatur aus der Motor-Rückmeldung (ab 100 °C zurücknehmen, der Motor selbst schaltet bei 135–145 °C ab).
     for (int i = 0; i < NJ; i++) {
-      const float r = joint[i].lastTau() * joint[i].cfg.motorPerJoint / joint[i].cfg.motorRatedNm;
+      const float r = joint[i].lastTotal * joint[i].cfg.motorPerJoint / joint[i].cfg.motorRatedNm;
       heat_[i] += (r * r - heat_[i]) * clampf(dt / 180.f, 0.f, 1.f); o.heat[i] = heat_[i];
       const float byModel = clampf(1.f - 0.6f * (heat_[i] - 1.f), 0.4f, 1.f), byTemp = clampf(1.f - (in.joint[i].motorTempC - 100.f) / 40.f, 0.4f, 1.f);
       ji[i].limitScale = std::fmin(byModel, byTemp);
@@ -144,9 +159,10 @@ class App {
     if (!falling) fallT_ = -1.f;
     if (lockOn_ > 0.3f) ji[Lumb].limitScale = 0.f;   // Lendensperre trägt: Beugemotor entlasten (kühlt ab)
     for (int i = 0; i < NJ; i++) {
-      if (falling && fallT_ < 1.5f && i <= KneeR) { o.tau[i] = clampf(-4.f * in.joint[i].qd, -60.f, 60.f) * (1.f - fallT_ / 1.5f); continue; }
+      if (falling && fallT_ < 1.5f && i <= KneeR) { o.tau[i] = o.tauTotal[i] = clampf(-4.f * in.joint[i].qd, -60.f, 60.f) * (1.f - fallT_ / 1.5f); continue; }
       if (sup.scale <= 0.f || !((jointMask >> i) & 1u)) { joint[i].off(); o.tau[i] = 0.f; continue; }
       o.tau[i] = joint[i].step(ji[i], dt, sup.scale);
+      o.vDes[i] = joint[i].lastVDes; o.kd[i] = joint[i].lastKd; o.guard[i] = joint[i].guard; o.tauTotal[i] = joint[i].lastTotal;
       o.ff[i] = ji[i].ffNm;
     }
     // Schlaufen: unabhängig vom Gelenkmodus (auch aus bleibt alles fest)

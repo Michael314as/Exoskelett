@@ -107,7 +107,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
 
 <div class="ide">
   <header class="top">
-    <div class="brand"><b>Christbaum-Exo · Technik</b><span>Entwurf 5 · Rev. T2 · 1,75 m / 75 kg</span></div>
+    <div class="brand"><b>Christbaum-Exo · Technik</b><span>Entwurf 5 · Rev. M2 · 1,75 m / 75 kg</span></div>
     <span class="grp" role="group" aria-label="Kamera"><em>Ansicht</em>
       <button class="btn" data-cam="iso" aria-pressed="true">Iso</button><button class="btn" data-cam="front">Vorne</button><button class="btn" data-cam="side">Seite</button><button class="btn" data-cam="back">Hinten</button><button class="btn" data-cam="top">Oben</button></span>
     <label class="chk"><input type="checkbox" id="ortho"> Parallel</label>
@@ -453,8 +453,8 @@ const PART_INFO = [
     care: 'Anschlag gegen Überstrecken. Die Unterarmschiene trägt den Schlaufenträger, deshalb biegesteif.' },
   { key: 'sensor', name: 'Sensoren: Manschetten, Fußkontakt, Schlaufenlast', dist: 0.5,
     what: 'So weiß das Exo, was du willst und was es trägt: Manschetten messen deine Bewegung, Fußsensoren das Standbein, die Schlaufenköpfe das Baumgewicht.',
-    how: 'Die blauen Manschetten an Oberarm, Unterarm und Oberschenkel sitzen auf je einer Wägezelle (Biegebalken wie in Küchenwaagen). Drückst du gegen die Schale, folgt das Exo. Die Steuerung rechnet den Druck in Momente für alle Gelenke um, die ihn bewegen können: Druck am Unterarm hilft auch der Schulter. Am Unterschenkel sitzt eine einfache Schale ohne Sensor. Ein Drucksensor im Steigbügel meldet, ob das Bein belastet ist. In jedem Schlaufenkopf misst eine kleine Wägezelle, wie stark der Baum zieht: Diesen Anteil trägt das Exo von selbst, ohne dass du drücken musst. „Arm heben“ oder „Hocke“ bewegen: rote Pfeile zeigen deinen Druck.',
-    parts: '6 Wägezellen 20 kg (Manschetten), 3 Wägezellen 50 kg (Schlaufenköpfe), 9 Verstärker HX711, 2 Drucksensoren (FSR, vergossen), gedruckte Schalen, Polster, Klettgurte.',
+    how: 'Die blauen Manschetten (Rev. M2) an Oberarm, Unterarm, Oberschenkel und jetzt auch am Schienbein sitzen auf je einer Wägezelle (Biegebalken wie in Küchenwaagen). Die Schale ist breit und dünn gepolstert, ein BOA-Drehverschluss zieht sie gleichmäßig straff. Zwischen Schale und Zelle läuft ein kleiner Längsschlitten: Rutscht die Manschette beim Beugen etwas längs, gleitet sie mit, statt über die Haut zu scheuern oder die Zelle falsch zu drücken. Drei schnelle Messwandler (ADS131M04, 1000 Messungen/s) in der Elektronikbox lesen alle Manschetten gleichzeitig. Die Steuerung „geht mit“: Drückst du, läuft das Gelenk mit einer Geschwindigkeit proportional zum Druck mit, die Dämpfung dafür rechnet der Motor selbst. Ein Drucksensor im Steigbügel meldet, ob das Bein belastet ist. In jedem Schlaufenkopf misst eine kleine Wägezelle, wie stark der Baum zieht: Diesen Anteil trägt das Exo von selbst. „Arm heben“ oder „Hocke“ bewegen: rote Pfeile zeigen deinen Druck.',
+    parts: '8 Wägezellen 20 kg (Manschetten), 4 Rumpf-Wägezellen, 3 Messwandler ADS131M04, 3 Wägezellen 50 kg (Schlaufenköpfe) und 2 Fußsensoren an HX711, 8 BOA-Verschlüsse, 8 Längsschlitten mit iglidur-Buchsen, gedruckte PETG-CF-Schalen, Viskopolster.',
     care: 'Schalen straff, Polster dünn, sonst wird die Regelung schwammig. Beim Einschalten 2 s ruhig stehen, dann stellt die Steuerung die Nullpunkte.' },
   { key: 'loop', name: 'Schlaufengreifer (Spannband)', dist: 0.6,
     what: 'Hält Stämme direkt am Handgelenk: rechts zwei Schlaufen (unten und schräg außen), links eine. Prinzip wie eine Schlauchschelle: ein Band, das um den Stamm zugezogen wird.',
@@ -478,8 +478,8 @@ const PART_INFO = [
     care: 'Gehäuse gedichtet, Scheibe kratzfest. Das Display hat eine eigene Sicherung; fällt es aus, läuft das Exo weiter.' },
   { key: 'wiring', name: 'Elektronik und Kabelbäume', dist: 0.7,
     what: 'Alles, was Strom und Signale führt: Steuerung in der Box, Verteilung zu den 8 Motoren, Kabelbäume zu Armen, Beinen, Not-Aus und Anzeige.',
-    how: 'In der Box an der Rückwand: Hauptplatine mit Teensy 4.1 und CAN-Transceiver, 3 Windentreiber, zwei Spannungswandler (24 V, 5 V) mit Kühlrippen. Unten Hauptsicherung, Schütz und eine Kupferschiene mit einer Sicherung je Motor. Ein CAN-Bus (grün) läuft als Kette von Motor zu Motor. Unten und seitlich an der Box sitzen dichte Rundstecker. Orange Kabelbäume: Leistung und CAN zu den Hüftmotoren. Blaue Kabelbäume: Manschetten-Verstärker, Fußsensoren, Schlaufen (Winde, Wägezelle, Taster) und Anzeige. Jeder Baum läuft im Gewebeschlauch an der Schiene, über jedes Gelenk mit einer Schlaufe, damit nichts knickt. Ansicht „Elektronik“ zeigt nur diese Teile.',
-    parts: 'Teensy 4.1, CAN-Transceiver SN65HVD230, 9 HX711 (an den Sensoren vergossen), 2 DC/DC-Wandler, 3 Motortreiber, Schütz, Midi-Sicherung 40 A, 8 Flachsicherungen 15 A, Kupferschiene, 7 Rundstecker IP67, Kabel 4 mm² / 1,5 mm² / geschirmt, Gewebeschlauch, etwa 250 €.',
+    how: 'In der Box an der Rückwand: Hauptplatine mit Teensy 4.1 und CAN-Transceiver, 3 Windentreiber, zwei Spannungswandler (24 V, 5 V) mit Kühlrippen. Unten Hauptsicherung, Schütz und eine Kupferschiene mit einer Sicherung je Motor. Ein CAN-Bus (grün) läuft als Kette von Motor zu Motor. Unten und seitlich an der Box sitzen dichte Rundstecker. Orange Kabelbäume: Leistung und CAN zu den Hüftmotoren. Blaue Kabelbäume: Manschetten (geschirmt zu den Messwandlern in der Box), Fußsensoren, Schlaufen (Winde, Wägezelle, Taster) und Anzeige. Jeder Baum läuft im Gewebeschlauch an der Schiene, über jedes Gelenk mit einer Schlaufe, damit nichts knickt. Ansicht „Elektronik“ zeigt nur diese Teile.',
+    parts: 'Teensy 4.1, 2 CAN-Transceiver SN65HVD230 (zwei Busse), 3 ADS131M04 (Manschetten), 5 HX711 (Schlaufen, Steigbügel, vergossen), 2 DC/DC-Wandler, 3 Motortreiber, Schütz, Midi-Sicherung 40 A, 8 Flachsicherungen 15 A, Kupferschiene, 7 Rundstecker IP67, Kabel 4 mm² / 1,5 mm² / geschirmt, Gewebeschlauch, etwa 250 €.',
     care: 'Kabel nie über eine Kante ziehen, über Gelenke immer mit Schlaufe. Stecker nach unten, damit kein Wasser hineinläuft. CAN-Bus an beiden Enden mit 120 Ω abschließen.' },
   { key: 'light', name: 'Licht und LED-Ring', dist: 0.75,
     what: 'Licht für die dunklen Dezembernachmittage und ein Ring, der immer zeigt, was das Exo tut.',
@@ -523,25 +523,31 @@ SIDE.forEach((sd, k) => {
   const hd = new THREE.Mesh(new THREE.SphereGeometry(0.045, 14, 12), std(0x55594C, 0.9)); hd.scale.set(0.8, 1.1, 0.6); hd.position.set(0, -D.fore - 0.07, sd * D.shHalf); BG.fore[k].add(hd);
 });
 
-/* ---------- Sensor-Manschette: Schale + Polster + Gurt, auf Wägezelle zur Schiene ---------- */
+/* ---------- Sensor-Manschette M2: breite Schale + dünnes Viskopolster + BOA-Verschluss, Längsschlitten, Wägezelle zur Schiene ---------- */
+// Rev. M2: Schale 45 % breiter (weniger Druck je cm²), Polster 4 mm dicht (straffe Ankopplung), BOA-Drehverschluss statt Klett,
+// Längsschlitten ±12 mm mit Zentrierfedern: Achsversatz Mensch ↔ Exo schiebt die Manschette nicht über die Haut und nicht auf die Zelle.
 const cuffArrows = {};
 function sensorCuff(g, y, zc, r, h, zr, sd, id) {
   const prev = cur; cur = 'sensor';
-  const t = 0.005;
-  put(g, mesh(shellGeo(r, t, h, deg(-100), deg(100)), M.print), 0, y, zc);                       // Schale vorne (PETG)
-  put(g, mesh(shellGeo(r - 0.006, 0.006, h - 0.006, deg(-96), deg(96)), M.foam), 0, y, zc);       // Polster
-  put(g, mesh(shellGeo(r + 0.001, 0.0025, h * 0.55, deg(100), deg(260)), M.strap), 0, y, zc);     // Klettgurt hinten
-  box(g, 0.012, 0.022, 0.008, M.chip, -r - 0.004, y, zc - sd * r * 0.55);                          // Gurtschnalle
-  // seitlicher Steg an der Schale → Wägezelle → Halter an der Schiene
-  const zo = zc + sd * (r + t), zcell = zo + sd * 0.011, zin = Math.abs(zr) - 0.0125;
-  box(g, 0.02, 0.022, 0.012, M.print, 0, y - 0.022, zo + sd * 0.004);                                // Steg Schale
+  const t = 0.004, H = h * 1.45;
+  put(g, mesh(shellGeo(r, t, H, deg(-105), deg(105)), M.print), 0, y, zc);                       // Schale vorne (PETG-CF)
+  put(g, mesh(shellGeo(r - 0.004, 0.004, H - 0.006, deg(-100), deg(100)), M.foam), 0, y, zc);     // Viskopolster 4 mm, perforiert
+  for (const dy of [-H * 0.28, H * 0.28]) put(g, mesh(shellGeo(r + 0.001, 0.0012, 0.012, deg(105), deg(255)), M.strap), 0, y + dy, zc);   // BOA-Bänder hinten
+  { const d = put(g, mesh(cyl(0.014, 0.014, 0.012, 20), M.chip), -r - 0.008, y, zc, 0, 0, Math.PI / 2); d.userData.boa = true; }        // BOA-Drehverschluss
+  // seitlicher Steg → Längsschlitten (2 Stangen Ø 5, Gleitbuchsen, Zentrierfedern) → Wägezelle → Halter an der Schiene
+  const zo = zc + sd * (r + t), zs = zo + sd * 0.009, zcell = zs + sd * 0.013, zin = Math.abs(zr) - 0.0125;
+  box(g, 0.02, 0.026, 0.008, M.print, 0, y, zo + sd * 0.003);                                        // Steg Schale
+  { const c = box(g, 0.04, 0.034, 0.008, M.aluDark, 0, y, zs); c.userData.slide = true; }            // Schlitten mit 2 Gleitbuchsen (iglidur)
+  for (const dx of [-0.011, 0.011]) {
+    const rd = put(g, mesh(cyl(0.0025, 0.0025, H + 0.024, 8), M.steel), dx, y, zs + sd * 0.0015); rd.userData.slide = true;       // Führungsstangen längs zum Glied
+    for (const s2 of [-1, 1]) { const f = put(g, mesh(cyl(0.0036, 0.0036, H * 0.22, 8), M.chrome), dx, y + s2 * (0.017 + H * 0.11), zs + sd * 0.0015); f.userData.slide = true; }   // Zentrierfedern
+  }
   put(g, mesh(rgeo(0.0127, 0.075, 0.0127, 0.0015), M.cell), 0, y, zcell);                             // Wägezelle (Biegebalken)
   box(g, 0.0135, 0.012, 0.004, M.gauge, 0, y, zcell - sd * 0.0066);                                   // Dehnmessstreifen (vergossen)
   for (const dy of [-0.028, -0.016, 0.016, 0.028]) put(g, mesh(cyl(0.0028, 0.0028, 0.02, 6), M.steel), 0, y + dy, zcell, Math.PI / 2);
   const bw = Math.max(0.006, zin - Math.abs(zcell) - 0.0063);
   box(g, 0.026, 0.03, bw, M.aluDark, 0, y + 0.024, sd * (Math.abs(zcell) + 0.0063 + bw / 2));          // Halter an der Schiene
   for (const dy of [0.012, -0.044]) box(g, 0.008, 0.006, 0.008, M.tpu, 0.012, y + dy, zcell);         // Überlast-Puffer
-  box(g, 0.016, 0.022, 0.009, M.pcb, -0.014, y + 0.03, sd * (Math.abs(zcell) + 0.004));              // Verstärker, vergossen
   cur = prev;
   const arr = new THREE.ArrowHelper(V(1, 0, 0), V(0.02, y, zc), 0.1, 0xD32F2F, 0.025, 0.018); arr.visible = false; g.add(arr);
   if (id) cuffArrows[id] = { arr, y, zc };
@@ -702,15 +708,6 @@ cur = 'power';
 /* ---------- 5 Hüfte: Abspreizgelenk hinter dem Hüftgelenk, Hüftschwinge mit Hüftmotor, Hüftlager ---------- */
 const XA0 = -0.19, XA1 = -0.12, XHUB = -0.155, XM = -0.12;
 const hipDrums = [];
-function passiveCuff(g, y, zc, r, h, zr, sd) {
-  const prev = cur; cur = 'leg';
-  put(g, mesh(shellGeo(r, 0.005, h, deg(-100), deg(100)), M.print), 0, y, zc);
-  put(g, mesh(shellGeo(r - 0.006, 0.006, h - 0.006, deg(-96), deg(96)), M.foam), 0, y, zc);
-  put(g, mesh(shellGeo(r + 0.001, 0.0025, h * 0.55, deg(100), deg(260)), M.strap), 0, y, zc);
-  const zo = Math.abs(zc) + r + 0.004, zi = Math.abs(zr) - 0.0125;
-  box(g, 0.02, 0.022, Math.max(0.006, zi - zo), M.print, 0, y, sd * (zo + zi) / 2);
-  cur = prev;
-}
 SIDE.forEach((sd, k) => {
   const zA = sd * HH;
   cur = 'hip'; fl = 4;
@@ -800,7 +797,7 @@ SIDE.forEach((sd, k) => {
     tube(g, pS(-0.16), pS(-D.shank + 0.012), 0.025);
     fl = null;
     for (let i = 0; i < 5; i++) { const y = -0.21 - i * 0.022; put(g, mesh(cyl(0.003, 0.003, 0.022, 8), M.chip), 0, y, sd * zShank(y), Math.PI / 2); }
-    passiveCuff(g, -0.14, sd * HH, 0.055, 0.06, sd * zShank(-0.14), sd);
+    sensorCuff(g, -0.12, sd * HH, 0.055, 0.06, sd * zShank(-0.12), sd, null);                    // Schienbein-Manschette mit Sensor (M2): Knie geht mit
     cur = 'foot'; fl = 6;
     flangeBearing(g, 0, -D.shank, sd * Z.an, 0.55, sd);                                              // Fußgelenk: Fußspitze hoch/runter
     fl = null;
@@ -1118,7 +1115,9 @@ cur = 'wiring';
   box(g, 0.002, 0.07, 0.17, M.pcb, xw, 0.29, 0);
   box(g, 0.004, 0.061, 0.018, M.pcb, xw + 0.004, 0.295, -0.045); box(g, 0.003, 0.012, 0.012, M.chip, xw + 0.0065, 0.295, -0.045);   // Teensy 4.1
   box(g, 0.004, 0.008, 0.007, M.chrome, xw + 0.004, 0.327, -0.045);                                                                 // USB
-  box(g, 0.003, 0.01, 0.006, M.chip, xw + 0.004, 0.275, -0.012);                                                                    // CAN-Transceiver
+  box(g, 0.003, 0.01, 0.006, M.chip, xw + 0.004, 0.275, -0.012);                                                                    // CAN-Transceiver (CAN1)
+  box(g, 0.003, 0.01, 0.006, M.chip, xw + 0.004, 0.258, -0.012);                                                                    // CAN-Transceiver (CAN3)
+  { const pc = cur; cur = 'sensor'; for (let i = 0; i < 3; i++) { const a = box(g, 0.0025, 0.018, 0.018, M.pcb, xw + 0.004 + i * 0.006, 0.312, 0.0); a.userData.ads = true; } cur = pc; }   // 3 × ADS131M04 (Manschetten, 1 kS/s), gestapelt, mittig
   for (let i = 0; i < 4; i++) box(g, 0.006, 0.008, 0.02, M.header, xw + 0.005, 0.262, 0.015 + i * 0.022);                         // Schraubklemmen
   for (let i = 0; i < 3; i++) { box(g, 0.003, 0.03, 0.028, std(0xA02020, 0.5), xw + 0.002, 0.225, -0.05 + i * 0.035); box(g, 0.008, 0.016, 0.02, M.aluDark, xw + 0.007, 0.225, -0.05 + i * 0.035); }   // Windentreiber
   for (const z of [-0.085, 0.085]) { box(g, 0.016, 0.05, 0.04, M.aluDark, xw + 0.008, 0.23, z); for (let i = 0; i < 4; i++) box(g, 0.006, 0.05, 0.002, M.alu, xw + 0.019, 0.23, z - 0.015 + i * 0.01); }   // DC/DC 24 V und 5 V
@@ -1460,7 +1459,7 @@ const DB = [
   ['GU-03', 'Riemen und Schnallen', 'Kauf', 'Gurtband 20/25 mm, Leiterschnallen, Fidlock-Brustgurt', 'Lageverstellriemen, Brustgurt', 0.12, 'GU-02'],
   ['EN-01', 'Akku', 'Kauf', 'Stihl AP 500 S (36 V, 337 Wh, IPX4, 70 × 116 × 164 mm)', '2,0 kg; bis 2 500 Ladezyklen; zweiter Akku optional (Darstellung), parallel über EL-06, einzeln im Betrieb wechselbar', 2.0, 'EN-02 EL-06'],
   ['EN-02', 'Akkuschacht', 'Druck + Halbzeug', 'PETG-CF, Führungsschienen Alu 4 × 4, Kontaktträger unten', 'stehend oben zwischen den Schulterblättern; Akku von oben einstecken (Griff über die Schulter), Stihl-Rastung, Kontakte unten (Wasser läuft ab)', 0.25, 'EN-01 AN-01 RA-04'],
-  ['EL-01', 'Hauptplatine', 'Kauf, bestückt', 'PJRC Teensy 4.1 (2,4 × 0,7 Zoll = 61 × 18 mm, ≈ 9 g), CAN-Transceiver SN65HVD230, CR2032', '200-Hz-Regeltakt, Watchdog, Uhr', 0.08, 'EL-10 EL-07 KB-03 KB-02'],
+  ['EL-01', 'Hauptplatine', 'Kauf, bestückt', 'PJRC Teensy 4.1 (2,4 × 0,7 Zoll = 61 × 18 mm, ≈ 9 g), 2 × CAN-Transceiver SN65HVD230 (CAN1 Beine + Rumpf beugen, CAN3 Arme + Rumpf drehen), CR2032', '500-Hz-Regeltakt (Mitgehen), Watchdog, Uhr', 0.08, 'EL-10 EL-07 KB-03 KB-02'],
   ['EL-02', 'Spannungswandler', 'Kauf', 'Mean Well DDR-60L-24 (Eingang 18–75 V, 24 V / 2,5 A, 60 W, 92 %) + Pololu D36V28F5 (Eingang 5,3–50 V, 5 V / 3,2 A) + Pololu D36V28F12 für das Licht', '2,5 A reichen für eine Winde zur Zeit: die Steuerung schaltet die Winden nacheinander (Stillstrom 5840 ≈ 1,5 A). Größere DDR-120-Varianten passen nicht zum Akkubereich 30–42 V.', 0.25, 'EL-04 EL-01 EL-03'],
   ['EL-03', 'Windentreiber', 'Kauf', '3 × Pololu G2 18v17', 'je eine Schlaufenwinde SG-06', 0.03, 'SG-06 EL-02'],
   ['EL-04', 'Schütz, Hauptsicherung', 'Kauf', 'HELLA Hochstromrelais 24 V / 80 A (Schließer), Midi-Sicherung 40 A', 'fällt bei Not-Aus und Watchdog ab', 0.2, 'BD-01 EL-08 EL-06'],
@@ -1468,7 +1467,7 @@ const DB = [
   ['EL-07', 'Lagesensor', 'Kauf', 'BNO085 (Adafruit 4754)', 'Rumpfneigung, Sturzerkennung', 0.005, 'EL-01'],
   ['EL-08', 'Stromschiene mit Sicherungen', 'Halbzeug + Kauf', 'Cu 6 × 6, 8 × Flachsicherung 15 A', 'eine Sicherung je Motor', 0.12, 'EL-04 EL-09'],
   ['EL-09', 'Leistungsleitungen', 'Kauf', 'Silikonlitze 4 mm² / 1,5 mm²', 'zu den Steckern der Kapseln', 0.2, 'EL-08 KB-01 KB-03'],
-  ['EL-10', 'CAN-Bus', 'Kauf', 'geschirmte Twisted-Pair-Leitung', '1 Mbit/s, 120 Ω an beiden Enden', 0.05, 'EL-01 AN-K AN-E AN-S BA-01'],
+  ['EL-10', 'CAN-Bus', 'Kauf', 'geschirmte Twisted-Pair-Leitung, 2 Stränge', '1 Mbit/s, 120 Ω an beiden Enden; je Strang 5 Motoren, bei 500 Hz ≈ 70 % Buslast', 0.05, 'EL-01 AN-K AN-E AN-S BA-01'],
   ['EL-11', 'Rundstecker', 'Kauf', 'M16 IP67 (Binder Serie 423)', 'unten Beine, seitlich Arme', 0.03, 'KB-01 KB-02 KB-03'],
   ['KB-01', 'Kabelbaum Beinkapseln', 'Fertigung', '2 × 2,5 mm² + CAN + Heizung in Gewebeschlauch 10 mm', 'Hüft- und Kniekapsel; Schlaufe am Abspreizgelenk', 0.2, 'AN-H AN-K EL-11'],
   ['KB-02', 'Kabelbaum Bein', 'Fertigung', '6-adrig geschirmt', 'Oberschenkel-Verstärker, Fußkontakt', 0.1, 'SE-03 SE-06 EL-11'],
@@ -1503,8 +1502,7 @@ const DB = [
   ['BE-03', 'Knieplatten', 'Laser', 'Alu 6 mm', '', 0.06, 'BE-01 BE-04'],
   ['BE-04', 'Kniegelenklager', 'Kauf', 'Flanschlager KFL001 (12 mm, Lochabstand 48 mm) + Passschraube M12', 'Achse auf Höhe des Kniegelenks', 0.12, 'BE-03 BA-04'],
   ['BE-05', 'Knieanschlag', 'Druck', 'TPU 95A', 'gegen Überstrecken', 0.01, 'BE-04'],
-  ['BE-06', 'Unterschenkelschiene', 'Halbzeug', '6082 Vierkant 30 × 30 × 2 / 25 × 25 × 2', '', 0.4, 'BE-04 BE-08 BE-07'],
-  ['BE-07', 'Schienbeinschale', 'Druck', 'PETG, Polster 6 mm, Klett', 'ohne Sensor', 0.12, 'BE-06'],
+  ['BE-06', 'Unterschenkelschiene', 'Halbzeug', '6082 Vierkant 30 × 30 × 2 / 25 × 25 × 2', '', 0.4, 'BE-04 BE-08 SE-01'],
   ['BE-08', 'Knöchellager', 'Kauf', 'Flanschlager KFL08 (8 mm, Lochabstand 37 mm)', 'Fußspitze hoch/runter', 0.07, 'BE-06 BE-09'],
   ['BE-09', 'Fersenbügel', 'Halbzeug, gebogen', 'Alu-Rundstab Ø 16', 'führt hinter die Ferse', 0.15, 'BE-08 BE-10'],
   ['BE-10', 'Kippgelenk', 'Kauf', 'Bolzen Ø 8 mit Gummibuchse', 'Achse nach vorne durch den Knöchel', 0.03, 'BE-09 BE-11'],
@@ -1512,13 +1510,15 @@ const DB = [
   ['BE-12', 'Spikes', 'Kauf', 'Schraubspikes M5, Hartmetallspitze', '6 je Fuß, tauschbar', 0.005, 'BE-11'],
   ['BE-14', 'Drehteller Steigbügel', 'Kauf + Laser', 'Axial-Nadellager AXK 3047 + Zentrierfeder, Edelstahlscheiben', 'Fußspitze drehen ±20° (Wenden, Fuß nach außen stellen) ohne das Knie zu verdrehen', 0.08, 'BE-11 SE-06'],
   ['BE-13', 'Fersenschale, Ristriemen', 'Druck + Kauf', 'PETG, Steigeisen-Ratschenriemen', '', 0.1, 'BE-11'],
-  ['SE-01', 'Manschette', 'Druck', 'PETG-Schale 5 mm, Polster 6 mm, Klett', 'Oberarm, Unterarm, Oberschenkel', 0.1, 'SE-02 BE-01 AR-01 AR-02'],
-  ['SE-02', 'Wägezelle Manschette', 'Kauf', 'Biegebalken YZC-133, 20 kg, 80 × 12,7 × 12,7 mm', 'misst nur quer zur Schiene', 0.03, 'SE-01 SE-03 SE-04'],
-  ['SE-03', 'Messverstärker', 'Kauf', 'HX711-Modul 24 × 16 mm, vergossen (Ausbau: ADS1220)', '80 Messungen/s', 0.005, 'SE-02 KB-02 KB-03'],
+  ['SE-01', 'Manschette M2', 'Druck', 'PETG-CF-Schale 4 mm, 45 % breiter (Oberarm 87, Unterarm 73, Oberschenkel 102, Schienbein 87 mm), Viskopolster 4 mm perforiert mit Wechselbezug, 3 Größen', 'Oberarm, Unterarm, Oberschenkel, Schienbein (neu mit Sensor): straff und breit = wenig Druck je cm², kaum Nachgeben', 0.13, 'SE-02 SE-10 SE-11 BE-01 BE-06 AR-01 AR-02'],
+  ['SE-02', 'Wägezelle Manschette', 'Kauf', 'Biegebalken YZC-133, 20 kg, 80 × 12,7 × 12,7 mm', 'misst nur quer zur Schiene; Längskräfte nimmt der Schlitten', 0.03, 'SE-01 SE-03 SE-04 SE-11'],
+  ['SE-03', 'Messwandler Manschetten', 'Kauf', 'TI ADS131M04 (4 Kanäle gleichzeitig, 24 Bit, SPI), 3 Stück auf einer Platine in der Elektronikbox, gemeinsamer 8,192-MHz-Takt', '1 000 Messungen/s (vorher HX711 80/s): Reaktionszeit ≈ 3 statt ≈ 35 ms; 12 Kanäle = 8 Glieder + 4 Rumpf', 0.005, 'SE-02 SE-09 EL-01 KB-02 KB-03'],
   ['SE-04', 'Überlastpuffer, Halter', 'Druck + Laser', 'TPU, Alu', 'Spalt 1 mm', 0.02, 'SE-02'],
+  ['SE-10', 'BOA-Drehverschluss', 'Kauf', 'BOA Fit System, Orthesen-Drehverschluss mit Stahlseil-Schnürung (z. B. Typ L6 / H+), 2 Bänder je Manschette', 'gleichmäßig straff in feinen Rasten, mit Handschuhen bedienbar, Ziehen am Rad = sofort auf; ersetzt den Klettgurt, der nachgibt und vereist', 0.03, 'SE-01'],
+  ['SE-11', 'Längsschlitten Manschette', 'Kauf + Laser', '2 × Edelstahlstange Ø 5 mm, 2 Gleitbuchsen iglidur JSM-0506 (Trockenlauf, kältefest), Alu-Schlitten, 2 Zentrierfedern ≈ 0,5 N/mm, ±12 mm Weg', 'Achsen von Mensch und Exo liegen nie genau übereinander: Beim Beugen wandert die Manschette sonst über die Haut (Scheuern) und drückt längs auf die Zelle (falsche Absicht)', 0.05, 'SE-01 SE-02'],
   ['SE-06', 'Fußkontakt', 'Kauf', '4 × Halbbrücken-Wägezelle 50 kg (Personenwaagen-Bauform 34 × 34 × 8 mm, 1,0 mV/V, Grenzlast 150 %) je Steigbügel, als Vollbrücke an einem HX711', 'misst die Fußlast (bis 200 kg, Grenzlast 300 kg) → Standbein / Schwungbein. Ein FSR 406 (0,2–20 N) wäre unter dem Körpergewicht überlastet.', 0.15, 'BE-11 KB-02'],
   ['SE-08', 'Drehring Unterarm-Manschette', 'Druck + Kauf', 'Gleitring PA6 / iglidur, Ø 100 mm', 'Unterarm dreht in der Manschette ±60° (Hand drehen ohne gegen das Exo zu arbeiten)', 0.03, 'SE-01 AR-02'],
-  ['SE-09', 'Rumpf-Wägezellen', 'Kauf', 'Biegebalken 20 kg (YZC-133) mit HX711, je 2 in den Gurtankern und hinter dem Schulterblattpolster', 'Absicht für den Rumpf: Gurte ziehen = vorbeugen, Polster drücken = aufrichten, Unterschied links/rechts = drehen', 0.04, 'GU-02 AN-L AN-D'],
+  ['SE-09', 'Rumpf-Wägezellen', 'Kauf', 'Biegebalken 20 kg (YZC-133) am ADS131M04 (SE-03), je 2 in den Gurtankern und hinter dem Schulterblattpolster', 'Absicht für den Rumpf: Gurte ziehen = vorbeugen, Polster drücken = aufrichten, Unterschied links/rechts = drehen', 0.04, 'GU-02 AN-L AN-D'],
   ['SE-07', 'Wägezelle Schlaufenkopf', 'Kauf', 'Biegebalken YZC-1B, 50 kg', 'Baumgewicht für die Vorsteuerung', 0.04, 'SG-02 KB-03'],
   ['SC-01', 'Schulterbügel', 'Halbzeug', '6082 Vierkant 30 × 30 × 3', 'Biegespannung Spitze 53 MPa', 0.3, 'RA-01 SC-02'],
   ['SC-02', 'Schultergabel', 'Laser', 'Alu 10 mm', 'Achse nach vorne durch das Schultergelenk', 0.12, 'SC-01 SC-03 SC-06'],
@@ -1548,7 +1548,7 @@ const DB = [
   ['BD-04', 'Arbeitslicht', 'Kauf', 'LED-Strahler 10 W, 12 V', 'zwei Stück am Rahmen', 0.12, 'RA-01 KB-04'],
 ];
 // Stückzahl je Seite bzw. gesamt (Teile, die im Modell als ein Körper zusammengefasst sind)
-const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 3, 'SE-02': 3, 'SE-03': 3, 'SE-04': 3, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-02': 4, 'AN-03': 4, 'AN-04': 4, 'AN-05': 4, 'SE-09': 2, 'RA-11': 2 };
+const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 4, 'SE-02': 4, 'SE-03': 3, 'SE-04': 4, 'SE-10': 4, 'SE-11': 4, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-02': 4, 'AN-03': 4, 'AN-04': 4, 'AN-05': 4, 'SE-09': 2, 'RA-11': 2 };
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const SRC = {
   'EL-01': ['PJRC Teensy 4.1 (Maße)', 'https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4'], 'EL-02': ['Mean Well DDR-60L-24 / Pololu D36V28F5', 'https://www.pololu.com/product/3782'], 'SE-06': ['50-kg-Halbbrücken-Wägezelle', 'https://www.sparkfun.com/products/10245'],
@@ -1596,7 +1596,9 @@ const REAL = {
   'RA-10': { mfr: 'Stabilus (Bauform LIFT-O-MAT)', typ: 'Gasfeder 150 N, Zylinder Ø 15 / Stange Ø 6, Hub 80 mm, Einbaulänge 236 mm (Bauform wie 6502IK)', dat: [['Kraft', '150 N'], ['Hub', '80 mm (Lendengelenk braucht ≈ 50 mm)'], ['Einbaulänge', '236 mm, passt zwischen die Halter (240 mm im Modell)'], ['Anschluss', 'Gewinde M6, Kugelpfannen']], src: [['Ersatzteil-Daten 6502IK', 'https://www.gasspringsshop.com/?p=28852']] },
   'RA-09': { mfr: 'Intertec (red magnetics) + eigene Laserteile', typ: 'Hubmagnet ITS-LZ-3263-D-24VDC (drückend) als Sperrbolzen-Antrieb', dat: [['Kraft', '30 N (Hubende 59 N)'], ['Spannung, Leistung', '24 V DC, 12,96 W'], ['Betrieb', 'bestromt schiebt der Magnet den Bolzen ins Rastsegment (gesperrt), stromlos zieht die Rückstellfeder ihn heraus (frei); 13 W nur, solange gesperrt']], src: [['Galaxus (Daten)', 'https://www.galaxus.de/en/s1/product/intertec-its-lz-3263-d-24vdc-linear-solenoid-pushing-30-n-59-n-24-vdc-1296-w-relays-36742554']] },
   'SE-02': { mfr: 'generisch (Küchenwaagen-Bauform)', typ: 'Biegebalken-Wägezelle YZC-133, 20 kg', dat: [['Ausgang', '1,0 ± 0,15 mV/V'], ['Maße', '80 × 12,7 × 12,7 mm, Löcher M4 / M5'], ['Nichtlinearität', '± 0,03 % v. E.'], ['Brückenwiderstand', '≈ 1 kΩ'], ['Masse', '32 g'], ['Hinweis', 'kein Hersteller-Datenblatt, Händlerangaben']], src: [['Robodo (Daten)', 'https://robodo.in/products/yzc-133-weighing-load-cell-sensor-20kg-for-electronic-weighing-scale']] },
-  'SE-03': { mfr: 'Avia Semiconductor (Modul generisch) / Ausbau Texas Instruments', typ: 'HX711 24-Bit-Wägezellen-ADC (Ausbau: ADS1220)', dat: [['Rate', '10 oder 80 Messungen/s'], ['Verstärkung', '128 (Kanal A)'], ['Ausbau ADS1220', '24 Bit, bis 2 000 Messungen/s, 2 Differenzkanäle, SPI → Reaktionszeit ≈ 10 statt 35 ms']], src: [['HX711 Datenblatt', 'https://cdn.sparkfun.com/datasheets/Sensors/ForceFlex/hx711_english.pdf'], ['TI ADS1220', 'https://www.ti.com/product/ADS1220']] },
+  'SE-03': { mfr: 'Texas Instruments', typ: 'ADS131M04, 4-Kanal-Delta-Sigma-ADC, gleichzeitig abtastend', dat: [['Auflösung', '24 Bit'], ['Rate', 'bis 32 kS/s je Kanal; hier 1 kS/s (OSR 4096, Hochauflösung)'], ['Verstärkung', 'PGA 1–128'], ['Schnittstelle', 'SPI bis 25 MHz, 1 Rahmen = 6 × 24 Bit'], ['Versorgung', '2,7–3,6 V, ≈ 1,4 mW je Kanal'], ['Gehäuse', 'TSSOP-20 / WQFN-20'], ['Preis', '≈ 4–6 € (Distributor)'], ['Bleibt HX711', 'Schlaufenköpfe und Steigbügel (langsam genügt)']], src: [['TI ADS131M04', 'https://www.ti.com/product/ADS131M04'], ['HX711 Datenblatt (Rest)', 'https://cdn.sparkfun.com/datasheets/Sensors/ForceFlex/hx711_english.pdf']] },
+  'SE-10': { mfr: 'BOA Technology (Denver, USA)', typ: 'BOA Fit System, Orthesen-Drehverschluss mit Stahlseil', dat: [['Bedienung', 'Drehen = Feinrasten anziehen, Ziehen = ganz auf'], ['Einsatz', 'Orthesen, Snowboard- und Arbeitsschuhe (kälte- und nässeerprobt)'], ['Hinweis', 'Bezug als Ersatzteil-Set oder über Orthopädie-Zulieferer; genaues Modell beim Händler wählen']], src: [['BOA Fit System', 'https://www.boafit.com/']] },
+  'SE-11': { mfr: 'igus', typ: 'Gleitbuchse iglidur JSM-0506-05 auf Edelstahlstange Ø 5', dat: [['Werkstoff', 'iglidur J: schmierfrei, geringer Reibwert, −50 … +90 °C'], ['Maße', 'Innen 5 mm, außen 6 mm, Länge 5 mm'], ['Weg', '±12 mm, Zentrierfedern ≈ 0,5 N/mm (6 N bis Anschlag)']], src: [['igus iglidur J', 'https://www.igus.de/product/iglidur_J']] },
   'SE-06': { mfr: 'generisch (Personenwaagen-Bauform)', typ: '4 × Halbbrücken-Wägezelle 50 kg je Steigbügel, zur Vollbrücke verschaltet, HX711', dat: [['Messbereich', '4 × 50 kg = 200 kg je Fuß, Grenzlast 300 kg'], ['Maße', '34 × 34 × 8 mm'], ['Ausgang', '1,0 mV/V']], src: [['SparkFun (Bauform)', 'https://www.sparkfun.com/products/10245']] },
   'SE-07': { mfr: 'generisch', typ: 'S-Wägezelle YZC-1B, 50 kg, Alu', dat: [['Genauigkeit', 'C2'], ['Überlast', '150 % sicher'], ['Hinweis', 'Maße vor dem Bau am Teil prüfen (kein Herstellerdatenblatt)']], src: [['Datenblatt-Scan', 'https://www.scribd.com/doc/245286527/Load-Cell-YZC-1B-BanLinhKien-vn']] },
   'SG-03': { mfr: 'Wichard', typ: 'Schnappschäkel mit festem Auge, Edelstahl, 50 mm', dat: [['Bruchlast', '2 000 kg'], ['Arbeitslast', '960 kg'], ['Einsatz', 'Notöffnung des Spannbands von Hand']], src: [['Fogh Marine (Daten)', 'https://shop.foghmarine.com/wichard-snap-shackle-fixed-md-l-50mm-bl-2000kg.html']] },
@@ -1652,7 +1654,7 @@ function classify(m, key, c) {
     case 'leg':
       if (g === 'upper') return 'AR-01'; if (g === 'fore') return 'AR-02';
       if (is(M.chip, M.chrome)) return 'BE-02';
-      if (g === 'shank') return is(M.alu) ? 'BE-06' : 'BE-07';
+      if (g === 'shank') return 'BE-06';
       return 'BE-01';
     case 'knee': if (g === 'shank') return is(M.steel, M.chrome) ? 'BE-04' : is(M.tpu) ? 'BE-05' : 'BE-03'; return 'BE-03';
     case 'foot':
@@ -1664,11 +1666,13 @@ function classify(m, key, c) {
       if (is(M.steel) && c.big > 0.025) return 'BE-11';
       return 'BE-13';
     case 'sensor':
+      if (m.userData.ads) return 'SE-03';
+      if (m.userData.boa) return 'SE-10'; if (m.userData.slide) return 'SE-11';
       if (g === 'torso') return 'SE-09';
       if (m.userData.ring) return 'SE-08';
       if (g === 'foot') return 'SE-06';
       if (c.inHead || (g === 'fore' && c.lp.y < yw + 0.06)) return 'SE-07';
-      if (is(M.cell, M.gauge)) return 'SE-02'; if (is(M.pcb)) return 'SE-03';
+      if (is(M.cell, M.gauge)) return 'SE-02';
       if (is(M.print, M.foam, M.strap)) return 'SE-01'; return 'SE-04';
     case 'shoulder':
       if (m.userData.slide) return 'SC-12';

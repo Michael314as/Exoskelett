@@ -46,20 +46,22 @@ Kälte hilft: jedes Kelvin weniger Umgebung ist Reserve.
 
 | Größe | Wert | Quelle |
 |---|---|---|
-| eigene Kette | ≈ 35 ms: HX711 80 Messungen/s (12,5 ms) + 8-Hz-Filter (≈ 20 ms) + CAN und Regeltakt (≈ 2 ms) | Firmware |
+| eigene Kette (Rev. M2) | ≈ 6 ms: ADS131M04 1000 Messungen/s (≈ 1 ms) + 40-Hz-Filter (≈ 4 ms) + Regeltakt 500 Hz und Bus (≈ 1–2 ms); die Dämpfung auf die Sollgeschwindigkeit rechnet der Motor ohne Busverzug. Vorher (HX711) ≈ 35 ms | Firmware |
 | Zielwert in der Literatur | ≤ 10 ms Regelkreis-Verzögerung für stabile, sichere Admittanzregelung | [Patent US 11 337 881](https://mtec-sc.org/patents/US-11337881-B2) |
 | Wahrnehmung | 25 ms Verzögerung → Masse fühlt sich ≈ 10 % schwerer an, 50 ms → ≈ 20 % | [Haptik-Studie (PMC4567313)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4567313/) |
 | Gleichgewicht | Reflexe beginnen ≈ 100 ms nach einer Störung; Exo-Moment in dieser Zeit verbesserte das Gleichgewicht nicht | [Beck et al., Sci. Robotics](http://sites.edb.utexas.edu/wp-content/uploads/sites/181/2024/02/Beck-et-al_SciRobotics.pdf) |
 
-**Fazit:** Mit 35 ms funktioniert es, fühlt sich aber etwas träge an: Der Exo-Arm wirkt etwa 15 % schwerer, als er ist.
-Für das Gefühl „das Exo ist ein Teil von mir“ lohnt der ADS1220 (≈ 10 ms). Er bleibt als Upgrade, damit der Prüfstand
-erst zeigt, ob es nötig ist (Kosten ≈ 5 × 8 €, Firmware-Treiber nötig).
+**Fazit (Rev. M2):** Mit ≈ 6 ms liegt die Kette deutlich unter dem Literatur-Zielwert von 10 ms; die Wahrnehmung „schwerer
+als es ist“ fällt auf wenige Prozent. Wichtiger als die Messkette ist ab hier die Ankopplung (Manschette, Kleidung): Die
+Regelung ist für 2–15 kN/m ausgelegt und in der Simulation stabil ([tools/transparenz.cpp](../tools/transparenz.cpp)).
+Unsicher bleiben die Trägheiten der Exo-Glieder (geschätzt) und die tatsächliche Reglerfrequenz im Motor; beides wird am
+Prüfstand eingestellt (P39).
 
 ## 4. Gewicht und Tragegefühl
 
 | Größe | Wert | Quelle |
 |---|---|---|
-| Exo gesamt | 43,3 kg, davon 29,1 kg Oberteil (mit Rumpfkapseln), ≈ 7,2 kg je Bein (mit Hüft- und Kniekapsel) | Bauteilliste der technischen Ansicht |
+| Exo gesamt | 44,3 kg, davon 29,5 kg Oberteil (mit Rumpfkapseln), ≈ 7,4 kg je Bein (mit Hüft- und Kniekapsel, Schienbein-Manschette) | Bauteilliste der technischen Ansicht |
 | Gewicht auf dem Körper | im Stand fast null: Exo-Beine und Motoren tragen es in den Boden | Firmware-Vorsteuerung |
 | Mehraufwand beim Gehen, falls nicht getragen | steigt etwa linear mit der Last (Rucksack) | [Legg & Ramsey](https://www.tandfonline.com/doi/abs/10.1080/00140139208967382), [Army LCDA-Modell](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8919998/) |
 | Masse am Bein | kostet pro kg deutlich mehr als am Rücken; ein Knöchel-Exo mit 2,1 kg Beinmasse brauchte gute Unterstützung, um überhaupt zu sparen | [Mooney et al.](https://link.springer.com/article/10.1186/1743-0003-11-80) |

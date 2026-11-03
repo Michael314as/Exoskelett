@@ -8,7 +8,7 @@ leicht, weich, ohne Zittern, mit spürbarer Verstärkung und sicherem Abschalten
 |---|---|
 | `src/exo_core.h` | Gelenkregler (Manschettenkraft → Moment), Taster-Erkennung, Schlaufenwinde, Sicherheits-Zustandsmaschine |
 | `src/exo_app.h` | Gesamtsteuerung: 8 Gelenke, Kopplung der Manschetten über die Hebel, Vorsteuerung aus Baumlast und Körpergewicht, Standbein/Schwungbein, 3 Winden, Bedienung, LED-Ring |
-| `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (RobStride RS06, 29-Bit-ID, Betriebsmodus Typ 1 / Rückmeldung Typ 2 mit Temperatur), Wägezellen-Verstärker HX711, Kalibrierung, Seilübersetzung |
+| `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (RobStride RS06, 29-Bit-ID, Betriebsmodus Typ 1 / Rückmeldung Typ 2 mit Temperatur), Typ 1 mit Mitgehen (`packMitCommand`: Moment, Sollgeschwindigkeit, Kd), Wägezellen-Wandler ADS131M04 (Manschetten) und HX711 (Schlaufen, Steigbügel), Kalibrierung, Übersetzung |
 | `src/settings.h` | Einstellungen und Kalibrierung im EEPROM (mit Prüfsumme), Werkstatt-Konsole, Wartungshinweise |
 | `src/main_teensy.cpp` | Teensy 4.1: Pinplan, 200-Hz-Takt, Schütz, Motoren über CAN, 8 Wägezellen, Lagesensor, LED-Ring, Watchdog, Statuszeile an den ESP32-C3 |
 | `esp32/` | ESP32-C3: E-Paper-Anzeige und Bluetooth zum Handy |
@@ -32,22 +32,27 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 
 - **Mensch:** Unterarm mit Trägheit, Muskel folgt einer Wunschbewegung, Kraft begrenzt.
 - **Weichteile und Polster** zwischen Arm und Manschette als Feder und Dämpfer.
-- **Wägezelle:** 80 Messungen/s (HX711) oder 320/s (NAU7802), mit Rauschen.
-- **Regler:** 200 Hz, wie auf dem Teensy.
-- **Exo-Gelenk:** Trägheit, Lager- und Bowdenreibung, Schwerkraft der Schiene, Motor mit 2 ms Verzögerung.
+- **Wägezelle:** 1000 Messungen/s (ADS131M04, Rev. M2) bzw. 80/s (HX711, alter Momentbetrieb zum Vergleich), mit Rauschen.
+- **Regler:** 500 Hz, wie auf dem Teensy; Befehle kommen 1 ms später beim Motor an (Bus).
+- **Motor:** rechnet t_ff + Kd·(v_soll − v) selbst mit frischer Geschwindigkeit (RobStride Typ 1), Stromregler 0,4 ms.
+- **Exo-Gelenk:** Trägheit, Lagerreibung, Schwerkraft der Schiene; Schulter und Knie mit eigenen Werten (Abschnitt 17).
 - **Baumlast:** greift über die Schlaufen am Exo an, nicht an der Manschette.
 
 ## Ergebnisse (aktueller Stand)
 
 | Test | Ergebnis |
 |---|---|
-| **Leichtgängigkeit:** Arm frei bewegen | Kraft an der Manschette: ohne Regelung 5,7 N (rms), mit Regelung 3,0 N. Das Exo fühlt sich fast doppelt so leicht an wie ungeregelt. |
-| **Verstärkung:** 20 Nm Baumlast halten | K = 0,5: du trägst 67 %, K = 1: 51 %, K = 2: 34 %, K = 3: 26 % (erwartet 67 / 50 / 33 / 25 %) |
-| **Stabilität:** ab wann schwingt es? | stabil bis K = 5,5 (HX711) bzw. 7,5 (NAU7802). In der Software ist K höchstens 3: große Reserve |
-| **Weichheit:** plötzliche Bewegung | Moment ändert sich höchstens 2 Nm je Takt (nichts ruckt), Überschwingen 0,01 rad |
+| **Leichtgängigkeit Ellbogen** (Mitgehen, M2) | Kraft an der Manschette 0,5 Hz: ohne Regelung 5,7 N (rms), alter Momentbetrieb 3,0 N, **Mitgehen 1,7 N**; 1,2 Hz: 7,4 / 4,9 / **3,1 N** |
+| **Leichtgängigkeit Schulter, Knie** (1,2 Hz, Manschette 2–15 kN/m) | alt bis 12,2 / 12,8 N, **Mitgehen bis 3,5 / 3,6 N** |
+| **Störfall** Kd doppelt + 2 ms Busverzug, straffe Manschette | Schwingungswächter regelt zurück: 5,8 / 6,7 N rms, kein Aufschaukeln |
+| **Schwingungswächter** | 15-Hz-Zittern → Mitgehen auf 25 %; erholt sich nach Ruhe; normale Bewegung 1 Hz löst ihn nicht aus |
+| **Verstärkung:** 20 Nm Baumlast halten | K = 0,5 / 1 / 2: du trägst 53 / 40 / 27 % (Stufe + gedeckelter Mitgeh-Anteil, erwartet 57 / 42 / 28 %) |
+| **Stabilität** | Mitgehen: kein Schwingen bei Manschette 2 / 6 / 15 kN/m in allen Stufen. Rückfallebene Momentbetrieb: stabil bis K = 5,5 |
+| **Weichheit:** plötzliche Bewegung | Vorsteuer-Moment ändert sich höchstens 0,8 Nm je Takt (nichts ruckt), kein Überschwingen |
+| **Knie mit Schienbein-Manschette** | Schwungbein: geht beim Strecken und Beugen mit; Standbein: Schienbein-Druck beugt nie |
 | **Beinseil** | Moment nie negativ (Seil kann nicht drücken), Vorspannung bleibt |
 | **Aufwachen** | Nullen 2 s, dann steigt die Unterstützung über 3 s an |
-| **Sensorfehler, Not-Aus** | im selben Regeltakt (5 ms) alle Momente 0, Ring rot |
+| **Sensorfehler, Not-Aus** | im selben Regeltakt (2 ms) alle Momente 0, Ring rot |
 | **Sturz** | Motoren in 0,1 s weich aus |
 | **Parkstütze unten** | keine Unterstützung, Ring gelb |
 | **Bedienung** | kurz/lang/doppelt sicher erkannt; Doppeltipp = Licht; Schlaufe zieht bis zur Zugkraft zu und hält stromlos; Stufenwechsel |
@@ -55,9 +60,9 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Baumlast-Vorsteuerung** | 200 N in den Schlaufen: Ellbogen trägt genau zwei Drittel (31,7 Nm), ohne Drücken; schwerer Baum bleibt in der Momentgrenze |
 | **Beine im Stand** | Hocke: Hüfte −14 Nm, Knie −20 Nm von selbst; mit Baum 300 N: −29 / −40 Nm |
 | **Schwungbein** | keine Gewichtsvorsteuerung, Bein anheben: Hüfte +10 Nm, Knie +5 Nm (Beugen begrenzt 10 Nm); Standbein beugt nie aktiv |
-| **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Motorantwort richtig gelesen, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
+| **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Mitgeh-Befehl (v_soll, Kd, Kp = 0) richtig, Kd/Geschwindigkeit über die Übersetzung umgerechnet, Motorantwort richtig gelesen, ADS131M04-Register und -Rahmen (Vorzeichen) richtig, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
 | **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: RobStride RS06 schafft 36 Nm (Reserve 48 %) |
-| **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (87 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern |
+| **Teensy-Code** | PC-Lauf mit Platzhaltern (SPI, zwei CAN-Busse). Rev. M2 noch nicht mit ARM-GCC gebaut (PlatformIO-Server in dieser Umgebung gesperrt); Rev. T2 baute mit 87 KB ohne Warnung |
 | **Einstellungen, Konsole** | Prüfsumme erkennt kaputtes EEPROM, Kalibrierung mit Gewicht, Fehlbedienung abgewiesen |
 | **Statuszeile** | Teensy → ESP32-C3: Modus, Akku, Stufe, Restzeit, Uhrzeit, Stunden, Grund; kaputte Zeilen werden verworfen |
 | **ESP32-Sketch** | kompiliert auf dem PC mit Platzhaltern; jede gültige Zeile geht ans Handy, E-Paper zeichnet nur bei Änderung (auch bei neuem Fehlergrund), überlange Zeilen laufen nicht über |

@@ -39,15 +39,17 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `laser/rumpfdrehung_wagen.dxf` | Alu 6082 T6 | 8 mm | 1 | 80 × 48 | 6 | 9.4 mm | Wagen der Rumpfdrehung RA-12 am oberen Rahmen: 4 Profilrollen auf der Bogenwelle (R 95 mm um die Wirbelsäule) |
 | `laser/rumpfdrehung_halter.dxf` | Alu 6082 T6 | 8 mm | 2 | 36 × 44 | 3 | 7.5 mm | Halter der Bogenwelle Ø 10 am unteren Rahmen (2 Stück, an den Enden), Gummianschlag ±15° |
 | `laser/parkstuetze_lasche.dxf` | Alu 5754 | 4 mm | 4 | 70 × 56 | 4 | 11.6 mm | Klappgelenk Parkstütze (Rastbolzen Ø6 im oberen Loch) |
+| `laser/manschette_schlitten.dxf` | Alu 6082 T6 | 4 mm | 8 | 40 × 34 | 4 | 9.7 mm | Längsschlitten der Manschette M2: Gleitbuchsen einpressen (Bohrung auf 6 H7 reiben), M3 zum Boss der Schale |
+| `laser/manschette_stangenhalter.dxf` | Alu 6082 T6 | 5 mm | 16 | 36 × 14 | 3 | 5.6 mm | Stangenhalter des Längsschlittens, 2 je Manschette: Stangen Ø 5 eingeklebt, M4 am Wägezellen-Halter; Federn zwischen Halter und Schlitten |
 
 ## Druckteile (Bambu Lab A1 mini, 180 × 180 × 180 mm)
 
 | Datei | Material | Stück | Größe | Volumen cm³ | passt | Genus | Zweck |
 |---|---|---|---|---|---|---|---|
-| `druck/manschette_oberschenkel.stl` | PETG | 2 | 90 × 172 × 70 | 95 | ja | 5 | Manschette r = 72 mm, Höhe 70 mm; Polster (Abstandsgewirke) innen einkleben |
-| `druck/manschette_unterschenkel.stl` | PETG | 2 | 70 × 138 × 60 | 65 | ja | 5 | Manschette r = 55 mm, Höhe 60 mm; Polster (Abstandsgewirke) innen einkleben |
-| `druck/manschette_oberarm.stl` | PETG | 2 | 65 × 128 × 60 | 59 | ja | 5 | Manschette r = 50 mm, Höhe 60 mm; Polster (Abstandsgewirke) innen einkleben |
-| `druck/manschette_unterarm.stl` | PETG | 2 | 55 × 112 × 50 | 43 | ja | 5 | Manschette r = 42 mm, Höhe 50 mm; Polster (Abstandsgewirke) innen einkleben |
+| `druck/manschette_oberschenkel.stl` | PETG-CF | 2 | 96 × 170 × 102 | 117 | ja | 6 | Manschette M2 r = 72 mm, Breite 102 mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss |
+| `druck/manschette_schienbein.stl` | PETG-CF | 2 | 74 × 136 × 87 | 79 | ja | 6 | Manschette M2 r = 55 mm, Breite 87 mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss |
+| `druck/manschette_oberarm.stl` | PETG-CF | 2 | 68 × 126 × 87 | 73 | ja | 6 | Manschette M2 r = 50 mm, Breite 87 mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss |
+| `druck/manschette_unterarm.stl` | PETG-CF | 2 | 58 × 110 × 72 | 54 | ja | 6 | Manschette M2 r = 42 mm, Breite 72 mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss |
 | `druck/bohrschablone_rohr25.stl` | PETG | 1 | 150 × 34 × 22 | 40 | ja | 7 | Lochraster der Außenrohre 25 × 25 (Steckbolzen Ø6) |
 | `druck/bohrschablone_rohr20.stl` | PETG | 1 | 150 × 29 × 18 | 33 | ja | 7 | Lochraster der Innenrohre 20 × 20 |
 | `druck/waegezellen_halter.stl` | PETG | 8 | 30 × 34 × 16 | 10 | ja | 2 | Halter je Wägezelle (an der Schiene) |

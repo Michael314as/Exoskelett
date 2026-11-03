@@ -12,6 +12,7 @@ Bewertung: S = Schwere (1 leicht … 4 schwer), W = Wahrscheinlichkeit vor Maßn
 | Gelenk überstreckt | Motor treibt über den Körperbereich | 4 | 2 | mechanische Anschläge, weiche Wand in Software, Momentgrenze | P8, P18 | gering |
 | Ungewollte Bewegung | Sensorfehler, Kabelbruch | 3 | 2 | Plausibilitätsprüfung, sofort stromlos, Rückmeldung rot | P19, F1 | gering |
 | Software hängt | Fehler, Störung | 3 | 2 | Hardware-Watchdog 0,5 s, Schütz fällt ab, Pulldown | P7 | gering |
+| Exo schwingt oder läuft nach (Mitgehen, Rev. M2) | Busverzug, zu hohe Dämpfung, sehr straffe Manschette, Rauschen | 3 | 2 | Schwingungswächter (> 6 Hz → bis 25 % zurück), Sollgeschwindigkeit ≤ 4 rad/s und weich vor Anschlägen, Gesamtmoment inkl. Kd-Anteil begrenzt, Kp = 0 (keine Positionsfeder, die zieht), v_soll 0 bei Stillstand = Motor bremst | P39, P8 | gering |
 | Not-Aus wirkungslos | nur Software | 4 | 1 | Not-Aus trennt elektrisch hart, zweiter Kontakt meldet | P6 | gering |
 | Sturz mit Exo | Gelände, Kippen nach vorne | 3 | 3 | Ausfallschritt, Steigbügel mit Spikes, Sturzerkennung → Motoren weich, **Beine 1,5 s gedämpft** (kein Zusammensacken, kein Treten), Aussteigen ohne Werkzeug | P4, P25 | mittel |
 | Kippen nach hinten | Baum zieht, Rumpf zu weit zurück | 3 | 2 | **Warnung per Vibration** ab 9° Rückneigung (Firmware), Schutzbügel hinten mit Gummipuffern trifft zuerst, Akkus seitlich geschützt | P25b | gering |

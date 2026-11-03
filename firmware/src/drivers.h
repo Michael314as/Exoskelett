@@ -32,6 +32,14 @@ inline uint32_t packTorqueCommand(uint8_t motorId, float torqueNm, const MotorLi
   out[0] = p >> 8; out[1] = p & 0xFF; out[2] = v >> 8; out[3] = v & 0xFF; out[4] = out[5] = out[6] = out[7] = 0;   // Kp = Kd = 0
   return (uint32_t(kTypeControl) << 24) | (t << 8) | motorId;
 }
+// Befehl Typ 1 mit Mitgehen: t_ref = Kd·(v_soll − v) + t_ff; der Motor rechnet das selbst mit seiner Reglerfrequenz,
+// also ohne den Umweg über den Bus. Kp bleibt 0 (keine Positionsfeder). Alles in Motorgrößen.
+inline uint32_t packMitCommand(uint8_t motorId, float torqueNm, float velRad, float kd, const MotorLimits& L, uint8_t out[8]) {
+  const uint32_t t = floatToUint(torqueNm, -L.tMax, L.tMax, 16), p = floatToUint(0, -L.pMax, L.pMax, 16), v = floatToUint(velRad, -L.vMax, L.vMax, 16);
+  const uint32_t d = floatToUint(kd, 0.f, L.kdMax, 16);
+  out[0] = p >> 8; out[1] = p & 0xFF; out[2] = v >> 8; out[3] = v & 0xFF; out[4] = out[5] = 0; out[6] = d >> 8; out[7] = d & 0xFF;
+  return (uint32_t(kTypeControl) << 24) | (t << 8) | motorId;
+}
 // Sonderbefehle Typ 3 (einschalten), 4 (stoppen; Byte 0 = 1 löscht Fehler), 6 (Nullpunkt setzen, Byte 0 = 1)
 inline uint32_t packSpecial(uint8_t type, uint8_t motorId, uint8_t out[8]) {
   for (int i = 0; i < 8; i++) out[i] = 0;
@@ -58,6 +66,8 @@ struct Transmission {
   float motorTorqueFor(float jointTorque) const { return jointTorque / (ratio * eta); }
   float jointAngleFrom(float motorAngle) const { return motorAngle / ratio; }
   float jointVelFrom(float motorVel) const { return motorVel / ratio; }
+  float motorVelFor(float jointVel) const { return jointVel * ratio; }
+  float motorKdFor(float jointKd) const { return jointKd / (ratio * ratio * eta); }   // Kd am Gelenk = Kd am Motor · Übersetzung² · η
 };
 
 /* ---------------------------------------------------------------- HX711 -------- */
@@ -70,6 +80,31 @@ inline int32_t hx711ReadRaw(ReadBit readBit, int extraPulses = 1) {   // 1 Zusat
   if (v & 0x800000u) v |= 0xFF000000u;   // Vorzeichen erweitern
   return int32_t(v);
 }
+/* ------------------------------------------------------------ ADS131M04 -------- */
+// Manschetten-Wägezellen ab Rev. M2: TI ADS131M04, 4 Kanäle gleichzeitig, 24 Bit, SPI (Modus 1), 1000 Messungen/s
+// (CLKIN 8,192 MHz, OSR 4096, Hochauflösung), PGA 128. Wort = 24 Bit (16 Bit Befehl/Register + 8 Nullbits), MSB zuerst.
+// Ein Rahmen: STATUS, Kanal 0…3, CRC = 6 Wörter = 18 Bytes. Lesen = NULL-Befehl (0x0000) senden.
+constexpr uint16_t kAdsRegClock = 0x03, kAdsRegGain1 = 0x04;
+constexpr uint16_t kAdsClock1k = 0x0F00 | (5u << 2) | 2u;   // alle 4 Kanäle an, OSR 4096 → 1 kS/s, Hochauflösung
+constexpr uint16_t kAdsGain128 = 0x7777;                    // PGA 128 auf allen Kanälen (Vollbrücke 2 mV/V)
+inline void adsWord(uint16_t w, uint8_t* out) { out[0] = w >> 8; out[1] = w & 0xFF; out[2] = 0; }
+// WREG eines Registers: Befehl 011a aaaa annn nnnn (n = Anzahl − 1), dann der Wert; Rest des Rahmens mit Nullen
+inline void adsWregFrame(uint16_t addr, uint16_t value, uint8_t out[18]) {
+  for (int i = 0; i < 18; i++) out[i] = 0;
+  adsWord(uint16_t(0x6000 | (addr << 7)), out); adsWord(value, out + 3);
+}
+// Rahmen auswerten: liefert STATUS (16 Bit), Kanäle als vorzeichenrichtige 24-Bit-Werte
+inline uint16_t adsParseFrame(const uint8_t in[18], int32_t ch[4]) {
+  for (int k = 0; k < 4; k++) {
+    const uint8_t* b = in + 3 * (k + 1);
+    uint32_t v = (uint32_t(b[0]) << 16) | (uint32_t(b[1]) << 8) | b[2];
+    if (v & 0x800000u) v |= 0xFF000000u;
+    ch[k] = int32_t(v);
+  }
+  return uint16_t((in[0] << 8) | in[1]);
+}
+inline bool adsStatusDataReady(uint16_t status) { return (status & 0x000F) == 0x000F; }   // DRDY0…3 gesetzt
+
 // Kalibrierung: Rohwert → Newton, mit Nullpunkt aus dem Nullen und Plausibilitätsprüfung
 struct CellCal {
   float offset = 0.f, nPerCount = 1.f / 4200.f;   // aus Kalibrierung mit Gewicht

@@ -21,8 +21,8 @@ vereisen, sich dehnen und reißen konnten (Zugkräfte bis 2,4 kN, Bowdenzug-Wirk
 | Ellbogen | RS06 in der Box, Bowdenzug-Paar | **RS03 oben am Oberarm, Schubstange 1:1** |
 | Wetter | Seile und Rollen können vereisen | Kapsel mit Stiftkühlkörper, O-Ringen, V-Ring, Druckausgleich, Heizband 4 W für Pausen |
 | Rücken | Box mit 6 Motoren, Akkus seitlich | Akkus stehend oben im Schutzbügel, flache Elektronikbox darunter, Rucksack ≈ 12 cm tief; Rumpfdrehung ±15° |
-| Gewicht | 31,9 kg | **43,3 kg** (Motoren schwerer, Kapseln mit Kühlkörpern, Rumpf beugen und drehen mit Motor) |
-| Material | 3.800–4.400 € | ≈ 5.700–6.800 € |
+| Gewicht | 31,9 kg | **44,3 kg** (Motoren schwerer, Kapseln mit Kühlkörpern, Rumpf beugen und drehen mit Motor, Manschetten M2) |
+| Material | 3.800–4.400 € | ≈ 6.000–7.100 € |
 
 **Entwurf 4 im Vergleich zu Entwurf 3** (zur Nachverfolgung):
 
@@ -221,8 +221,11 @@ Sie hebt beim seitlichen Heben mit, deshalb ändert seitliches Heben nichts am A
 
 Details: [steuerung.md](steuerung.md).
 
-- **Manschetten mit Wägezelle** an Oberarm, Unterarm, Oberschenkel: Drückst du, folgt das Exo. Der Druck wird über die
-  Hebel auf alle Gelenke umgerechnet, die ihn bewegen können.
+- **Manschetten M2 mit Wägezelle** an Oberarm, Unterarm, Oberschenkel und Schienbein: Drückst du, **geht das Exo mit**
+  (Sollgeschwindigkeit proportional zum Druck, Dämpfung rechnet der Motor selbst, 1000 Messungen/s). Breite, dünn
+  gepolsterte Schalen mit BOA-Drehverschluss, ein Längsschlitten verhindert Scheuern bei Achsversatz. Simulation:
+  2,5–4 N an der Manschette bei zügiger Bewegung (vorher bis 12 N). Der Druck wird zusätzlich über die Hebel auf alle
+  Gelenke umgerechnet, die ihn bewegen können.
 - **Wägezellen in den Schlaufenköpfen:** Das Exo kennt das Baumgewicht und trägt seinen Anteil von selbst (je Stufe
   50 / 67 / 80 %).
 - **Fußkontakt:** Das Standbein trägt automatisch einen Teil von Oberkörper, Exo und Baum; das Schwungbein läuft frei und
@@ -291,13 +294,13 @@ Exo läuft frei mit, warnt aber bei Rückneigung und dämpft die Beine bei einem
 
 ## 8. Gewicht
 
-**Bauteilliste der technischen Ansicht: 43,3 kg mit einem Akku** (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
+**Bauteilliste der technischen Ansicht: 44,3 kg mit einem Akku** (davon ≈ 1 kg für die Manschetten M2 mit Schlitten, BOA und Schienbein-Sensor) (Entwurf 4 mit Seilantrieb: 31,9 kg). Die Motoren allein
 wiegen 10,3 kg (6 × RS04 je 1,42 kg, 2 × RS03 je 0,88 kg) statt 5,0 kg; Kühlkörper (8 × ≈ 0,28 kg), Mäntel, Dichtungen und Wangen kommen dazu.
 Seile, Rollen, Scheiben, Bowdenzüge und die Motorbox fallen weg.
 
 Was das für dich heißt:
-- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **29,1 kg
-  Exo-Oberteil** (mit den Rumpfkapseln am Becken), Schwerpunkt 34 cm über und 5 cm hinter der Hüftachse: Der Rucksack zieht
+- Fast das ganze Gewicht geht über die Exo-Beine und Steigbügel in den Boden. Die Steuerung trägt im Stand **29,5 kg
+  Exo-Oberteil** (mit den Rumpfkapseln am Becken), Schwerpunkt 34 cm über und 4 cm hinter der Hüftachse: Der Rucksack zieht
   kaum nach hinten.
 - Mehr Masse sitzt an den Gliedern: je Bein 1,4 kg Kniemotor oben am Oberschenkel, je Arm 1,4 kg an der Schulter und
   0,9 kg oben am Oberarm. Beim schnellen Schwingen spürst du das; im Stand gleicht die Steuerung das Eigengewicht aus.
@@ -332,8 +335,8 @@ Software begrenzt. Erst Prüfstand, dann Leergewicht, dann Bäume.
 | Lendengelenk, Gasfedern, Hubmagnet, Drehteller, Drehring, Schulterschlitten | 190 bis 220 € |
 | Steigbügel, Fersenbügel, Spikes, Gurtsystem, Manschetten, Polster | 300 bis 380 € |
 | Schutzbügel, Parkstütze, Haube Elektronikbox, Eloxieren, Filament | 230 bis 360 € |
-| Rumpfantrieb: Kurbeln, Hebel, Stangen, Gelenkköpfe, 4 Rumpf-Wägezellen + HX711 | 90 bis 120 € |
-| **Summe Material** | **etwa 5 700 bis 6 800 €** (dazu Werkzeug einmalig 280 bis 500 €) |
+| Rumpfantrieb: Kurbeln, Hebel, Stangen, Gelenkköpfe, 4 Rumpf-Wägezellen | 90 bis 120 € |
+| **Summe Material** | **etwa 6 000 bis 7 100 €** (Rev. M2: Manschetten ≈ +300 €; dazu Werkzeug einmalig 280 bis 500 €) |
 
 Über einen Einkaufsagenten direkt aus China (RS04 ¥ 1.199, RS03 ¥ 999) wären die Motoren etwa 1.000 € billiger;
 Gewährleistung und Lieferung sind dann schwieriger.

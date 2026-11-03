@@ -1,8 +1,11 @@
-// Teensy 4.1: liest die Hardware, ruft App::step() 200-mal pro Sekunde auf und schreibt die Ausgänge.
+// Teensy 4.1: liest die Hardware, ruft App::step() 500-mal pro Sekunde auf und schreibt die Ausgänge.
 // Bauen: pio run (siehe platformio.ini). Pinbelegung: docs/verdrahtung.md (muss mit PIN_* unten übereinstimmen).
 //
-// Motoren: 8 × RobStride RS06 im „Operation Control“-Modus (29-Bit-CAN-ID) über CAN1, 1 Mbit/s: 2 Hüftmotoren an der Hüftschwinge,
-// 6 in der Box (Knie, Schulter, Ellbogen). Wägezellen: 9 × HX711 (6 Manschetten, 3 Schlaufenköpfe). Fußkontakt: 2 × HX711 mit je 4 Halbbrücken-Zellen 50 kg.
+// Motoren (Entwurf 5): 10 × RobStride RS04/RS03 im „Operation Control“-Modus (Typ 1, 29-Bit-CAN-ID), 1 Mbit/s, auf zwei Bussen:
+// CAN1 Beine + Rumpf beugen (5), CAN3 Arme + Rumpf drehen (5). 500 Hz × 5 Motoren × (Befehl + Antwort) ≈ 70 % Buslast je Bus.
+// Mitgehen (Rev. M2): je Takt t_ff, v_soll und Kd an den Motor; die Dämpfung auf v_soll rechnet der Motor selbst (ohne Busverzug).
+// Manschetten (8 Glieder + 4 Rumpf): 3 × ADS131M04 an SPI0, 1000 Messungen/s, gemeinsamer Takt (8,192-MHz-Oszillator) und SYNC.
+// Schlaufenköpfe (3) und Steigbügel (2): HX711 (langsam genügt).
 // Lagesensor: BNO085 (I2C), liefert Kippgeschwindigkeit (Sturz) und Vorneigung des Rumpfs. Uhr: RTC des Teensy mit Knopfzelle. LED-Ring: 12 × WS2812. Watchdog: WDOG1 des i.MX RT1062 (direkt über Register, 0,5 s).
 // Anzeige und Handy-Funk macht ein ESP32-C3 an Serial1: Der Teensy schickt ihm jede Sekunde eine Statuszeile.
 // (Ein E-Paper-Update blockiert mehrere 100 ms und darf deshalb nicht im Regeltakt laufen.)
@@ -10,6 +13,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <FlexCAN_T4.h>
+#include <SPI.h>
 #ifndef EXO_HOST_TEST
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_BNO08x.h>
@@ -22,13 +26,18 @@ using namespace exo;
 
 // ---------- Pins (Teensy 4.1) ----------
 constexpr int PIN_BTN_POWER = 2,              /* Serial1 zum ESP32-C3: 0 RX, 1 TX */ PIN_BTN_LOOP[NL] = {3, 4, 5};
-constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8}, PIN_LUMB_LOCK = 13;              // 13: Hubmagnet der Lendensperre (über MOSFET)
+constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8}, PIN_LUMB_LOCK = 9;               // 9: Hubmagnet der Lendensperre (über MOSFET; 13 ist jetzt SPI-Takt)
 constexpr int PIN_LOOP_CUR[NL] = {14, 15, 16}, PIN_VBAT = 17;                  // analog A0–A3; I2C: 18 SDA, 19 SCL
 constexpr int PIN_LED_RING = 20, PIN_VIBE = 21;                                // CAN1: 22 TX, 23 RX
 constexpr int PIN_LOOP_DIR[NL] = {24, 25, 26}, PIN_LOOP_END[NL] = {27, 28, 29};
 constexpr int PIN_HEAT_LEGS = 42, PIN_HEAT_ARMS = 43;                          // Heizfolien der Gelenkkapseln (MOSFET; Lötpunkte unten, SD-Karte nicht benutzt)
-constexpr int PIN_ESTOP_SENSE = 30, PIN_CONTACTOR = 31, PIN_STAND = 32, PIN_LIGHT = 33, PIN_HX_SCK = 34;
-constexpr int PIN_HX_DOUT[kCells] = {9, 35, 36, 37, 40, 41, 10, 11, 12, 38, 39, 44, 45, 46, 47};   // 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1, 9/10 Fuß L/R, 11/12 Gurt L/R, 13/14 Rückenpolster L/R (Pins 44–47: Lötpunkte unten)
+constexpr int PIN_ESTOP_SENSE = 46, PIN_CONTACTOR = 47, PIN_STAND = 32, PIN_LIGHT = 33, PIN_HX_SCK = 34;   // 46/47: Lötpunkte unten; CAN3: 30 RX, 31 TX
+// Zellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1, 9/10 Fuß L/R, 11/12 Gurt L/R, 13/14 Rückenpolster L/R, 15/16 Unterschenkel L/R
+// HX711 nur noch für Schlaufen und Steigbügel (−1 = Zelle hängt am ADS131M04)
+constexpr int PIN_HX_DOUT[kCells] = {-1, -1, -1, -1, -1, -1, 36, 37, 40, 38, 39, -1, -1, -1, -1, -1, -1};
+// ADS131M04: SPI0 (11 MOSI, 12 MISO, 13 SCK), Chipselect je Wandler, DRDY des ersten (alle laufen synchron), SYNC/RESET gemeinsam
+constexpr int PIN_ADS_CS[3] = {10, 35, 41}, PIN_ADS_DRDY = 44, PIN_ADS_SYNC = 45;
+constexpr int kAdsCell[3][4] = {{0, 1, 2, 3}, {4, 5, 11, 12}, {13, 14, 15, 16}};    // Zelle je Wandler-Kanal
 constexpr float kFootContactN = 49.f;                                          // ≈ 5 kg auf dem Steigbügel = Standbein (am Prüfstand einstellen)
 
 static App app;
@@ -38,7 +47,10 @@ static IntervalTimer ctlTimer;
 static volatile bool tick = false;
 
 // ---------- Motoren ----------
-static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can;
+static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
+static FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> can3;
+static const uint8_t kBus[NJ] = {1, 1, 1, 1, 3, 3, 3, 3, 1, 3};                  // Beine + Rumpf beugen an CAN1, Arme + Rumpf drehen an CAN3
+static void canWrite(int i, const CAN_message_t& m) { if (kBus[i] == 1) can1.write(m); else can3.write(m); }
 static const MotorLimits kLim[NJ] = {kRS04, kRS04, kRS04, kRS04, kRS04, kRS04, kRS03, kRS03, kRS04, kRS03};   // Hüfte, Knie, Schulter, Rumpf beugen: RS04; Ellbogen, Rumpf drehen: RS03
 static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};             // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, Rumpf beugen, Rumpf drehen
 // Übersetzung Gelenk : Motor und Wirkungsgrad. Hüfte: Seilgetriebe 1:6. Knie: Kurvenscheibe 5 cm (gestreckt) / Trommel 1,5 cm, Bowdenzug.
@@ -49,16 +61,18 @@ static float powerOnTime = 0.f;                                                 
 static bool motorsOn = false;
 
 static void motorsEnable(bool on) {
-  for (int i = 0; i < NJ; i++) { CAN_message_t m; m.flags.extended = 1; m.len = 8; m.id = packSpecial(on ? kTypeEnable : kTypeStop, kCanId[i], m.buf); can.write(m); }
+  for (int i = 0; i < NJ; i++) { CAN_message_t m; m.flags.extended = 1; m.len = 8; m.id = packSpecial(on ? kTypeEnable : kTypeStop, kCanId[i], m.buf); canWrite(i, m); }
   motorsOn = on;
 }
 static bool readMotors(JointInput* j) {
   CAN_message_t m;
-  while (can.read(m)) {
-    if (!m.flags.extended || m.len < 8) continue;
+  auto take = [&] {
+    if (!m.flags.extended || m.len < 8) return;
     const uint8_t from = (m.id >> 8) & 0xFF;
     for (int i = 0; i < NJ; i++) if (kCanId[i] == from) { const MotorState s = unpackReply(m.id, m.buf, kLim[i]); if (s.valid) { motorState[i] = s; lastReplyMs[i] = millis(); } }
-  }
+  };
+  while (can1.read(m)) take();
+  while (can3.read(m)) take();
   bool ok = true;
   for (int i = 0; i < NJ; i++) {
     j[i].q = kTr[i].jointAngleFrom(motorState[i].pos - cfg.joint0[i]); j[i].qd = kTr[i].jointVelFrom(motorState[i].vel);
@@ -67,10 +81,10 @@ static bool readMotors(JointInput* j) {
   }
   return powerOnTime < 0.6f ? true : ok;          // Motoren brauchen nach dem Schütz einen Moment zum Hochfahren
 }
-static void motorSendTorque(int id, float tauJoint) {
+static void motorSend(int id, float tauJoint, float vJoint, float kdJoint) {
   CAN_message_t m; m.flags.extended = 1; m.len = 8;
-  m.id = packTorqueCommand(kCanId[id], kTr[id].motorTorqueFor(tauJoint), kLim[id], m.buf);
-  can.write(m);
+  m.id = packMitCommand(kCanId[id], kTr[id].motorTorqueFor(tauJoint), kTr[id].motorVelFor(vJoint), kTr[id].motorKdFor(kdJoint), kLim[id], m.buf);
+  canWrite(id, m);
 }
 
 // ---------- Wägezellen ----------
@@ -80,15 +94,45 @@ static int32_t readCellRaw(int c) {
   return hx711ReadRaw([c] { digitalWrite(PIN_HX_SCK, HIGH); delayMicroseconds(1); const bool b = digitalRead(PIN_HX_DOUT[c]);
                             digitalWrite(PIN_HX_SCK, LOW); delayMicroseconds(1); return b; });
 }
+// ADS131M04: einen Rahmen je Wandler lesen (18 Bytes, 25 MHz SPI ≈ 6 µs je Wandler)
+static const SPISettings kAdsSpi(25000000, MSBFIRST, SPI_MODE1);
+static void adsTransfer(int a, uint8_t* buf) {
+  SPI.beginTransaction(kAdsSpi); digitalWrite(PIN_ADS_CS[a], LOW);
+  SPI.transfer(buf, 18);
+  digitalWrite(PIN_ADS_CS[a], HIGH); SPI.endTransaction();
+}
+static void adsBegin() {
+  SPI.begin();
+  for (int a = 0; a < 3; a++) { pinMode(PIN_ADS_CS[a], OUTPUT); digitalWrite(PIN_ADS_CS[a], HIGH); }
+  pinMode(PIN_ADS_DRDY, INPUT); pinMode(PIN_ADS_SYNC, OUTPUT); digitalWrite(PIN_ADS_SYNC, HIGH);
+  uint8_t b[18];
+  for (int a = 0; a < 3; a++) { adsWregFrame(kAdsRegClock, kAdsClock1k, b); adsTransfer(a, b); adsWregFrame(kAdsRegGain1, kAdsGain128, b); adsTransfer(a, b); }
+  digitalWrite(PIN_ADS_SYNC, LOW); delayMicroseconds(2); digitalWrite(PIN_ADS_SYNC, HIGH);   // alle drei gleichzeitig starten
+}
+static bool adsRead() {                                                         // true = neuer Satz gelesen
+  if (digitalRead(PIN_ADS_DRDY) == HIGH) return false;                          // DRDY aktiv tief
+  for (int a = 0; a < 3; a++) {
+    uint8_t b[18] = {}; int32_t ch[4];
+    adsTransfer(a, b); adsParseFrame(b, ch);
+    for (int k = 0; k < 4; k++) if (kAdsCell[a][k] >= 0) cellRaw[kAdsCell[a][k]] = ch[k];
+  }
+  return true;
+}
 static bool readCuffs(JointInput* j) {
   bool ok = true;
+  adsRead();
   for (int c = 0; c < kCells; c++) {
-    if (digitalRead(PIN_HX_DOUT[c]) == HIGH) continue;                          // noch kein neuer Wert (80 Hz)
+    if (PIN_HX_DOUT[c] < 0) {                                                   // ADS131M04-Zelle: Wert liegt schon in cellRaw
+      if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; continue; }
+      cellN[c] = cfg.cell[c].toNewton(cellRaw[c]); continue;
+    }
+    if (digitalRead(PIN_HX_DOUT[c]) == HIGH) continue;                          // noch kein neuer Wert (HX711, 80 Hz)
     cellRaw[c] = readCellRaw(c);
     if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; continue; }
     cellN[c] = cfg.cell[c].toNewton(cellRaw[c]);
   }
-  j[HipL].cuffN = cellN[0]; j[HipR].cuffN = cellN[1];                          // Knie: keine eigene Manschette (Kopplung in exo_app.h)
+  j[HipL].cuffN = cellN[0]; j[HipR].cuffN = cellN[1];
+  j[KneeL].cuffN = cellN[15]; j[KneeR].cuffN = cellN[16];                       // Schienbein-Manschetten (M2); dazu die Kopplung vom Oberschenkel
   j[ShL].cuffN = cellN[2]; j[ShR].cuffN = cellN[3]; j[ElL].cuffN = cellN[4]; j[ElR].cuffN = cellN[5];
   for (int i = 0; i < NL; i++) in.loopN[i] = fmaxf(0.f, cellN[6 + i]);
   // Rumpf: Gurte ziehen (11/12) = vorbeugen, ins Rückenpolster drücken (13/14) = aufrichten; Drehen aus dem Unterschied rechts/links
@@ -181,7 +225,15 @@ static void logLine(const Outputs& o) {
 static bool saveSettings(const Settings& s) { EEPROM.put(0, s); Settings chk; EEPROM.get(0, chk); return valid(chk); }
 static void consolePrint(const char* t) { Serial.print(t); }
 static void setClock(int h, int m) { const unsigned long day = rtc_get() / 86400UL * 86400UL; rtc_set(day + h * 3600UL + m * 60UL); }
-static int32_t consoleRaw(int c) { int64_t sum = 0; for (int i = 0; i < 16; i++) { while (digitalRead(PIN_HX_DOUT[c]) == HIGH) watchdogFeed(); sum += readCellRaw(c); } return int32_t(sum / 16); }
+static int32_t consoleRaw(int c) {
+  int64_t sum = 0;
+  for (int i = 0; i < 16; i++) {
+    if (PIN_HX_DOUT[c] < 0) { while (!adsRead()) watchdogFeed(); sum += cellRaw[c]; continue; }
+    while (digitalRead(PIN_HX_DOUT[c]) == HIGH) watchdogFeed();
+    sum += readCellRaw(c);
+  }
+  return int32_t(sum / 16);
+}
 static void pollConsole() {
   static char line[48]; static size_t n = 0;
   while (Serial.available()) {
@@ -199,21 +251,22 @@ void setup() {
   for (int i = 0; i < NL; i++) { pinMode(PIN_BTN_LOOP[i], INPUT_PULLUP); pinMode(PIN_LOOP_PWM[i], OUTPUT); pinMode(PIN_LOOP_DIR[i], OUTPUT); pinMode(PIN_LOOP_END[i], INPUT_PULLUP); }
   pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_LUMB_LOCK, OUTPUT); pinMode(PIN_HEAT_LEGS, OUTPUT); pinMode(PIN_HEAT_ARMS, OUTPUT); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
   digitalWrite(PIN_CONTACTOR, LOW);                                             // Schütz erst mit dem Einschalten
-  pinMode(PIN_HX_SCK, OUTPUT); for (int c = 0; c < kCells; c++) pinMode(PIN_HX_DOUT[c], INPUT);
+  pinMode(PIN_HX_SCK, OUTPUT); for (int c = 0; c < kCells; c++) if (PIN_HX_DOUT[c] >= 0) pinMode(PIN_HX_DOUT[c], INPUT);
+  adsBegin();
   Serial.begin(115200); Serial1.begin(115200);
   EEPROM.get(0, cfg);
   if (!valid(cfg)) cfg = Settings();                                            // ungültig oder neu: Werkseinstellungen
   app.setLevel(cfg.level); app.jointMask = cfg.jointMask;
-  can.begin(); can.setBaudRate(1000000);
+  can1.begin(); can1.setBaudRate(1000000); can3.begin(); can3.setBaudRate(1000000);
   peripheralsBegin();
-  ctlTimer.begin([] { tick = true; }, 5000);                                    // 200 Hz
+  ctlTimer.begin([] { tick = true; }, 2000);                                    // 500 Hz (Mitgehen braucht ≤ 2 ms Takt, Studie tools/transparenz.cpp)
 }
 
 void loop() {
   if (!tick) return;
   tick = false;
   watchdogFeed();
-  const float dt = 0.005f;
+  const float dt = 0.002f;
   in.btnPower = !digitalRead(PIN_BTN_POWER);
   for (int i = 0; i < NL; i++) {
     in.btnLoop[i] = !digitalRead(PIN_BTN_LOOP[i]);
@@ -237,7 +290,7 @@ void loop() {
   powerOnTime = power ? powerOnTime + dt : 0.f;
   if (power && !motorsOn && powerOnTime > 0.3f) motorsEnable(true);
   if (!power && motorsOn) motorsOn = false;                                     // ohne Strom sind sie ohnehin aus
-  if (motorsOn) for (int i = 0; i < NJ; i++) if ((cfg.jointMask >> i) & 1u) motorSendTorque(i, o.tau[i]);
+  if (motorsOn) for (int i = 0; i < NJ; i++) if ((cfg.jointMask >> i) & 1u) motorSend(i, o.tau[i], o.vDes[i], o.kd[i]);
   if (logOn) logLine(o);
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
   digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate); analogWrite(PIN_LUMB_LOCK, (int)(o.lumbarDuty * 255.f + 0.5f));
@@ -249,9 +302,9 @@ void loop() {
   if (dirty && app.sup.mode == Mode::Off) { dirty = false; seal(cfg); saveSettings(cfg); }
 
   static int div = 0;
-  if (++div >= 10) { div = 0; showLed(o.led, o.ledCount); }                    // 20 Hz
+  if (++div >= 25) { div = 0; showLed(o.led, o.ledCount); }                    // 20 Hz
   static int div2 = 0;
-  if (++div2 >= 200) { div2 = 0; sendStatus(o, in.safety.batteryV); }        // 1 Hz an Display und Handy
+  if (++div2 >= 500) { div2 = 0; sendStatus(o, in.safety.batteryV); }        // 1 Hz an Display und Handy
   pollConsole();
 }
 #endif

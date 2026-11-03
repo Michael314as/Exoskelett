@@ -11,14 +11,14 @@
 
 namespace exo {
 
-constexpr int kCells = 15;
+constexpr int kCells = 17;
 
 struct Settings {
   uint32_t magic = 0x45584F33;   // "EXO3"
-  uint16_t version = 5;          // 5: Rumpf (10 Gelenke, 15 Wägezellen)
+  uint16_t version = 6;          // 6: Manschetten M2 (Schienbein-Manschetten, 17 Wägezellen); 5: Rumpf
   uint8_t level = 1;             // Unterstützungsstufe 0/1/2
   uint16_t jointMask = 0x3FF;    // aktive Gelenke (Bit = JointId, 10 Gelenke); Prüfstand: nur Ellbogen rechts
-  CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1, 9/10 Fuß L/R, 11/12 Schultergurt L/R, 13/14 Rückenpolster L/R
+  CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1, 9/10 Fuß L/R, 11/12 Schultergurt L/R, 13/14 Rückenpolster L/R, 15/16 Unterschenkel L/R
   float joint0[10] = {};         // Motorwinkel bei gestreckter Grundstellung (Nullpunkt), je Gelenk
   float hours = 0.f;             // Betriebsstunden (für Wartungshinweise)
   uint32_t crc = 0;
@@ -31,7 +31,7 @@ inline uint32_t crc32(const uint8_t* d, size_t n) {
 }
 inline void seal(Settings& s) { s.crc = crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc)); }
 inline bool valid(const Settings& s) {
-  return s.magic == 0x45584F33 && s.version == 5 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
+  return s.magic == 0x45584F33 && s.version == 6 && s.crc == crc32(reinterpret_cast<const uint8_t*>(&s), offsetof(Settings, crc));
 }
 
 // Wartungshinweis aus den Betriebsstunden (Intervalle laut docs/wartung.md)
@@ -45,7 +45,7 @@ inline const char* maintenanceDue(float hours) {
 /* ------------------------------------------------------------- Konsole ------ */
 // Befehle (eine Zeile, Leerzeichen getrennt):
 //   status                      Zustand, Akku, Stufe, Stunden
-//   roh <zelle>                 Rohwert einer Wägezelle (0–8)
+//   roh <zelle>                 Rohwert einer Wägezelle (0–16)
 //   null <zelle>                aktuellen Rohwert als Nullpunkt übernehmen (Manschette unbelastet)
 //   kal <zelle> <gramm>         mit angehängtem Gewicht kalibrieren
 //   stufe <0|1|2>               Unterstützungsstufe

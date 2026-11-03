@@ -53,6 +53,13 @@ struct JointConfig {
   float slew = 400.f;          // max. Momentänderung [Nm/s] – nichts ruckt
   float motorPerJoint = 1.f;   // Motormoment je Nm am Gelenk = 1 / (Übersetzung · Wirkungsgrad), für die Wärmeschätzung
   float motorRatedNm = 28.f;   // Dauermoment des Motors in der Kühlkörper-Kapsel (Stiftkühlkörper Ø 140, Luft −10…+5 °C); am Prüfstand messen (P33)
+  // Mitgehen (Admittanz, ab Rev. M2): das Gelenk läuft mit vSoll = admit · Manschettenkraft mit, der Motor regelt intern
+  // (RobStride Typ 1, Kd-Anteil, ≈ 10 kHz im Motor) auf diese Geschwindigkeit. 0 = alter reiner Momentenbetrieb.
+  float admit = 0.f;           // [rad/s je N] Manschettenkraft (Studie: 0,6 bei 500 Hz Regeltakt, ≤ 1 ms CAN-Verzug)
+  float kdJoint = 0.f;         // Geschwindigkeits-Dämpfung im Motor, auf das Gelenk bezogen [Nm·s/rad] (≈ 0,75 · Segmentträgheit / 0,065)
+  float viscComp = 0.f;        // Ausgleich der geschwindigkeitsabhängigen Reibung [Nm·s/rad]
+  float guardOnN = 2.0f;       // Schwingungswächter: Anteil > 6 Hz in der Manschettenkraft (Effektivwert) ab dem zurückgeregelt wird [N]
+  float guardOffN = 1.0f;      // … und unter dem es sich langsam wieder erholt [N]
 };
 
 struct JointInput {
@@ -75,33 +82,62 @@ class Joint {
 
   // scale: 0…1 aus der Zustandsmaschine (weiches Ein-/Ausblenden)
   float step(const JointInput& in, float dt, float scale) {
-    const float f = lp_.step(in.cuffValid ? in.cuffN : 0.f, dt, cfg.filterHz);
+    const float raw = in.cuffValid ? in.cuffN : 0.f;
+    const float f = lp_.step(raw, dt, cfg.filterHz);
     lastForce = f;
     const float fUse = deadband(f, cfg.deadbandN);
-    float assist = cfg.gain * (fUse * cfg.rCuff + in.crossNm);
+    const bool adm = cfg.admit > 0.f && !cfg.pullOnly;
+    if (adm) {
+      // Schwingungswächter: schwingt das Gelenk mit der Manschette (zu straffe Manschette, Verzug am Bus, Kälte),
+      // steckt Energie über 6 Hz in der Kraft. Dann Mitgehen schnell zurücknehmen (bis 25 %), langsam wieder freigeben.
+      const float hp1 = raw - hpLp_.step(raw, dt, 6.f), hp = hp1 - hpLp2_.step(hp1, dt, 6.f);   // Hochpass 2. Ordnung: Gehen (1–2 Hz) bleibt draußen
+      oscN = std::sqrt(env_.step(hp * hp, dt, 3.f));
+      if (oscN > cfg.guardOnN) guard = std::fmax(0.25f, guard - 4.f * dt);
+      else if (oscN < cfg.guardOffN) guard = std::fmin(1.f, guard + 0.3f * dt);
+    }
+    const float g = adm ? guard : 1.f;
+    float assist = g * cfg.gain * (fUse * cfg.rCuff + in.crossNm);
+    float vDes = adm ? g * cfg.admit * (fUse * cfg.rCuff + in.crossNm) / rRef() : 0.f;   // Knie ohne eigene Manschette: über die Kopplung
     // weiche Wand vor den Endanschlägen: Unterstützung in Richtung Anschlag läuft aus, Rückstellmoment baut sich auf
     const float dLo = in.q - cfg.qMin, dHi = cfg.qMax - in.q;
-    if (dHi < cfg.wallWidth && assist > 0.f) assist *= clampf(dHi / cfg.wallWidth, 0.f, 1.f);
-    if (dLo < cfg.wallWidth && assist < 0.f) assist *= clampf(dLo / cfg.wallWidth, 0.f, 1.f);
+    // Auslauf quadratisch: weit vor dem Anschlag kaum spürbar, kurz davor fast null (Mitgehen und Kraftverstärkung gleich)
+    auto fade = [&](float d) { const float x = clampf(d / cfg.wallWidth, 0.f, 1.f); return x * x; };
+    vDes = clampf(vDes, -cfg.velMax, cfg.velMax);
+    if (dHi < cfg.wallWidth && assist > 0.f) assist *= fade(dHi);
+    if (dLo < cfg.wallWidth && assist < 0.f) assist *= fade(dLo);
+    if (dHi < cfg.wallWidth && vDes > 0.f) vDes *= fade(dHi);
+    if (dLo < cfg.wallWidth && vDes < 0.f) vDes *= fade(dLo);
     // zu schnell: Unterstützung in Bewegungsrichtung zurücknehmen
     if (std::fabs(in.qd) > cfg.velMax && signf(assist) == signf(in.qd)) assist *= clampf(2.f - std::fabs(in.qd) / cfg.velMax, 0.f, 1.f);
     const float grav = in.gravScale * cfg.gravCoef * std::sin(in.q + cfg.gravPhase);
-    const float fric = cfg.frictionComp * std::tanh(in.qd / 0.05f);   // weich um den Stillstand, damit nichts zittert
-    float tau = scale * (grav + in.ffNm + assist + fric - cfg.damping * in.qd);
+    // Reibung: im Mitgeh-Betrieb nach der Sollgeschwindigkeit (die kennt der Regler sicher), sonst nach der gemessenen
+    const float vf = adm ? vDes : in.qd;
+    const float fric = cfg.frictionComp * std::tanh(vf / 0.05f) + cfg.viscComp * vf;   // weich um den Stillstand, damit nichts zittert
+    const float kd = adm ? scale * cfg.kdJoint : 0.f;
+    float tau = scale * (grav + in.ffNm + assist + fric - (adm ? 0.f : cfg.damping * in.qd));
     if (cfg.pullOnly) tau = std::fmax(tau, cfg.pretension * scale);
-    tau = clampf(tau, cfg.pullOnly ? 0.f : cfg.tauMin * in.limitScale, std::fmin(cfg.tauMax * in.limitScale, in.tauMaxNow));
+    // Grenzen gelten für das Gesamtmoment, das der Motor rechnet: tau + Kd·(vSoll − v)
+    const float pd = kd * (vDes - in.qd);
+    const float hi = std::fmin(cfg.tauMax * in.limitScale, in.tauMaxNow), lo = cfg.pullOnly ? 0.f : cfg.tauMin * in.limitScale;
+    tau = clampf(tau + pd, lo, hi) - pd;
     // Änderungsrate begrenzen
     const float maxStep = cfg.slew * dt;
     tau = clampf(tau, last_ - maxStep, last_ + maxStep);
-    last_ = tau;
+    last_ = tau; lastVDes = scale * vDes; lastKd = kd; lastTotal = tau + pd;
     return tau;
   }
-  void off() { last_ = 0.f; lp_.reset(); }
+  void off() { last_ = 0.f; lastTotal = 0.f; lastVDes = 0.f; lastKd = 0.f; guard = 1.f; lp_.reset(); hpLp_.reset(); hpLp2_.reset(); env_.reset(); }
   float lastTau() const { return last_; }
+  // statische Verstärkung beim Halten: Motor = (K + Kd·admit/r) · Manschettenmoment → Mensch trägt 1 / (1 + Keff)
+  float effectiveGain() const { return cfg.gain + (cfg.admit > 0.f && !cfg.pullOnly ? cfg.kdJoint * cfg.admit / rRef() : 0.f); }
+  float rRef() const { return cfg.rCuff > 0.f ? cfg.rCuff : 0.2f; }
   float lastForce = 0.f;
+  float lastTotal = 0.f;             // Gesamtmoment am Gelenk (t_ff + Kd-Anteil), für Wärmeschätzung
+  float lastVDes = 0.f, lastKd = 0.f;  // an den Motor: Sollgeschwindigkeit [rad/s, Gelenk] und Dämpfung [Nm·s/rad, Gelenk]
+  float guard = 1.f, oscN = 0.f;       // Schwingungswächter: Faktor 0,25…1 und gemessener Schwinganteil [N]
 
  private:
-  LowPass lp_;
+  LowPass lp_, hpLp_, hpLp2_, env_;
   float last_ = 0.f;
 };
 

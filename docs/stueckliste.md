@@ -12,7 +12,7 @@ Herstellweg:
 
 Preise sind Richtwerte (Stand November 2026). Motoren nach recherchierten Händlerpreisen, siehe [bestellung-prototyp.md](bestellung-prototyp.md).
 
-**Gesamt Material, ein Exo:** etwa **5.700–6.800 €**, davon Motoren (7 × RobStride RS04, 3 × RS03) 3.200–3.600 €, alles andere ≈ 2.100–2.700 €.
+**Gesamt Material, ein Exo:** etwa **6.000–7.100 €**, davon Motoren (7 × RobStride RS04, 3 × RS03) 3.200–3.600 €, alles andere ≈ 2.400–3.000 € (Rev. M2: Manschetten mit BOA, Längsschlitten, schneller Messung und Schienbein-Sensor ≈ +300 €).
 Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüfstand (eine Kapsel) + Schlaufe ≈ 600 €.
 
 ---
@@ -62,7 +62,7 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Gelenkköpfe Edelstahl, DIN ISO 12240-4 | 4 × M8 + 4 × M6 | wartungsfrei (z. B. SKF SIKAC 8 M / 6 M) | Kauf | 70 € |
 | Federpaket Knie (Druckfeder mit Hülse in der Stange) | 2 | Federstahl | Kauf + Druck | 15 € |
 | Rumpfantrieb: Kurbeln, Hebel am Lendengelenk, Träger (Laser), Stangen Ø 12 / Ø 10, 4 Gelenkköpfe | 1 Satz | Laser + Kauf | 60 € |
-| Rumpf-Wägezellen 20 kg + HX711 (Gurtanker, Schulterblattpolster) | 4 | Kauf | 25 € |
+| Rumpf-Wägezellen 20 kg (Gurtanker, Schulterblattpolster), am ADS131M04 | 4 | Kauf | 20 € |
 | Bremswiderstand mit Schaltung (ab 46 V, 10 Ω / 200 W) | 1 | Aluminium-Gehäusewiderstand, MOSFET, Komparator | Kauf + Löten | 30 € |
 
 *Warum keine Seile mehr:* siehe [konzept.md](konzept.md), Abschnitt 5.
@@ -74,11 +74,11 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Schulterbügel | 2 | Alu 20 × 20 × 2 + Laschen | Säge + Bohren, Laser | 15 € |
 | Ober-/Unterarmschienen | 4 | Alu 20 × 20 × 2 / 25 × 25 × 2 | Säge + Bohren | 12 € |
 | Schulter-/Ellbogenlager | 4 | Flanschlager klein | Kauf | 28 € |
-| Manschetten-Schalen | 8 | PETG, nach Abguss/Handy-Scan | Druck (größte ~16 × 9 × 8 cm) | 15 € |
-| Polster | 8 | Abstandsgewirke 10 mm | Kauf, Schere | 25 € |
-| Klettgurte | 8 | 50 mm | Kauf | 15 € |
-| Wägezellen 10–20 kg | 8 | Einpunkt-Biegebalken | Kauf | 40 € |
-| Wägezellen-Verstärker | 8 | HX711 oder NAU7802 | Kauf | 20 € |
+| Manschetten-Schalen M2 (Oberarm, Unterarm, Oberschenkel, Schienbein; 3 Größen) | 8 | PETG-CF 4 mm, 45 % breiter, nach Handy-Scan | Druck (größte ~17 × 12 × 9 cm) | 30 € |
+| Viskopolster mit Wechselbezug | 8 | dichter PU-Viskoschaum 4 mm, perforiert, Funktionsstoff, Klett nur am Bezug | Kauf, Schere | 40 € |
+| BOA-Drehverschluss mit 2 Seilbändern | 8 | BOA Fit System (Orthesen-Variante) | Kauf | 120–200 € |
+| Längsschlitten | 8 | 2 × Edelstahlstange Ø 5, 2 × iglidur JSM-0506-05, Alu-Schlitten (Laser), 2 Zentrierfedern ≈ 0,5 N/mm, ±12 mm | Kauf + Laser | 50 € |
+| Wägezellen 20 kg | 8 | Biegebalken YZC-133 | Kauf | 40 € |
 | Wägezellen-Halter, Überlastpuffer | 8 Satz | PETG/TPU | Druck | 5 € |
 | Schlaufenkopf | 2 | Alu 15 × 40 Flachprofil + Laserlaschen, TPU-Zahnleiste | Säge + Bohren, Laser, Druck | 20 € |
 | Schlaufen | 3 | Gummischlauch 12 mm, Federstahldraht 1,5 mm, Dyneema 4 mm | Kauf, zusammenstecken | 20 € |
@@ -90,10 +90,11 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 
 | Teil | Menge | Herstellweg | etwa |
 |---|---|---|---|
-| Teensy 4.1 + CAN-Transceiver | 1 | Kauf | 50 € |
+| Teensy 4.1 + 2 CAN-Transceiver (zwei Busse) | 1 | Kauf | 55 € |
+| Manschetten-Messplatine: 3 × TI ADS131M04, 8,192-MHz-Oszillator, 3,3-V-Brückenspeisung, 12 Stecker | 1 | Platine fertigen lassen + bestücken | 60 € |
 | ESP32-C3 (Funk zum Handy) | 1 | Kauf | 8 € |
 | Lagesensor (IMU, Adafruit BNO085 #4754) | 1 | Kauf | 30 € |
-| Wägezellen 20 kg (Manschetten) / 50 kg (Schlaufenköpfe) + HX711 | 6 + 3 | Kauf | 45 € |
+| Wägezellen 50 kg (Schlaufenköpfe) + HX711 | 3 + 3 | Kauf | 20 € |
 | Fußkontakt: Halbbrücken-Wägezellen 50 kg (34 × 34 mm) + HX711 | 8 + 2 | Kauf | 20 € |
 | Knopfzelle CR2032 + Halter (Uhr) | 1 | Kauf | 3 € |
 | DC/DC 36→24 V, 36→5 V | 2 | Kauf | 30 € |
