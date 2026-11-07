@@ -49,8 +49,9 @@ inline const char* maintenanceDue(float hours) {
 //   null <zelle>                aktuellen Rohwert als Nullpunkt übernehmen (Manschette unbelastet)
 //   kal <zelle> <gramm>         mit angehängtem Gewicht kalibrieren
 //   stufe <0|1|2>               Unterstützungsstufe
-//   pruefstand / voll           nur Ellbogen rechts aktiv (Prüfstand) / alle 8 Gelenke
-//   log <0|1>                   Messdaten über USB (t, q, qd, Kraft, Moment des Prüfstand-Gelenks)
+//   pruefstand [gelenk] / voll  nur ein Gelenk aktiv (ohne Angabe 7 = Ellbogen rechts) / alle 10 Gelenke
+//   log <0|1> [gelenk]          Messdaten über USB, 500/s: t, q, qd, Kraft, t_ff, v_soll, Kd, Gesamtmoment,
+//                               Motormoment (Rückmeldung), Wächter, Schwinganteil – Gelenk 0–9, ohne Angabe 7 (Ellbogen rechts)
 //   uhr <hh> <mm>               Uhrzeit für die Anzeige stellen (läuft mit Knopfzelle weiter)
 //   speichern                   ins EEPROM schreiben
 //   werks                       Werkseinstellungen
@@ -58,7 +59,7 @@ struct ConsoleIO {
   int32_t (*rawCell)(int cell) = nullptr;   // liefert aktuellen Rohwert (gemittelt)
   void (*print)(const char*) = nullptr;
   bool (*save)(const Settings&) = nullptr;
-  void (*setLog)(bool) = nullptr;
+  void (*setLog)(bool on, int joint) = nullptr;
   void (*setClock)(int h, int m) = nullptr;
 };
 
@@ -76,9 +77,18 @@ inline bool runCommand(const char* line, Settings& s, const ConsoleIO& io) {
     s.cell[a].nPerCount = (b / 1000.f * 9.81f) / counts;
     std::snprintf(out, sizeof out, "Zelle %d: %.6f N/Schritt\n", a, double(s.cell[a].nPerCount)); say(out); return true;
   }
-  if (!std::strcmp(cmd, "pruefstand")) { s.jointMask = 1u << 7; say("Prüfstand: nur Ellbogen rechts (Motor-ID 8)\n"); return true; }
+  if (!std::strcmp(cmd, "pruefstand")) {
+    const int g = n >= 2 ? a : 7;
+    if (g < 0 || g > 9) { say("Fehler: Gelenk 0–9\n"); return false; }
+    s.jointMask = uint16_t(1u << g); std::snprintf(out, sizeof out, "Prüfstand: nur Gelenk %d aktiv (Motor-ID %d)\n", g, g + 1); say(out); return true;
+  }
   if (!std::strcmp(cmd, "voll")) { s.jointMask = 0x3FF; say("alle 10 Gelenke aktiv\n"); return true; }
-  if (!std::strcmp(cmd, "log") && n >= 2 && (a == 0 || a == 1)) { if (io.setLog) io.setLog(a == 1); say(a ? "Log an: t,q,qd,kraft,moment\n" : "Log aus\n"); return true; }
+  if (!std::strcmp(cmd, "log") && n >= 2 && (a == 0 || a == 1)) {
+    const int g = n >= 3 ? int(b) : 7;
+    if (g < 0 || g > 9) { say("Fehler: Gelenk 0–9\n"); return false; }
+    if (io.setLog) io.setLog(a == 1, g);
+    say(a ? "Log an: t_us,q,qd,kraft_N,moment_Nm,v_soll,kd,gesamt_Nm,motor_Nm,waechter,schwing_N\n" : "Log aus\n"); return true;
+  }
   if (!std::strcmp(cmd, "stufe") && n >= 2 && a >= 0 && a <= 2) { s.level = uint8_t(a); say("Stufe gesetzt\n"); return true; }
   if (!std::strcmp(cmd, "uhr") && n >= 3 && a >= 0 && a < 24 && b >= 0.f && b < 60.f) { if (io.setClock) io.setClock(a, int(b)); say("Uhr gestellt\n"); return true; }
   if (!std::strcmp(cmd, "speichern")) { seal(s); const bool ok = io.save && io.save(s); say(ok ? "gespeichert\n" : "Fehler beim Speichern\n"); return ok; }

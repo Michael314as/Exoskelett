@@ -287,9 +287,12 @@ int main() {
   std::printf("12) Prüfstand-Modus: nur Ellbogen rechts aktiv\n");
   {
     Settings c; static char out[96]; ConsoleIO io; io.print = [](const char* t) { std::snprintf(out, sizeof out, "%s", t); };
-    static bool logState = false; io.setLog = [](bool on) { logState = on; };
+    static bool logState = false; static int logJ = -1; io.setLog = [](bool on, int j) { logState = on; logJ = j; };
     check(runCommand("pruefstand", c, io) && c.jointMask == (1u << ElR), "Konsole: pruefstand setzt nur Ellbogen rechts");
-    check(runCommand("log 1", c, io) && logState, "Konsole: Messdaten-Log an");
+    check(runCommand("log 1", c, io) && logState && logJ == 7, "Konsole: Messdaten-Log an (ohne Angabe Ellbogen rechts)");
+    check(runCommand("log 1 3", c, io) && logJ == 3 && !runCommand("log 1 12", c, io), "Konsole: Log für ein gewähltes Gelenk (Knie rechts), ungültiges Gelenk abgewiesen");
+    check(runCommand("pruefstand 5", c, io) && c.jointMask == (1u << 5) && !runCommand("pruefstand 10", c, io), "Konsole: Prüfstand mit gewähltem Gelenk (Schulter rechts)");
+    runCommand("pruefstand", c, io);
     App app; app.jointMask = c.jointMask; Inputs in; Outputs o; const float dt = 0.005f;
     auto run = [&](float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
     in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);

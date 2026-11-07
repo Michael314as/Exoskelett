@@ -22,7 +22,13 @@ build/esp32_host: test/esp32_host.cpp esp32/esp32_display_ble.ino esp32/status.h
 # Auswertung prüfen: Simulations-Log mit bekannten Werten → tools/auswertung.py muss sie wiederfinden
 ident: build/log_demo
 	./build/log_demo > build/log_demo.csv
-	python3 ../tools/auswertung.py build/log_demo.csv --erwartet 0.05,0.2,0.3,0.9
+	python3 ../tools/auswertung.py build/log_demo.csv --erwartet 0.05,0.2,0.3,0.9 --erwartet-vorschlag ok
+	./build/log_demo stoerung > build/log_stoerung.csv
+	python3 ../tools/auswertung.py build/log_stoerung.csv --erwartet 0.05,0.2,0.3,0.9 --erwartet-vorschlag kd_senken
+	./build/log_demo traege > build/log_traege.csv
+	python3 ../tools/auswertung.py build/log_traege.csv --admit 0.15 --erwartet 0.05,0.2,0.3,0.9 --erwartet-vorschlag admit_hoeher
+	cut -d, -f1-5 build/log_demo.csv > build/log_alt.csv
+	python3 ../tools/auswertung.py build/log_alt.csv
 
 build/log_demo: test/log_demo.cpp src/exo_core.h src/exo_app.h
 	mkdir -p build

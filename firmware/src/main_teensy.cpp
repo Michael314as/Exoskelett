@@ -213,11 +213,18 @@ static void sendStatus(const Outputs&, float batteryV) {
 }
 
 // ---------- Messdaten-Log (Prüfstand): Grundlage für tools/auswertung.py ----------
+// Spalten: t_us,q,qd,kraft_N,moment_Nm (t_ff),v_soll,kd,gesamt_Nm (t_ff + Kd·(v_soll − v)),motor_Nm (Rückmeldung, aufs Gelenk
+// umgerechnet),waechter (1 = volles Mitgehen),schwing_N (Anteil > 6 Hz). Die ersten 5 Spalten wie bis Rev. T2.
 static bool logOn = false;
-static void setLog(bool on) { logOn = on; }
+static int logJoint = ElR;
+static void setLog(bool on, int joint) { logOn = on; logJoint = joint; }
 static void logLine(const Outputs& o) {
-  char b[80];
-  snprintf(b, sizeof b, "%lu,%.5f,%.4f,%.2f,%.3f\n", (unsigned long)micros(), double(in.joint[ElR].q), double(in.joint[ElR].qd), double(in.joint[ElR].cuffN), double(o.tau[ElR]));
+  const int i = logJoint;
+  const float motorNm = motorState[i].torque * kTr[i].ratio * kTr[i].eta;
+  char b[160];
+  snprintf(b, sizeof b, "%lu,%.5f,%.4f,%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%.2f,%.2f\n", (unsigned long)micros(), double(in.joint[i].q), double(in.joint[i].qd),
+           double(in.joint[i].cuffN), double(o.tau[i]), double(o.vDes[i]), double(o.kd[i]), double(o.tauTotal[i]), double(motorNm),
+           double(o.guard[i]), double(app.joint[i].oscN));
   if (Serial.availableForWrite() >= int(strlen(b))) Serial.write(b);          // nie blockieren
 }
 

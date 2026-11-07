@@ -43,14 +43,22 @@ Kabel: [verdrahtung.md](verdrahtung.md).
 4. Uhr stellen: `uhr <stunde> <minute>`.
 5. **Prüfen P10–P12** (Vorzeichen jeder Zelle, Rauschen, Überlast).
 
-## 6. Prüfstand und Parameter
-1. Holzarm mit Scharnier, Seilscheibe Ellbogen, Bowdenzug-Paar, ein Motor (ID 8) und die Unterarm-Manschette (Zelle 5).
-2. Konsole: `pruefstand`, `stufe 0`, `speichern`. Dann sind nur Motor 8 und seine Manschette aktiv.
-3. `log 1`, Ausgabe mitschreiben, Exo einschalten, Holzarm 30 s an der Manschette führen (langsam und schnell).
-4. `python3 tools/auswertung.py log.csv`: Trägheit, Reibung und Schwerkraft des echten Gelenks. Die Werte in
-   `firmware/test/sim_test.cpp` (struct Plant) eintragen, `make -C firmware test` laufen lassen, Reibungsausgleich und
-   Schwerkraft in `firmware/src/exo_app.h` (defaultJoint) übernehmen, neu bauen und flashen.
-5. Prüfstand-Abnahme **P13–P20**.
+## 6. Prüfstand und Parameter (Mitgehen einstellen, P39)
+1. Holzarm mit Gelenkkapsel (Ellbogen: RS03, ID 8, Schubstange) und der Unterarm-Manschette M2 (Zelle 5).
+2. Konsole: `pruefstand` (oder `pruefstand <gelenk>`, z. B. `pruefstand 5` für die Schulter rechts), `stufe 0`, `speichern`.
+   Dann ist nur dieser Motor aktiv.
+3. `log 1` (bzw. `log 1 <gelenk>`), Ausgabe mitschreiben, Exo einschalten, Holzarm 30 s an der Manschette führen:
+   langsam und schnell, über den ganzen Bereich, einmal über dünnem Pulli, einmal über der Winterjacke.
+4. `python3 tools/auswertung.py log.csv --hebel 0.15`. Die Auswertung liefert:
+   - Trägheit, Reibung und Schwerkraft des echten Gelenks (aus dem Moment, das der Motor zurückmeldet),
+   - die Manschettenkraft in Bewegung (Ziel < 4 N) und wie oft der Schwingungswächter eingegriffen hat,
+   - einen Vorschlag als Zeile für `firmware/src/exo_app.h` (`kdJoint`, `admit`, `frictionComp`, `viscComp`,
+     `gravCoef`): „passt“, „Kd senken“ (Wächter greift ein) oder „admit höher“ (zu viel Kraft, kein Schwingen).
+5. Vorschlag eintragen, Trägheit und Reibung auch in `firmware/test/sim_test.cpp` (struct Plant), `make -C firmware test`,
+   neu bauen, flashen, Schritt 3–4 wiederholen, bis die Auswertung „passt“ meldet. Die Auswertung selbst ist mit
+   simulierten Logs geprüft (`make -C firmware ident`: findet die eingebauten Werte und schlägt in allen drei Fällen das
+   Richtige vor).
+6. Prüfstand-Abnahme **P13–P20**, **P39**.
 
 ## 7. Erste Bewegung am Körper
 1. Konsole `voll`, Stufe sanft: `stufe 0`, `speichern`.
