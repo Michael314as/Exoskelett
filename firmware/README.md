@@ -43,9 +43,9 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | Test | Ergebnis |
 |---|---|
 | **Leichtgängigkeit Ellbogen** (Mitgehen, M2) | Kraft an der Manschette 0,5 Hz: ohne Regelung 5,7 N (rms), alter Momentbetrieb 3,0 N, **Mitgehen 1,3 N**; 1,2 Hz: 7,4 / 4,9 / **1,9 N** |
-| **Leichtgängigkeit Schulter, Knie** (1,2 Hz, Manschette 2–15 kN/m) | alt bis 12,2 / 12,8 N, **Mitgehen bis 2,7 / 3,0 N** |
-| **Schneller Schwung** 1,4 Hz ±34° | Schulter alt 24 N → **4,8 N**; Knie alt 26 N → **9,7 N** (Beugegrenze 10 Nm; ohne sie 4,9 N) |
-| **Trägheit/Reibung falsch geschätzt** (×0,5 … ×2) | Schulter bis 3,6 N, Knie bis 5,0 N: bleibt leicht und stabil |
+| **Leichtgängigkeit Schulter, Knie** (1,2 Hz, Manschette 2–15 kN/m) | alt bis 12,2 / 10,1 N, **Mitgehen bis 2,7 / 2,9 N** (Knie: Trägheit 0,18 kg·m² aus der Bauteilliste) |
+| **Schneller Schwung** 1,4 Hz ±34° | Schulter alt 24 N → **4,8 N**; Knie alt 20 N → **4,7 N** (mit Beugegrenze 10 Nm) |
+| **Trägheit/Reibung falsch geschätzt** (×0,5 … ×2) | Schulter und Knie bis 3,6 N: bleibt leicht und stabil |
 | **Störfall** Kd doppelt + 2 ms Busverzug, straffe Manschette | Schwingungswächter regelt zurück: 5,7 / 6,7 N rms, kein Aufschaukeln |
 | **Schwingungswächter** | 15-Hz-Zittern → Mitgehen auf 25 %; erholt sich nach Ruhe; normale Bewegung 1 Hz löst ihn nicht aus |
 | **Verstärkung:** 20 Nm Baumlast halten | K = 0,5 / 1 / 2: du trägst 40 / 30 / 20 % (Stufe + gedeckelter Mitgeh-Anteil, erwartet 47 / 35 / 23 %) |

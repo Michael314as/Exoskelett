@@ -116,7 +116,7 @@ etwa 11 Nm, auch wenn die Software versagt.
 | Regeltakt | 500 Hz, Befehl ≤ 1 ms auf dem Bus | darunter wird Mitgehen an Schulter und Knie unruhig (Studie [tools/transparenz.cpp](../tools/transparenz.cpp)) |
 | Messung | 1000/s, Tiefpass 40 Hz, Totband 0,3 N | schnell genug fürs Mitgehen, Rauschen (≈ 0,05–0,15 N) löst nichts aus |
 | Mitgehen (admit) | 0,9 rad/s je N (Rumpf beugen 0,25, drehen 0,35) | 3 N Druck = ≈ 2,7 rad/s: zügige Armbewegung mit einem Fingerdruck |
-| Dämpfung im Motor (Kd) | Ellbogen 0,75 · Schulter 2,3 · Knie 2,9 · Hüfte 4 · Rumpf 10 / 7 Nm·s/rad | ≈ 0,75 × Trägheit des Exo-Glieds / 0,065 s; doppelt so viel geht noch, halb so viel auch (Simulation) |
+| Dämpfung im Motor (Kd) | Ellbogen 0,75 · Schulter 2,3 · Knie 2,1 · Hüfte 4 · Rumpf 10 / 7 Nm·s/rad | ≈ 0,75 × Trägheit des Exo-Glieds / 0,065 s; doppelt so viel geht noch, halb so viel auch (Simulation) |
 | Reibungsausgleich | 0,1–0,2 Nm + 0,25–0,5 Nm·s/rad | nach der Sollgeschwindigkeit, nicht der gemessenen: zittert nicht im Stillstand |
 | Schwingungswächter | Anteil > 6 Hz in der Kraft: über 2 N → Mitgehen schnell bis 25 % zurück, unter 1 N langsam wieder frei | fängt zu straffe Manschette, Busverzug, Kälte ab; Gehen (1–2 Hz) löst ihn nicht aus |
 | Momentänderung | höchstens 300–600 Nm/s (Vorsteuer-Anteil) | nichts ruckt |
@@ -137,10 +137,10 @@ Geschwindigkeitssignal, ohne auf den Bus zu warten.
 |---|---|---|
 | Ellbogen 0,5 Hz ±29° / 1,2 Hz ±20° | 3,0 / 4,9 N | **1,3 / 1,9 N** |
 | Schulter 1,2 Hz ±20° | bis 12,2 N | **bis 2,7 N** |
-| Knie (Schwungbein) 1,2 Hz ±20° | bis 12,8 N | **bis 3,0 N** |
+| Knie (Schwungbein) 1,2 Hz ±20° | bis 10,1 N | **bis 2,9 N** |
 | Schulter, schneller Schwung 1,4 Hz ±34° | 24 N | **4,8 N** |
-| Knie, schneller Schwung 1,4 Hz ±34° | 26 N | **9,7 N** (Rest = Sicherheitsgrenze 10 Nm beim Knie-Beugen; ohne sie 4,9 N) |
-| Trägheit und Reibung des Exo-Glieds halb oder doppelt so groß wie geschätzt | – | **bis 3,6 N (Schulter), 5,0 N (Knie)** |
+| Knie, schneller Schwung 1,4 Hz ±34° | 20 N | **4,7 N** (mit der 10-Nm-Beugegrenze) |
+| Trägheit und Reibung des Exo-Glieds halb oder doppelt so groß wie geschätzt | – | **bis 3,6 N (Schulter und Knie)** |
 
 Werte: Effektivwert der Kraft an der Manschette; 3 N ≈ das Gewicht von 300 g. Die Studie
 ([tools/transparenz.cpp](../tools/transparenz.cpp)) mit anderem Menschmodell kommt auf dieselbe Größenordnung. Störfälle (Dämpfung doppelt, Busverzug 2 ms, Rauschen 0,6 N, Reibung doppelt bei Kälte, Schwerkraft ±30 % falsch
@@ -152,9 +152,10 @@ damit fast ganz, große wie bisher nach der Stufe K und der Baumlast-Vorsteuerun
 trägst 40 / 30 / 20 % in den Stufen sanft / normal / kräftig (vorher 67 / 50 / 33 %).
 
 **Knie-Beugen bleibt auf 10 Nm begrenzt** (Software und Federpaket 11 Nm), damit das Exo nie kräftig ins Knie tritt.
-Bei sehr schnellen Schritten braucht der Exo-Unterschenkel allein etwa 12 Nm zum Beschleunigen; den Rest (≈ 10 N an der
-Schienbein-Manschette) spürst du. Beim normalen Gehen im Wald liegt das weit darunter. Wer es leichter will, kann die
-Grenze nach dem Prüfstand auf 15 Nm anheben (Federpaket entsprechend), das ist eine Sicherheitsabwägung.
+Die Trägheit von Unterschenkel und Fuß um die Knieachse stammt jetzt aus der Bauteilliste: **0,18 kg·m²** (vorher auf
+0,25 geschätzt; fast die Hälfte sitzt unten im Steigbügel, Fußkontakt, Fersenschale und Drehteller). Damit reichen die
+10 Nm auch für schnelle Schritte (4,7 N an der Schienbein-Manschette, vorher mit der zu hohen Schätzung 9,7 N). Ein noch
+leichterer Fuß brächte kaum mehr (0,12 kg·m² → 4,4 N).
 **Entscheidung (3. November 2026):** 10 Nm bleiben. Die Simulation gilt für die Planung als Nachweis, der echte
 Nachweis kommt mit P39 (Log mit `log 1` aufnehmen, auswerten, nachstellen).
 

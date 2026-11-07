@@ -87,7 +87,7 @@ inline JointConfig defaultJoint(JointId id) {
   c.filterHz = 40.f; c.deadbandN = 0.3f; c.admit = 0.9f; c.velMax = 8.f;
   switch (id) {
     case HipL: case HipR:   c.kdJoint = 4.0f; c.viscComp = 0.4f; break;    // Bein mit Kniekapsel ≈ 0,35 kg·m²
-    case KneeL: case KneeR: c.kdJoint = 2.9f; c.viscComp = 0.5f; break;    // Unterschenkel-Schiene ≈ 0,25 kg·m²
+    case KneeL: case KneeR: c.kdJoint = 2.1f; c.viscComp = 0.5f; break;    // Unterschenkel + Fuß 0,18 kg·m² um die Knieachse (aus der Bauteilliste)
     case ShL: case ShR:     c.kdJoint = 2.3f; c.viscComp = 0.4f; break;    // Exo-Arm mit Ellbogenkapsel ≈ 0,20 kg·m²
     case Lumb:              c.kdJoint = 10.f; c.viscComp = 0.5f; c.admit = 0.25f; c.velMax = 2.f; break;   // Oberteil träge, Gasfedern tragen: langsam mitgehen
     case Twist:             c.kdJoint = 7.f;  c.viscComp = 0.3f; c.admit = 0.35f; c.velMax = 2.f; break;   // Rucksack drehen ≈ 0,6 kg·m²

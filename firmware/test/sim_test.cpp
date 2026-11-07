@@ -440,7 +440,7 @@ int main() {
   std::printf("17) Mitgehen an Schulter und Knie (Schwungbein): leicht, robust, Schwingungswächter\n");
   {
     struct Seg { const char* n; JointId id; double Jh, KpH, KdH, J, visc, coul, grav, r; };
-    for (Seg g : {Seg{"Schulter", ShR, 0.35, 150, 10, 0.20, 0.4, 0.7, 2.4, 0.17}, Seg{"Knie", KneeR, 0.45, 200, 12, 0.25, 0.5, 0.9, 0.0, 0.20}}) {
+    for (Seg g : {Seg{"Schulter", ShR, 0.35, 150, 10, 0.20, 0.4, 0.7, 2.4, 0.17}, Seg{"Knie", KneeR, 0.45, 200, 12, 0.18, 0.5, 0.9, 0.0, 0.20}}) {
       JointConfig c = defaultJoint(g.id); c.gain = 1.0f; if (c.rCuff <= 0.f) c.rCuff = 0.2f;   // Knie: im Test eigene Manschette am Unterschenkel
       c.qMin = -1.f; c.qMax = 3.f;
       JointConfig a = c; a.admit = 0.f; a.filterHz = 8.f; a.deadbandN = 2.f; a.damping = 0.3f; a.viscComp = 0.f;   // alt
@@ -467,13 +467,7 @@ int main() {
       const Result Rg = run(c, 8, qg, 0, 1000, true, 0.0, mk(6000));
       const Result Rga = run(a, 8, qg, 0, 80, true, 0.0, mk(6000));
       std::printf("     %s, schnelle Schwungbewegung 1,4 Hz ±34°: alt %.1f N rms (max %.1f), Mitgehen %.1f N rms (max %.1f)\n", g.n, Rga.rmsCuffN, Rga.maxCuffN, Rg.rmsCuffN, Rg.maxCuffN);
-      if (g.id == KneeR) {   // Knie-Beugen ist aus Sicherheitsgründen auf 10 Nm begrenzt (Federpaket 11 Nm); die Trägheit des Exo-Unterschenkels braucht hier ≈ 12 Nm
-        check(Rg.ok && Rg.rmsCuffN < 0.5 * Rga.rmsCuffN, "schnelle Schwungbewegung Knie: weniger als halb so viel wie bisher (Rest = 10-Nm-Beugegrenze)");
-        JointConfig hi = c; hi.tauMax = 30.f;
-        const Result Rh = run(hi, 8, qg, 0, 1000, true, 0.0, mk(6000));
-        std::printf("     zum Vergleich ohne 10-Nm-Beugegrenze: %.1f N rms (max %.1f)\n", Rh.rmsCuffN, Rh.maxCuffN);
-        check(Rh.rmsCuffN < 8.0, "ohne Beugegrenze wäre auch das Knie unter 8 N: die Grenze, nicht die Regelung, setzt den Rest");
-      } else check(Rg.ok && Rg.rmsCuffN < 8.0 && Rg.rmsCuffN < 0.5 * Rga.rmsCuffN, "schnelle Schwungbewegung: unter 8 N rms, weniger als halb so viel wie bisher");
+      check(Rg.ok && Rg.rmsCuffN < 8.0 && Rg.rmsCuffN < 0.5 * Rga.rmsCuffN, "schnelle Schwungbewegung: unter 8 N rms, weniger als halb so viel wie bisher");
       // Störfall: Dämpfung im Motor doppelt so groß und 2 ms Busverzug (z. B. Bus überlastet): darf nicht aufschaukeln
       JointConfig bad = c; bad.kdJoint *= 2.f;
       Result R = run(bad, 10, qd, 0, 1000, true, 0.0, mk(15000), 0.002);
