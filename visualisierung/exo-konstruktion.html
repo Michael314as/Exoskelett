@@ -95,9 +95,9 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
 
 <div class="app">
   <header>
-    <p class="kicker">Exoskelett · Konzeptzeichnung, Entwurf 4 (Seilantrieb) · aktueller Stand Entwurf 5 (Gelenkkapseln): technische Ansicht</p>
+    <p class="kicker">Exoskelett · Konzeptzeichnung, Entwurf 5 (Gelenkkapseln) · Manschetten M2 · Maße und Bauteildaten: technische Ansicht</p>
     <h1>So ist das Exo aufgebaut</h1>
-    <p class="lede"><b>Hinweis:</b> Diese Zeichnung zeigt noch Entwurf 4 mit Seilen und Bowdenzügen. Seit Entwurf 5 sitzen die Motoren in dichten, beheizten Gelenkkapseln direkt an den Gelenken, Knie und Ellbogen über Schubstangen; das zeigt die technische Ansicht. Hüfte und Knie haben eigene Antriebe und helfen in beide Richtungen: Ein Hüftmotor sitzt auf der Hüftschwinge, Knie, Schultern und Ellbogen werden über Seile von hinten bewegt. Die Beine lassen sich seitlich abspreizen, der Fuß kippt mit. Blaue Sensor-Manschetten sagen dem Exo, wohin du willst; Fußsensoren und Wägezellen in den Schlaufen sagen ihm, was es tragen muss. Ein Lendengelenk mit Gasfedern lässt dich bücken und sperrt, sobald ein Baum hängt. Gurte wie bei einem guten Rucksack, Anzeige am rechten Oberarm. Nummer antippen, „Rundgang“ starten oder mit den Reglern bewegen.</p>
+    <p class="lede">Zehn Motoren sitzen in dichten, beheizten Gelenkkapseln direkt an den Gelenken: Hüfte und Schulter direkt auf der Achse, Knie und Ellbogen über starre Schubstangen, dazu zwei Kapseln am Becken für Rumpf beugen und drehen. Keine Seile, keine Bowdenzüge, nichts, was vereist oder reißt. Blaue Sensor-Manschetten an Oberarm, Unterarm, Oberschenkel und Schienbein sagen dem Exo, wohin du willst, und es geht mit: Du bewegst dich, das Exo folgt mit, ohne dass du es schiebst. Fußsensoren und Wägezellen in den Schlaufen sagen ihm, was es tragen muss. Die Akkus stehen geschützt oben im Rucksack, die flache Elektronikbox sitzt in Lendenhöhe. Nummer antippen, „Rundgang“ starten oder mit den Reglern bewegen.</p>
   </header>
   <main class="work">
     <div class="left">
@@ -138,21 +138,22 @@ h3{margin:0 0 6px;font:600 13px/1.2 var(--font-display);letter-spacing:.08em;tex
         <table class="perf">
           <thead><tr><th>Gelenk</th><th>Moment Spitze</th><th>schnellste Bewegung</th><th>feinste Stufe</th></tr></thead>
           <tbody>
-            <tr><td>Hüfte</td><td>140 Nm (Motor könnte 205)</td><td>4,2 rad/s (240°/s)</td><td>0,006 Nm</td></tr>
-            <tr><td>Knie</td><td>110 Nm (Motor könnte 84–134)</td><td>4,7–7,5 rad/s</td><td>0,005 Nm</td></tr>
-            <tr><td>Schulter</td><td>100 Nm (Motor könnte 148)</td><td>5,4 rad/s (310°/s)</td><td>0,005 Nm</td></tr>
-            <tr><td>Ellbogen</td><td>58 Nm (Motor könnte 84)</td><td>7,5 rad/s (430°/s)</td><td>0,003 Nm</td></tr>
+            <tr><td>Hüfte</td><td>110 Nm strecken, 35 Nm beugen (RS04: 120)</td><td>Mitgehen bis 8 rad/s</td><td>0,004 Nm</td></tr>
+            <tr><td>Knie</td><td>110 Nm strecken, beugen 10 Nm (Federpaket 11 Nm)</td><td>Mitgehen bis 8 rad/s</td><td>0,004 Nm</td></tr>
+            <tr><td>Schulter</td><td>100 Nm (RS04: 120)</td><td>Mitgehen bis 8 rad/s</td><td>0,004 Nm</td></tr>
+            <tr><td>Ellbogen</td><td>56 Nm (RS03: 60)</td><td>Mitgehen bis 8 rad/s</td><td>0,002 Nm</td></tr>
+            <tr><td>Rumpf beugen / drehen</td><td>80 / 30 Nm</td><td>bis 2 rad/s</td><td>0,004 Nm</td></tr>
           </tbody>
         </table>
-        <p class="note">Gehen braucht an der Hüfte etwa 3,5 rad/s, am Knie im Schwung etwa 6 rad/s; Greifbewegungen 2–4 rad/s. Motoren RobStride RS06 (11 Nm dauernd, 36 Nm Spitze): Die Momente sind in der Firmware auf das begrenzt, was Körper und Rahmen sicher vertragen; der Rest ist Reserve gegen Wärme. Reaktionszeit vom Druck an der Manschette bis zum Motor etwa 35 ms (mit schnellerem Wägezellen-Wandler etwa 15 ms). Ohne Strom laufen alle Gelenke frei mit; die Balance hältst du selbst über deine Füße, das Exo hat bewusst keinen Fußmotor. Der Rucksack verschiebt den Schwerpunkt um etwa 3 cm nach hinten, ein Baum vorne gleicht das aus.</p>
+        <p class="note">Gehen braucht an der Hüfte etwa 3,5 rad/s, am Knie im Schwung etwa 6 rad/s; Greifbewegungen 2–4 rad/s. Motoren RobStride RS04 (120 Nm Spitze, Dauer in der Kapsel ≈ 28 Nm) und RS03 (60 Nm, ≈ 16 Nm), alle 1:1 (Rumpf drehen 1 : 1,8): Die Momente sind in der Firmware auf das begrenzt, was Körper und Rahmen sicher vertragen. Reaktionszeit vom Druck an der Manschette bis zum Motor etwa 6 ms (1000 Messungen/s, Regeltakt 500 Hz, Dämpfung im Motor). Simulation: Arm und Bein frei bewegen mit 1,3–3 N an der Manschette (≈ 130–300 g), schneller Schwung ≈ 5 N; am Körper noch zu messen (Prüfpunkt P39). Ohne Strom laufen alle Gelenke schwer, aber frei (Getriebe 9:1 im Motor); die Balance hältst du selbst über deine Füße, das Exo hat bewusst keinen Fußmotor.</p>
       </section>
       <section class="block">
         <h3>Farben</h3>
         <div class="legend">
           <span><i style="background:#C9D0D4"></i>Aluminium</span><span><i style="background:#5A6268"></i>Stahl, Lager, Schrauben</span>
           <span><i style="background:#3E7CB1"></i>3D-Druck (PETG)</span><span><i style="background:#2B3138"></i>TPU, Gummi, Polster</span>
-          <span><i style="background:#E8C547"></i>Dyneema-Seil</span><span><i style="background:#AEB6BB"></i>Bowden-Innenzug</span><span><i style="background:#151A1E"></i>Bowdenhülle, Gurte</span>
-          <span><i style="background:#D4520E"></i>Motor</span><span><i style="background:#2E7D4F"></i>Elektronik, Sensoren</span>
+          <span><i style="background:#151A1E"></i>Kapselmantel, Gurte</span><span><i style="background:#9AA3A9"></i>Stiftkühlkörper, Kurbeln</span><span><i style="background:#E8B400"></i>Federpaket Knie</span>
+          <span><i style="background:#D4520E"></i>Motor (Kennung)</span><span><i style="background:#2E7D4F"></i>Elektronik, Sensoren</span>
           <span><i style="background:#C4501A"></i>Kabelbaum Leistung + CAN</span><span><i style="background:#2D5C8A"></i>Kabelbaum Sensoren, Taster</span><span><i style="background:#B3261E"></i>Akkuleitung</span>
         </div>
       </section>
@@ -182,14 +183,15 @@ const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
 const H = 1.75;
 const D = { ankle: 0.039 * H, shank: 0.246 * H, thigh: 0.245 * H, torso: 0.288 * H, shHalf: 0.1 * H, hipHalf: 0.05 * H,
   upper: 0.186 * H, fore: 0.146 * H, exoHip: 0.205, exoSh: 0.265 };
-const R_SH = 0.07, R_EL = 0.05, R_DRUM = 0.015;      // Seilscheiben Schulter/Ellbogen, Trommel am Motor
 const HH = D.hipHalf;                                 // Hüftgelenk seitlich (Mensch); alle Bein-Achsen gehen durch diese Linie
 // Abstände der Exo-Teile von der Körpermitte (seitlich, m)
 const Z = { hb: 0.205, tp: 0.236, hm: 0.25, kn: 0.165, ks: 0.177, ek: 0.205, fk: 0.219, an: 0.155, br: 0.181 };
-const R_HM = 0.06, R_KF = 0.045;                      // Seilscheibe Hüftmotor (1:6 zur Trommel Ø 2 cm), Beugescheibe Knie
+// Entwurf 5: Kurbeln und Hebel der Schubstangen (Parallelogramm 1:1), Lage der Kniekapsel, Kurbelebenen seitlich
+const R_KC = 0.06, PHI_K = deg(165), KNEE_CAP_Y = -0.13;   // Knie: Kurbel/Hebel 60 mm, Hebel zeigt nach hinten
+const R_EC = 0.05, PHI_E = deg(190), EL_CAP_Y = -0.115;    // Ellbogen: 50 mm
+Z.kc = 0.243;                                              // Kurbelebene Knie (außen an der Schiene)
 const zRail = (y) => Z.tp + (Z.kn - Z.tp) * (-y / D.thigh);    // Oberschenkelschiene läuft zum Knie nach innen
 const zShank = (y) => Z.ks + (Z.an - Z.ks) * (-y / D.shank);   // Unterschenkelschiene zum Knöchel
-const kneeCam = (a) => 0.05 + 0.03 * clamp((a - deg(45)) / deg(110), 0, 1);   // Knie-Kurvenscheibe: 5 cm gestreckt, 8 cm in der Hocke
 
 /* ================= Szene ================= */
 const stage = $('stage');
@@ -272,63 +274,6 @@ function flangeBearing(g, x, y, z, s = 1, dir = 1) {
   put(g, mesh(new THREE.TorusGeometry(0.016 * s, 0.004 * s, 8, 24), M.chrome), x, y, z + dir * 0.023);
   for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) bolt(g, x + dx * f * 0.36, y + dy * f * 0.36, z + dir * 0.007, 0.02, 0.0035, dir);
 }
-// Umlenkrolle im Rollenbock an beliebiger Achse n: Rille, Kugellager, Achsbolzen, zwei Wangen, Steg zur Befestigung (Richtung mount)
-function pulleyAt(g, c, n, r, w, mount) {
-  const prev = catNow; catNow = 'drive';
-  const y = n.clone().normalize(), x = mount.clone().addScaledVector(y, -mount.dot(y)).normalize(), z = new THREE.Vector3().crossVectors(x, y);
-  const grp = new THREE.Group(); grp.position.copy(c); grp.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z)); g.add(grp);
-  const pts = [[0.0035, -w / 2], [r + 0.0012, -w / 2], [r + 0.0012, -w * 0.18], [r - 0.0012, 0], [r + 0.0012, w * 0.18], [r + 0.0012, w / 2], [0.0035, w / 2]].map(([a, b]) => new THREE.Vector2(a, b));
-  grp.add(mesh(new THREE.LatheGeometry(pts, 28), M.alu));
-  grp.add(mesh(cyl(0.0042, 0.0042, w + 0.001, 14), M.chrome));                                         // Kugellager
-  const ax = mesh(cyl(0.0022, 0.0022, w + 0.012, 8), M.steel); grp.add(ax);
-  for (const s of [-1, 1]) {
-    const cheek = mesh(rgeo(r * 1.15 + 0.012, 0.0025, r * 1.3, 0.001), M.aluDark); cheek.position.set((r * 1.15 + 0.012) / 2 - r * 0.15, s * (w / 2 + 0.0022), 0); grp.add(cheek);
-    const nut = mesh(cyl(0.0042, 0.0042, 0.003, 6), M.steel); nut.position.set(0, s * (w / 2 + 0.005), 0); grp.add(nut);
-  }
-  const stem = mesh(rgeo(0.014, w + 0.009, 0.01, 0.002), M.aluDark); stem.position.set(r + 0.012, 0, 0); grp.add(stem);
-  catNow = prev; return grp;
-}
-// Seilweg über Umlenkrollen: An jeder Ecke sitzt eine Rolle, deren Achse senkrecht auf der Ebene aus ein- und auslaufendem
-// Seil steht, das Seil liegt tangential an. Ecken in lokalen Koordinaten von g; Rückgabe: Seilpunkte (lokal).
-function routeStatic(g, pts, r = 0.012, w = 0.01, mounts = []) {
-  const out = [pts[0].clone()];
-  for (let i = 1; i < pts.length - 1; i++) {
-    const P = pts[i], u = pts[i - 1].clone().sub(P).normalize(), v = pts[i + 1].clone().sub(P).normalize();
-    const th = Math.acos(clamp(u.dot(v), -1, 1)); if (th > Math.PI - 0.03) { out.push(P.clone()); continue; }
-    const half = th / 2, bis = u.clone().add(v).normalize(), C = P.clone().addScaledVector(bis, r / Math.sin(half));
-    const T1 = P.clone().addScaledVector(u, r / Math.tan(half)), T2 = P.clone().addScaledVector(v, r / Math.tan(half));
-    const a = T1.clone().sub(C), b = T2.clone().sub(C), ax = a.clone().cross(b).normalize(), ang = a.angleTo(b), q = new THREE.Quaternion();
-    for (let j = 0; j <= 10; j++) { q.setFromAxisAngle(ax, ang * j / 10); out.push(C.clone().add(a.clone().applyQuaternion(q))); }
-    const grp = pulleyAt(g, C, u.clone().cross(v), r - 0.0016, w, bis.clone().negate());
-    const mp = mounts[i - 1];
-    if (mp) { const end = C.clone().add(V(r + 0.016, 0, 0).applyQuaternion(grp.quaternion)); const prev = catNow; catNow = 'struct'; tube(g, end, mp, 0.008, M.aluDark); put(g, mesh(new THREE.SphereGeometry(0.006, 8, 6), M.aluDark), mp.x, mp.y, mp.z); catNow = prev; }
-  }
-  out.push(pts[pts.length - 1].clone()); return out;
-}
-// Seil als Rohr entlang lokaler Punkte (fest in einer Baugruppe)
-function ropeStatic(g, pts, rr = 0.0016, mat = M.rope) {
-  const prev = catNow; catNow = 'drive';
-  const c = new THREE.CurvePath(); for (let i = 1; i < pts.length; i++) if (pts[i].distanceToSquared(pts[i - 1]) > 1e-10) c.add(new THREE.LineCurve3(pts[i - 1], pts[i]));
-  const m = mesh(new THREE.TubeGeometry(c, pts.length * 4, rr, 6, false), mat); m.castShadow = false; g.add(m); catNow = prev; return m;
-}
-// Seilrolle mit Rille (Achse z)
-function pulley(g, x, y, z, r, w = 0.016, mat = M.alu) {
-  const pts = [[0.004, -w / 2], [r, -w / 2], [r, -w * 0.15], [r * 0.82, 0], [r, w * 0.15], [r, w / 2], [0.004, w / 2]].map(([a, b]) => new THREE.Vector2(a, b));
-  const m = mesh(new THREE.LatheGeometry(pts, 32), mat); put(g, m, x, y, z, Math.PI / 2);
-  bolt(g, x, y, z + Math.sign(z || 1) * (w / 2 + 0.004), w + 0.02, 0.004, Math.sign(z || 1));
-  return m;
-}
-// Seilscheibe mit zwei Rillen und Erleichterungslöchern (Achse z)
-function sheave(g, x, y, z, R, t = 0.012, gz = 0.003) {
-  const prev = catNow; catNow = 'drive';
-  const s = new THREE.Shape(); s.absarc(0, 0, R, 0, Math.PI * 2, false);
-  for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + Math.PI / 4, h = new THREE.Path(); h.absarc(Math.cos(a) * R * 0.55, Math.sin(a) * R * 0.55, R * 0.22, 0, Math.PI * 2, true); s.holes.push(h); }
-  const geo = new THREE.ExtrudeGeometry(s, { depth: t, bevelEnabled: true, bevelThickness: 0.0012, bevelSize: 0.0012, bevelSegments: 1, curveSegments: 40 }); geo.translate(0, 0, -t / 2);
-  put(g, mesh(geo, M.alu), x, y, z);
-  for (const dz of [-gz, gz]) put(g, mesh(new THREE.TorusGeometry(R - 0.0012, 0.0014, 6, 48), M.aluDark), x, y, z + dz);
-  put(g, mesh(cyl(0.012, 0.012, t + 0.008, 6), M.steel), x, y, z, Math.PI / 2);
-  catNow = prev;
-}
 // Schraubenfeder entlang y
 function spring(g, x, y, z, r, len, turns, wire, mat = M.steel) {
   const pts = []; for (let i = 0; i <= turns * 16; i++) { const a = i / 16 * Math.PI * 2; pts.push(V(Math.cos(a) * r, (i / (turns * 16)) * len, Math.sin(a) * r)); }
@@ -339,6 +284,26 @@ function shellGeo(r, t, h, a0, a1) {
   const s = new THREE.Shape(); s.absarc(0, 0, r + t, a0, a1, false); s.absarc(0, 0, r, a1, a0, true); s.closePath();
   const geo = new THREE.ExtrudeGeometry(s, { depth: h, bevelEnabled: true, bevelThickness: 0.0015, bevelSize: 0.0015, bevelSegments: 2, curveSegments: 28 });
   geo.translate(0, 0, -h / 2); geo.rotateX(-Math.PI / 2); return geo;
+}
+
+// Gelenkkapsel (Entwurf 5): Motor im dichten Mantel, Stiftkühlkörper außen, Abtriebsflansch innen. Achse z, nach außen sd.
+// s = 1: RobStride RS04 (Ø 116 mm Kapsel), s = 0,85: RS03. Rückgabe: z der Außenseite.
+const pinGeo = new THREE.CylinderGeometry(0.0022, 0.0022, 0.02, 6); pinGeo.rotateX(Math.PI / 2);
+function capsule(g, x, y, z, sd, s = 1, axis = 'z') {
+  const prevCat = catNow; catNow = 'drive';                       // Kapseln gehören immer zur Ansicht „Antrieb“
+  const grp = new THREE.Group(); grp.position.set(x, y, z); g.add(grp);
+  if (axis === 'x') grp.rotation.y = -sd * Math.PI / 2;            // Achse nach hinten (−x) statt nach außen
+  const R = 0.058 * s, L = 0.046 * s;
+  put(grp, mesh(cyl(R * 0.52, R * 0.52, 0.01, 28), M.steel), 0, 0, -sd * 0.004, Math.PI / 2);          // Abtriebsflansch
+  put(grp, mesh(cyl(R, R, L, 40), M.housing), 0, 0, sd * L / 2, Math.PI / 2);                          // Mantel PETG-CF mit O-Ringen
+  put(grp, mesh(cyl(R + 0.0008, R + 0.0008, 0.006, 40), M.motor), 0, 0, sd * L * 0.3, Math.PI / 2);   // Motor (orange Kennung)
+  put(grp, mesh(cyl(R * 1.08, R * 1.08, 0.004, 40), M.aluDark), 0, 0, sd * (L + 0.002), Math.PI / 2); // Kühlkörper-Grundplatte
+  const pts = []; for (let rr = 0.012; rr < R; rr += 0.0105 * s) { const n = Math.max(6, Math.round(2 * Math.PI * rr / (0.0105 * s))); for (let i = 0; i < n; i++) pts.push([Math.cos(i / n * Math.PI * 2) * rr, Math.sin(i / n * Math.PI * 2) * rr]); }
+  const pins = new THREE.InstancedMesh(pinGeo, M.aluDark, pts.length); pins.castShadow = true;
+  const mx = new THREE.Matrix4(); pts.forEach(([px, py], i) => { mx.makeTranslation(px, py, sd * (L + 0.014)); pins.setMatrixAt(i, mx); });
+  tag(pins); grp.add(pins);
+  put(grp, mesh(cyl(0.006, 0.006, 0.012, 12), M.chrome), R * 0.8, 0, sd * L * 0.6, 0, 0, Math.PI / 2);   // Druckausgleich
+  catNow = prevCat; return grp;
 }
 
 /* ================= Gruppen (Körpersegmente) ================= */
@@ -352,33 +317,33 @@ const SIDE = [-1, 1];                       // links -z, rechts +z
 /* ================= Bauteil-Infos ================= */
 const PART_INFO = [
   { key: 'frame', name: 'Rückenrahmen', dist: 1.3,
-    what: 'Das Rückgrat des Exos: trägt Antriebsbox und Akku, verbindet Schultergelenke und Hüftgelenke und leitet die Last der Arme über Metall in die Beine.',
-    how: 'Zwei senkrechte Alu-Vierkantrohre 30 × 30 × 2 mm und drei Querrohre, an den Ecken Doppelplatten mit Schrauben. Unten sitzt an jedem Rohr die Gabel des Abspreizgelenks, oben die Schulterbügel (30 × 30 × 3). Hinten und seitlich ein Schutzbügel aus Alu-Rohr Ø 22 mit Gummipuffern: Fällst du nach hinten oder stößt seitlich an, trifft zuerst der Bügel, nicht Box oder Akkus. Die Rohrgrößen stammen aus der Festigkeitsrechnung (tools/festigkeit.py): wo mehr Kraft fließt, ist das Profil größer.',
+    what: 'Das Rückgrat des Exos: trägt Akkus, Elektronikbox und Rumpfkapseln, verbindet Schultergelenke und Hüftgelenke und leitet die Last der Arme über Metall in die Beine.',
+    how: 'Zwei senkrechte Alu-Vierkantrohre 30 × 30 × 2 mm und drei Querrohre, an den Ecken Doppelplatten mit Schrauben. Unten sitzt an jedem Rohr die Gabel des Abspreizgelenks, oben die Schulterbügel (30 × 30 × 3). Hinten und seitlich ein Schutzbügel aus Alu-Rohr Ø 22 mit Gummipuffern, oben als Bogen über den Akkus: Fällst du nach hinten oder stößt an, trifft zuerst der Bügel, nicht Box oder Akkus. Die Rohrgrößen stammen aus der Festigkeitsrechnung (tools/festigkeit.py): wo mehr Kraft fließt, ist das Profil größer.',
     parts: 'Alu-Vierkantrohr, Eckplatten 4 mm, M6-Schrauben mit Sicherungsmutter.',
     care: 'Spitzenlast mit mindestens zweifacher Sicherheit, Dauerlast unter 50 MPa (Ermüdung). Rohrenden verschließen, damit kein Wasser steht und gefriert.' },
-  { key: 'lumb', name: 'Lendengelenk, Gasfedern, Sperre', dist: 1.3,
-    what: 'Ein Gelenk im Rückenrahmen auf Höhe deiner Lendenwirbel: Du kannst dich bücken und zur Seite neigen, ohne dass Hüftgurt und Schultergurte drücken.',
-    how: 'Scharnier mit Elastomerfeder (Beugen ±25°, seitlich ±10°). Zwei Gasfedern 150 N hinter dem Rahmen tragen das Exo-Oberteil beim Bücken. Hängt ein Baum über 5 kg in den Schlaufen, schiebt ein Hubmagnet einen Bolzen in das Rastsegment: Dann trägt der Rahmen den Baum, nicht dein Kreuz. Nach dem Absetzen löst die Sperre. Roter Hebel: von Hand sperren. Bewegt in der technischen Ansicht (Regler „Lende“).',
-    parts: 'Scharnierlaschen Alu 8 mm, Rastsegment Edelstahl 4 mm (Laser), Elastomerfeder Ø 24, Bolzen Ø 10, 2 Gasfedern 150 N / Hub 50 mm, Hubmagnet 24 V.',
-    care: 'Spalt zwischen den Laschen ≥ 25 mm oder ≤ 5 mm (keine Quetschstelle), Polster darüber.' },
+  { key: 'lumb', name: 'Lendengelenk: beugen und drehen mit Motor', dist: 1.3,
+    what: 'Ein Gelenk im Rückenrahmen auf Höhe deiner Lendenwirbel: Du kannst dich bücken und den Oberkörper drehen, und das Exo hilft dabei.',
+    how: 'Scharnier mit Elastomerfeder (Beugen −10° bis +25°). Zwei Gasfedern 150 N tragen das Exo-Oberteil. Rumpf beugen: Kapsel mit RS04 hinter dem Kreuzbein, Kurbel und Schubstange zum Hebel am Lendengelenk (bis 80 Nm aufrichten). Rumpf drehen ±15°: zweite Kapsel mit RS03, Kurbel und Stange zum Wagen einer Bogenführung um die Wirbelsäule (bis 30 Nm). Die Absicht kommt aus vier Wägezellen: Gurte ziehen = vorbeugen, ins Rückenpolster drücken = aufrichten, Unterschied links/rechts = drehen. Hängt ein Baum über 5 kg in den Schlaufen, sperrt ein Hubmagnet das Gelenk: Dann trägt der Rahmen, und der Beugemotor wird stromlos.',
+    parts: 'Scharnierlaschen Alu 8 mm, Rastsegment Edelstahl 4 mm (Laser), Elastomerfeder, 2 Gasfedern 150 N, Hubmagnet 24 V, 2 Gelenkkapseln (RS04, RS03), Kurbeln, Stangen mit Gelenkköpfen, Bogenführung mit 4 Profilrollen, 4 Wägezellen 20 kg.',
+    care: 'Spalt zwischen den Laschen ≥ 25 mm oder ≤ 5 mm (keine Quetschstelle), Polster darüber. Kurbeln mit Fingerschutz.' },
   { key: 'straps', name: 'Gurtsystem', dist: 1.1,
     what: 'Hält das Exo am Oberkörper, ohne zu drücken. Die Last geht über die Exo-Beine in den Boden; die Gurte halten das Exo nur in der richtigen Lage.',
     how: '1) Breiter, gepolsterter Hüftgurt auf dem Beckenkamm, vorne Magnet-Schnalle: führt das Exo in Höhe und Seite und nimmt das Kippen auf, wenn die Arme ziehen. 2) S-förmige Schultergurte, oben in der Lochleiste höhenverstellbar, unten am Hüftgurt: halten das Exo, damit es nicht nach hinten kippt. 3) Lageverstellriemen von der Schulter schräg nach oben zum Rahmen: ziehen den Rahmen an den Rücken. 4) Brustgurt, höhenverstellbar: hält die Schultergurte zusammen, wenn ein Arm seitlich zieht. 5) Lenden- und Schulterblattpolster aus Abstandsgewirke: Luftspalt statt Schwitzen.',
     parts: 'Hüftgurt und Schultergurte eines großen Trekkingrucksacks (Ersatzteil) oder genäht aus Gurtband 50 mm und Abstandsgewirke, Magnet-Schnallen (Fidlock-Bauart), Leiterschnallen, etwa 120 €.',
     care: 'Anziehen: Hüftgurt, Schultergurte, Lageverstellriemen, Brustgurt. Schultergurte nur anliegend, sie tragen fast nichts. Polster abnehmbar und waschbar.' },
-  { key: 'drive', name: 'Antriebsbox: 6 Motoren', dist: 0.75,
-    what: 'Antrieb für Knie, Schultern und Ellbogen. Die zwei Hüftmotoren sitzen direkt an der Hüfte (Nummer 8).',
-    how: 'Bürstenlose Robotergelenk-Motoren mit Planetengetriebe und Encoder, jeder mit Doppeltrommel: ein Zug wird auf-, der andere abgewickelt. Angeordnet nach dem Weg ihrer Züge: unten die Kniemotoren (Züge gehen nach unten zu den Beinen), in der Mitte Ellbogen, oben Schulter (Seile gehen nach oben zur Schulter). So ist jeder Zug so kurz und gerade wie möglich.',
-    parts: '6 Motoren (CAN-Bus, 24 bis 48 V), Trommeln Ø 3 cm, Montageplatte Alu 4 mm, dichte Box mit Deckel und Dichtung, Hüllenanschläge mit Spannschrauben.',
-    care: 'Die Motoren (RobStride RS06) haben keine Schutzart gegen Wasser. Deshalb sitzen sie in der gedichteten Box (IP54: Deckeldichtung, Zug-Durchführungen mit Faltenbalg, Lüftung nach unten mit Labyrinth); die Hüftmotoren bekommen gedichtete Hauben. Trommeln mit Bordscheiben, Züge sauber lagenweise wickeln.' },
-  { key: 'power', name: 'Akku und Elektronik', dist: 0.8,
-    what: 'Strom, Steuerung und Sicherheit: Stihl AP 500 S, Mikrocontroller, Sensor-Verstärker, Not-Aus.',
-    how: 'Zwei Stihl-Akkus AP 500 S stecken links und rechts neben der Box in gedruckten Schächten, von hinten eingeschoben, mit der Stihl-Rastung. Ein Ideal-Dioden-Modul schaltet sie parallel: Du kannst im Betrieb einen nach dem anderen wechseln, das Exo läuft weiter, und mit zwei Akkus etwa doppelt so lange. Die Schächte liegen innerhalb des Schutzbügels, tief und nah am Rücken: geschützt bei Stürzen und gut für den Schwerpunkt. Hauptsicherung, Not-Aus und Schütz trennen die Motoren. Ein Teensy 4.1 rechnet 200-mal pro Sekunde; eine Knopfzelle hält die Uhr. Am linken Schultergurt sitzen Ein/Aus und der Not-Aus.',
-    parts: 'Stihl AP 500 S (vorhanden), Adapter, Teensy 4.1 mit CAN-Transceiver und Knopfzelle, DC/DC-Wandler 24 V und 5 V, 3 Motortreiber für die Winden, Schütz, Sicherung, Pilz-Not-Aus, wasserdichte Rundstecker.',
-    care: 'Not-Aus trennt hart, nicht nur per Software. Akkustrom am Tisch prüfen, bevor man weiterbaut.' },
+  { key: 'drive', name: 'Gelenkkapseln: 10 Motoren', dist: 0.75,
+    what: 'Jeder Motor sitzt direkt an seinem Gelenk in einer dichten, beheizten Kapsel. Hier im Bild: die zwei Rumpfkapseln hinter dem Kreuzbein; die anderen sitzen an Hüfte, Knie, Schulter und Ellbogen.',
+    how: 'RobStride RS04 (120 Nm Spitze) an Hüften, Knien, Schultern und Rumpf beugen, RS03 (60 Nm) an den Ellbogen und Rumpf drehen. Jede Kapsel: außen ein Stiftkühlkörper direkt auf dem Motorgehäuse (die Wärme geht auf kurzem Weg nach draußen), seitlich ein dünner Mantel aus PETG-CF mit O-Ringen, am drehenden Abtrieb ein V-Ring, ein Druckausgleichselement gegen Kondenswasser und ein Heizband 4 W: In Pausen bei Frost hält es Dichtung und Lager eisfrei, unter Last heizt der Motor sich selbst. Die Dämpfung fürs Mitgehen rechnet jeder Motor selbst (10 000-mal pro Sekunde).',
+    parts: '7 × RobStride RS04, 3 × RobStride RS03, 10 Stiftkühlkörper (Fischer ICK S R 140), Kapselmäntel (Druck PETG-CF), Motorträger (Alu-Laserteile), Wärmeleitpads, V-Ringe, O-Ringe, Druckausgleich M12, Heizbänder 12 V 4 W.',
+    care: 'Dauermoment in der Kapsel ≈ 28 Nm (RS04): Die Schulter hält 100 Nm etwa 13 s mit voller Kraft, danach wird die Hilfe weich schwächer statt abzuschalten. Kühlrippen frei halten, nicht abdecken.' },
+  { key: 'power', name: 'Rucksack: Akkus oben, Elektronik unten', dist: 0.8,
+    what: 'Strom, Steuerung und Sicherheit, kompakt am Rücken: der ganze Rucksack ist etwa 12 cm tief.',
+    how: 'Zwei Stihl-Akkus AP 500 S stehen nebeneinander oben zwischen den Schulterblättern in gedruckten Schächten, rundum vom Schutzbügel umgeben und oben von seinem Bogen überdacht. Eingesteckt wird von oben, mit der Stihl-Rastung; die Kontakte liegen unten, Wasser läuft ab. Ein Ideal-Dioden-Modul schaltet sie parallel: einzeln im Betrieb wechselbar. Darunter in Lendenhöhe die flache Elektronikbox (6 cm tief) mit Teensy 4.1, Wandlern, Sicherungen und Bremswiderstand. Hauptsicherung, Not-Aus und Schütz trennen die Motoren. Am linken Schultergurt sitzen Ein/Aus und der Not-Aus.',
+    parts: 'Stihl AP 500 S (vorhanden), Akkuschächte (Druck), Ideal-Dioden-Modul, Elektronikbox Alu 1,5 mm mit PETG-Deckel 60 × 140 × 220 mm, Schütz, Sicherung, Pilz-Not-Aus, wasserdichte Rundstecker.',
+    care: 'Not-Aus trennt hart, nicht nur per Software. Mit zwei Akkus etwa 3 h typische Arbeit.' },
   { key: 'hip', name: 'Hüfte: Abspreizgelenk und Hüftlager', dist: 0.6,
     what: 'Bein vor und zurück (Motor) und seitlich abspreizen (frei, mit Zentrierfeder), ohne dass sich Teile überschneiden.',
-    how: 'Jede Achse des Exos muss durch dein Hüftgelenk zeigen. Für Vor/Zurück ist das ein Flanschlager außen neben der Hüfte. Die Abspreiz-Achse zeigt nach vorne und liegt deshalb hinter dir: eine Gabel unten am Rückenrahmen, genau in Verlängerung deines Hüftgelenks. Daran dreht die Hüftschwinge, ein Alu-Bügel, der hinter und neben der Hüfte zum Hüftlager führt und auch den Hüftmotor trägt. Zwei kleine Druckfedern ziehen das Bein sanft in die Mitte, Gummipuffer begrenzen auf ±20°. Regler „Beine spreizen“ probieren.',
+    how: 'Jede Achse des Exos muss durch dein Hüftgelenk zeigen. Für Vor/Zurück ist das ein Flanschlager außen neben der Hüfte. Die Abspreiz-Achse zeigt nach vorne und liegt deshalb hinter dir: eine Gabel unten am Rückenrahmen, genau in Verlängerung deines Hüftgelenks. Daran dreht die Hüftschwinge, ein Alu-Bügel, der hinter und neben der Hüfte zum Hüftlager führt und auch die Hüftkapsel trägt. Zwei kleine Druckfedern ziehen das Bein sanft in die Mitte, Gummipuffer begrenzen auf ±20°. Regler „Beine spreizen“ probieren.',
     parts: 'Gabel Alu 8 mm (Laser), Achsbolzen Ø 16 mm (vorne Kugelsperrbolzen), Nabe mit 2 Gleitlagern, Hüftschwinge Alu-Vierkant 25 × 25, 2 Druckfedern, 2 TPU-Puffer, Flanschlager (UCFL/KFL).',
     care: 'Achsen beim Anpassen auf dein Hüftgelenk ausrichten (Klebepunkt am großen Rollhügel, Abspreizachse von hinten auf die Hüftgelenk-Mitte). Die Hüftschwinge liegt unter dem Hüftgurt und berührt ihn auch bei 20° nicht.' },
   { key: 'leg', name: 'Bein- und Armschienen', dist: 0.8,
@@ -386,36 +351,36 @@ const PART_INFO = [
     how: 'Außenrohr 25 × 25 und Innenrohr 20 × 20, ineinander geschoben, Länge über Lochraster und Steckbolzen. Die Oberschenkelschiene läuft von der Hüfte schräg nach innen zum Knie, die Unterschenkelschiene weiter zum Knöchel. So sitzen Knie- und Fußgelenk dicht am Bein und die Schienen gehen durchgehend bis in die Gelenke.',
     parts: 'Alu-Vierkantrohre, Steckbolzen mit Federring, Schellen.',
     care: 'Lochabstand 2 cm reicht. Die Unterarmschiene trägt den Schlaufenträger, deshalb biegesteif.' },
-  { key: 'knee', name: 'Kniegelenk', dist: 0.55,
+  { key: 'knee', name: 'Kniegelenk mit Kniehebel', dist: 0.55,
     what: 'Beugen und Strecken des Knies, angetrieben in beide Richtungen, mit Anschlag gegen Überstrecken.',
-    how: 'Flanschlager außen am Knie, Achse auf Höhe deines Kniegelenks. Außen daneben zwei Scheiben, fest am Unterschenkel: die Kurvenscheibe für den Streckzug (der Hebel wächst in der Hocke von 5 auf 8 cm, dort ist es am schwersten) und die Beugescheibe Ø 9 cm. Beide Züge kommen von hinten oben aus den Hüllenanschlägen über dem Knie.',
-    parts: 'Flanschlager, Passschraube M10, Kurvenscheibe und Beugescheibe (Alu 10 mm, Laser), Seilklemmen, TPU-Anschlag.',
-    care: 'Ein einachsiges Gelenk passt nie ganz zum Knie, darum Manschetten mit etwas Spiel. Anschlag so, dass das Knie nie ganz durchgestreckt wird.' },
-  { key: 'rope', name: 'Beinantrieb: Hüftmotor und Knie-Bowdenzug', dist: 0.75,
-    what: 'Hüfte und Knie haben getrennte Antriebe und arbeiten in beide Richtungen: stark beim Strecken (Aufstehen, Tragen), schwächer beim Beugen (Bein anheben, Gehen ohne Widerstand).',
-    how: 'Hüfte: Der Motor sitzt auf der Hüftschwinge hinter dem Hüftgelenk. Eine kleine Trommel (Ø 2 cm) treibt über eine offene Seilschleife die Scheibe (Ø 12 cm) am Oberschenkel, Übersetzung 1:6, bis etwa 140 Nm. Er spreizt mit, deshalb ändert Spreizen nichts am Antrieb, und er schwingt beim Gehen nicht mit. Knie: Motor in der Box, Bowdenzug-Paar über die Hüftschwinge hinten am Oberschenkel entlang. Der Beugezug endet in einer Federpatrone: Sie begrenzt die Beugekraft mechanisch, auch wenn die Software versagt.',
-    parts: '2 Motoren wie in der Box, 2 Trommeln, 2 Seilscheiben Ø 12 cm (Alu 16 mm), Dyneema 3 mm mit Klemmen, Bowdenhüllen 5 mm, Innenzug 2 mm, 2 Federpatronen (Druckfeder mit Anschlag, etwa 250 N), Spannschrauben.',
-    care: 'Hüftmotor mit gedruckter Haube gegen Äste und Schnee (hier offen gezeichnet). Bowdenhüllen mit großem Radius (mindestens 15 cm) um die Hüfte führen.' },
-  { key: 'bowden', name: 'Bowdenzüge für die Ellbogen', dist: 0.75,
-    what: 'Bewegen die Ellbogen in beide Richtungen: beugen und strecken.',
-    how: 'Zwei Züge in schwarzen Hüllen von der Box über die Schulter am Oberarm entlang, Anschlag oberhalb des Ellbogens, dann auf die Seilscheibe: vorne beugen, hinten strecken. Hier bleibt es beim Bowdenzug, weil der Weg über zwei bewegte Gelenke (Schulter vor/zurück und seitlich) führt.',
-    parts: 'Bowdenhülle (kompressionsarm, z. B. Schaltzughülle 5 mm), Innenzug 2 mm Edelstahl 7 × 7 oder Dyneema in PTFE-Hülle, Endkappen, Spannschrauben.',
-    care: 'Biegeradius mindestens 15 cm, sonst steigt die Reibung stark. PTFE-Innenhülle verwenden.' },
-  { key: 'shoulder', name: 'Schulter mit Seilscheibe', dist: 0.6,
+    how: 'Flanschlager außen am Knie, Achse auf Höhe deines Kniegelenks. Auf der verlängerten Achse sitzt der Kniehebel (60 mm), an dem die Schubstange von der Kniekapsel angreift. Kurbel an der Kapsel und Hebel am Knie sind gleich lang und laufen immer parallel: Das Knie dreht genau so weit wie der Motor (1:1), über den ganzen Bereich mit vollem Moment.',
+    parts: 'Flanschlager KFL001, Passschraube M12, Kniehebel (Alu 10 mm, Laser), Gelenkkopf M8, TPU-Anschlag, Fingerschutz über Kurbel und Hebel.',
+    care: 'Ein einachsiges Gelenk passt nie ganz zum Knie; den Rest gleicht der Längsschlitten der Manschetten aus. Anschlag so, dass das Knie nie ganz durchgestreckt wird.' },
+  { key: 'rope', name: 'Beinantrieb: Hüftkapsel, Kniekapsel, Schubstange', dist: 0.75,
+    what: 'Hüfte und Knie haben eigene Motoren und arbeiten in beide Richtungen: stark beim Strecken (Aufstehen, Tragen), sanft beim Beugen (Bein anheben, Gehen).',
+    how: 'Hüfte: Kapsel mit RS04 direkt auf der Hüftachse; das Gehäuse hängt an der Hüftschwinge, der Abtrieb ist mit der Oberschenkelplatte verschraubt. Sie spreizt mit, deshalb ändert Spreizen nichts am Antrieb. Knie: Kapsel mit RS04 oben am Oberschenkel, nah an der Hüfte (wenig schwingende Masse). Eine Kurbel treibt über eine starre Schubstange den Kniehebel. In der Stange sitzt ein Federpaket: Es gibt beim Beugen ab etwa 11 Nm nach, auch wenn die Software versagt.',
+    parts: '2 × 2 Gelenkkapseln RS04, 2 Kurbeln 60 mm (Laser), 2 Schubstangen Stahlrohr Ø 12 mit Gelenkköpfen M8, 2 Federpakete, Motorträger.',
+    care: 'Gelenkköpfe wartungsfrei (Edelstahl). Kurbeln mit durchsichtigem Fingerschutz. Kein Seil, nichts kann vereisen oder sich längen.' },
+  { key: 'bowden', name: 'Ellbogenantrieb: Kapsel und Schubstange', dist: 0.75,
+    what: 'Bewegt die Ellbogen in beide Richtungen: beugen und strecken.',
+    how: 'Kapsel mit RS03 oben am Oberarm, knapp unter der Schulter. Eine Kurbel (50 mm) treibt über eine Schubstange am Oberarm entlang den Hebel am Unterarm, 1:1 wie am Knie. So hängt der Motor nicht am Ende des Arms: Der Exo-Unterarm bleibt leicht, und er schwingt beim Greifen kaum nach.',
+    parts: '2 Gelenkkapseln RS03, 2 Kurbeln 50 mm, 2 Schubstangen Ø 10 mit Gelenkköpfen M6, Motorträger am Oberarm.',
+    care: 'Fingerschutz über der Kurbel. Stange so führen, dass sie bei gebeugtem Arm nicht an der Jacke reibt.' },
+  { key: 'shoulder', name: 'Schulter mit Gelenkkapsel', dist: 0.6,
     what: 'Hebt und senkt den Arm mit dem Motor; seitlich heben geht frei, mit Federunterstützung.',
-    how: 'Wie an der Hüfte: Die Achse fürs seitliche Heben zeigt nach vorne durch dein Schultergelenk und sitzt deshalb hinter dir, in einer Gabel am Schulterbügel. Daran dreht die Schulterschwinge, die über die Schulter zum Flanschlager mit Seilscheibe Ø 14 cm führt. Das Seilpaar läuft von der Box durch die hohle Achse der Gabel, dann über zwei Rollen an der Schwinge auf die Scheibe: Seitliches Heben ändert die Seillänge nicht. Eine Feder an der Nabe trägt das Gewicht des Exo-Arms beim seitlich Heben. Regler „Arme seitlich“ probieren.',
-    parts: 'Flanschlager, Seilscheibe (Alu 10 mm), 4 Seilrollen mit Lager, Dyneema 3 mm, Bolzen.',
-    care: 'Rollen mit Abdeckung gegen Vereisen. Die große Scheibe gibt Übersetzung, die Schulter braucht am Arm das meiste Moment.' },
-  { key: 'elbow', name: 'Ellbogen mit Seilscheibe', dist: 0.55,
+    how: 'Die Achse fürs seitliche Heben zeigt nach vorne durch dein Schultergelenk und sitzt deshalb hinter dir, in einer Gabel am Schulterbügel. Daran dreht die Schulterschwinge über die Schulter zum Schulterlager; dort sitzt die Schulterkapsel mit RS04 direkt auf der Achse (100 Nm). Eine Feder an der Nabe trägt das Gewicht des Exo-Arms beim seitlich Heben, eine Gleitführung lässt die Schulter beim Hochziehen ±3 cm mitgehen. Regler „Arme seitlich“ probieren.',
+    parts: 'Gabel Alu 8 mm, Schulterschwinge Alu 30 × 30, Flanschlager, Gelenkkapsel RS04 mit Motorträger, Feder, Gleitführung.',
+    care: 'Kapsel nicht als Griff benutzen. Kühlrippen zeigen nach außen, damit sie frei bleiben.' },
+  { key: 'elbow', name: 'Ellbogengelenk mit Hebel', dist: 0.55,
     what: 'Beugt und streckt den Unterarm, zum Heranziehen, Hebeln und Halten.',
-    how: 'Flanschlager zwischen Ober- und Unterarmschiene, Seilscheibe Ø 10 cm am Unterarm. Die Züge kommen am Oberarm entlang von oben: vorne beugen, hinten strecken.',
-    parts: 'Kleines Flanschlager, Seilscheibe, Hüllenanschlag am Oberarm, Alu-Rohr 20 × 20.',
+    how: 'Flanschlager zwischen Ober- und Unterarmschiene. Auf der verlängerten Achse der Ellbogenhebel (50 mm), an dem die Schubstange von der Ellbogenkapsel angreift.',
+    parts: 'Kleines Flanschlager, Ellbogenhebel (Alu, Laser), Gelenkkopf M6, Alu-Rohr 25 × 25.',
     care: 'Anschlag gegen Überstrecken. Die Unterarmschiene trägt den Schlaufenträger, deshalb biegesteif.' },
-  { key: 'sensor', name: 'Sensoren: Manschetten, Fußkontakt, Schlaufenlast', dist: 0.5,
+  { key: 'sensor', name: 'Sensoren: Manschetten M2, Fußkontakt, Schlaufenlast', dist: 0.5,
     what: 'So weiß das Exo, was du willst und was es trägt: Manschetten messen deine Bewegung, Fußsensoren das Standbein, die Schlaufenköpfe das Baumgewicht.',
-    how: 'Die blauen Manschetten an Oberarm, Unterarm und Oberschenkel sitzen auf je einer Wägezelle (Biegebalken wie in Küchenwaagen). Drückst du gegen die Schale, folgt das Exo. Die Steuerung rechnet den Druck in Momente für alle Gelenke um, die ihn bewegen können: Druck am Unterarm hilft auch der Schulter. Am Unterschenkel sitzt eine einfache Schale ohne Sensor. Ein Drucksensor im Steigbügel meldet, ob das Bein belastet ist. In jedem Schlaufenkopf misst eine kleine Wägezelle, wie stark der Baum zieht: Diesen Anteil trägt das Exo von selbst, ohne dass du drücken musst. „Arm heben“ oder „Hocke“ bewegen: rote Pfeile zeigen deinen Druck.',
-    parts: '6 Wägezellen 20 kg (Manschetten), 3 Wägezellen 50 kg (Schlaufenköpfe), 9 Verstärker HX711, 2 Drucksensoren (FSR, vergossen), gedruckte Schalen, Polster, Klettgurte.',
-    care: 'Schalen straff, Polster dünn, sonst wird die Regelung schwammig. Beim Einschalten 2 s ruhig stehen, dann stellt die Steuerung die Nullpunkte.' },
+    how: 'Die blauen Manschetten an Oberarm, Unterarm, Oberschenkel und Schienbein sitzen auf je einer Wägezelle (Biegebalken). Die Schale ist breit und dünn gepolstert, ein BOA-Drehverschluss zieht sie gleichmäßig straff (statt Klett, der nachgibt und vereist). Zwischen Schale und Zelle läuft ein kleiner Längsschlitten: Rutscht die Manschette beim Beugen etwas längs, gleitet sie mit, statt zu scheuern oder die Zelle falsch zu drücken. Drei schnelle Messwandler in der Box lesen alle Manschetten 1000-mal pro Sekunde. Drückst du, läuft das Gelenk mit einer Geschwindigkeit proportional zum Druck mit: Das Exo geht mit, du schiebst es nicht. In jedem Schlaufenkopf misst eine Wägezelle den Zug des Stamms: Diesen Anteil trägt das Exo von selbst. „Arm heben“ oder „Hocke“ bewegen: rote Pfeile zeigen deinen Druck.',
+    parts: '8 Wägezellen 20 kg (Manschetten), 4 im Rumpf, 3 Messwandler ADS131M04, 3 Wägezellen 50 kg (Schlaufenköpfe) und 2 × 4 Fußzellen an HX711, gedruckte Schalen PETG-CF, Viskopolster, 8 BOA-Verschlüsse, 8 Längsschlitten.',
+    care: 'Straff anziehen, über der Winterjacke etwas fester. Beim Einschalten 2 s ruhig stehen, dann stellt die Steuerung die Nullpunkte. Schlittenstangen sauber halten, nicht fetten.' },
   { key: 'loop', name: 'Schlaufengreifer (Spannband)', dist: 0.6,
     what: 'Hält Stämme direkt am Handgelenk: rechts zwei Schlaufen (unten und schräg außen), links eine. Prinzip wie eine Schlauchschelle: ein Band, das um den Stamm zugezogen wird.',
     how: 'Die Schlaufe ist ein Edelstahl-Lochband (20 × 0,3 mm) mit aufvulkanisiertem Gummi innen. Ein Ende ist fest am Schlaufenkopf (über einen Schnappschäkel), das andere läuft durch einen Schlitz im Kopf in einen Bandkanal und weiter zum Antrieb an der Unterarmschiene. Dort greift ein Stachelrad an einem Schneckengetriebemotor in die Lochung. ZUZIEHEN: Das Stachelrad zieht das Band aus der Schlaufe heraus; die Schlaufe wird kleiner, nichts wird zusammengedrückt. Das überschüssige Band (bis 25 cm) schiebt sich in den Speicherkanal entlang der Schiene. Gestoppt wird bei der eingestellten Zugkraft (Motorstrom + Wägezelle im Kopf, etwa 400 N). ÖFFNEN: Das Stachelrad schiebt das Band zurück; der Federstahl drückt die Schlaufe wieder rund auf, bis Ø 16 cm. Das Schneckengetriebe hält ohne Strom. BEDIENUNG an der Handschlaufe, Daumenseite: je Schlaufe eine Wippe. Nach vorne tippen = zuziehen bis Haltekraft, nach vorne halten = langsam nachziehen, nach hinten 1 s halten = öffnen (hängt Last daran, erst nach Vibrationswarnung). Rechts gelb = unten, orange = außen (fühlbar verschieden geformt), beide nach vorne = beide zu. Links: Wippe für die linke Schlaufe, blaue Taste: kurz = Licht, lang = Stufe. Eine LED je Wippe: grün offen, gelb zieht, blau hält.',
@@ -424,7 +389,7 @@ const PART_INFO = [
   { key: 'foot', name: 'Fußgelenk und Steigbügel', dist: 0.6,
     what: 'Leitet die Last in den Boden, auch in Schlamm, Schnee und unebenem Gelände. Der Fuß kann abrollen und seitlich kippen.',
     how: 'Die Unterschenkelschiene endet in einem Lager auf Höhe deines Knöchels (Fußspitze hoch/runter). Daran hängt der Fersenbügel, der hinter die Ferse führt. Dort sitzt das zweite Gelenk mit Achse nach vorne durch den Knöchel: Der Fuß kippt seitlich mit, beim Spreizen oder am Hang. Am Fuß nur ein schmaler Steigbügel unter der Sohlenmitte mit Spikes, Fersenschale und Ratschenriemen über den Rist. Passt zu jedem Arbeitsstiefel. Ein Drehteller unter dem Bügel lässt die Fußspitze ±20° drehen (Wenden, ohne das Knie zu verdrehen). Vier Wägezellen zwischen Bügel und Sohle melden das Standbein.',
-    parts: 'Fersenbügel Alu, Steigbügel Edelstahl 4 mm (Laser), Gelenkbolzen mit Gummibuchsen, 6 Schraubspikes, Ratschenriemen, FSR-Drucksensor, Fersenschale PETG.',
+    parts: 'Fersenbügel Alu, Steigbügel Edelstahl 4 mm (Laser), Gelenkbolzen mit Gummibuchsen, 6 Schraubspikes, Ratschenriemen, 4 Wägezellen 50 kg, Fersenschale PETG.',
     care: 'Spikes tauschbar, auf hartem Boden abschrauben. Die Gummibuchsen lassen etwas Drehung zu, damit die Fußspitze nach außen zeigen kann.' },
   { key: 'stand', name: 'Parkstütze', dist: 1.2,
     what: 'Das Exo steht allein: rückwärts hineinstellen, festschnallen, losgehen. Aussteigen genauso.',
@@ -437,10 +402,10 @@ const PART_INFO = [
     parts: 'E-Paper 1,54" mit ESP32-C3 im gedruckten Gehäuse mit Scheibe, Kabel im Gewebeschlauch zur Box, etwa 30 €.',
     care: 'Gehäuse gedichtet, Scheibe kratzfest. Das Display hat eine eigene Sicherung; fällt es aus, läuft das Exo weiter.' },
   { key: 'wiring', name: 'Elektronik und Kabelbäume', dist: 0.7,
-    what: 'Alles, was Strom und Signale führt: Steuerung in der Box, Verteilung zu den 8 Motoren, Kabelbäume zu Armen, Beinen, Not-Aus und Anzeige.',
-    how: 'In der Box an der Rückwand: Hauptplatine mit Teensy 4.1 und CAN-Transceiver, 3 Windentreiber, zwei Spannungswandler (24 V, 5 V) mit Kühlrippen. Unten Hauptsicherung, Schütz und eine Kupferschiene mit einer Sicherung je Motor. Ein CAN-Bus (grün) läuft als Kette von Motor zu Motor. Unten und seitlich an der Box sitzen dichte Rundstecker. Orange Kabelbäume: Leistung und CAN zu den Hüftmotoren. Blaue Kabelbäume: Manschetten-Verstärker, Fußsensoren, Schlaufen (Winde, Wägezelle, Taster) und Anzeige. Jeder Baum läuft im Gewebeschlauch an der Schiene, über jedes Gelenk mit einer Schlaufe, damit nichts knickt. Ansicht „Elektronik“ zeigt nur diese Teile.',
-    parts: 'Teensy 4.1, CAN-Transceiver SN65HVD230, 9 HX711 (an den Sensoren vergossen), 2 DC/DC-Wandler, 3 Motortreiber, Schütz, Midi-Sicherung 40 A, 8 Flachsicherungen 15 A, Kupferschiene, 7 Rundstecker IP67, Kabel 4 mm² / 1,5 mm² / geschirmt, Gewebeschlauch, etwa 250 €.',
-    care: 'Kabel nie über eine Kante ziehen, über Gelenke immer mit Schlaufe. Stecker nach unten, damit kein Wasser hineinläuft. CAN-Bus an beiden Enden mit 120 Ω abschließen.' },
+    what: 'Alles, was Strom und Signale führt: Steuerung in der flachen Box, Verteilung zu den 10 Kapseln, Kabelbäume zu Armen, Beinen, Not-Aus und Anzeige.',
+    how: 'In der Box an der Montageplatte: Hauptplatine mit Teensy 4.1, zwei CAN-Transceivern (Beine und Rumpf beugen an einem Bus, Arme und Rumpf drehen am anderen), drei Messwandler für die Manschetten, 3 Windentreiber, zwei Spannungswandler. Unten eine Kupferschiene mit einer Sicherung je Kapsel. Unten und seitlich dichte Rundstecker. Orange Kabelbäume: Leistung und CAN zu den Kapseln an Hüfte und Knie. Blaue Kabelbäume: Manschetten, Fußsensoren, Schlaufen, Anzeige. Über jedes Gelenk mit einer Schlaufe, damit nichts knickt. Ansicht „Elektronik“ zeigt nur diese Teile.',
+    parts: 'Teensy 4.1, 2 CAN-Transceiver SN65HVD230, 3 ADS131M04, 5 HX711, 2 DC/DC-Wandler, 3 Motortreiber, Schütz, Midi-Sicherung 40 A, 10 Flachsicherungen 15 A, Kupferschiene, Rundstecker IP67, Kabel geschirmt, Gewebeschlauch.',
+    care: 'Stecker nach unten, damit kein Wasser hineinläuft. Jeder CAN-Bus an beiden Enden mit 120 Ω abschließen. Manschettenkabel geschirmt, Schirm nur an der Box.' },
   { key: 'light', name: 'Licht und LED-Ring', dist: 0.75,
     what: 'Licht für die dunklen Dezembernachmittage und ein Ring, der immer zeigt, was das Exo tut.',
     how: 'Zwei 10-W-LED-Strahler auf den Schulterbügeln leuchten nach vorne, Doppeltipp auf den Ein/Aus-Taster schaltet sie. Um den Not-Aus sitzt ein Ring aus 12 LEDs: grün bereit, blau hilft, gelb Grenze oder Parkstütze, rot Fehler, die Zahl der LEDs zeigt den Akku. Eine kurze Vibration bestätigt jede Schlaufe.',
@@ -448,14 +413,14 @@ const PART_INFO = [
     care: 'Licht hängt an einer eigenen Sicherung; fällt es aus, läuft das Exo weiter.' },
   { key: 'buckle', name: 'Schnellkupplungen', dist: 0.6,
     what: 'Zerlegen für den Transport ohne Werkzeug.',
-    how: 'Jedes Bein steckt am Abspreizgelenk mit einem Kugelsperrbolzen (roter Ring), die Arme ebenso am Schulterbügel. Bowdenzüge und Motorkabel haben Kupplungen an der Box. Ring ziehen, abnehmen: Das Exo passt in drei Teilen in jeden Kofferraum.',
-    parts: '6 Kugelsperrbolzen, 4 Bowdenzug-Kupplungen, wasserdichte Stecker, etwa 90 €.',
-    care: 'Bolzen mit Fangseil, damit sie im Schnee nicht verloren gehen.' },
+    how: 'Jedes Bein steckt am Abspreizgelenk mit einem Kugelsperrbolzen (roter Ring), die Arme ebenso am Schulterbügel. Die Kapseln bleiben an ihren Gelenken; nur je ein Rundstecker (Leistung + CAN) wird gelöst. Das Exo passt in drei Teilen in jeden Kofferraum.',
+    parts: '6 Kugelsperrbolzen, wasserdichte Rundstecker, etwa 80 €.',
+    care: 'Bolzen mit Fangseil, damit sie im Schnee nicht verloren gehen. Stecker mit Kappe verschließen.' },
   { key: 'finish', name: 'Oberfläche und Abdeckungen', dist: 0.9,
     what: 'Damit es sich anfühlt und aussieht wie ein Produkt: keine offenen Kabel, keine scharfen Kanten, ein Farbton.',
-    how: 'Alu-Teile werden gesammelt eloxiert oder pulverbeschichtet (Dienstleister, keine eigene Maschine). Über der Antriebsbox und den Hüftmotoren gedruckte Hauben, Kabel laufen im Gewebeschlauch an den Schienen. Alle Kanten entgratet und gerundet. Schalter „Hauben“ zeigt sie (sonst sieht man hinein), „Eloxiert“ zeigt roh oder titangrau.',
-    parts: 'Eloxieren als Sammelauftrag 80 bis 150 € oder Pulverbeschichten 60 bis 120 €, Gewebeschlauch, PETG matt für Hauben.',
-    care: 'Erst eloxieren, wenn alle Bohrungen sitzen (nach dem Prototyp). Gewindebohrungen vorher abdecken.' },
+    how: 'Alu-Teile werden gesammelt eloxiert oder pulverbeschichtet (Dienstleister). Durchsichtige Fingerschutz-Schalen über den Kurbeln von Knie und Ellbogen, gedruckter Deckel auf der Elektronikbox. Kabel laufen im Gewebeschlauch an den Schienen. Schalter „Hauben“ zeigt den Deckel, „Eloxiert“ zeigt roh oder titangrau.',
+    parts: 'Eloxieren als Sammelauftrag 80 bis 150 € oder Pulverbeschichten 60 bis 120 €, Gewebeschlauch, PETG matt, PETG klar für den Fingerschutz.',
+    care: 'Erst eloxieren, wenn alle Bohrungen sitzen (nach dem Prototyp). Kühlkörper nicht lackieren.' },
 ];
 const hot = {};
 function hotspot(key, obj, x, y, z) {
@@ -482,25 +447,28 @@ SIDE.forEach((sd, k) => {
   const hd = new THREE.Mesh(new THREE.SphereGeometry(0.045, 14, 12), std(0x55594C, 0.9)); hd.scale.set(0.8, 1.1, 0.6); hd.position.set(0, -D.fore - 0.07, sd * D.shHalf); BG.fore[k].add(hd);
 });
 
-/* ---------- Sensor-Manschette: Schale + Polster + Gurt, auf Wägezelle zur Schiene ---------- */
+/* ---------- Sensor-Manschette M2: breite Schale, dünnes Viskopolster, BOA-Verschluss, Längsschlitten, Wägezelle ---------- */
 const cuffArrows = {};
 function sensorCuff(g, y, zc, r, h, zr, sd, id) {
   const prev = cur; cur = 'sensor';
-  const t = 0.005;
-  put(g, mesh(shellGeo(r, t, h, deg(-100), deg(100)), M.print), 0, y, zc);                       // Schale vorne (PETG)
-  put(g, mesh(shellGeo(r - 0.006, 0.006, h - 0.006, deg(-96), deg(96)), M.foam), 0, y, zc);       // Polster
-  put(g, mesh(shellGeo(r + 0.001, 0.0025, h * 0.55, deg(100), deg(260)), M.strap), 0, y, zc);     // Klettgurt hinten
-  box(g, 0.012, 0.022, 0.008, M.chip, -r - 0.004, y, zc - sd * r * 0.55);                          // Gurtschnalle
-  // seitlicher Steg an der Schale → Wägezelle → Halter an der Schiene
-  const zo = zc + sd * (r + t), zcell = zo + sd * 0.011, zin = Math.abs(zr) - 0.0125;
-  box(g, 0.02, 0.022, 0.012, M.print, 0, y - 0.022, zo + sd * 0.004);                                // Steg Schale
+  const t = 0.004, H = h * 1.45;
+  put(g, mesh(shellGeo(r, t, H, deg(-105), deg(105)), M.print), 0, y, zc);                       // Schale vorne (PETG-CF), 45 % breiter
+  put(g, mesh(shellGeo(r - 0.004, 0.004, H - 0.006, deg(-100), deg(100)), M.foam), 0, y, zc);     // Viskopolster 4 mm
+  for (const dy of [-H * 0.28, H * 0.28]) put(g, mesh(shellGeo(r + 0.001, 0.0012, 0.012, deg(105), deg(255)), M.strap), 0, y + dy, zc);   // BOA-Seilbänder hinten
+  put(g, mesh(cyl(0.014, 0.014, 0.012, 20), M.chip), -r - 0.008, y, zc, 0, 0, Math.PI / 2);         // BOA-Drehrad
+  // seitlicher Steg → Längsschlitten (2 Stangen, Gleitbuchsen, Zentrierfedern) → Wägezelle → Halter an der Schiene
+  const zo = zc + sd * (r + t), zs = zo + sd * 0.009, zcell = zs + sd * 0.013, zin = Math.abs(zr) - 0.0125;
+  box(g, 0.02, 0.026, 0.008, M.print, 0, y, zo + sd * 0.003);
+  box(g, 0.04, 0.034, 0.008, M.aluDark, 0, y, zs);                                                   // Schlitten
+  for (const dx of [-0.011, 0.011]) {
+    put(g, mesh(cyl(0.0025, 0.0025, H + 0.024, 8), M.steel), dx, y, zs + sd * 0.0015);              // Führungsstangen längs zum Glied
+    for (const s2 of [-1, 1]) put(g, mesh(cyl(0.0036, 0.0036, H * 0.22, 8), M.chrome), dx, y + s2 * (0.017 + H * 0.11), zs + sd * 0.0015);   // Zentrierfedern
+  }
   put(g, mesh(rgeo(0.0127, 0.075, 0.0127, 0.0015), M.cell), 0, y, zcell);                             // Wägezelle (Biegebalken)
   box(g, 0.0135, 0.012, 0.004, M.gauge, 0, y, zcell - sd * 0.0066);                                   // Dehnmessstreifen (vergossen)
-  for (const dy of [-0.028, -0.016, 0.016, 0.028]) put(g, mesh(cyl(0.0028, 0.0028, 0.02, 6), M.steel), 0, y + dy, zcell, Math.PI / 2);
   const bw = Math.max(0.006, zin - Math.abs(zcell) - 0.0063);
   box(g, 0.026, 0.03, bw, M.aluDark, 0, y + 0.024, sd * (Math.abs(zcell) + 0.0063 + bw / 2));          // Halter an der Schiene
   for (const dy of [0.012, -0.044]) box(g, 0.008, 0.006, 0.008, M.tpu, 0.012, y + dy, zcell);         // Überlast-Puffer
-  box(g, 0.016, 0.022, 0.009, M.pcb, -0.014, y + 0.03, sd * (Math.abs(zcell) + 0.004));              // Verstärker, vergossen
   cur = prev;
   const arr = new THREE.ArrowHelper(V(1, 0, 0), V(0.02, y, zc), 0.1, 0xD32F2F, 0.025, 0.018); arr.visible = false; g.add(arr);
   if (id) cuffArrows[id] = { arr, y, zc };
@@ -518,7 +486,7 @@ cur = 'frame'; fl = 3;
   }
   box(g, 0.012, 0.03, 0.012, M.red, rx - 0.02, 0.17, 0.11);                                // Sperrhebel (von Hand)
   for (const sd of [-1, 1]) {                                                               // Gasfedern 150 N: tragen das Oberteil beim Bücken
-    rod(g, V(-0.2, 0.09, sd * 0.055), V(-0.2025, 0.22, sd * 0.055), 0.009, M.steel); rod(g, V(-0.2025, 0.21, sd * 0.055), V(-0.205, 0.33, sd * 0.055), 0.004, M.chrome);
+    rod(g, V(-0.17, 0.16, sd * 0.118), V(-0.172, 0.27, sd * 0.118), 0.009, M.steel); rod(g, V(-0.172, 0.26, sd * 0.118), V(-0.174, 0.37, sd * 0.118), 0.004, M.chrome);
     box(g, 0.02, 0.025, 0.03, M.motorDark, -0.13, 0.13, sd * 0.06);                          // Hubmagnet der Lendensperre
   }
   hotspot('lumb', g, rx + 0.04, 0.17, 0.12);
@@ -539,10 +507,10 @@ cur = 'frame'; fl = 3;
 /* ---------- Schutzbügel: hinten und seitlich um Box und Akkus (Sturz nach hinten, Anstoßen) ---------- */
 cur = 'frame';
 SIDE.forEach((sd) => {
-  const P = [V(-0.155, D.torso + 0.13, sd * 0.085), V(-0.32, D.torso + 0.08, sd * 0.13), V(-0.365, 0.42, sd * 0.25), V(-0.365, 0.15, sd * 0.25), V(-0.2, 0.15, sd * 0.25), V(-0.155, 0.1, sd * 0.1)];
+  const P = [V(-0.155, D.torso + 0.13, sd * 0.085), V(-0.24, D.torso + 0.105, sd * 0.1), V(-0.295, D.torso + 0.03, sd * 0.11), V(-0.295, 0.18, sd * 0.13), V(-0.23, 0.12, sd * 0.13), V(-0.155, 0.1, sd * 0.1)];
   for (let i = 1; i < P.length; i++) { rod(G.torso, P[i - 1], P[i], 0.011, M.alu, 14); put(G.torso, mesh(new THREE.SphereGeometry(0.011, 12, 10), M.alu), P[i].x, P[i].y, P[i].z); }
   for (const i of [2, 3]) put(G.torso, mesh(new THREE.SphereGeometry(0.02, 14, 10), M.tpu), P[i].x - 0.01, P[i].y, P[i].z + sd * 0.008);   // Gummipuffer
-  rod(G.torso, V(-0.365, 0.42, sd * 0.25), V(-0.365, 0.42, -sd * 0.0), 0.009, M.alu, 12);                                       // Querstrebe hinten
+  rod(G.torso, V(-0.295, D.torso + 0.03, sd * 0.11), V(-0.295, D.torso + 0.03, 0), 0.009, M.alu, 12);                         // Bogen über den Akkus
 });
 
 /* ---------- 2 Gurtsystem: Hüftgurt trägt und führt, Schultergurte gegen Kippen, Brustgurt, Polster ---------- */
@@ -581,70 +549,46 @@ cur = 'straps';
   hotspot('straps', g, 0.16, 0.12, 0.13);
 }
 
-/* ---------- 3 Antriebsbox: Knie-, Schulter- und Ellbogenmotoren mit Doppeltrommel ---------- */
-const spools = {};
+/* ---------- 3 Rumpfkapseln: Beugen (RS04) und Drehen (RS03) hinter dem Kreuzbein ---------- */
 cur = 'drive';
 {
-  const g = G.torso, bx = -0.25, by0 = 0.135, bh = 0.35;
-  const shell = put(g, mesh(rgeo(0.13, bh, 0.29, 0.012), M.glass, false), bx, by0 + bh / 2, 0);
-  shell.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.13, bh, 0.29)), new THREE.LineBasicMaterial({ color: 0x55666e })));
-  box(g, 0.004, bh, 0.29, M.alu, bx + 0.065, by0 + bh / 2, 0);
-  const rows = [['knee', by0 + 0.075, M.cable], ['el', by0 + 0.175, M.cable], ['sh', by0 + 0.275, M.rope]];   // Knie unten, Ellbogen Mitte, Schulter oben: jeder Zug nimmt den kürzesten Weg
-  for (const [key, y, wmat] of rows) for (const [k, sd] of SIDE.entries()) {
-    const z = sd * 0.07;
-    put(g, mesh(cyl(0.043, 0.043, 0.04, 32), M.motor), bx, y, z + sd * 0.035, Math.PI / 2);
-    put(g, mesh(cyl(0.036, 0.036, 0.004, 32), M.motorDark), bx, y, z + sd * 0.057, Math.PI / 2);
-    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; put(g, mesh(rgeo(0.004, 0.004, 0.036, 0.001), M.motorDark), bx + Math.cos(a) * 0.044, y + Math.sin(a) * 0.044, z + sd * 0.035); }
-    box(g, 0.012, 0.012, 0.012, M.chip, bx - 0.03, y - 0.03, z + sd * 0.05);
-    const sp = new THREE.Group(); sp.position.set(bx, y, z - sd * 0.012); g.add(sp);
-    put(sp, mesh(cyl(R_DRUM, R_DRUM, 0.03, 24), M.alu), 0, 0, 0, Math.PI / 2);
-    for (const dz of [-0.0165, 0, 0.0165]) put(sp, mesh(cyl(0.026, 0.026, 0.003, 28), M.alu), 0, 0, dz, Math.PI / 2);
-    for (const dz of [-0.008, 0.008]) for (let i = 0; i < 2; i++) put(sp, mesh(new THREE.TorusGeometry(R_DRUM + 0.0015 + i * 0.0025, 0.0014, 6, 24), wmat), 0, 0, dz + (i - 0.5) * 0.004);
-    put(sp, mesh(rgeo(0.006, 0.02, 0.006, 0.001), M.steel), 0.011, 0, 0.0175);
-    spools[key + k] = sp;
-  }
-  for (const sd of SIDE) for (const y of [by0, by0 + bh]) box(g, 0.03, 0.015, 0.04, M.tpu, bx, y, sd * 0.1);
-  hotspot('drive', g, bx - 0.08, by0 + 0.2, 0.17);
+  const g = G.torso;
+  capsule(g, -0.205, 0.095, -0.056, 1, 1, 'x');                                              // Rumpf beugen: Kurbel → Stange → Hebel am Lendengelenk
+  capsule(g, -0.205, 0.095, 0.052, 1, 0.85, 'x');                                            // Rumpf drehen: Kurbel → Stange → Bogenführung
+  box(g, 0.012, 0.13, 0.22, M.alu, -0.195, 0.095, 0);                                        // Träger am Beckenrahmen
+  rod(g, V(-0.2, 0.13, -0.056), V(-0.185, 0.185, -0.075), 0.005, M.steel);                   // Schubstange Rumpf beugen (vereinfacht)
+  hotspot('drive', g, -0.29, 0.095, 0.0);
 }
 
-/* ---------- 4 Akku + Elektronik ---------- */
+/* ---------- 4 Rucksack: Akkus stehend oben, flache Elektronikbox in Lendenhöhe ---------- */
 cur = 'power';
 {
-  const g = G.torso, bx = -0.25;
-  // Zwei Akkuschächte links und rechts neben der Box: Akku von hinten einschieben, Stihl-Rastung, im Betrieb einzeln wechselbar
-  for (const sd of SIDE) {
-    const zb = sd * 0.19, yb = 0.255;
-    box(g, 0.11, 0.006, 0.09, M.print, bx, yb - 0.09, zb); box(g, 0.11, 0.006, 0.09, M.print, bx, yb + 0.09, zb);      // Boden, Deckel
-    box(g, 0.11, 0.186, 0.006, M.print, bx, yb, zb + sd * 0.045);                                                  // Außenwand
-    box(g, 0.006, 0.186, 0.09, M.print, bx + 0.055, yb, zb);                                                       // Stirnwand mit Kontakten
-    for (const dy of [-0.06, 0.06]) box(g, 0.1, 0.004, 0.004, M.aluDark, bx - 0.005, yb + dy, zb - sd * 0.038);    // Führungsschienen
-    box(g, 0.1, 0.165, 0.072, M.stihl, bx - 0.002, yb, zb); box(g, 0.03, 0.167, 0.074, M.stihlGrey, bx + 0.036, yb, zb);   // Stihl AP 500 S
-    box(g, 0.012, 0.03, 0.012, M.red, bx - 0.052, yb + 0.07, zb + sd * 0.02);                                      // Rastung (Entriegeln)
-    for (const dy of [-0.015, 0, 0.015]) box(g, 0.004, 0.006, 0.01, M.chrome, bx + 0.052, yb + dy, zb);             // Kontakte
+  const g = G.torso, ax = -0.225;
+  // Zwei Akkuschächte stehend zwischen den Schulterblättern: Akku von oben einstecken (Stihl-Rastung), Kontakte unten, Wasser läuft ab
+  for (const zb of [-0.046, 0.046]) {
+    const yb = 0.47;
+    box(g, 0.11, 0.006, 0.084, M.print, ax, yb - 0.09, zb);                                  // Boden mit Kontakten
+    for (const dz of [-0.042, 0.042]) box(g, 0.11, 0.17, 0.004, M.print, ax, yb - 0.005, zb + dz);   // Seitenwände
+    box(g, 0.004, 0.17, 0.084, M.print, ax - 0.055, yb - 0.005, zb);                          // Rückwand
+    box(g, 0.1, 0.165, 0.072, M.stihl, ax, yb, zb); box(g, 0.1, 0.03, 0.074, M.stihlGrey, ax, yb + 0.07, zb);   // Stihl AP 500 S, Griff oben
+    box(g, 0.012, 0.012, 0.03, M.red, ax - 0.045, yb + 0.088, zb);                           // Rastung (Entriegeln)
   }
-  box(g, 0.004, 0.03, 0.04, M.pcb, -0.311, 0.2, 0.07);                                                            // Ideal-Dioden-Modul: Akkus parallel
-  put(g, mesh(cyl(0.006, 0.006, 0.003, 16), std(0xC0C4C8, 0.3, 0.9)), bx - 0.0585, 0.455, 0.035, 0, 0, Math.PI / 2);   // Knopfzelle für die Uhr
-  box(g, 0.03, 0.04, 0.03, std(0x333a40, 0.5), bx - 0.03, 0.17, 0.1);
-  box(g, 0.02, 0.03, 0.015, M.red, bx - 0.035, 0.17, -0.1);
+  // Flache Elektronikbox 60 × 140 × 220 mm in Lendenhöhe
+  const shell = put(g, mesh(rgeo(0.06, 0.14, 0.22, 0.008), M.glass, false), -0.21, 0.27, 0);
+  shell.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.06, 0.14, 0.22)), new THREE.LineBasicMaterial({ color: 0x55666e })));
+  box(g, 0.004, 0.14, 0.22, M.alu, -0.181, 0.27, 0);                                         // Montageplatte (Alu, Wärme an den Rahmen)
+  box(g, 0.004, 0.03, 0.04, M.pcb, -0.236, 0.36, 0.07);                                      // Ideal-Dioden-Modul: Akkus parallel
+  put(g, mesh(cyl(0.006, 0.006, 0.003, 16), std(0xC0C4C8, 0.3, 0.9)), -0.236, 0.32, -0.09, 0, 0, Math.PI / 2);   // Knopfzelle für die Uhr
+  box(g, 0.03, 0.04, 0.03, std(0x333a40, 0.5), -0.22, 0.225, 0.075);                        // Schütz
+  box(g, 0.02, 0.03, 0.015, M.red, -0.22, 0.225, -0.09);                                    // Hauptsicherung
   put(g, mesh(cyl(0.022, 0.022, 0.012, 24), M.yellow), 0.13, D.torso - 0.08, -0.1, 0, 0, Math.PI / 2);
   put(g, mesh(cyl(0.02, 0.016, 0.02, 24), M.red), 0.146, D.torso - 0.08, -0.1, 0, 0, Math.PI / 2);
   box(g, 0.014, 0.03, 0.022, M.chip, 0.13, D.torso - 0.14, -0.1);
-  box(g, 0.012, 0.03, 0.03, M.pcb, -0.14, 0.18, 0);
-  hotspot('power', g, bx - 0.06, 0.255, -0.24);
+  hotspot('power', g, -0.26, 0.5, -0.12);
 }
 
-/* ---------- 5 Hüfte: Abspreizgelenk hinter dem Hüftgelenk, Hüftschwinge mit Hüftmotor, Hüftlager ---------- */
+/* ---------- 5 Hüfte: Abspreizgelenk hinter dem Hüftgelenk, Hüftschwinge mit Hüftkapsel, Hüftlager ---------- */
 const XA0 = -0.19, XA1 = -0.12, XHUB = -0.155, XM = -0.12;
-const hipDrums = [];
-function passiveCuff(g, y, zc, r, h, zr, sd) {
-  const prev = cur; cur = 'leg';
-  put(g, mesh(shellGeo(r, 0.005, h, deg(-100), deg(100)), M.print), 0, y, zc);
-  put(g, mesh(shellGeo(r - 0.006, 0.006, h - 0.006, deg(-96), deg(96)), M.foam), 0, y, zc);
-  put(g, mesh(shellGeo(r + 0.001, 0.0025, h * 0.55, deg(100), deg(260)), M.strap), 0, y, zc);
-  const zo = Math.abs(zc) + r + 0.004, zi = Math.abs(zr) - 0.0125;
-  box(g, 0.02, 0.022, Math.max(0.006, zi - zo), M.print, 0, y, sd * (zo + zi) / 2);
-  cur = prev;
-}
 SIDE.forEach((sd, k) => {
   const zA = sd * HH;
   cur = 'hip'; fl = 4;
@@ -673,30 +617,11 @@ SIDE.forEach((sd, k) => {
     flangeBearing(g, 0, 0, sd * Z.hb, 1, sd);
     fl = null;
     if (k === 1) hotspot('hip', g, XHUB, -0.045, zA + sd * 0.07);
-    // Hüftmotor mit Seilgetriebe 1:6: Trommel Ø 2 cm am Motor, Scheibe Ø 12 cm am Oberschenkel
+    // Hüftkapsel: RS04 direkt auf der Hüftachse, Gehäuse an der Hüftschwinge (Bügel außen um die Oberschenkelplatte)
     cur = 'rope';
-    box(g, 0.13, 0.11, 0.008, M.alu, -0.115, 0, sd * 0.222);                                       // Motorplatte
-    box(g, 0.026, 0.026, 0.026, M.aluDark, XHUB, 0, sd * 0.207);
-    for (const a of [0.5, 2.6, 4.7]) rod(g, V(XM + Math.cos(a) * 0.036, Math.sin(a) * 0.036, sd * 0.226), V(XM + Math.cos(a) * 0.036, Math.sin(a) * 0.036, sd * 0.262), 0.003, M.steel);
-    put(g, mesh(cyl(0.043, 0.043, 0.04, 32), M.motor), XM, 0, sd * 0.282, Math.PI / 2);
-    put(g, mesh(cyl(0.036, 0.036, 0.004, 32), M.motorDark), XM, 0, sd * 0.304, Math.PI / 2);
-    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; put(g, mesh(rgeo(0.004, 0.004, 0.036, 0.001), M.motorDark), XM + Math.cos(a) * 0.044, Math.sin(a) * 0.044, sd * 0.282); }
-    box(g, 0.012, 0.012, 0.012, M.chip, XM - 0.03, -0.03, sd * 0.295);
-    put(g, mesh(cyl(0.005, 0.005, 0.04, 10), M.steel), XM, 0, sd * 0.243, Math.PI / 2);
-    const dr = new THREE.Group(); dr.position.set(XM, 0, sd * Z.hm); g.add(dr);
-    put(dr, mesh(cyl(0.01, 0.01, 0.018, 20), M.alu), 0, 0, 0, Math.PI / 2);
-    for (const dz of [-0.009, 0.009]) put(dr, mesh(cyl(0.016, 0.016, 0.002, 24), M.alu), 0, 0, dz, Math.PI / 2);
-    put(dr, mesh(rgeo(0.004, 0.011, 0.004, 0.001), M.steel), 0.008, 0, 0.011);
-    hipDrums[k] = dr;
-    // offene Seilschleife: Außentangenten Trommel → Scheibe; beide Kreise liegen fest, also bleiben die Seile beim Drehen gleich
-    const cx = -0.4167, ny = 0.909;
-    for (const s of [1, -1]) {
-      const zz = sd * Z.hm + s * 0.004;
-      rod(g, V(XM + cx * 0.0105, s * ny * 0.0105, zz), V(cx * (R_HM + 0.0015), s * ny * (R_HM + 0.0015), zz), 0.0014, M.rope);
-      const a0 = s > 0 ? Math.atan2(ny, cx) - deg(140) : Math.atan2(-ny, cx);
-      put(g, mesh(new THREE.TorusGeometry(R_HM + 0.0015, 0.0014, 6, 32, deg(140)), M.rope), 0, 0, zz, 0, 0, a0);   // Umschlingung an der Scheibe
-    }
-    if (k === 1) hotspot('rope', g, XM, 0.065, sd * 0.3);
+    box(g, 0.03, 0.05, 0.085, M.alu, -0.077, 0, sd * 0.22);                                       // Bügel von der Schwinge nach außen, hinter der Oberschenkelplatte
+    capsule(g, 0, 0, sd * 0.247, sd, 1);
+    if (k === 1) hotspot('rope', g, 0.0, 0.075, sd * 0.31);
   }
   {
     const g = G.thigh[k];
@@ -705,9 +630,6 @@ SIDE.forEach((sd, k) => {
     put(g, mesh(cyl(0.008, 0.008, Z.tp - Z.hb + 0.01, 12), M.steel), 0, 0, sd * (Z.tp + Z.hb) / 2, Math.PI / 2);
     box(g, 0.012, 0.025, 0.014, M.tpu, 0.04, 0.02, sd * Z.tp);
     fl = null;
-    cur = 'rope';
-    sheave(g, 0, 0, sd * Z.hm, R_HM, 0.016, 0.004);                                                // Seilscheibe Ø 12 cm am Oberschenkel
-    for (const a of [deg(-25), deg(25)]) box(g, 0.01, 0.01, 0.01, M.steel, Math.cos(a) * (R_HM - 0.007), Math.sin(a) * (R_HM - 0.007), sd * (Z.hm + 0.01));   // Seilklemmen
     cur = 'leg'; fl = 5;
     const pR = (y) => V(0, y, sd * zRail(y));
     tube(g, pR(-0.02), pR(-0.24), 0.03);                 // 30 × 30 × 2,5
@@ -719,14 +641,10 @@ SIDE.forEach((sd, k) => {
     cur = 'knee';
     box(g, 0.06, 0.06, 0.008, M.alu, 0, -D.thigh, sd * Z.kn);                                         // Knieplatte außen am Knie
     sensorCuff(g, -0.15, sd * HH, 0.072, 0.07, sd * zRail(-0.15), sd, k === 1 ? 'thigh' : null);
-    // Hüllenanschläge des Knie-Bowdenzugs hinten über dem Knie; der Beugezug sitzt in einer Federpatrone
+    // Kniekapsel: RS04 oben am Oberschenkel, Kurbel 60 mm innen, Schubstange 1:1 zum Kniehebel (Parallelogramm)
     cur = 'rope';
-    const yS = -D.thigh + 0.13;
-    box(g, 0.04, 0.014, Math.abs(Z.fk - zRail(yS)) + 0.01, M.aluDark, -0.05, yS - 0.004, sd * (Z.fk + zRail(yS)) / 2);
-    put(g, mesh(cyl(0.006, 0.006, 0.018, 12), M.chrome), -0.06, yS + 0.009, sd * Z.ek);
-    put(g, mesh(cyl(0.0085, 0.0085, 0.036, 14), M.aluDark), -0.072, yS + 0.018, sd * Z.fk);
-    spring(g, -0.072, yS + 0.002, sd * Z.fk, 0.0105, 0.03, 6, 0.0013, M.yellow);
-    for (const y of [-0.12, -0.26]) box(g, 0.03, 0.012, Math.abs(Z.fk - zRail(y)) + 0.012, M.print, -0.03, y, sd * (Z.fk + zRail(y)) / 2);   // Hüllenhalter
+    box(g, 0.05, 0.05, Math.abs(Z.kc - zRail(KNEE_CAP_Y)) + 0.012, M.alu, 0, KNEE_CAP_Y, sd * (Z.kc + zRail(KNEE_CAP_Y)) / 2);   // Träger an der Schiene
+    capsule(g, 0, KNEE_CAP_Y, sd * (Z.kc + 0.008), sd, 1);
     cur = 'power'; box(g, 0.012, 0.03, 0.03, M.pcb, 0.02, -0.08, sd * (zRail(-0.08) + 0.024));
     if (k === 1) hotspot('leg', g, 0.03, -0.27, sd * 0.25);
   }
@@ -738,18 +656,9 @@ SIDE.forEach((sd, k) => {
     box(g, 0.014, 0.025, 0.016, M.tpu, -0.035, 0.03, sd * Z.ks);
     put(g, mesh(cyl(0.011, 0.011, Z.fk - Z.ks + 0.012, 8), M.steel), 0, 0, sd * (Z.fk + Z.ks) / 2, Math.PI / 2);
     cur = 'rope';
-    {                                                                                                // Kurvenscheibe (strecken): Hebel wächst in der Hocke von 5 auf 8 cm
-      const sh = new THREE.Shape();
-      for (let i = 0; i <= 64; i++) { const a = deg(-60 + 280 * i / 64), r = kneeCam(a); i ? sh.lineTo(Math.cos(a) * r, Math.sin(a) * r) : sh.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
-      sh.lineTo(0, 0); sh.closePath();
-      const hole = new THREE.Path(); hole.absarc(-0.03, 0.02, 0.013, 0, Math.PI * 2, true); sh.holes.push(hole);
-      const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.01, bevelEnabled: true, bevelThickness: 0.001, bevelSize: 0.001, bevelSegments: 1 }); geo.translate(0, 0, -0.005);
-      put(g, mesh(geo, M.alu), 0, 0, sd * Z.ek);
-      box(g, 0.012, 0.012, 0.012, M.steel, Math.cos(deg(-20)) * 0.042, Math.sin(deg(-20)) * 0.042, sd * (Z.ek + 0.009));
-    }
-    put(g, mesh(cyl(R_KF, R_KF, 0.01, 36), M.aluDark), 0, 0, sd * Z.fk, Math.PI / 2);                // Beugescheibe Ø 9 cm
-    put(g, mesh(new THREE.TorusGeometry(R_KF - 0.001, 0.0014, 6, 40), M.alu), 0, 0, sd * Z.fk);
-    box(g, 0.012, 0.012, 0.012, M.steel, Math.cos(deg(300)) * 0.036, Math.sin(deg(300)) * 0.036, sd * (Z.fk + 0.009));
+    put(g, mesh(cyl(0.012, 0.012, Z.kc - Z.ks, 12), M.steel), 0, 0, sd * (Z.kc + Z.ks) / 2, Math.PI / 2);   // Achsverlängerung zum Hebel
+    tube(g, V(0, 0, sd * Z.kc), V(Math.cos(PHI_K) * R_KC, Math.sin(PHI_K) * R_KC, sd * Z.kc), 0.016, M.aluDark);   // Kniehebel 60 mm
+    put(g, mesh(new THREE.SphereGeometry(0.009, 12, 10), M.chrome), Math.cos(PHI_K) * R_KC, Math.sin(PHI_K) * R_KC, sd * Z.kc);   // Gelenkkopf
     if (k === 1) hotspot('knee', g, 0.0, 0.075, sd * 0.25);
     cur = 'leg'; fl = 5;
     const pS = (y) => V(0, y, sd * zShank(y));
@@ -757,7 +666,7 @@ SIDE.forEach((sd, k) => {
     tube(g, pS(-0.16), pS(-D.shank + 0.012), 0.025);
     fl = null;
     for (let i = 0; i < 5; i++) { const y = -0.21 - i * 0.022; put(g, mesh(cyl(0.003, 0.003, 0.022, 8), M.chip), 0, y, sd * zShank(y), Math.PI / 2); }
-    passiveCuff(g, -0.14, sd * HH, 0.055, 0.06, sd * zShank(-0.14), sd);
+    sensorCuff(g, -0.12, sd * HH, 0.055, 0.06, sd * zShank(-0.12), sd, k === 1 ? 'shin' : null);   // Schienbein-Manschette mit Sensor (M2)
     cur = 'foot'; fl = 6;
     flangeBearing(g, 0, -D.shank, sd * Z.an, 0.55, sd);                                              // Fußgelenk: Fußspitze hoch/runter
     fl = null;
@@ -793,11 +702,10 @@ SIDE.forEach((sd, k) => {
   }
 });
 
-/* ---------- 9 Schulter, 10 Ellbogen, Arme mit Seilscheiben ---------- */
+/* ---------- 9 Schulter, 10 Ellbogen: Gelenkkapseln, Ellbogen über Schubstange ---------- */
 const ZS = (sd) => sd * D.exoSh;
-const shRoute = [], shRoute2 = [];
 SIDE.forEach((sd, k) => {
-  const zs = ZS(sd), zUp = zs + sd * 0.036, zFo = zs + sd * 0.014, zDisc = zs + sd * 0.054;
+  const zs = ZS(sd), zUp = zs + sd * 0.036, zFo = zs + sd * 0.014, zDisc = zs + sd * 0.054, zEc = zs + sd * 0.062;
   cur = 'shoulder'; fl = k === 1 ? 3 : null;
   const zA = sd * D.shHalf, yA = D.torso;                       // Abspreizachse: nach vorne durch dein Schultergelenk
   {
@@ -809,8 +717,6 @@ SIDE.forEach((sd, k) => {
     for (const x of [-0.2, -0.125]) put(g, mesh(cyl(0.011, 0.011, 0.012, 18), M.steel), x, yA, zA, 0, 0, Math.PI / 2);   // Hohlachse
     put(g, mesh(new THREE.TorusGeometry(0.012, 0.0025, 6, 16), M.red), -0.118, yA, zA, 0, Math.PI / 2, 0);              // Kugelsperrbolzen
     fl = null;
-    shRoute[k] = [1, -1].map((s) => routeStatic(g, [V(-0.235, 0.41, sd * 0.058 + s * sd * 0.008), V(-0.235, yA + s * 0.005, zA), V(s > 0 ? -0.095 : -0.112, yA + s * 0.005, zA)], 0.012, 0.009,
-      [V(-0.1545, 0.47, sd * 0.085)]));
     if (k === 1) hotspot('shoulder', g, -0.16, yA + 0.08, zA + sd * 0.03);
   }
   {
@@ -824,46 +730,41 @@ SIDE.forEach((sd, k) => {
     box(g, 0.07, 0.07, 0.008, M.alu, 0, D.torso, zs);
     flangeBearing(g, 0, D.torso, zs + sd * 0.006, 0.8, sd);
     fl = null;
-    box(g, 0.012, 2 * R_SH + 0.05, 0.01, M.aluDark, -0.1, D.torso, zDisc + sd * 0.016);                   // Rollenträger hinter der Scheibe
-    tube(g, V(-0.1, D.torso + 0.06, zDisc + sd * 0.016), V(-0.06, yA + 0.088, ZS(sd) - sd * 0.005), 0.012, M.aluDark);
-    shRoute2[k] = [1, -1].map((s) => {
-      const yT = D.torso + s * R_SH, zP = zDisc + s * 0.0035 * sd;
-      return routeStatic(g, [V(-0.2, yA + s * 0.005, zA), V(s > 0 ? -0.095 : -0.112, yA + s * 0.005, zA), V(-0.08, yT, zP), V(0, yT, zP)], 0.012, 0.009,
-        [V(-0.1, yA + 0.05, zA + sd * 0.025), V(-0.1, yT, zDisc + sd * 0.016)]);
-    });
+    // Schulterkapsel: RS04 direkt auf der Achse, Gehäuse an der Schwinge, Abtrieb an der Oberarmplatte
+    box(g, 0.04, 0.03, Math.abs(zDisc - zs) + 0.03, M.alu, -0.04, D.torso + 0.07, (zs + zDisc) / 2);
+    capsule(g, 0, D.torso, zs + sd * 0.052, sd, 1);
   }
   {
     const g = G.upper[k];
     cur = 'shoulder';
     box(g, 0.06, 0.06, 0.008, M.alu, 0, 0, zUp);
-    sheave(g, 0, 0, zDisc, R_SH);
-    for (const a of [-70, -90]) box(g, 0.012, 0.01, 0.01, M.steel, Math.cos(deg(a)) * (R_SH - 0.008), Math.sin(deg(a)) * (R_SH - 0.008), zDisc + sd * 0.01);   // Seilklemmen
     cur = 'leg'; fl = k === 1 ? 2 : null;
     tube(g, V(0, -0.02, zUp), V(0, -0.2, zUp), 0.025);   // 25 × 25 × 3
     tube(g, V(0, -0.17, zUp), V(0, -D.upper + 0.03, zUp), 0.022);
     fl = null;
     sensorCuff(g, -0.15, sd * D.shHalf, 0.05, 0.06, zUp, sd, k === 1 ? 'upper' : null);
+    // Ellbogenkapsel: RS03 oben am Oberarm, Kurbel 50 mm innen, Schubstange 1:1 zum Hebel am Unterarm
     cur = 'bowden';
-    box(g, 2 * R_EL + 0.024, 0.012, 0.01, M.aluDark, 0, -D.upper + 0.13, zDisc);                       // Hüllenanschlag Ellbogen
-    box(g, 0.02, 0.03, Math.abs(zDisc - zUp), M.aluDark, 0, -D.upper + 0.13, (zDisc + zUp) / 2);
-    for (const s of [1, -1]) put(g, mesh(cyl(0.006, 0.006, 0.02, 12), M.chrome), s * R_EL, -D.upper + 0.12, zDisc);
+    box(g, 0.045, 0.045, Math.abs(zEc - zUp) + 0.01, M.alu, 0, EL_CAP_Y, (zEc + zUp) / 2);
+    capsule(g, 0, EL_CAP_Y, zEc + sd * 0.008, sd, 0.85);
     cur = 'power'; box(g, 0.012, 0.03, 0.025, M.pcb, -0.02, -0.07, zUp + sd * 0.014);
-    if (k === 1) hotspot('bowden', g, -0.03, -0.08, zDisc + sd * 0.05);
+    if (k === 1) hotspot('bowden', g, -0.03, EL_CAP_Y - 0.06, zEc + sd * 0.07);
     if (k === 1) hotspot('sensor', g, 0.07, -0.15, sd * D.shHalf + sd * 0.02);
   }
   {
     const g = G.fore[k];
     cur = 'elbow';
     flangeBearing(g, 0, 0, zFo + sd * 0.004, 0.65, sd);
-    sheave(g, 0, 0, zDisc, R_EL, 0.01);
-    for (const a of [-120, 190]) box(g, 0.01, 0.01, 0.01, M.steel, Math.cos(deg(a)) * (R_EL - 0.007), Math.sin(deg(a)) * (R_EL - 0.007), zDisc + sd * 0.009);
+    put(g, mesh(cyl(0.01, 0.01, Math.abs(zEc - zFo), 12), M.steel), 0, 0, (zEc + zFo) / 2, Math.PI / 2);   // Achsverlängerung zum Hebel
+    tube(g, V(0, 0, zEc), V(Math.cos(PHI_E) * R_EC, Math.sin(PHI_E) * R_EC, zEc), 0.014, M.aluDark);   // Ellbogenhebel 50 mm
+    put(g, mesh(new THREE.SphereGeometry(0.008, 12, 10), M.chrome), Math.cos(PHI_E) * R_EC, Math.sin(PHI_E) * R_EC, zEc);
     box(g, 0.014, 0.02, 0.014, M.tpu, -0.03, 0.025, zFo);
     cur = 'leg'; fl = k === 1 ? 1 : null;
     tube(g, V(0, -0.02, zFo), V(0, -D.fore + 0.01, zFo), 0.025);
     fl = null;
     sensorCuff(g, -0.07, sd * D.shHalf, 0.042, 0.05, zFo, sd, k === 1 ? 'fore' : null);
     put(g, mesh(new THREE.TorusGeometry(0.05, 0.004, 8, 40), M.chrome), 0, -0.07, sd * D.shHalf, Math.PI / 2);   // Drehring: Unterarm dreht in der Manschette ±60°
-    if (k === 1) hotspot('elbow', g, 0.0, R_EL + 0.02, zDisc + sd * 0.03);
+    if (k === 1) hotspot('elbow', g, 0.0, 0.06, zEc + sd * 0.03);
   }
 });
 
@@ -926,69 +827,22 @@ SIDE.forEach((sd, k) => {
   logs.push(lg);
 });
 
-/* ---------- Seile und Bowdenzüge (werden bei jeder Haltung neu gelegt) ---------- */
+/* ---------- Kurbeln und Schubstangen (werden bei jeder Haltung neu gelegt) ---------- */
+// Parallelogramm 1:1: Kurbel an der Kapsel und Hebel am Gelenk sind gleich lang und immer parallel, die Stange verschiebt nur.
+// Der Kurbelzapfen liegt also um denselben Vektor neben der Kapselachse wie der Hebelzapfen neben der Gelenkachse.
 const dyn = [];
 function dynTube(mat, r, key, fn, smooth = false) { const m = new THREE.Mesh(new THREE.BufferGeometry(), mat); m.castShadow = false; scene.add(m); (parts[key] = parts[key] || []).push(m); m.userData.base = mat; dyn.push({ m, r, fn, smooth }); return dyn[dyn.length - 1]; }
 const W = (g, x, y, z) => g.localToWorld(V(x, y, z));
-const arcPts = (c, R, a0, a1, n = 14) => { const out = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; out.push(V(c.x + Math.cos(a) * R, c.y + Math.sin(a) * R, c.z)); } return out; };
-// Bogen auf einer Scheibe in der x-y-Ebene der Baugruppe g; Winkel in g gemessen
-const arcLocal = (g, R, z, a0, a1, n = 14) => { const out = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; out.push(g.localToWorld(V(Math.cos(a) * R, Math.sin(a) * R, z))); } return out; };
-// Richtung (dx, dy) der Baugruppe src als Winkel in der Baugruppe g
-const angIn = (g, src, dx, dy) => { const v = new THREE.Vector3(dx, dy, 0).transformDirection(src.matrixWorld).transformDirection(new THREE.Matrix4().copy(g.matrixWorld).invert()); return Math.atan2(v.y, v.x); };
-const angOf = (g, dx, dy) => { const v = new THREE.Vector3(dx, dy, 0).transformDirection(g.matrixWorld); return Math.atan2(v.y, v.x); };
+function pushRod(key, capG, capY, jointG, R, phi, z, rodR, spring) {
+  const ends = () => { const C = W(capG, 0, capY, z), K = W(jointG, 0, 0, z), L = W(jointG, Math.cos(phi) * R, Math.sin(phi) * R, z); return [C, C.clone().add(L.clone().sub(K)), L]; };
+  dynTube(M.aluDark, 0.008, key, () => { const [C, P] = ends(); return [C, P]; });                       // Kurbel
+  dynTube(M.steel, rodR, key, () => { const [, P, L] = ends(); return [P, L]; });                          // Schubstange
+  if (spring) dynTube(M.yellow, rodR + 0.004, key, () => { const [, P, L] = ends(); return [P.clone().lerp(L, 0.25), P.clone().lerp(L, 0.42)]; });   // Federpaket (Knie: gibt ab ≈ 11 Nm nach)
+  dynTube(M.chrome, 0.009, key, () => { const [, P] = ends(); return [P.clone().add(V(0, 0, -0.006)), P.clone().add(V(0, 0, 0.006))]; });   // Gelenkkopf an der Kurbel
+}
 SIDE.forEach((sd, k) => {
-  const zs = ZS(sd), zDisc = zs + sd * 0.054;
-  // Schulter: offenes Seilpaar von der Box über die Umlenkrollen auf die Seilscheibe
-  const route = (i) => [...shRoute[k][i].slice(0, -1).map((p) => G.torso.localToWorld(p.clone())), ...shRoute2[k][i].slice(1, -1).map((p) => G.shsw[k].localToWorld(p.clone()))];
-  dynTube(M.rope, 0.0016, 'shoulder', () => {      // heben: oben, wickelt nach vorne ab
-    const U = G.upper[k], at = angIn(U, G.shsw[k], 0, 1), aa = deg(-70);
-    return [...route(0), ...arcLocal(U, R_SH, zDisc + 0.0035 * sd, at, Math.min(aa, at))];
-  });
-  dynTube(M.rope, 0.0016, 'shoulder', () => {      // senken: unten
-    const U = G.upper[k], ab = angIn(U, G.shsw[k], 0, -1);
-    let a1 = deg(-90); while (a1 < ab) a1 += Math.PI * 2; if (a1 - ab > Math.PI * 1.6) a1 = ab;
-    return [...route(1), ...arcLocal(U, R_SH, zDisc - 0.0035 * sd, ab, a1)];
-  });
-  // Ellbogen: Hüllen von der Box über die Schulter am Oberarm entlang
-  for (const s of [1, -1]) {
-    dynTube(M.housing, 0.003, 'bowden', () => [W(G.torso, -0.25, 0.31 + s * 0.01, sd * 0.1), W(G.torso, -0.23, 0.45, sd * 0.155), W(G.torso, -0.215, D.torso + 0.02, sd * (D.shHalf + 0.01)),
-      W(G.shsw[k], -0.13, D.torso + 0.11, sd * 0.215), W(G.shsw[k], -0.05, D.torso + 0.12, zs + sd * 0.02),
-      W(G.upper[k], 0.0 + s * 0.012, 0.06, zDisc + sd * 0.016), W(G.upper[k], s * 0.03, -0.12, zDisc + sd * 0.01), W(G.upper[k], s * R_EL, -D.upper + 0.13, zDisc)], true);
-  }
-  dynTube(M.cable, 0.0016, 'bowden', () => {      // beugen: vorne
-    const Fo = G.fore[k], af = angIn(Fo, G.upper[k], 1, 0);
-    let a1 = deg(-120); while (a1 > af) a1 -= Math.PI * 2; if (af - a1 > Math.PI * 1.6) a1 = af;
-    return [W(G.upper[k], R_EL, -D.upper + 0.12, zDisc), ...arcLocal(Fo, R_EL, zDisc, af, a1)];
-  });
-  dynTube(M.cable, 0.0016, 'bowden', () => {      // strecken: hinten
-    const Fo = G.fore[k], ab = angIn(Fo, G.upper[k], -1, 0);
-    let a1 = deg(190); while (a1 < ab) a1 += Math.PI * 2; if (a1 - ab > Math.PI * 1.6) a1 = ab;
-    return [W(G.upper[k], -R_EL, -D.upper + 0.12, zDisc), ...arcLocal(Fo, R_EL, zDisc, ab, a1)];
-  });
-});
-// Knie: Bowdenzug-Paar von der Box über das Abspreizgelenk und die Hüftschwinge hinten am Oberschenkel entlang
-SIDE.forEach((sd, k) => {
-  const T = G.thigh[k], S = G.shank[k], yS = -D.thigh + 0.13;
-  for (const [s, zp, xs] of [[1, Z.ek, -0.06], [-1, Z.fk, -0.072]]) {
-    dynTube(M.housing, 0.0042, 'rope', () => [W(G.torso, -0.262 + s * 0.008, 0.135, sd * 0.06), W(G.torso, -0.255, 0.03, sd * (0.1 + s * 0.004)), W(G.torso, -0.215, -0.035, sd * (0.15 + s * 0.005)),
-      W(G.swing[k], -0.17, -0.036, sd * (0.2 + s * 0.005)), W(G.swing[k], -0.09, -0.068, sd * (0.208 + s * 0.005)), W(T, -0.03, -0.12, sd * (zp - 0.004)),
-      W(T, -0.03, -0.26, sd * (zp - 0.002)), W(T, xs, yS + (s > 0 ? 0.018 : 0.036), sd * zp)], true);
-  }
-  // Streckzug: von hinten oben über die Kurvenscheibe nach vorne, Klemme vorne unten
-  dynTube(M.cable, 0.0014, 'rope', () => {
-    const P = W(T, -0.06, yS, sd * Z.ek), p = S.worldToLocal(P.clone());
-    let at = deg(45); for (let i = 0; i < 4; i++) at = Math.atan2(p.y, p.x) - Math.acos(Math.min(1, kneeCam(at) / Math.hypot(p.x, p.y)));
-    const out = [P], a1 = deg(-20);
-    for (let i = 0; i <= 18; i++) { const a = at + (a1 - at) * i / 18, r = kneeCam(a) + 0.0015; out.push(S.localToWorld(V(Math.cos(a) * r, Math.sin(a) * r, sd * Z.ek))); }
-    return out;
-  });
-  // Beugezug: aus der Federpatrone hinten senkrecht nach unten, unter der Beugescheibe nach vorne, Klemme vorne unten
-  dynTube(M.cable, 0.0014, 'rope', () => {
-    const P = W(T, -0.072, yS, sd * Z.fk), p = S.worldToLocal(P.clone()), d = Math.hypot(p.x, p.y);
-    const a0 = Math.atan2(p.y, p.x) + Math.acos(Math.min(1, R_KF / d)), a1 = Math.max(a0, deg(300)), out = [P];
-    for (let i = 0; i <= 14; i++) { const a = a0 + (a1 - a0) * i / 14, r = R_KF + 0.0015; out.push(S.localToWorld(V(Math.cos(a) * r, Math.sin(a) * r, sd * Z.fk))); }
-    return out;
-  });
+  pushRod('rope', G.thigh[k], KNEE_CAP_Y, G.shank[k], R_KC, PHI_K, sd * Z.kc, 0.006, true);
+  pushRod('bowden', G.upper[k], EL_CAP_Y, G.fore[k], R_EC, PHI_E, ZS(sd) + sd * 0.062, 0.005, false);
 });
 
 function layDyn() {
@@ -997,12 +851,7 @@ function layDyn() {
     let curve;
     if (d.smooth) curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
     else { curve = new THREE.CurvePath(); for (let i = 1; i < pts.length; i++) if (pts[i].distanceToSquared(pts[i - 1]) > 1e-10) curve.add(new THREE.LineCurve3(pts[i - 1], pts[i])); }
-    d.m.geometry.dispose(); d.m.geometry = new THREE.TubeGeometry(curve, Math.max(8, pts.length * 6), d.r, 6, false);
-    if (d.spool) {
-      let len = 0; for (let i = 1; i < pts.length; i++) len += pts[i].distanceTo(pts[i - 1]);
-      if (d.len0 === null) d.len0 = len;
-      spools[d.spool].rotation.z = (len - d.len0) / R_DRUM;
-    }
+    d.m.geometry.dispose(); d.m.geometry = new THREE.TubeGeometry(curve, Math.max(8, pts.length * 6), d.r, 8, false);
   }
 }
 
@@ -1012,30 +861,27 @@ cur = null;
 {
   box(bench, 1.1, 0.04, 0.5, M.bench, 0.3, 0.72, 0);
   for (const [x, z] of [[-0.2, -0.2], [0.8, -0.2], [-0.2, 0.2], [0.8, 0.2]]) box(bench, 0.04, 0.7, 0.04, M.bench, x, 0.35, z);
-  // a) Arm-Antrieb: Motor, Doppeltrommel, zwei Hüllen mit Spannschrauben
-  const a = new THREE.Group(); a.position.set(-0.02, 0.84, 0); a.scale.setScalar(1.8); bench.add(a);
-  put(a, mesh(cyl(0.043, 0.043, 0.04, 32), M.motor), 0, 0, -0.07, Math.PI / 2);
-  put(a, mesh(cyl(0.03, 0.03, 0.006, 24), M.steel), 0, 0, -0.035, Math.PI / 2);
-  for (let i = 0; i < 6; i++) { const ang = i / 6 * Math.PI * 2; bolt(a, Math.cos(ang) * 0.022, Math.sin(ang) * 0.022, -0.022, 0.016, 0.0025); }
-  put(a, mesh(cyl(R_DRUM, R_DRUM, 0.03, 24), M.alu), 0, 0, 0.01, Math.PI / 2);
-  for (const dz of [-0.005, 0.01, 0.025]) put(a, mesh(cyl(0.026, 0.026, 0.003, 28), M.alu), 0, 0, dz, Math.PI / 2);
-  for (const [dz, dir] of [[0.002, 1], [0.018, -1]]) {
-    for (let i = 0; i < 3; i++) put(a, mesh(new THREE.TorusGeometry(R_DRUM + 0.0015 + i * 0.002, 0.0012, 6, 24), M.cable), 0, 0, dz + (i - 1) * 0.003);
-    rod(a, V(0, dir * (R_DRUM + 0.004), dz), V(0.13, dir * 0.03, dz), 0.0012, M.cable);
-    rod(a, V(0.08, dir * 0.026, dz), V(0.2, dir * 0.04, dz), 0.0035, M.housing);
-    put(a, mesh(cyl(0.005, 0.005, 0.016, 6), M.chrome), 0.076, dir * 0.025, dz, 0, 0, Math.PI / 2 - Math.atan2(0.004, 0.05));
-  }
-  // b) Sensor-Manschette: Halter, Wägezelle, Puffer, Schale, Polster, Gurt, Verstärker
+  // a) Gelenkkapsel zerlegt: Abtriebsflansch, Motor, Mantel, Kühlkörper; daneben Kurbel und Schubstange mit Gelenkköpfen
+  const a = new THREE.Group(); a.position.set(-0.02, 0.84, 0); a.scale.setScalar(1.6); bench.add(a);
+  put(a, mesh(cyl(0.03, 0.03, 0.01, 28), M.steel), 0, 0, -0.07, Math.PI / 2);                           // Abtriebsflansch
+  put(a, mesh(cyl(0.054, 0.054, 0.04, 36), M.motor), 0, 0, -0.035, Math.PI / 2);                         // Motor RS04
+  put(a, mesh(cyl(0.058, 0.058, 0.046, 40), M.glass, false), 0, 0, 0.03, Math.PI / 2);                  // Mantel (abgezogen)
+  for (const dz of [0.008, 0.052]) put(a, mesh(new THREE.TorusGeometry(0.056, 0.002, 6, 32), M.tpu), 0, 0, dz);   // O-Ringe
+  capsule(a, 0, 0, 0.075, 1, 1);                                                                          // Kühlkörper-Seite
+  tube(a, V(0.09, 0.0, 0), V(0.09, 0.06, 0), 0.014, M.aluDark);                                          // Kurbel 60 mm
+  rod(a, V(0.09, 0.06, 0), V(0.25, 0.06, 0), 0.006, M.steel); rod(a, V(0.13, 0.06, 0), V(0.16, 0.06, 0), 0.01, M.yellow);   // Schubstange mit Federpaket
+  for (const x of [0.09, 0.25]) put(a, mesh(new THREE.SphereGeometry(0.009, 12, 10), M.chrome), x, 0.06, 0);
+  // b) Sensor-Manschette M2: Schale, Polster, BOA-Drehrad, Längsschlitten, Wägezelle, Halter
   const s = new THREE.Group(); s.position.set(0.33, 0.86, 0); s.scale.setScalar(1.6); bench.add(s);
-  put(s, mesh(shellGeo(0.05, 0.005, 0.06, deg(-100), deg(100)), M.print), -0.02, 0, 0);
-  put(s, mesh(shellGeo(0.044, 0.006, 0.054, deg(-96), deg(96)), M.foam), -0.06, 0, 0);
-  put(s, mesh(shellGeo(0.051, 0.0025, 0.035, deg(100), deg(260)), M.strap), -0.1, 0, 0);
-  put(s, mesh(rgeo(0.0127, 0.075, 0.0127, 0.0015), M.cell), 0.0, 0, 0.09);
-  box(s, 0.0135, 0.012, 0.004, M.gauge, 0.0, 0, 0.083);
+  put(s, mesh(shellGeo(0.05, 0.004, 0.087, deg(-105), deg(105)), M.print), -0.02, 0, 0);
+  put(s, mesh(shellGeo(0.046, 0.004, 0.08, deg(-100), deg(100)), M.foam), -0.06, 0, 0);
+  put(s, mesh(cyl(0.014, 0.014, 0.012, 20), M.chip), -0.12, 0, 0, 0, 0, Math.PI / 2);
+  box(s, 0.04, 0.034, 0.008, M.aluDark, 0.0, 0, 0.07);
+  for (const dx of [-0.011, 0.011]) put(s, mesh(cyl(0.0025, 0.0025, 0.11, 8), M.steel), dx, 0, 0.072);
+  put(s, mesh(rgeo(0.0127, 0.075, 0.0127, 0.0015), M.cell), 0.0, 0, 0.095);
+  box(s, 0.0135, 0.012, 0.004, M.gauge, 0.0, 0, 0.088);
   box(s, 0.026, 0.03, 0.02, M.aluDark, 0.0, 0.03, 0.125);
-  for (const dy of [-0.015, 0.015]) box(s, 0.008, 0.006, 0.008, M.tpu, 0.03, dy, 0.09);
-  box(s, 0.016, 0.022, 0.009, M.pcb, 0.0, -0.05, 0.13);
-  rod(s, V(0.0, -0.039, 0.13), V(0.0, -0.08, 0.16), 0.0012, M.chip);
+  for (const dy of [-0.015, 0.015]) box(s, 0.008, 0.006, 0.008, M.tpu, 0.03, dy, 0.095);
   // c) Schlaufenwinde: Schneckengetriebemotor, Trommel, Schlaufe, Schnappschäkel, U-Profil mit Zahnleiste
   const w = new THREE.Group(); w.position.set(0.66, 0.84, 0); w.scale.setScalar(1.6); bench.add(w);
   box(w, 0.034, 0.046, 0.03, M.motorDark, 0, 0, 0);
@@ -1049,16 +895,16 @@ cur = null;
 }
 const benchLabels = [], benchLabel = (t, x, y, z) => benchLabels.push(tagLabel(bench, t, x, y, z));
 const setBench = (on) => { bench.visible = on; benchLabels.forEach((l) => { l.visible = on; }); };
-benchLabel('Arm-Antrieb zerlegt', -0.02, 1.02, 0); benchLabel('Sensor-Manschette', 0.33, 1.14, 0); benchLabel('Schlaufenwinde', 0.62, 1.0, 0);
+benchLabel('Gelenkkapsel zerlegt', -0.02, 1.02, 0); benchLabel('Manschette M2', 0.33, 1.14, 0); benchLabel('Schlaufenwinde', 0.62, 1.0, 0);
 
 /* ---------- Kraftfluss (Beispiel: 3 m Baum fast senkrecht tragen) ---------- */
 const FLOW_TEXT = [
   ['Schlaufen am Handgelenk', 'Der Stamm (41 kg) hängt längs in den zwei rechten Schlaufen, je etwa 200 N. Die Zahnleiste hält ihn formschlüssig.'],
-  ['Unterarm, Ellbogen', 'Der Unterarm zeigt steil nach oben wie bei einer Fackel, die Last drückt fast längs: Ellbogen nur etwa 42 Nm, der Motor schafft bis 58 Nm.'],
-  ['Oberarm, Schulter', 'Schulter: etwa 100 Nm, der Motor schafft mit dem offenen Seilpaar bis etwa 100 Nm. Die linke Hand stützt den Stamm weiter oben.'],
+  ['Unterarm, Ellbogen', 'Der Unterarm zeigt steil nach oben wie bei einer Fackel, die Last drückt fast längs: Ellbogen nur etwa 42 Nm, die Ellbogenkapsel (RS03) schafft bis 56 Nm.'],
+  ['Oberarm, Schulter', 'Schulter: etwa 100 Nm, die Schulterkapsel (RS04) schafft bis 100 Nm, etwa 13 s mit voller Kraft. Die linke Hand stützt den Stamm weiter oben.'],
   ['Rahmen', 'Schulterbügel → Rückenrahmen → Hüftbügel. Die Last läuft über Metall, nicht über deinen Rücken.'],
-  ['Hüftschwinge, Hüftgelenke', 'Rahmen → Abspreizgelenk → Hüftschwinge → Hüftlager. Zusatzmoment beide Hüften etwa 57 Nm, die zwei Hüftmotoren schaffen zusammen bis etwa 280 Nm.'],
-  ['Beinschienen, Knie', 'Knie etwa 17 Nm, das Exo bis etwa 200 Nm (Kurvenscheibe in der Hocke). Bei fast gestreckten Knien tragen die Schienen fast ohne Motor.'],
+  ['Hüftschwinge, Hüftgelenke', 'Rahmen → Abspreizgelenk → Hüftschwinge → Hüftlager. Zusatzmoment beide Hüften etwa 57 Nm, die zwei Hüftkapseln schaffen zusammen bis etwa 220 Nm.'],
+  ['Beinschienen, Knie', 'Knie etwa 17 Nm, die Kniekapseln über die Schubstangen bis etwa 220 Nm. Bei fast gestreckten Knien tragen die Schienen fast ohne Motor.'],
   ['Fersenbügel, Steigbügel', 'Knöchellager → Fersenbügel → Steigbügel unter der Sohlenmitte: Mensch, Exo und Baum, etwa 1.300 N, gehen über die Spikes in den Boden.'],
 ];
 const flowMarks = [];
@@ -1084,73 +930,49 @@ function showFlowText() {
 /* ---------- Elektronik in der Box, Stecker und Kabelbäume ---------- */
 cur = 'wiring';
 {
-  const g = G.torso, bx = -0.25, xw = -0.309;
-  // Rückwand innen: Hauptplatine mit Teensy, CAN-Transceiver, Stiftleisten; Windentreiber; Spannungswandler
-  box(g, 0.002, 0.1, 0.17, M.pcb, xw, 0.43, 0);
-  box(g, 0.004, 0.061, 0.018, M.pcb, xw + 0.004, 0.44, -0.045); box(g, 0.003, 0.012, 0.012, M.chip, xw + 0.0065, 0.44, -0.045);   // Teensy 4.1
-  box(g, 0.004, 0.008, 0.007, M.chrome, xw + 0.004, 0.473, -0.045);                                                                  // USB
-  box(g, 0.003, 0.01, 0.006, M.chip, xw + 0.004, 0.41, -0.012);                                                                      // CAN-Transceiver
-  for (let i = 0; i < 4; i++) box(g, 0.006, 0.008, 0.02, M.header, xw + 0.005, 0.395, 0.015 + i * 0.022);                         // Schraubklemmen
-  for (let i = 0; i < 3; i++) { box(g, 0.003, 0.03, 0.028, std(0xA02020, 0.5), xw + 0.002, 0.345, -0.05 + i * 0.035); box(g, 0.008, 0.016, 0.02, M.aluDark, xw + 0.007, 0.345, -0.05 + i * 0.035); }   // Windentreiber
-  for (const [y, z] of [[0.25, -0.06], [0.25, 0.06]]) { box(g, 0.016, 0.05, 0.08, M.aluDark, xw + 0.007, y, z); for (let i = 0; i < 6; i++) box(g, 0.006, 0.05, 0.002, M.alu, xw + 0.018, y, z - 0.035 + i * 0.014); }   // DC/DC 24 V und 5 V
-  // Leistung: Kupferschiene mit einer Sicherung je Motor, Leitungen zu den Motoren, CAN-Kette
-  box(g, 0.006, 0.006, 0.25, M.copper, bx + 0.04, 0.15, 0);
-  const mot = [];
-  for (const [y, z] of [[0.21, -1], [0.21, 1], [0.31, -1], [0.31, 1], [0.41, -1], [0.41, 1]]) mot.push(V(bx - 0.03, y - 0.03, z * 0.12));
-  mot.forEach((m, i) => {
-    box(g, 0.006, 0.012, 0.004, M.fuse, bx + 0.04, 0.16, -0.1 + i * 0.04);
-    rod(g, V(bx + 0.04, 0.163, -0.1 + i * 0.04), V(bx + 0.02, m.y, m.z * 0.9), 0.0016, M.wireR);
-    rod(g, V(bx + 0.035, 0.163, -0.1 + i * 0.04 + 0.006), V(bx + 0.015, m.y, m.z * 0.9 + 0.006), 0.0016, M.wireB);
-  });
-  const canPts = [V(xw + 0.006, 0.41, -0.012), ...mot.map((m) => V(m.x, m.y, m.z)), V(bx - 0.03, 0.13, 0.135)];
-  for (let i = 1; i < canPts.length; i++) rod(g, canPts[i - 1], canPts[i], 0.0012, M.can);
-  // Akkuleitung: Akku → Hauptsicherung → (Not-Aus am Schultergurt) → Schütz → Kupferschiene
-  for (const sd of SIDE) for (const [dz, mat] of [[0, M.wireR], [0.012, M.wireB]]) rod(g, V(-0.193, 0.255 + dz, sd * 0.15), V(-0.3, 0.2 + dz, sd * 0.06), 0.0025, mat);   // Akkuleitungen zum Dioden-Modul
-  rod(g, V(-0.3, 0.2, 0.07), V(-0.282, 0.165, -0.095), 0.0025, M.wireR);
-  rod(g, V(-0.28, 0.17, 0.1), V(bx + 0.04, 0.15, 0.12), 0.0022, M.wireR);
-  // Rundstecker IP67: unten Hüftmotor (Leistung + CAN) und Bein-Sensoren, seitlich Arme, links Not-Aus/Taster, rechts Anzeige
-  const plug = (x, y, z, rx, rz, ring) => { put(g, mesh(cyl(0.008, 0.008, 0.016, 16), M.conn), x, y, z, rx, 0, rz); put(g, mesh(new THREE.TorusGeometry(0.0085, 0.0015, 6, 16), ring), x, y, z, rx + Math.PI / 2, 0, rz); };
-  for (const sd of SIDE) { plug(-0.25, 0.127, sd * 0.125, 0, 0, M.harnP); plug(-0.272, 0.127, sd * 0.095, 0, 0, M.harnS); plug(-0.27, 0.45, sd * 0.153, Math.PI / 2, 0, M.harnS); }
-  plug(-0.27, 0.475, -0.153, Math.PI / 2, 0, M.red); plug(-0.27, 0.475, 0.153, Math.PI / 2, 0, M.harnS);
-  // Träger der Rollen über der Box
-  cur = 'wiring';
-  hotspot('wiring', g, -0.33, 0.3, 0.1);
+  const g = G.torso, xw = -0.186;                                                                  // Montageplatte innen (vorne in der Box)
+  box(g, 0.002, 0.11, 0.19, M.pcb, xw - 0.003, 0.29, 0);                                          // Hauptplatine
+  box(g, 0.004, 0.061, 0.018, M.pcb, xw - 0.007, 0.305, -0.06); box(g, 0.003, 0.012, 0.012, M.chip, xw - 0.0095, 0.305, -0.06);   // Teensy 4.1
+  for (const y of [0.268, 0.252]) box(g, 0.003, 0.01, 0.006, M.chip, xw - 0.007, y, -0.06);       // 2 CAN-Transceiver (CAN1 Beine + Rumpf beugen, CAN3 Arme + Rumpf drehen)
+  for (let i = 0; i < 3; i++) box(g, 0.004, 0.018, 0.018, M.pcb, xw - 0.008 - i * 0.004, 0.33, 0.0 + i * 0.002);   // 3 × ADS131M04 (Manschetten, 1000/s)
+  for (let i = 0; i < 3; i++) { box(g, 0.003, 0.03, 0.026, std(0xA02020, 0.5), xw - 0.006, 0.245, 0.0 + i * 0.03); box(g, 0.008, 0.016, 0.02, M.aluDark, xw - 0.011, 0.245, 0.0 + i * 0.03); }   // Windentreiber
+  for (const z of [-0.06, 0.06]) { box(g, 0.016, 0.04, 0.05, M.aluDark, xw - 0.01, 0.215, z); }  // DC/DC 24 V und 5 V (am Alu gekühlt)
+  box(g, 0.006, 0.006, 0.17, M.copper, xw - 0.006, 0.212, 0);                                     // Kupferschiene mit einer Sicherung je Kapsel
+  for (let i = 0; i < 10; i++) box(g, 0.006, 0.012, 0.004, M.fuse, xw - 0.009, 0.222, -0.08 + i * 0.018);
+  // Akkuleitungen von den Schächten oben zum Dioden-Modul
+  for (const zb of [-0.046, 0.046]) for (const [dz, mat] of [[0, M.wireR], [0.01, M.wireB]]) rod(g, V(-0.225, 0.375, zb + dz), V(-0.232, 0.345, 0.06 + dz * 0.5), 0.0022, mat);
+  // Rundstecker IP67 unten an der Box: Beine (Leistung + CAN, Sensoren), Rumpfkapseln; seitlich Arme, Not-Aus/Taster, Anzeige
+  const plug = (x, y, z, rx, rz, ring) => { put(g, mesh(cyl(0.008, 0.008, 0.016, 16), M.conn), x, y, z, rx, 0, rz); put(g, mesh(new THREE.TorusGeometry(0.0085, 0.0015, 6, 16), ring), x, y, z + 0.0, rx + Math.PI / 2, 0, rz); };
+  for (const sd of SIDE) { plug(-0.2, 0.195, sd * 0.09, 0, 0, M.harnP); plug(-0.222, 0.195, sd * 0.06, 0, 0, M.harnS); plug(-0.21, 0.32, sd * 0.117, Math.PI / 2, 0, M.harnS); }
+  plug(-0.21, 0.29, -0.117, Math.PI / 2, 0, M.red); plug(-0.21, 0.29, 0.117, Math.PI / 2, 0, M.harnS);
+  hotspot('wiring', g, -0.27, 0.24, 0.12);
 }
 // Kabelbäume (über die Gelenke mit Schlaufe, werden bei jeder Haltung neu gelegt)
 SIDE.forEach((sd, k) => {
   const zs = ZS(sd), zUp = zs + sd * 0.036, zFo = zs + sd * 0.014, zc = sd * D.shHalf, yw = -D.fore;
   const T = G.thigh[k], Sh = G.shank[k], Sw = G.swing[k], U = G.upper[k], Fo = G.fore[k];
-  dynTube(M.harnP, 0.0045, 'wiring', () => [W(G.torso, -0.25, 0.12, sd * 0.125), W(G.torso, -0.245, 0.06, sd * 0.14), W(G.torso, -0.215, 0.0, sd * 0.145),
-    W(Sw, -0.172, -0.03, sd * 0.19), W(Sw, -0.165, -0.05, sd * 0.25), W(Sw, XM - 0.03, -0.047, sd * 0.292)], true);                 // Hüftmotor: Leistung + CAN
-  dynTube(M.harnS, 0.003, 'wiring', () => [W(G.torso, -0.272, 0.12, sd * 0.095), W(G.torso, -0.255, 0.04, sd * 0.118), W(G.torso, -0.225, -0.035, sd * 0.155),
+  dynTube(M.harnP, 0.0045, 'wiring', () => [W(G.torso, -0.2, 0.187, sd * 0.09), W(G.torso, -0.215, 0.08, sd * 0.13), W(G.torso, -0.215, 0.0, sd * 0.15),
+    W(Sw, -0.172, -0.03, sd * 0.19), W(Sw, -0.11, -0.045, sd * 0.25), W(Sw, -0.04, -0.06, sd * 0.285)], true);                    // Hüftkapsel: Leistung + CAN
+  dynTube(M.harnP, 0.0035, 'wiring', () => [W(Sw, -0.11, -0.045, sd * 0.25), W(T, -0.06, -0.06, sd * 0.27), W(T, -0.05, KNEE_CAP_Y + 0.03, sd * 0.275)], true);   // weiter zur Kniekapsel
+  dynTube(M.harnS, 0.003, 'wiring', () => [W(G.torso, -0.222, 0.187, sd * 0.06), W(G.torso, -0.235, 0.06, sd * 0.118), W(G.torso, -0.225, -0.035, sd * 0.155),
     W(Sw, -0.178, -0.042, sd * 0.208), W(Sw, -0.1, -0.078, sd * 0.216), W(T, -0.015, -0.1, sd * (zRail(-0.1) + 0.017)), W(T, 0.016, -0.17, sd * (zRail(-0.17) + 0.017)),
     W(T, 0.016, -D.thigh + 0.05, sd * (Z.kn + 0.02)), W(Sh, 0.02, -0.04, sd * (zShank(-0.04) + 0.018)), W(Sh, 0.016, -D.shank + 0.06, sd * (zShank(-D.shank + 0.06) + 0.016)),
-    W(G.foot[k], 0.03, -D.ankle + 0.012, sd * (HH + 0.07))], true);                                                                  // Oberschenkel-Verstärker, Fußsensor
-  dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.45, sd * 0.16), W(G.torso, -0.21, D.torso + 0.035, sd * (D.shHalf - 0.025)),
+    W(G.foot[k], 0.03, -D.ankle + 0.012, sd * (HH + 0.07))], true);                                                                  // Manschetten Oberschenkel und Schienbein, Fußsensor
+  dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.21, 0.32, sd * 0.125), W(G.torso, -0.2, 0.42, sd * 0.13), W(G.torso, -0.18, D.torso + 0.035, sd * (D.shHalf - 0.025)),
     W(G.shsw[k], -0.12, D.torso + 0.115, sd * 0.2), W(G.shsw[k], -0.03, D.torso + 0.115, zs - sd * 0.02), W(U, -0.022, -0.03, zUp + sd * 0.016), W(U, -0.022, -0.16, zUp + sd * 0.016), W(U, -0.022, -D.upper + 0.04, zUp + sd * 0.016),
     W(Fo, -0.024, -0.03, zFo + sd * 0.016), W(Fo, -0.03, -0.09, zFo + sd * 0.045), W(Fo, -0.03, -0.15, zFo + sd * 0.045), W(Fo, -0.012, yw + 0.07, zFo + sd * 0.02), W(Fo, 0.03, -D.fore - 0.02, zc + sd * 0.024)], true);   // Arm: Manschetten, Winden, Schlaufen-Wägezellen, Taster
-  dynTube(M.harnS, 0.0022, 'wiring', () => [W(G.torso, -0.27, 0.47, sd * 0.155), W(G.torso, -0.2, D.torso + 0.12, sd * 0.1), W(G.torso, -0.16, D.torso + 0.17, sd * 0.13)], true);   // Arbeitslicht
+  dynTube(M.harnS, 0.0022, 'wiring', () => [W(G.torso, -0.21, 0.33, sd * 0.125), W(G.torso, -0.18, D.torso + 0.12, sd * 0.1), W(G.torso, -0.16, D.torso + 0.17, sd * 0.13)], true);   // Arbeitslicht
   if (k === 1) dynTube(M.harnS, 0.0025, 'wiring', () => [W(U, -0.022, -0.1, zUp + sd * 0.016), W(U, -0.02, -0.13, zUp + sd * 0.035), W(U, 0, -0.15, zs + sd * 0.082)], true);   // Anzeige
 });
-dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.27, 0.475, -0.16), W(G.torso, -0.2, D.torso + 0.04, -0.11), W(G.torso, -0.1, D.torso + 0.058, -0.075),
+dynTube(M.harnS, 0.0035, 'wiring', () => [W(G.torso, -0.21, 0.29, -0.125), W(G.torso, -0.19, D.torso + 0.04, -0.11), W(G.torso, -0.1, D.torso + 0.058, -0.075),
   W(G.torso, -0.01, D.torso + 0.098, -0.095), W(G.torso, 0.093, D.torso + 0.045, -0.1), W(G.torso, 0.134, D.torso - 0.05, -0.1)], true);   // Not-Aus, Ein/Aus, LED-Ring
-// Hauben (Schalter „Hauben“): Hüftmotor mit Seilgetriebe
-// Fingerschutz: durchsichtige Schalen über allen Seilscheiben (nichts kann eingezogen werden)
+// Fingerschutz: durchsichtige Schalen über den Kurbeln von Knie und Ellbogen (nichts kann eingezogen werden)
 const guardMat = new THREE.MeshPhysicalMaterial({ color: 0xBFD6E6, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
-function guard(g, x, y, z, r, w) { const prev = catNow; catNow = 'struct'; put(g, mesh(new THREE.CylinderGeometry(r, r, w, 40, 1, true), guardMat, false), x, y, z, Math.PI / 2); put(g, mesh(new THREE.CircleGeometry(r, 40), guardMat, false), x, y, z + Math.sign(z) * w / 2); catNow = prev; }
+function guard(g, x, y, z, r, w) { const prev = catNow; catNow = 'struct'; put(g, mesh(new THREE.CylinderGeometry(r, r, w, 40, 1, true), guardMat, false), x, y, z, Math.PI / 2); put(g, mesh(new THREE.CircleGeometry(r, 40), guardMat, false), x, y, z - Math.sign(z) * w / 2); catNow = prev; }
 cur = 'finish';
 SIDE.forEach((sd, k) => {
-  guard(G.swing[k], 0, 0, sd * Z.hm, R_HM + 0.012, 0.03);
-  guard(G.thigh[k], 0, -D.thigh, sd * (Z.ek + Z.fk) / 2, 0.092, 0.04);
-  guard(G.shsw[k], 0, D.torso, ZS(sd) + sd * 0.054, R_SH + 0.012, 0.026);
-  guard(G.upper[k], 0, -D.upper, ZS(sd) + sd * 0.054, R_EL + 0.012, 0.024);
-});
-cur = 'finish';
-SIDE.forEach((sd, k) => {
-  const sh = mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.052, 36, 1, false), null); sh.material = null;
-  const cov = new THREE.MeshPhysicalMaterial({ color: 0x2A2E33, roughness: 0.38, metalness: 0.1, clearcoat: 0.6, clearcoatRoughness: 0.35 });
-  sh.material = cov; sh.userData.base = cov; put(G.swing[k], sh, XM, 0, sd * 0.284, Math.PI / 2);
-  box(G.swing[k], 0.15, 0.14, 0.03, cov, -0.05, 0, sd * 0.255);
+  guard(G.thigh[k], 0, KNEE_CAP_Y, sd * (Z.kc - 0.002), R_KC + 0.014, 0.022);
+  guard(G.upper[k], 0, EL_CAP_Y, ZS(sd) + sd * 0.06, R_EC + 0.013, 0.02);
 });
 
 /* ================= 14–17 Komfort-Features ================= */
@@ -1158,14 +980,14 @@ const feat = { standT: 0, standOn: false, light: true, akku: 0.82 };
 // 14 Parkstütze: zwei Klappstützen hinten am Rahmen, ausgeklappt steht das Exo allein
 cur = 'stand';
 SIDE.forEach((sd) => {
-  box(G.torso, 0.034, 0.03, 0.03, M.aluDark, -0.345, 0.1, sd * 0.12);
-  put(G.torso, mesh(cyl(0.006, 0.006, 0.045, 10), M.steel), -0.345, 0.1, sd * 0.12, Math.PI / 2);
-  put(G.torso, mesh(new THREE.TorusGeometry(0.009, 0.002, 6, 14), M.red), -0.345, 0.1, sd * 0.146);   // Rastbolzen
+  box(G.torso, 0.034, 0.03, 0.03, M.aluDark, -0.29, 0.1, sd * 0.12);
+  put(G.torso, mesh(cyl(0.006, 0.006, 0.045, 10), M.steel), -0.29, 0.1, sd * 0.12, Math.PI / 2);
+  put(G.torso, mesh(new THREE.TorusGeometry(0.009, 0.002, 6, 14), M.red), -0.29, 0.1, sd * 0.146);   // Rastbolzen
 });
-hotspot('stand', G.torso, -0.37, 0.1, 0.16);
+hotspot('stand', G.torso, -0.315, 0.1, 0.16);
 const standFeet = SIDE.map(() => { const m = mesh(new THREE.SphereGeometry(0.02, 14, 10), M.tpu); m.scale.set(1.4, 0.6, 1.4); scene.add(m); return m; });
 SIDE.forEach((sd, k) => dynTube(M.alu, 0.011, 'stand', () => {
-  const h = W(G.torso, -0.345, 0.1, sd * 0.12), up = W(G.torso, -0.355, 0.47, sd * 0.12);
+  const h = W(G.torso, -0.29, 0.1, sd * 0.12), up = W(G.torso, -0.3, 0.47, sd * 0.13);
   const down = V(h.x - 0.42, 0.012, h.z * 1.4), tip = up.lerp(down, feat.standT);
   standFeet[k].position.copy(tip); return [h, tip];
 }));
@@ -1217,11 +1039,9 @@ cur = 'buckle';
 hotspot('buckle', G.torso, -0.118, D.torso + 0.03, D.shHalf + 0.03);
 // 17 Oberfläche und Abdeckungen
 cur = 'finish';
-hotspot('finish', G.torso, -0.25, 0.57, 0.15);
+hotspot('finish', G.torso, -0.26, 0.27, 0.13);
 const MC = new THREE.MeshPhysicalMaterial({ color: 0x2A2E33, roughness: 0.38, metalness: 0.1, clearcoat: 0.6, clearcoatRoughness: 0.35 });
-put(G.torso, mesh(rgeo(0.15, 0.05, 0.31, 0.02), MC), -0.25, 0.505, 0);                     // gedruckte Haube über der Box
-for (let i = 0; i < 6; i++) box(G.torso, 0.1, 0.003, 0.012, M.chip, -0.25, 0.531, -0.1 + i * 0.04);   // Lüftungsschlitze
-put(G.torso, mesh(rgeo(0.006, 0.34, 0.3, 0.003), MC), -0.318, 0.3, 0);                      // Rückwand
+put(G.torso, mesh(rgeo(0.006, 0.146, 0.226, 0.003), MC), -0.243, 0.27, 0);                  // Deckel der Elektronikbox (PETG, Dichtung)
 cur = null;
 function setFinish(anod) {
   M.alu.color.set(anod ? 0x7A838C : 0xC9D0D4); M.alu.roughness = anod ? 0.4 : 0.34; M.alu.metalness = anod ? 0.75 : 0.85;
@@ -1358,8 +1178,6 @@ function pose(dt) {
     const c0 = L.head.clone().addScaledVector(L.d, rO + 0.004), dir = L.d.clone().lerp(d1, t).normalize(), a = rO + (a1 - rO) * t, b = rO + (b1 - rO) * t;
     L.rg.position.copy(c0.lerp(c1, t)); L.rg.rotation.y = Math.atan2(-dir.z, dir.x); L.ring.scale.set(a, 1, b);
   }
-  // Trommeln der Armmotoren drehen mit dem Gelenk
-  for (let k = 0; k < 2; k++) { spools['sh' + k].rotation.z = (ex.psi + lam) * R_SH / R_DRUM; spools['el' + k].rotation.z = ex.eps * R_EL / R_DRUM; spools['knee' + k].rotation.z = (th + phS) * 0.05 / R_DRUM; hipDrums[k].rotation.z = -(th + lam) * R_HM / 0.01; }
   // Kraftfluss-Pfeil an den Schlaufen
   if (flowOn) { flowArrow.position.copy(W(G.fore[1], XH - 0.05, -D.fore - 0.05, D.shHalf)); }
   layDyn();
