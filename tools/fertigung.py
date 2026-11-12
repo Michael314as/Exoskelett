@@ -94,7 +94,7 @@ def check_holes(outline, holes):
                 errs.append(f'Loch {i + 1} und {j + 1} näher als {STEG_MIN} mm')
     return errs
 
-# Eckplatten Rückenrahmen (Rohr 25 × 25 an Querrohr 20 × 20)
+# Eckplatten Rückenrahmen (Rohr 30 × 30 an Querrohr 20 × 20)
 laser('eckplatte', P(rrect(60, 60, 6)) - circ(M6 / 2, -15, 15) - circ(M6 / 2, 15, 15) - circ(M6 / 2, -15, -15) - circ(M6 / 2, 15, -15),
       'Alu 5754', 4, 24, 'Doppelplatten an allen Rahmenecken (2 je Ecke)')
 
@@ -135,22 +135,26 @@ def abtriebsflansch(m, w, h):
     return p
 laser('abtriebsflansch_rs04', abtriebsflansch(RS04, 90, 90), 'Alu 6082 T6', 8, 4, 'Flansch Abtrieb RS04 → Oberschenkelplatte (Hüfte) bzw. Oberarmschiene (Schulter); 9 × M5 auf Ø 36')
 # Kurbeln und Hebel (Parallelogramm 1:1): Kurbel am Motorabtrieb, Hebel am Gelenk, Zapfen für die Gelenkköpfe
+# Zapfen: einschnittig, deshalb als Passschraube ISO 7379 (12.9) mit glattem Schaft Ø 8 bzw. Ø 6 im Biegequerschnitt, nie als
+# normale Schraube mit Gewinde in der Kurbel (tools/festigkeit.py: M8 8.8 läge im Gewindegrund über der Streckgrenze).
+# Bohrung 0,2 mm kleiner lasern und auf H7 reiben (Parameter `zapfen` bleibt das Nennmaß + 0,2 für die Armbreite).
+REIB = 0.4                   # Aufmaß zum Reiben: Laserloch = Nennmaß − 0,2 (zapfen − REIB)
 def kurbel(m, r, zapfen, nabe):
     p = P(circ(nabe) + rrect(r, 2 * zapfen + 8, zapfen + 4, r / 2, 0) + circ(zapfen + 4, r, 0)) - circ(6)
     p = lochkreis(p, m['ab_lk'], m['ab_n'], m['ab_loch'], dreh=20)
-    return p - circ(zapfen / 2, r, 0)
-laser('kurbel_knie', kurbel(RS04, 60.0, 8.2, 27.0), 'Alu 6082 T6', 10, 2, 'Kurbel BA-01: auf dem Abtrieb des Kniemotors (9 × M5), Zapfen M8 bei 60 mm')
-laser('kurbel_ellbogen', kurbel(RS03, 50.0, 6.2, 23.0), 'Alu 6082 T6', 8, 2, 'Kurbel AR-04: auf dem Abtrieb des Ellbogenmotors (6 × M4), Zapfen M6 bei 50 mm')
+    return p - circ((zapfen - REIB) / 2, r, 0)
+laser('kurbel_knie', kurbel(RS04, 60.0, 8.2, 27.0), 'Alu 6082 T6', 10, 2, 'Kurbel BA-01: auf dem Abtrieb des Kniemotors (9 × M5 + 2 Stifte Ø 6), Zapfen bei 60 mm: Passschraube Ø 8 (ISO 7379, 12.9), Loch Ø 7,8 auf 8 H7 reiben')
+laser('kurbel_ellbogen', kurbel(RS03, 50.0, 6.2, 23.0), 'Alu 6082 T6', 8, 2, 'Kurbel AR-04: auf dem Abtrieb des Ellbogenmotors (6 × M4 + 2 Stifte Ø 5 nach dem Motor bohren), Zapfen bei 50 mm: Passschraube Ø 6 (12.9), Loch Ø 5,8 auf 6 H7 reiben')
 def hebel(r, zapfen, bohrung, lk, n, d, nabe):
     p = P(circ(nabe) + rrect(r, 2 * zapfen + 8, zapfen + 4, r / 2, 0) + circ(zapfen + 4, r, 0)) - circ(bohrung / 2)
     p = lochkreis(p, lk, n, d, dreh=30)
-    return p - circ(zapfen / 2, r, 0)
-laser('kniehebel', hebel(60.0, 8.2, 12.5, 32.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 2, 'Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen M8 bei 60 mm')
-laser('ellbogenhebel', hebel(50.0, 6.2, 8.5, 26.0, 3, M4, 20.0), 'Alu 6082 T6', 8, 2, 'Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen M6 bei 50 mm')
+    return p - circ((zapfen - REIB) / 2, r, 0)
+laser('kniehebel', hebel(60.0, 8.2, 12.5, 32.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 2, 'Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen bei 60 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben')
+laser('ellbogenhebel', hebel(50.0, 6.2, 8.5, 26.0, 3, M4, 20.0), 'Alu 6082 T6', 8, 2, 'Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen bei 50 mm: Passschraube Ø 6 (12.9), Loch auf 6 H7 reiben')
 # Rumpfantrieb (RA-13): Kurbeln an den Rumpfkapseln, Hebel am Lendengelenk, Träger am unteren Rahmen
-laser('kurbel_rumpf_beugen', kurbel(RS04, 50.0, 8.2, 27.0), 'Alu 6082 T6', 10, 1, 'Kurbel am RS04 des Rumpfs (Beugen), Zapfen M8 bei 50 mm')
-laser('hebel_lendengelenk', hebel(50.0, 8.2, 10.5, 30.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 1, 'Hebel am Lendengelenk (oberer Rahmen), Bolzen Ø 10, Zapfen M8 bei 50 mm')
-laser('kurbel_rumpf_drehen', kurbel(RS03, 40.0, 6.2, 23.0), 'Alu 6082 T6', 8, 1, 'Kurbel am RS03 des Rumpfs (Drehen), Zapfen M6 bei 40 mm')
+laser('kurbel_rumpf_beugen', kurbel(RS04, 50.0, 8.2, 27.0), 'Alu 6082 T6', 10, 1, 'Kurbel am RS04 des Rumpfs (Beugen), Zapfen bei 50 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben')
+laser('hebel_lendengelenk', hebel(50.0, 8.2, 10.5, 30.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 1, 'Hebel am Lendengelenk (oberer Rahmen), Bolzen Ø 10, Zapfen bei 50 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben')
+laser('kurbel_rumpf_drehen', kurbel(RS03, 40.0, 6.2, 23.0), 'Alu 6082 T6', 8, 1, 'Kurbel am RS03 des Rumpfs (Drehen), Zapfen bei 40 mm: Passschraube Ø 6 (12.9), Loch auf 6 H7 reiben')
 laser('traeger_rumpfkapsel', P(rrect(40, 120, 6)) - circ(M6 / 2, 0, 50) - circ(M6 / 2, 0, -50) - circ(M6 / 2, -10, 20) - circ(M6 / 2, 10, 20) - slot(20, M6, 0, -15, 90),
       'Alu 6082 T6', 8, 3, 'Träger der Rumpfkapseln am unteren Rahmen (2 für Beugen, 1 Konsole für Drehen)')
 
@@ -271,8 +275,9 @@ def bohrschablone(profil, n_loecher=7, pitch=20.0, loch=6.6):
         x = -L / 2 + 5 + pitch / 2 + i * pitch
         m = m - Manifold.cylinder(t * 3, loch / 2, loch / 2, 32).translate((x, 0, -1))
     return m
-druck('bohrschablone_rohr25', bohrschablone(25), 'PETG', 1, 'Lochraster der Außenrohre 25 × 25 (Steckbolzen Ø6)')
-druck('bohrschablone_rohr20', bohrschablone(20), 'PETG', 1, 'Lochraster der Innenrohre 20 × 20')
+# Rohrmaße nach tools/festigkeit.py: Beinschienen außen 30 × 30 × 2, innen 25 × 25 (Teleskop, 1 mm Spiel), Armschienen 25 × 25 × 3
+druck('bohrschablone_rohr30', bohrschablone(30), 'PETG', 1, 'Lochraster der Außenrohre 30 × 30 an Ober- und Unterschenkel (Steckbolzen Ø6)')
+druck('bohrschablone_rohr25', bohrschablone(25), 'PETG', 1, 'Lochraster der Innenrohre 25 × 25 (Teleskop) und der Armschienen 25 × 25')
 
 def zellenhalter():
     """Halter Wägezelle (Biegebalken 12,7 × 12,7 × 80) an der Schiene, mit Aufnahme für die Überlastpuffer."""

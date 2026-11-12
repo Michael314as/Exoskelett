@@ -16,8 +16,8 @@ constexpr int kCells = 17;
 constexpr uint16_t kSettingsVersion = 7;
 constexpr uint32_t kAllCells = (1u << kCells) - 1u;
 // Messbereich je Zelle [N]: darüber gilt der Sensor als gestört. Manschetten und Rumpf: Biegebalken 20 kg, Puffer liegen bei ≈ 150 N an.
-// Schlaufenköpfe: 50-kg-Zelle, ein schwerer Baum zieht 300–500 N. Steigbügel: 4 × 50 kg, Mensch + Exo + Baum auf einem Bein ≈ 1500 N,
-// beim Auftreten mehr. Mit einheitlich 150 N (bis Version 6) hätte schon das Stehen auf einem Bein einen Sensorfehler ausgelöst.
+// Schlaufenköpfe: 50-kg-Zelle, ein schwerer Baum zieht 300–500 N. Steigbügel: 4 × 50 kg zwischen Bügel und Sohle, darauf steht der
+// Mensch mit 750–1400 N. Mit einheitlich 150 N (bis Version 6) hätte schon das Stehen auf einem Bein einen Sensorfehler ausgelöst.
 inline float defaultCellLimitN(int c) { return c >= 6 && c <= 8 ? 650.f : (c == 9 || c == 10) ? 2600.f : 150.f; }
 // Welche Zelle ein Gelenk für seine Absicht braucht (Prüfstand: nur diese muss angeschlossen sein)
 inline uint32_t cuffCellsOfJoint(int g) {
