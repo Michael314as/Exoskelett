@@ -45,6 +45,9 @@ static Inputs in;
 static Settings cfg;
 static IntervalTimer ctlTimer;
 static volatile bool tick = false;
+static volatile uint32_t tickCount = 0;                                          // zählt der Zeitgeber: daran sieht die Schleife ausgelassene Takte
+static const char* notice = "";                                                 // Hinweis der Steuerung für die Anzeige
+static const char* sensorDetail = "";                                           // welcher Sensor zuletzt gestört war (USB-Konsole)
 
 // ---------- Motoren ----------
 static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
@@ -53,31 +56,42 @@ static const uint8_t kBus[NJ] = {1, 1, 1, 1, 3, 3, 3, 3, 1, 3};                 
 static void canWrite(int i, const CAN_message_t& m) { if (kBus[i] == 1) can1.write(m); else can3.write(m); }
 static const MotorLimits kLim[NJ] = {kRS04, kRS04, kRS04, kRS04, kRS04, kRS04, kRS03, kRS03, kRS04, kRS03};   // Hüfte, Knie, Schulter, Rumpf beugen: RS04; Ellbogen, Rumpf drehen: RS03
 static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};             // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, Rumpf beugen, Rumpf drehen
-// Übersetzung Gelenk : Motor und Wirkungsgrad. Hüfte: Seilgetriebe 1:6. Knie: Kurvenscheibe 5 cm (gestreckt) / Trommel 1,5 cm, Bowdenzug.
+// Übersetzung Gelenk : Motor und Wirkungsgrad
 static const Transmission kTr[NJ] = {{1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.f, 0.97f}, {1.f, 0.97f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.f, 0.95f}, {1.8f, 0.93f}};   // direkt bzw. Schubstange 1:1; Rumpf drehen über Kurbel 1 : 1,8
 static MotorState motorState[NJ];
 static uint32_t lastReplyMs[NJ];
 static float powerOnTime = 0.f;                                                 // Zeit seit Schütz zu
 static bool motorsOn = false;
 
-static void motorsEnable(bool on) {
-  for (int i = 0; i < NJ; i++) { CAN_message_t m; m.flags.extended = 1; m.len = 8; m.id = packSpecial(on ? kTypeEnable : kTypeStop, kCanId[i], m.buf); canWrite(i, m); }
-  motorsOn = on;
+static uint16_t zeroArm = 0;                                                    // Gelenke, deren Nullpunkt beim nächsten Einschalten eingemessen wird (Konsole gelenk0)
+static void armJointZero(uint16_t mask) { zeroArm = mask; }
+// Einschalten eines Motors: alte Fehler löschen, Bus-Wächter im Motor setzen (0,1 s ohne Befehl → der Motor wird von selbst
+// stromlos; Werkseinstellung ist „aus“ und der Wert geht beim Ausschalten verloren), dann einschalten.
+// Der Wächter ist die zweite Ebene neben dem Schütz: hängt der Teensy oder reißt das CAN-Kabel, hält der Motor sonst sein letztes Moment.
+static void motorEnable(int i) {
+  CAN_message_t m; m.flags.extended = 1; m.len = 8;
+  m.id = packSpecial(kTypeStop, kCanId[i], m.buf); canWrite(i, m);
+  m.id = packParamWrite(kCanId[i], kParamCanTimeout, kCanTimeoutTicks, m.buf); canWrite(i, m);
+  m.id = packSpecial(kTypeEnable, kCanId[i], m.buf); canWrite(i, m);
 }
 static bool readMotors(JointInput* j) {
   CAN_message_t m;
-  auto take = [&] {
+  auto take = [&](uint8_t bus) {
     if (!m.flags.extended || m.len < 8) return;
     const uint8_t from = (m.id >> 8) & 0xFF;
-    for (int i = 0; i < NJ; i++) if (kCanId[i] == from) { const MotorState s = unpackReply(m.id, m.buf, kLim[i]); if (s.valid) { motorState[i] = s; lastReplyMs[i] = millis(); } }
+    for (int i = 0; i < NJ; i++) if (kCanId[i] == from && kBus[i] == bus) { const MotorState s = unpackReply(m.id, m.buf, kLim[i]); if (s.valid) { motorState[i] = s; lastReplyMs[i] = millis(); } }
   };
-  while (can1.read(m)) take();
-  while (can3.read(m)) take();
+  while (can1.read(m)) take(1);
+  while (can3.read(m)) take(3);
   bool ok = true;
   for (int i = 0; i < NJ; i++) {
-    j[i].q = kTr[i].jointAngleFrom(motorState[i].pos - cfg.joint0[i]); j[i].qd = kTr[i].jointVelFrom(motorState[i].vel);
-    if (((cfg.jointMask >> i) & 1u) && (millis() - lastReplyMs[i] > 50 || motorState[i].fault)) ok = false;   // nur eingebaute Motoren prüfen; Motorfehler (Übertemperatur, Überstrom …) = Sensorfehler
+    // Winkel über den gespeicherten Nullpunkt, auf ±π gefaltet (der Motor meldet nach dem Einschalten 0…2π)
+    j[i].q = ((zeroArm >> i) & 1u) ? 0.f : kTr[i].jointAngleFrom(motorState[i].pos, cfg.joint0[i]);
+    j[i].qd = kTr[i].jointVelFrom(motorState[i].vel);
     j[i].motorTempC = motorState[i].tempC;
+    if (!((cfg.jointMask >> i) & 1u)) continue;                                 // nur eingebaute Motoren prüfen
+    if (millis() - lastReplyMs[i] > 50 || motorState[i].fault) ok = false;      // stumm oder Motorfehler (Übertemperatur, Überstrom, Encoder …)
+    if (powerOnTime > 1.0f && motorState[i].mode != kMotorRun) ok = false;      // antwortet, ist aber nicht eingeschaltet (z. B. eigener Bus-Wächter)
   }
   return powerOnTime < 0.6f ? true : ok;          // Motoren brauchen nach dem Schütz einen Moment zum Hochfahren
 }
@@ -101,34 +115,63 @@ static void adsTransfer(int a, uint8_t* buf) {
   SPI.transfer(buf, 18);
   digitalWrite(PIN_ADS_CS[a], HIGH); SPI.endTransaction();
 }
+static void adsConfigure(int a);
 static void adsBegin() {
   SPI.begin();
   for (int a = 0; a < 3; a++) { pinMode(PIN_ADS_CS[a], OUTPUT); digitalWrite(PIN_ADS_CS[a], HIGH); }
   pinMode(PIN_ADS_DRDY, INPUT); pinMode(PIN_ADS_SYNC, OUTPUT); digitalWrite(PIN_ADS_SYNC, HIGH);
-  uint8_t b[18];
-  for (int a = 0; a < 3; a++) { adsWregFrame(kAdsRegClock, kAdsClock1k, b); adsTransfer(a, b); adsWregFrame(kAdsRegGain1, kAdsGain128, b); adsTransfer(a, b); }
+  for (int a = 0; a < 3; a++) adsConfigure(a);
   digitalWrite(PIN_ADS_SYNC, LOW); delayMicroseconds(2); digitalWrite(PIN_ADS_SYNC, HIGH);   // alle drei gleichzeitig starten
+  uint8_t b[18];
+  for (int a = 0; a < 3; a++) { for (int i = 0; i < 18; i++) b[i] = 0; adsTransfer(a, b); }   // einmal lesen: löscht die Neustart-Meldung im STATUS
 }
-static bool adsRead() {                                                         // true = neuer Satz gelesen
+static uint32_t lastAdsMs = 0, lastHxMs[kCells] = {}, adsCrcErrors = 0, adsResets = 0;
+static void adsConfigure(int a) { uint8_t b[18]; adsWregFrame(kAdsRegClock, kAdsClock1k, b); adsTransfer(a, b); adsWregFrame(kAdsRegGain1, kAdsGain128, b); adsTransfer(a, b); }
+// Liest alle drei Wandler. Jeder Rahmen wird mit seiner Prüfsumme geprüft. Je Wandler zwei Rahmen: Der Baustein puffert zwei Messungen,
+// und weil der Regeltakt (500/s) nur jede zweite abholt, käme sonst immer die ältere (1 ms mehr Verzug). Meldet ein Wandler einen
+// Neustart (z. B. nach einem Spannungseinbruch), wird er neu eingestellt; sonst liefe er mit Verstärkung 1 statt 128 weiter.
+static bool adsRead() {                                                         // true = neuer, gültiger Satz von allen drei Wandlern
   if (digitalRead(PIN_ADS_DRDY) == HIGH) return false;                          // DRDY aktiv tief
+  bool all = true;
   for (int a = 0; a < 3; a++) {
-    uint8_t b[18] = {}; int32_t ch[4];
-    adsTransfer(a, b); adsParseFrame(b, ch);
+    int32_t ch[4] = {}; bool got = false;
+    for (int pass = 0; pass < 2; pass++) {
+      uint8_t b[18] = {}; int32_t c2[4];
+      adsTransfer(a, b);
+      if (!adsFrameCrcOk(b)) { adsCrcErrors++; break; }
+      const uint16_t st = adsParseFrame(b, c2);
+      if (adsStatusReset(st)) { adsResets++; adsConfigure(a); got = false; break; }
+      if (pass == 1 && !adsStatusDataReady(st)) break;                          // keine zweite Messung im Puffer: die erste gilt
+      for (int k = 0; k < 4; k++) ch[k] = c2[k];
+      got = true;
+    }
+    if (!got) { all = false; continue; }
     for (int k = 0; k < 4; k++) if (kAdsCell[a][k] >= 0) cellRaw[kAdsCell[a][k]] = ch[k];
   }
-  return true;
+  if (all) lastAdsMs = millis();
+  return all;
 }
+// Sensoren lesen und überwachen. Als gestört gilt eine angemeldete Zelle, wenn sie am Anschlag ist ODER keine frischen Werte mehr
+// kommen (Wandler stumm, Kabel ab, Prüfsumme falsch). Ein eingefrorener Wert ist beim Mitgehen der gefährlichste Fehler: Die letzte
+// Kraft bliebe stehen und das Gelenk liefe mit ihrer Sollgeschwindigkeit weiter.
+constexpr uint32_t kAdsStaleMs = 20, kHxStaleMs = 300;                          // ADS131M04: 1000/s; HX711: 80/s (Brücke RATE gesetzt), 10/s ab Werk
 static bool readCuffs(JointInput* j) {
   bool ok = true;
   adsRead();
+  const uint32_t now = millis();
   for (int c = 0; c < kCells; c++) {
+    if (!((cfg.cellMask >> c) & 1u)) { cellN[c] = 0.f; lastHxMs[c] = now; continue; }   // nicht angeschlossen (Prüfstand)
     if (PIN_HX_DOUT[c] < 0) {                                                   // ADS131M04-Zelle: Wert liegt schon in cellRaw
-      if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; continue; }
+      if (now - lastAdsMs > kAdsStaleMs) { ok = false; sensorDetail = "Manschetten-Messwandler liefert nichts (Kabel, Prüfsumme)"; continue; }
+      if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; sensorDetail = "Manschetten-Zelle am Anschlag"; continue; }
       cellN[c] = cfg.cell[c].toNewton(cellRaw[c]); continue;
     }
-    if (digitalRead(PIN_HX_DOUT[c]) == HIGH) continue;                          // noch kein neuer Wert (HX711, 80 Hz)
-    cellRaw[c] = readCellRaw(c);
-    if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; continue; }
+    if (digitalRead(PIN_HX_DOUT[c]) == HIGH) {                                  // noch kein neuer Wert (HX711)
+      if (now - lastHxMs[c] > kHxStaleMs) { ok = false; sensorDetail = "HX711 (Schlaufe/Steigbügel) liefert nichts"; }
+      continue;
+    }
+    cellRaw[c] = readCellRaw(c); lastHxMs[c] = now;
+    if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; sensorDetail = "Schlaufen-/Fußzelle am Anschlag"; continue; }
     cellN[c] = cfg.cell[c].toNewton(cellRaw[c]);
   }
   j[HipL].cuffN = cellN[0]; j[HipR].cuffN = cellN[1];
@@ -146,12 +189,18 @@ static bool readCuffs(JointInput* j) {
 static Adafruit_BNO08x imu(-1);
 static Adafruit_NeoPixel ring(12, PIN_LED_RING, NEO_GRB + NEO_KHZ800);
 static bool imuOk = false;
+static uint32_t imuLastMs = 0;
+static void imuReports() { imuOk = imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000) && imu.enableReport(SH2_GAME_ROTATION_VECTOR, 10000); }
+// Lagesensor lebt: Er liefert 200 Werte/s. Bleibt er stumm, stünden Vorneigung (Hüft-Vorsteuerung) und Sturzerkennung auf altem Stand.
+static bool imuAlive() { return imuOk && millis() - imuLastMs < 100; }
 
 static float trunkPitch = 0.f;                                                  // Vorneigung aus dem Rotationsvektor
 static float readTrunkTiltRate(bool* still) {
   static float rate = 0.f, quiet = 0.f;
   sh2_SensorValue_t v;
+  if (imuOk && imu.wasReset()) imuReports();                                    // der BNO085 startet gelegentlich neu und vergisst dann seine Berichte
   while (imuOk && imu.getSensorEvent(&v)) {
+    imuLastMs = millis();
     if (v.sensorId == SH2_GAME_ROTATION_VECTOR) {
       const float qr = v.un.gameRotationVector.real, qi = v.un.gameRotationVector.i, qj = v.un.gameRotationVector.j, qk = v.un.gameRotationVector.k;
       trunkPitch = atan2f(2.f * (qr * qk + qi * qj), 1.f - 2.f * (qj * qj + qk * qk));   // Drehung um die Querachse (z), wie bei der Kippgeschwindigkeit
@@ -180,8 +229,8 @@ static void showLed(Led led, int count) {
   ring.show();
 }
 static void peripheralsBegin() {
-  Wire.begin();
-  imuOk = imu.begin_I2C() && imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000) && imu.enableReport(SH2_GAME_ROTATION_VECTOR, 10000);
+  Wire.begin(); Wire.setClock(400000);                                          // 400 kHz: ein Bericht (≈ 20 Bytes) dauert sonst länger als ein Regeltakt
+  imuOk = imu.begin_I2C(); if (imuOk) imuReports();
   ring.begin(); ring.setBrightness(80); ring.show();
   // Hardware-Watchdog: 0,5 s ohne Lebenszeichen → Neustart; dabei fällt das Schütz ab (Pin wird beim Reset Eingang)
   CCM_CCGR3 |= CCM_CCGR3_WDOG1(CCM_CCGR_ON);
@@ -191,6 +240,7 @@ static void peripheralsBegin() {
 static void watchdogFeed() { WDOG1_WSR = 0x5555; WDOG1_WSR = 0xAAAA; }
 #else
 float readTrunkTiltRate(bool* still);
+static bool imuAlive() { return true; }
 static float trunkPitch = 0.f;
 static unsigned long rtcNow = 14 * 3600 + 32 * 60;
 static unsigned long rtc_get() { return rtcNow; }
@@ -208,7 +258,8 @@ static void sendStatus(const Outputs&, float batteryV) {
   const int pct = int(constrain((batteryV - 30.f) / 11.f * 100.f, 0.f, 100.f));
   const unsigned long t = rtc_get() % 86400UL;
   char b[96];
-  snprintf(b, sizeof b, "S,%s,%d,%d,%d,%02lu:%02lu,%.1f,%s\n", kMode[int(app.sup.mode)], pct, cfg.level + 1, pct * 165 / 100, t / 3600, (t / 60) % 60, double(cfg.hours), app.sup.reason);
+  const char* why = app.sup.reason && app.sup.reason[0] ? app.sup.reason : notice;   // Fehlergrund hat Vorrang vor Hinweisen („Akku schwach“, „Motor warm“ …)
+  snprintf(b, sizeof b, "S,%s,%d,%d,%d,%02lu:%02lu,%.1f,%.39s\n", kMode[int(app.sup.mode)], pct, cfg.level + 1, pct * 165 / 100, t / 3600, (t / 60) % 60, double(cfg.hours), why);
   if (Serial1.availableForWrite() >= int(strlen(b))) Serial1.write(b);          // nie warten: lieber eine Zeile auslassen
 }
 
@@ -246,7 +297,7 @@ static void pollConsole() {
   while (Serial.available()) {
     const char ch = char(Serial.read());
     if (ch == '\n' || ch == '\r') {
-      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; io.setLog = setLog; io.setClock = setClock; runCommand(line, cfg, io); app.setLevel(cfg.level); app.jointMask = cfg.jointMask; }
+      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; io.armJointZero = armJointZero; io.setLog = setLog; io.setClock = setClock; runCommand(line, cfg, io); app.setLevel(cfg.level); app.jointMask = cfg.jointMask; }
                else Serial.print("Konsole nur, wenn das Exo aus ist\n"); }
       n = 0;
     } else if (n < sizeof line - 1) line[n++] = ch;
@@ -266,14 +317,24 @@ void setup() {
   app.setLevel(cfg.level); app.jointMask = cfg.jointMask;
   can1.begin(); can1.setBaudRate(1000000); can3.begin(); can3.setBaudRate(1000000);
   peripheralsBegin();
-  ctlTimer.begin([] { tick = true; }, 2000);                                    // 500 Hz (Mitgehen braucht ≤ 2 ms Takt, Studie tools/transparenz.cpp)
+  ctlTimer.begin([] { tick = true; tickCount++; }, 2000);                                    // 500 Hz (Mitgehen braucht ≤ 2 ms Takt, Studie tools/transparenz.cpp)
 }
 
 void loop() {
   if (!tick) return;
   tick = false;
   watchdogFeed();
-  const float dt = 0.002f;
+  // Regeltakt überwachen: Dauert ein Durchlauf länger als 2 ms, fehlen Takte. Die Zeit läuft dann mit dem echten Abstand weiter;
+  // fehlen in einer Sekunde mehr als 100 von 500 (unter 400 Hz ist das Mitgehen nicht mehr nachgewiesen stabil), ist das ein Fehler.
+  static uint32_t seenTick = 0, missedWin = 0, winTicks = 0; static bool timingOk = true;
+  const uint32_t tc = tickCount, missed = tc - seenTick > 1u ? tc - seenTick - 1u : 0u; seenTick = tc;
+  missedWin += missed;
+  if (++winTicks >= 500) {
+    timingOk = missedWin <= 100;
+    if (missedWin && Serial.availableForWrite() >= 48) { char b[48]; snprintf(b, sizeof b, "Regeltakt: %lu Takte ausgelassen\n", (unsigned long)missedWin); Serial.write(b); }
+    missedWin = 0; winTicks = 0;
+  }
+  const float dt = 0.002f * float(1u + (missed > 4u ? 4u : missed));
   in.btnPower = !digitalRead(PIN_BTN_POWER);
   for (int i = 0; i < NL; i++) {
     in.btnLoop[i] = !digitalRead(PIN_BTN_LOOP[i]);
@@ -286,17 +347,42 @@ void loop() {
   in.safety.parkStandDown = !digitalRead(PIN_STAND);
   in.safety.batteryV = analogRead(PIN_VBAT) * (3.3f / 1023.f) * 15.f;          // Spannungsteiler 1:15
   in.safety.trunkTiltRate = readTrunkTiltRate(&in.standingStill);
+  in.safety.imuOk = imuAlive();
+  in.safety.timingOk = timingOk;
   in.trunkPitch = trunkPitch;
   for (int k = 0; k < 2; k++) in.footContact[k] = cellN[9 + k] > kFootContactN;   // 4 Halbbrücken-Zellen je Steigbügel als Vollbrücke an einem HX711
 
+  const Mode before = app.sup.mode;
   const Outputs o = app.step(in, dt);
+  notice = o.notice;
+  static const char* lastReason = "";
+  if (app.sup.reason != lastReason) {                                           // Fehlergrund mit Einzelheit auf die USB-Konsole
+    lastReason = app.sup.reason;
+    if (lastReason[0] && Serial.availableForWrite() >= 120) { char b[120]; snprintf(b, sizeof b, "%s (%s; CRC-Fehler %lu, Wandler-Neustarts %lu)\n", lastReason, sensorDetail, (unsigned long)adsCrcErrors, (unsigned long)adsResets); Serial.write(b); }
+  }
+  static bool dirty = false;
+  // Gelenk-Nullpunkte einmessen (Konsole gelenk0): beim Wechsel NULLEN → AKTIV den Motorwinkel übernehmen, dann gleich wieder aus
+  if (zeroArm && before == Mode::Zeroing && app.sup.mode == Mode::Active) {
+    for (int i = 0; i < NJ; i++) if ((zeroArm >> i) & 1u) cfg.joint0[i] = motorState[i].pos;
+    zeroArm = 0; dirty = true; app.sup.powerButton(Press::Long);
+    Serial.print("Gelenk-Nullpunkte übernommen; das Exo schaltet aus und speichert\n");
+  }
 
-  // Schütz: an, solange das Exo nullt oder aktiv ist; Motoren erst nach dem Hochfahren einschalten
+  // Schütz: an, solange das Exo nullt, aktiv ist oder ausläuft (auch beim gedämpften Absinken nach einem weichen Fehler).
+  // Motoren nach dem Hochfahren einzeln einschalten (ein Motor je Takt, damit der Sendepuffer nicht überläuft); wer danach
+  // nicht im Betriebszustand ist, bekommt alle 0,1 s einen neuen Versuch. Ab 1 s gilt das als Fehler (readMotors).
   const bool power = app.sup.mode == Mode::Zeroing || app.sup.mode == Mode::Active || app.sup.mode == Mode::SoftOff;
   digitalWrite(PIN_CONTACTOR, power ? HIGH : LOW);
   powerOnTime = power ? powerOnTime + dt : 0.f;
-  if (power && !motorsOn && powerOnTime > 0.3f) motorsEnable(true);
-  if (!power && motorsOn) motorsOn = false;                                     // ohne Strom sind sie ohnehin aus
+  static int enableNext = 0; static float retryT = 0.f;
+  if (!power) { motorsOn = false; enableNext = 0; retryT = 0.f; }               // ohne Strom sind sie ohnehin aus
+  else if (powerOnTime > 0.3f && enableNext < NJ) {
+    if ((cfg.jointMask >> enableNext) & 1u) motorEnable(enableNext);
+    if (++enableNext >= NJ) motorsOn = true;
+  } else if (motorsOn && powerOnTime < 1.0f && (retryT += dt) >= 0.1f) {
+    retryT = 0.f;
+    for (int i = 0; i < NJ; i++) if (((cfg.jointMask >> i) & 1u) && motorState[i].mode != kMotorRun) { motorEnable(i); break; }
+  }
   if (motorsOn) for (int i = 0; i < NJ; i++) if ((cfg.jointMask >> i) & 1u) motorSend(i, o.tau[i], o.vDes[i], o.kd[i]);
   if (logOn) logLine(o);
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
@@ -304,9 +390,8 @@ void loop() {
   digitalWrite(PIN_HEAT_LEGS, o.heaterLegs); digitalWrite(PIN_HEAT_ARMS, o.heaterArms);
 
   // Betriebsstunden: gespeichert wird nur, wenn das Exo aus ist (Flash-Schreiben kann den Regeltakt stören)
-  static bool dirty = false;
   if (app.sup.mode == Mode::Active) { cfg.hours += dt / 3600.f; dirty = true; }
-  if (dirty && app.sup.mode == Mode::Off) { dirty = false; seal(cfg); saveSettings(cfg); }
+  if (dirty && (app.sup.mode == Mode::Off || app.sup.mode == Mode::Fault)) { dirty = false; seal(cfg); saveSettings(cfg); }
 
   static int div = 0;
   if (++div >= 25) { div = 0; showLed(o.led, o.ledCount); }                    // 20 Hz

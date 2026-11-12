@@ -1,4 +1,4 @@
-// Steuerungskern des Christbaum-Exos (Entwurf 4).
+// Steuerungskern des Christbaum-Exos (Entwurf 5, Rev. S1: Sicherheits-Durchsicht).
 //
 // Hardwareunabhängig: keine Arduino-Abhängigkeit, kein dynamischer Speicher. Läuft auf dem Teensy 4.1
 // (siehe main_teensy.cpp) und auf dem PC in der Simulation (siehe ../test/sim_test.cpp).
@@ -60,6 +60,10 @@ struct JointConfig {
   float viscComp = 0.f;        // Ausgleich der geschwindigkeitsabhängigen Reibung [Nm·s/rad]
   float guardOnN = 2.0f;       // Schwingungswächter: Anteil > 6 Hz in der Manschettenkraft (Effektivwert) ab dem zurückgeregelt wird [N]
   float guardOffN = 1.0f;      // … und unter dem es sich langsam wieder erholt [N]
+  // Sicherheit (Rev. S1)
+  float tareMaxN = 30.f;       // größter Nullpunkt, den das Nullen beim Einschalten übernimmt [N]; darüber: Manschette ist belastet
+  float angleMargin = 0.35f;   // Gelenkwinkel weiter als das außerhalb von qMin…qMax = Nullpunkt falsch oder Encoder gestört [rad]
+  float fallDamp = 0.f;        // Dämpfung beim gedämpften Absinken (Sturz, Sensorfehler) [Nm·s/rad]; 0 = stromlos
 };
 
 struct JointInput {
@@ -208,70 +212,111 @@ enum class Led : uint8_t { Off, WhitePulse, Green, Blue, Yellow, Red };
 
 struct SafetyInput {
   bool estopOk = true;         // Not-Aus-Kreis geschlossen
-  bool canOk = true;           // alle Motoren melden sich
-  bool sensorsOk = true;       // keine Wägezelle ausgefallen oder am Anschlag
+  bool canOk = true;           // alle Motoren melden sich, sind eingeschaltet und ohne Fehler
+  bool sensorsOk = true;       // keine Wägezelle ausgefallen, eingefroren oder am Anschlag
+  bool imuOk = true;           // Lagesensor liefert Werte
+  bool anglesOk = true;        // Gelenkwinkel plausibel (setzt die Gesamtsteuerung)
+  bool timingOk = true;        // Regeltakt wird eingehalten
   float batteryV = 36.f;
   float trunkTiltRate = 0.f;   // [rad/s] aus der IMU (Sturzerkennung)
   bool parkStandDown = false;  // Parkstütze ausgeklappt
   bool anyAssist = false;      // irgendein Gelenk unterstützt gerade
 };
 
+// Fehlerreaktionen (Rev. S1), nach Schwere:
+//   hart   Not-Aus, Motor/Bus, Spannungseinbruch: im selben Takt stromlos, Schütz fällt ab.
+//   weich  Sensor, Lagesensor, Gelenkwinkel, Regeltakt: Unterstützung im selben Takt aus, aber die Beine sinken 1,5 s gedämpft
+//          ab (Motoren und Bus sind ja in Ordnung), erst dann fällt das Schütz ab. Mit 44 kg Exo ist „sofort schlaff“ gefährlicher.
+//   Sturz  wie weich, Unterstützung läuft in 0,1 s aus; danach AUS statt FEHLER.
+//   Akku   Warnung unter 32 V, darunter nimmt die Kraft stufenlos ab (powerLimit), unter 30 V (1 s gemittelt) weich aus in 2 s.
 class Supervisor {
  public:
   Mode mode = Mode::Off;
   float scale = 0.f;           // 0…1 an alle Gelenke
   float rampUp = 3.0f;         // sanftes Aufwachen
   float rampDown = 0.3f;       // weich aus
-  float fallRate = 2.5f;       // ab dieser Rumpf-Kippgeschwindigkeit: Sturz
-  float minBatteryV = 30.f;
+  float fallRate = 2.5f;       // ab dieser Rumpf-Kippgeschwindigkeit: Sturz …
+  float fallConfirm = 0.02f;   // … wenn sie so lange anhält [s] (ein einzelner Stoß am Rucksack ist kein Sturz)
+  float dampTime = 1.5f;       // gedämpftes Absinken der Beine nach Sturz oder weichem Fehler [s]
+  float minBatteryV = 30.f;    // darunter (1 s gemittelt): weich ausschalten
+  float warnBatteryV = 32.f;   // darunter: Warnung „Akku schwach“
+  float brownoutV = 26.f;      // darunter (schnell gemessen): hart aus, bevor Wandler und Motoren von selbst aussteigen
+  float deratePerV = 0.25f;    // Abregelung bei Spannungseinbruch: je Volt unter 33 V ein Viertel weniger Moment (bis 30 %)
   const char* reason = "";
+  bool lowBattery = false;
 
   void powerButton(Press p) {
-    if (p == Press::Short && (mode == Mode::Off || mode == Mode::Fault)) { mode = Mode::Zeroing; t_ = 0.f; reason = ""; }
-    if (p == Press::Long && mode != Mode::Off) mode = Mode::SoftOff;
+    if (p == Press::Short && (mode == Mode::Off || mode == Mode::Fault)) { mode = Mode::Zeroing; t_ = 0.f; reason = ""; fallT_ = 0.f; hold_ = 0.f; }
+    if (p == Press::Long && (mode == Mode::Zeroing || mode == Mode::Active)) softStop("", Mode::Off, rampDown, 0.f);
+    if (p == Press::Long && mode == Mode::Fault) mode = Mode::Off;
   }
-  // Nullen fertig, wenn 2 s ruhig gestanden
-  void step(const SafetyInput& s, bool stillForZeroing, float dt) {
+  // Nullen fertig, wenn 2 s ruhig gestanden (und die Manschetten dabei unbelastet waren: zeroOk)
+  void step(const SafetyInput& s, bool stillForZeroing, float dt, bool zeroOk = true) {
     t_ += dt;
-    // harte Fehler: sofort stromlos, keine Rampe
-    if (mode != Mode::Off) {
-      if (!s.estopOk) { fault("Not-Aus"); }
-      else if (!s.canOk) { fault("Motor meldet sich nicht"); }
-      else if (!s.sensorsOk) { fault("Sensor-Manschette gestört"); }
-      else if (s.batteryV < minBatteryV) { fault("Akku leer"); }
+    // Akku: schnell gefiltert für Einbruch und Abregelung, langsam für „leer“ (Lastspitzen sollen nicht abschalten)
+    if (!vInit_) { vFast_ = vSlow_ = s.batteryV; vInit_ = true; }
+    vFast_ += (s.batteryV - vFast_) * clampf(dt / 0.05f, 0.f, 1.f);
+    vSlow_ += (s.batteryV - vSlow_) * clampf(dt / 1.0f, 0.f, 1.f);
+    if (vSlow_ < warnBatteryV) lowBattery = true; else if (vSlow_ > warnBatteryV + 1.f) lowBattery = false;
+    if (mode != Mode::Off && mode != Mode::Fault) {
+      // harte Fehler: sofort stromlos, keine Rampe
+      if (!s.estopOk) fault("Not-Aus");
+      else if (!s.canOk) fault("Motor meldet sich nicht");
+      else if (vFast_ < brownoutV) fault("Akku-Spannung eingebrochen");
+      else if (mode != Mode::SoftOff) {
+        // weiche Fehler: Unterstützung sofort aus, Beine gedämpft, dann FEHLER
+        const char* why = !s.sensorsOk ? "Sensor-Manschette gestört" : !s.imuOk ? "Lagesensor gestört" : !s.anglesOk ? "Gelenkwinkel unplausibel"
+                        : !s.timingOk ? "Regeltakt überlastet" : nullptr;
+        if (why) { if (mode == Mode::Zeroing) fault(why); else softStop(why, Mode::Fault, 0.f, dampTime); }
+        else if (vSlow_ < minBatteryV) { if (mode == Mode::Zeroing) fault("Akku leer"); else softStop("Akku leer", Mode::Fault, 2.0f, 0.f); }
+      }
     }
     switch (mode) {
       case Mode::Zeroing:
         scale = 0.f;
         if (!stillForZeroing) t_ = 0.f;
-        if (t_ >= 2.f) { mode = Mode::Active; t_ = 0.f; }
+        if (t_ >= 2.f && zeroOk) { mode = Mode::Active; t_ = 0.f; }
         break;
       case Mode::Active:
-        if (std::fabs(s.trunkTiltRate) > fallRate) { mode = Mode::SoftOff; reason = "Sturz erkannt"; rampOverride_ = 0.1f; break; }
+        fallT_ = std::fabs(s.trunkTiltRate) > fallRate ? fallT_ + dt : 0.f;
+        if (fallT_ >= fallConfirm) { softStop("Sturz erkannt", Mode::Off, 0.1f, dampTime); break; }
         if (s.parkStandDown) { scale = std::fmax(0.f, scale - dt / rampDown); break; }   // auf der Stütze: keine Unterstützung
         scale = std::fmin(1.f, scale + dt / rampUp);
         break;
       case Mode::SoftOff:
-        scale = std::fmax(0.f, scale - dt / (rampOverride_ > 0.f ? rampOverride_ : rampDown));
-        if (scale <= 0.f) { mode = Mode::Off; rampOverride_ = 0.f; }
+        scale = ramp_ > 0.f ? std::fmax(0.f, scale - dt / ramp_) : 0.f;
+        hold_ = std::fmax(0.f, hold_ - dt);
+        if (scale <= 0.f && hold_ <= 0.f) mode = end_;
         break;
       case Mode::Fault: case Mode::Off:
         scale = 0.f; break;
     }
   }
+  // Gedämpftes Absinken der Beine: 1 → 0 über dampTime (0 = keine Dämpfung aktiv)
+  float legDamp() const { return mode == Mode::SoftOff && holdTotal_ > 0.f ? hold_ / holdTotal_ : 0.f; }
+  // Abregelung der Momentgrenzen bei Spannungseinbruch (1 = volle Kraft): hält den Akku über der Abschaltgrenze
+  float powerLimit() const { return clampf(1.f - deratePerV * (minBatteryV + 3.f - vFast_), 0.3f, 1.f); }
+  float batteryFast() const { return vFast_; }
   Led led(const SafetyInput& s) const {
     switch (mode) {
       case Mode::Off: return Led::Off;
       case Mode::Zeroing: return Led::WhitePulse;
       case Mode::Fault: return Led::Red;
-      case Mode::SoftOff: return Led::Yellow;
+      case Mode::SoftOff: return end_ == Mode::Fault ? Led::Red : Led::Yellow;
       case Mode::Active: return s.parkStandDown ? Led::Yellow : (s.anyAssist ? Led::Blue : Led::Green);
     }
     return Led::Off;
   }
  private:
-  void fault(const char* why) { mode = Mode::Fault; scale = 0.f; reason = why; }
-  float t_ = 0.f, rampOverride_ = 0.f;
+  void fault(const char* why) { mode = Mode::Fault; scale = 0.f; reason = why; hold_ = holdTotal_ = 0.f; }
+  void softStop(const char* why, Mode end, float ramp, float hold) {
+    mode = Mode::SoftOff; reason = why; end_ = end; ramp_ = ramp; hold_ = holdTotal_ = hold;
+    if (ramp <= 0.f) scale = 0.f;
+  }
+  float t_ = 0.f, ramp_ = 0.3f, hold_ = 0.f, holdTotal_ = 0.f, fallT_ = 0.f;
+  float vFast_ = 36.f, vSlow_ = 36.f;
+  bool vInit_ = false;
+  Mode end_ = Mode::Off;
 };
 
 /* ------------------------------------------------------------ Baumzähler ----- */
