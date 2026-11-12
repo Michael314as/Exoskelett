@@ -88,7 +88,7 @@ erhalten, und das Exo kann nie „mehr wollen“ als die Last.
 Exo-Oberteil (29,5 kg laut Bauteilliste der technischen Ansicht; vorher mit 11 kg viel zu knapp angesetzt) + 10/20/30 % deines Oberkörpers je Stufe + der Lastanteil aus den Schlaufen. Die Hüfte gleicht
 die Vorneigung des Rumpfs aus (Lagesensor), das Knie die Beugung. Stehen beide Füße, teilen sich die Beine die Last.
 
-**c2) Der Rucksack zieht nach hinten.** Der Schwerpunkt des Exo-Oberteils liegt 22 cm über und 8 cm **hinter** der
+**c2) Der Rucksack zieht nach hinten.** Der Schwerpunkt des Exo-Oberteils liegt 34 cm über und 4 cm **hinter** der
 Hüftachse (Anzeige „Exo-Oberteil“ in der technischen Ansicht). Aufrecht will er nach hinten kippen; ohne Ausgleich zögen
 dich die Schultergurte zurück. Die Hüft-Vorsteuerung rechnet Mensch und Exo deshalb getrennt: aufrecht halten die
 Hüftmotoren je Seite ≈ 8 Nm gegen das Kippen nach hinten, vorgebeugt (35°) tragen sie ≈ 14 Nm nach oben. So spürst du den
@@ -188,17 +188,43 @@ einen Anschlag, laufen Mitgehen und Verstärkung vorher weich aus.
 ```
 AUS ──Ein──▶ NULLEN (2 s ruhig stehen) ──▶ AKTIV (3 s sanft hochfahren) ──Aus──▶ AUSLAUF ──▶ AUS
                                               │
-Not-Aus, Sensor- oder Motorfehler, Akku leer ─┴──▶ FEHLER: Gelenkmotoren stromlos, Schlaufen halten, Ring rot
-Sturz erkannt ──▶ AUSLAUF in 0,1 s     Parkstütze unten ──▶ keine Unterstützung, Ring gelb
+Not-Aus, Motor meldet sich nicht, Spannung < 26 V ─┴──▶ FEHLER sofort: Schütz offen, Schlaufen halten, Ring rot
+Sensor-, Lagesensor-, Winkelfehler, Regeltakt ──▶ Kraft sofort 0, Beine 1,5 s gedämpft ──▶ FEHLER
+Sturz erkannt (20 ms bestätigt) ──▶ Arme in 0,1 s weich, Beine 1,5 s gedämpft ──▶ AUS
+Akku < 32 V: Warnung ──▶ < 30 V: Kraft läuft in 2 s aus ──▶ FEHLER     Parkstütze unten ──▶ keine Unterstützung, Ring gelb
 ```
+
+**Abgestufte Reaktion (Rev. S1, Durchsicht Nov 2026).** Früher schaltete jeder Fehler sofort alles stromlos. Wer in
+der Hocke steht oder einen Baum hält, dem knicken dann die Exo-Beine weg. Jetzt gilt:
+
+| Fehler | Reaktion | Warum |
+|---|---|---|
+| Not-Aus, Motor meldet sich nicht oder ist nicht im Betrieb, Spannung bricht unter 26 V ein | sofort stromlos, Schütz offen | hier kann die Regelung nichts mehr sicher tun |
+| Manschetten-Sensor gestört (Stecker, Kabelbruch, Wert eingefroren, Übertragungsfehler), Lagesensor fällt aus, Gelenkwinkel unmöglich, Regeltakt überlastet | Unterstützung im selben Takt auf 0, Hüften und Knie bremsen 1,5 s (nur dämpfen, nie antreiben), dann stromlos | ein falscher Sensorwert darf nicht antreiben, aber du sollst nicht fallen |
+| Sturz | wie oben, Arme laufen in 0,1 s aus; danach AUS statt FEHLER | Kippgeschwindigkeit muss 20 ms anliegen, ein einzelner Messfehler löst nicht aus |
+| Akku wird leer | ab 32 V Anzeige „Akku schwach“ und Vibration alle 20 s; ab 30 V läuft die Kraft in 2 s aus | Zeit, den Baum abzusetzen |
+| Spannung sackt unter Last (unter 33 V) | Momentgrenze sinkt stufenlos bis auf 30 %, Anzeige „Akku unter Last: weniger Kraft“ | schwächer werden statt abschalten |
+
+**Nullen beim Einschalten:** In den 2 s im Zustand NULLEN mittelt die Firmware jede Manschetten- und Rumpfzelle und
+zieht diesen Wert danach ab (Gurt nachgezogen, Jacke, Kälte). Liegt mehr als 30 N an (Rumpf 120/60 N), startet sie
+nicht und zeigt „Nullen: Manschetten entlasten“. Schlaufen- und Fußzellen werden nicht genullt (dort hängt echte Last).
+
+**Schlaufe öffnen unter Last:** Hängen mehr als 5 kg in der Schlaufe, vibriert ein langer Tastendruck erst nur.
+Die Schlaufe öffnet erst, wenn der Taster eine weitere Sekunde gehalten wird. Bei gedrücktem Not-Aus stehen die Winden.
+
+**Was überwacht wird:** jede Wägezelle auf ihren eigenen Messbereich (Manschetten 150 N, Schlaufen 650 N, Füße
+2600 N) und auf frische Werte (Manschetten 20 ms, Schlaufen/Füße 0,3 s), der ADS131M04 mit Prüfsumme und
+Neustart-Erkennung, jeder Motor auf Rückmeldung (50 ms) und Betriebsart, der Lagesensor auf frische Werte (0,1 s),
+jeder Gelenkwinkel auf den möglichen Bereich, der Regeltakt selbst. Zusätzlich schaltet jeder Motor von sich aus ab,
+wenn 0,1 s kein Befehl kommt (Parameter `canTimeout`).
 
 ## 6. Elektronik
 
 ```
-Stihl AP 500 S (36 V) ── Hauptsicherung ── Not-Aus ── Schütz ──┬── 10 Gelenkkapseln an 2 CAN-Bussen (CAN1: Hüften, Knie, Rumpf beugen; CAN3: Schultern, Ellbogen, Rumpf drehen)
-                                                               │   RS04 an Hüften, Knien, Schultern, Rumpf beugen; RS03 an Ellbogen, Rumpf drehen; Bremswiderstand ab 46 V
-                                                               ├── DC/DC 24 V ── 3 Motortreiber ── 3 Schlaufenwinden
-                                                               └── DC/DC 5 V ── Steuerung, Display
+Stihl AP 500 S (36 V) ── Hauptsicherung ─┬── Schütz (Spule über Not-Aus) ──┬── 10 Gelenkkapseln an 2 CAN-Bussen (CAN1: Hüften, Knie, Rumpf beugen; CAN3: Schultern, Ellbogen, Rumpf drehen)
+                                                                        │   RS04 an Hüften, Knien, Schultern, Rumpf beugen; RS03 an Ellbogen, Rumpf drehen; Bremswiderstand ab 46 V
+                                        ├── DC/DC 24 V ── 3 Motortreiber ── 3 Schlaufenwinden, Schützspule
+                                        └── DC/DC 5 V ── Steuerung, Display (bleibt bei Not-Aus an und zeigt den Grund)
 Teensy 4.1 + 2 CAN-Transceiver + Knopfzelle (Uhr), Regeltakt 500 Hz
    ├── 3 × ADS131M04 an SPI0 (1000/s): 8 Manschetten (Oberschenkel, Schienbein, Oberarm, Unterarm) + 4 Rumpf-Wägezellen
    ├── 5 × HX711: 3 Schlaufenköpfe, 2 Steigbügel (je 4 Zellen)
@@ -213,12 +239,12 @@ geht der Takt auf 400 Hz (Simulation: noch stabil) oder ein dritter Bus (CAN2, P
 
 Pinplan: [verdrahtung.md](verdrahtung.md).
 
-## 6a. Schutzfunktionen (Entwurf 4)
+## 6a. Schutzfunktionen
 
 | Funktion | Auslöser | Was passiert |
 |---|---|---|
 | **Wärmeschutz** | Wärmemodell je Motor: Strom² über die Zeit (Zeitkonstante 3 min) | ab 100 % Wärme sinkt die Momentgrenze stufenlos bis auf 40 %; das Exo wird schwächer statt abzuschalten, Anzeige „Motor warm“ |
-| **Sturzdämpfung** | Sturz erkannt (Kippgeschwindigkeit) | Arme stromlos, Beine 1,5 s mit Dämpfung (−4 Nm·s/rad): das Exo sackt langsam statt zu treten oder zu klappen |
+| **Sturzdämpfung** | Sturz erkannt (Kippgeschwindigkeit) | Arme stromlos, Beine 1,5 s mit Dämpfung (Hüfte 15, Knie 20 Nm·s/rad, höchstens 80 Nm; das Schütz bleibt so lange zu): das Exo sackt langsam statt zu treten oder zu klappen. Dasselbe bei Sensorfehlern |
 | **Lendensperre** | > 5 kg in den Schlaufen für 0,3 s | Hubmagnet (Pin 9, ab Rev. M2) sperrt das Lendengelenk, der Rahmen trägt den Baum; nach dem Absetzen frei |
 | **Rückneigung** | Rumpf mehr als 9° nach hinten | Vibrationspulse: „lehn dich nach vorne“, bevor der Baum dich umzieht |
 | **Winden nacheinander** | mehrere Schlaufen gleichzeitig gedrückt | eine Winde nach der anderen (24-V-Wandler 2,5 A), Zeitgrenze 12 s je Bewegung |
@@ -240,7 +266,9 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 | Exo zittert oder schaukelt | Bus überlastet / verzögert, Kd zu hoch, Polster durchgesessen | Schwingungswächter nimmt Mitgehen zurück (Anzeige im Log); Buslast prüfen, Kd am Prüfstand (P39) senken, Polster tauschen |
 | Exo fühlt sich zäh an | Wächter hat zurückgeregelt, Messwandler verrauscht, Kälte (Reibung) | 2 s still halten → Wächter erholt sich; Schirmung der Manschettenkabel prüfen; Kapselheizung |
 | Manschette scheuert beim Beugen | Schlitten klemmt (Schmutz, Eis) | Stangen abwischen; iglidur läuft trocken, kein Fett (bindet Schmutz) |
-| Exo „läuft weg“ | Nullpunkt verschoben (Kälte, Gurt nachgezogen) | Nullen bei jedem Einschalten |
+| Exo „läuft weg“ | Nullpunkt verschoben (Kälte, Gurt nachgezogen) | Nullen bei jedem Einschalten (macht die Firmware selbst); aus- und wieder einschalten |
+| Startet nicht, „Nullen: Manschetten entlasten“ | beim Einschalten drückt ein Arm oder Bein gegen die Manschette | locker stehen, Arme hängen lassen |
+| „Gelenkwinkel unplausibel“ | Gelenk-Nullpunkt nicht eingemessen oder Motor getauscht | `gelenk0` ([montage.md](montage.md) Abschnitt 4) |
 | Baum fühlt sich zu leicht oder zu schwer an | Lastanteil der Stufe | Stufe wechseln (beide rechten Taster 2 s) |
 | Bein streckt beim Gehen | Fußsensor meldet falsch | Schwelle am Prüfstand einstellen, Sensor prüfen |
 | Bein knickt beim Aufsetzen | Standbein zu spät erkannt | Glättung verkürzen; Federpatrone begrenzt ohnehin |

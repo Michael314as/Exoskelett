@@ -158,12 +158,38 @@ int main() {
     std::printf("     volle Unterstützung nach %.1f s\n", t1 + 0.5f);
     check(t1 + 0.5f > 2.5f && t1 + 0.5f < 3.6f, "Unterstützung steigt über etwa 3 s an");
     in.sensorsOk = false; s.step(in, true, 0.005f);
-    check(s.mode == Mode::Fault && s.scale == 0.f, "Sensorfehler: im selben Regeltakt stromlos");
-    std::printf("     Grund: %s\n", s.reason);
+    check(s.mode == Mode::SoftOff && s.scale == 0.f && s.legDamp() > 0.9f && s.led(in) == Led::Red, "Sensorfehler: im selben Regeltakt keine Unterstützung mehr, Beine gedämpft, Ring rot");
+    float ts = 0; while (s.mode != Mode::Fault && ts < 3) { s.step(in, true, 0.005f); ts += 0.005f; }
+    std::printf("     Grund: %s, stromlos nach %.2f s\n", s.reason, ts);
+    check(ts > 1.4f && ts < 1.6f && s.legDamp() == 0.f, "… nach 1,5 s gedämpftem Absinken: Fehler, Schütz fällt ab");
+    in.sensorsOk = true; s.powerButton(Press::Short); for (int i = 0; i < 1200; i++) s.step(in, true, 0.005f);
+    in.estopOk = false; s.step(in, true, 0.005f);
+    check(s.mode == Mode::Fault && s.scale == 0.f && s.legDamp() == 0.f, "Not-Aus: im selben Regeltakt hart aus (keine Dämpfung, das Schütz ist ohnehin offen)");
     Supervisor s2; SafetyInput in2; s2.powerButton(Press::Short); for (int i = 0; i < 1200; i++) s2.step(in2, true, 0.005f);
-    in2.trunkTiltRate = 3.5f; float tf = 0; while (s2.mode != Mode::Off && tf < 2) { s2.step(in2, true, 0.005f); tf += 0.005f; }
-    std::printf("     Sturz: weich aus nach %.2f s (%s)\n", tf, s2.reason);
-    check(tf <= 0.12f, "Sturz: Motoren in 0,1 s weich");
+    in2.trunkTiltRate = 3.5f; s2.step(in2, true, 0.005f); in2.trunkTiltRate = 0.f; for (int i = 0; i < 20; i++) s2.step(in2, true, 0.005f);
+    check(s2.mode == Mode::Active, "ein einzelner Stoß am Lagesensor (5 ms) ist kein Sturz");
+    in2.trunkTiltRate = 3.5f; float tf = 0, tOff = 0; while (s2.mode != Mode::Off && tf < 3) { s2.step(in2, true, 0.005f); tf += 0.005f; if (s2.scale > 0.f) tOff = tf; }
+    std::printf("     Sturz: Unterstützung aus nach %.2f s, Beine gedämpft bis %.2f s (%s)\n", tOff, tf, s2.reason);
+    check(tOff <= 0.14f, "Sturz: Unterstützung in 0,1 s weich aus");
+    check(tf > 1.5f && tf < 1.75f, "Sturz: das Schütz bleibt 1,5 s zu, damit die Beine gedämpft absinken können");
+    // Akku: Lastspitze schaltet nicht ab, leerer Akku weich, Einbruch hart
+    Supervisor sb; SafetyInput ib; sb.powerButton(Press::Short); for (int i = 0; i < 1200; i++) sb.step(ib, true, 0.005f);
+    ib.batteryV = 31.5f; for (int i = 0; i < 60; i++) sb.step(ib, true, 0.005f);
+    std::printf("     Akku 31,5 V für 0,3 s (Lastspitze): Momentgrenze %.0f %%\n", sb.powerLimit() * 100);
+    check(sb.mode == Mode::Active && sb.powerLimit() < 0.7f && sb.powerLimit() > 0.5f, "Spannungseinbruch unter Last: Kraft geht zurück, das Exo bleibt an");
+    ib.batteryV = 29.f; for (int i = 0; i < 40; i++) sb.step(ib, true, 0.005f);
+    check(sb.mode == Mode::Active, "0,2 s unter 30 V schalten nicht ab");
+    ib.batteryV = 36.f; for (int i = 0; i < 1000; i++) sb.step(ib, true, 0.005f);
+    check(sb.powerLimit() == 1.f && !sb.lowBattery, "Spannung erholt sich: volle Kraft");
+    ib.batteryV = 31.5f; for (int i = 0; i < 1000; i++) sb.step(ib, true, 0.005f);
+    check(sb.mode == Mode::Active && sb.lowBattery, "31,5 V dauerhaft: Warnung „Akku schwach“, noch an");
+    ib.batteryV = 29.5f; float tb = 0; while (sb.mode == Mode::Active && tb < 10) { sb.step(ib, true, 0.005f); tb += 0.005f; }
+    const float sc0 = sb.scale; float tr = 0; while (sb.mode != Mode::Fault && tr < 10) { sb.step(ib, true, 0.005f); tr += 0.005f; }
+    std::printf("     Akku 29,5 V: nach %.1f s weich aus über %.1f s (%s)\n", tb, tr, sb.reason);
+    check(sc0 > 0.9f && tr > 1.5f && tr < 2.5f && !std::strcmp(sb.reason, "Akku leer"), "Akku leer: Unterstützung läuft über 2 s aus statt schlagartig");
+    Supervisor sh; SafetyInput ih; sh.powerButton(Press::Short); for (int i = 0; i < 1200; i++) sh.step(ih, true, 0.005f);
+    ih.batteryV = 22.f; float th = 0; while (sh.mode == Mode::Active && th < 2) { sh.step(ih, true, 0.005f); th += 0.005f; }
+    check(sh.mode == Mode::Fault && th < 0.2f, "Spannung bricht zusammen (22 V): hart aus, bevor Wandler und Motoren von selbst aussteigen");
     Supervisor s3; SafetyInput in3; s3.powerButton(Press::Short); for (int i = 0; i < 1200; i++) s3.step(in3, true, 0.005f);
     in3.parkStandDown = true; for (int i = 0; i < 100; i++) s3.step(in3, true, 0.005f);
     check(s3.scale == 0.f && s3.led(in3) == Led::Yellow, "Parkstütze unten: keine Unterstützung, Ring gelb");
@@ -301,7 +327,7 @@ int main() {
     check(runCommand("voll", c, io) && c.jointMask == 0x3FF, "Konsole: voll schaltet alle 10 Gelenke frei");
   }
 
-  std::printf("13) Entwurf 4: Kopplung der Manschetten, Baumlast, Standbein/Schwungbein\n");
+  std::printf("13) Kopplung der Manschetten, Baumlast, Standbein/Schwungbein\n");
   {
     const float dt = 0.005f;
     auto ready = [&](App& app, Inputs& in, Outputs& o) { in.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o = app.step(in, dt); in.btnPower = false; for (float t = 0; t < 6.f; t += dt) o = app.step(in, dt); };
@@ -390,10 +416,16 @@ int main() {
     in.trunkPitch = -0.25f; bool vib = false; for (float t = 0; t < 1.f; t += dt) { o = app.step(in, dt); vib |= o.vibrate; }
     check(o.warnBackward && vib, "Rücklage: Warnung und Vibration");
     in.trunkPitch = 0.f;
-    in.joint[KneeR].qd = 3.f; in.safety.trunkTiltRate = 3.f; run(0.05f);
-    check(app.sup.mode == Mode::SoftOff && o.tauTotal[KneeR] < -5.f, "Sturz: Knie bremst die Bewegung (Dämpfung), statt schlaff zu werden");
+    in.joint[KneeR].qd = 1.5f; in.joint[HipR].qd = 1.5f; in.safety.trunkTiltRate = 3.f; run(0.2f);
+    std::printf("     Sturz, Knie sinkt mit 1,5 rad/s ein: Knie %+.0f Nm, Hüfte %+.0f Nm, Schulter %+.0f Nm\n", o.tauTotal[KneeR], o.tauTotal[HipR], o.tauTotal[ShR]);
+    check(app.sup.mode == Mode::SoftOff && o.tauTotal[KneeR] < -20.f && o.tauTotal[HipR] < -15.f && o.tauTotal[ShR] == 0.f, "Sturz: Knie und Hüfte bremsen das Einsinken (Dämpfung), Arme stromlos");
+    run(0.8f);
+    check(app.sup.mode == Mode::SoftOff && o.tauTotal[KneeR] < -5.f, "nach 1 s bremst das Knie noch (früher fiel das Schütz schon nach 0,1 s ab)");
+    in.joint[KneeR].qd = -1.5f; run(0.01f);
+    check(o.tauTotal[KneeR] > 0.f, "Dämpfung wirkt gegen die Bewegung, in beide Richtungen (tritt nie)");
     run(2.f);
-    check(o.tauTotal[KneeR] == 0.f, "nach 1,5 s Sturzdämpfung: stromlos");
+    check(o.tauTotal[KneeR] == 0.f && app.sup.mode == Mode::Off, "nach 1,5 s Sturzdämpfung: stromlos, aus");
+    in.joint[KneeR].qd = in.joint[HipR].qd = 0.f;
     in.safety.trunkTiltRate = 0.f;
     App hot; Inputs hi; Outputs ho; hi.btnPower = true; for (float t = 0; t < 0.15f; t += dt) ho = hot.step(hi, dt); hi.btnPower = false; for (float t = 0; t < 6.f; t += dt) ho = hot.step(hi, dt);
     hi.joint[ShR].cuffN = 700.f; hi.joint[ShR].q = 0.8f; for (float t = 0; t < 2.f; t += dt) ho = hot.step(hi, dt); const float t0 = ho.tauTotal[ShR];
@@ -501,6 +533,99 @@ int main() {
     uint8_t r[18] = {0x05, 0x0F, 0, 0x7F, 0xFF, 0xFF, 0x80, 0x00, 0x00, 0xFF, 0xFF, 0xFE, 0x00, 0x10, 0x00};
     int32_t ch[4]; const uint16_t st = adsParseFrame(r, ch);
     check(adsStatusDataReady(st) && ch[0] == 8388607 && ch[1] == -8388608 && ch[2] == -2 && ch[3] == 4096, "ADS131M04: Rahmen mit Vorzeichen richtig gelesen");
+  }
+
+  std::printf("18) Sicherheits-Durchsicht (Rev. S1): Nullen, Winkel, Sensorfehler, Schlaufe unter Last, Messbereiche, Motor-Wächter\n");
+  {
+    const float dt = 0.005f;
+    auto run = [&](App& app, Inputs& in, Outputs& o, float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
+    auto on = [&](App& app, Inputs& in, Outputs& o) { in.btnPower = true; run(app, in, o, 0.15f); in.btnPower = false; run(app, in, o, 6.f); };
+    {
+      // Nullen: Die Manschette sitzt straff und drückt im ruhigen Stand mit 6 N auf die Zelle. Ohne Nullen liefe das Gelenk dauernd mit.
+      App app; Inputs in; Outputs o; in.joint[ShR].cuffN = 6.f; in.joint[ShR].q = 0.5f; on(app, in, o);
+      std::printf("     Manschette mit 6 N Vorlast: genullt %.1f N, Sollgeschwindigkeit %+.2f rad/s\n", o.tare[ShR], o.vDes[ShR]);
+      check(app.sup.mode == Mode::Active && std::fabs(o.tare[ShR] - 6.f) < 0.1f && std::fabs(o.vDes[ShR]) < 0.01f, "Nullen beim Einschalten: Vorlast der Manschette wird übernommen, das Gelenk läuft nicht weg");
+      in.joint[ShR].cuffN = 9.f; run(app, in, o, 0.5f);
+      check(o.vDes[ShR] > 1.5f, "… und 3 N mehr Druck bewegen das Gelenk wie gewohnt");
+      App a2; Inputs i2; Outputs o2; i2.joint[ElR].cuffN = 50.f; on(a2, i2, o2);
+      check(a2.sup.mode == Mode::Zeroing && !std::strcmp(o2.notice, "Nullen: Manschetten entlasten"), "50 N auf einer Manschette beim Einschalten: kein Start, Hinweis in der Anzeige");
+      i2.joint[ElR].cuffN = 2.f; run(a2, i2, o2, 3.f);
+      check(a2.sup.mode == Mode::Active, "entlastet: startet von selbst");
+    }
+    {
+      App app; Inputs in; Outputs o; on(app, in, o);
+      in.joint[KneeL].q = 2.6f; in.joint[KneeL].qd = 1.0f; run(app, in, o, 0.01f);
+      check(app.sup.mode == Mode::SoftOff && !std::strcmp(app.sup.reason, "Gelenkwinkel unplausibel") && o.tauTotal[KneeL] < 0.f, "Gelenkwinkel weit außerhalb des Bereichs (Nullpunkt falsch): Unterstützung aus, Beine gedämpft");
+      run(app, in, o, 1.6f);
+      check(app.sup.mode == Mode::Fault, "… danach Fehler");
+      App a2; Inputs i2; Outputs o2; on(a2, i2, o2);
+      i2.joint[ShL].cuffN = std::nanf(""); run(a2, i2, o2, 0.01f);
+      bool finite = true; for (int i = 0; i < NJ; i++) finite &= std::isfinite(o2.tau[i]) && std::isfinite(o2.vDes[i]);
+      check(a2.sup.mode == Mode::SoftOff && finite, "ungültiger Messwert (keine Zahl): Sensorfehler, kein ungültiger Motorbefehl");
+      App a3; Inputs i3; Outputs o3; on(a3, i3, o3);
+      i3.joint[ShR].cuffN = 30.f; i3.joint[ShR].q = 0.8f; i3.joint[KneeR].qd = 1.5f; run(a3, i3, o3, 1.f);
+      i3.safety.sensorsOk = false; run(a3, i3, o3, 0.005f);
+      std::printf("     Sensorfehler in der Bewegung: Schulter %+.1f Nm, Knie %+.1f Nm\n", o3.tauTotal[ShR], o3.tauTotal[KneeR]);
+      check(o3.tauTotal[ShR] == 0.f && o3.vDes[ShR] == 0.f && o3.tauTotal[KneeR] < -20.f && o3.led == Led::Red, "Sensorfehler: Arme im selben Takt stromlos, Beine bremsen das Einsinken, Ring rot");
+    }
+    {
+      // Schlaufe öffnen mit Baum: lang = nur Warnung, erst weiteres Halten öffnet
+      App app; Inputs in; Outputs o; on(app, in, o);
+      in.btnLoop[LoopR1] = true; run(app, in, o, 0.15f); in.btnLoop[LoopR1] = false; run(app, in, o, 0.5f);
+      in.loopCurrentA[LoopR1] = 2.5f; run(app, in, o, 0.3f); in.loopCurrentA[LoopR1] = 0.f;
+      in.loopN[LoopR1] = 150.f; run(app, in, o, 0.5f);
+      in.btnLoop[LoopR1] = true; run(app, in, o, 1.3f); const bool warned = o.vibrate; in.btnLoop[LoopR1] = false; run(app, in, o, 1.f);
+      check(app.loop[LoopR1].state == LoopState::Closed && warned, "Baum in der Schlaufe, 1,3 s gedrückt: nur Vibrationswarnung, Schlaufe bleibt zu");
+      in.btnLoop[LoopR1] = true; run(app, in, o, 2.2f); in.btnLoop[LoopR1] = false;
+      check(app.loop[LoopR1].state == LoopState::Opening, "über die Warnung hinaus gehalten (2 s): Schlaufe öffnet");
+      in.safety.estopOk = false; run(app, in, o, 0.05f);
+      check(o.winch[LoopR1] == 0.f, "Not-Aus: auch die Winde steht");
+      App a2; Inputs i2; Outputs o2; on(a2, i2, o2);
+      i2.btnLoop[LoopL1] = true; run(a2, i2, o2, 0.15f); i2.btnLoop[LoopL1] = false; run(a2, i2, o2, 0.5f);
+      i2.loopCurrentA[LoopL1] = 2.5f; run(a2, i2, o2, 0.3f); i2.loopCurrentA[LoopL1] = 0.f;
+      i2.btnLoop[LoopL1] = true; run(a2, i2, o2, 1.1f); i2.btnLoop[LoopL1] = false;
+      check(a2.loop[LoopL1].state == LoopState::Opening, "leere Schlaufe: lang drücken öffnet wie bisher sofort");
+    }
+    {
+      // Spannungseinbruch: Momentgrenzen gehen zurück
+      App app; Inputs in; Outputs o; on(app, in, o);
+      in.joint[ShR].cuffN = 700.f; in.joint[ShR].q = 0.8f; run(app, in, o, 2.f); const float full = o.tauTotal[ShR];
+      in.safety.batteryV = 31.5f; run(app, in, o, 0.4f);
+      std::printf("     Schulter am Anschlag: %.0f Nm bei 36 V, %.0f Nm bei 31,5 V (%s)\n", full, o.tauTotal[ShR], o.notice);
+      check(full > 95.f && o.tauTotal[ShR] < 0.7f * full && o.tauTotal[ShR] > 0.4f * full && o.notice[0], "Akku bricht unter Last ein: Schulter nimmt Kraft zurück, Hinweis in der Anzeige");
+    }
+    {
+      Settings st;
+      CellCal foot = st.cell[9]; foot.nPerCount = 0.01f; CellCal cuff = st.cell[0]; cuff.nPerCount = 0.01f; CellCal lp = st.cell[6]; lp.nPerCount = 0.01f;
+      check(foot.plausible(150000) && lp.plausible(45000) && !cuff.plausible(20000), "Messbereich je Zelle: 1500 N im Steigbügel und 450 N im Schlaufenkopf sind gültig, 200 N an einer Manschette nicht");
+      check(!foot.plausible(300000) && !lp.plausible(70000), "… darüber gilt die Zelle als gestört");
+      seal(st); Settings old = st; old.version = 6; seal(old);
+      check(valid(st) && !valid(old), "Einstellungen einer älteren Version werden verworfen (neue Messbereiche greifen)");
+      static char out[128]; ConsoleIO io; io.print = [](const char* t) { std::snprintf(out, sizeof out, "%s", t); };
+      static uint16_t armed = 0; io.armJointZero = [](uint16_t m) { armed = m; };
+      Settings c;
+      check(runCommand("pruefstand 3", c, io) && c.cellMask == (1u << 16), "Prüfstand Knie rechts: nur die Schienbein-Zelle rechts ist angemeldet");
+      check(runCommand("zelle 6 1", c, io) && c.cellMask == ((1u << 16) | (1u << 6)) && runCommand("zelle 6 0", c, io) && c.cellMask == (1u << 16) && !runCommand("zelle 17 1", c, io), "Konsole: einzelne Zelle an- und abmelden");
+      check(runCommand("voll", c, io) && c.cellMask == kAllCells, "voll: alle 17 Zellen angemeldet");
+      check(runCommand("gelenk0 4", c, io) && armed == (1u << 4) && runCommand("gelenk0 alle", c, io) && armed == 0x3FF && !runCommand("gelenk0 11", c, io), "Konsole: Gelenk-Nullpunkt einmessen vormerken");
+    }
+    {
+      check(std::fabs(wrapPi(6.2832f - 0.2f) + 0.2f) < 1e-3f && std::fabs(wrapPi(-6.0f) - 0.2832f) < 1e-3f && std::fabs(wrapPi(1.f) - 1.f) < 1e-6f, "Winkel werden auf ±π gefaltet");
+      Transmission tw{1.8f, 0.93f};
+      check(std::fabs(tw.jointAngleFrom(0.1f + 6.2832f, 0.46f) + 0.2f) < 1e-3f, "Rumpf drehen: Gelenkwinkel aus Motorwinkel, Nullpunkt und Übersetzung");
+      uint8_t b[8]; const uint32_t id = packParamWrite(4, kParamCanTimeout, kCanTimeoutTicks, b);
+      check((id >> 24) == 18 && ((id >> 8) & 0xFF) == kHostId && (id & 0xFF) == 4 && b[0] == 0x28 && b[1] == 0x70 && b[2] == 0 && b[3] == 0 && b[4] == 0xD0 && b[5] == 0x07 && b[6] == 0 && b[7] == 0,
+            "Bus-Wächter im Motor: Parameter 0x7028 = 2000 (0,1 s) als Typ 18, Low-Byte zuerst");
+      const uint8_t z[8] = {};
+      const MotorState run2 = unpackReply((uint32_t(kTypeFeedback) << 24) | (2u << 22) | (3u << 8) | kHostId, z, kRS04);
+      const MotorState rst = unpackReply((uint32_t(kTypeFeedback) << 24) | (3u << 8) | kHostId, z, kRS04);
+      check(run2.mode == kMotorRun && rst.mode == kMotorReset && run2.fault == 0, "Betriebszustand des Motors (läuft / Reset) aus der Rückmeldung gelesen");
+      check(crc16Ccitt(reinterpret_cast<const uint8_t*>("123456789"), 9) == 0x29B1, "CRC-16-CCITT stimmt mit dem bekannten Prüfwert überein");
+      uint8_t f[18] = {0x01, 0x0F, 0, 0x00, 0x10, 0x00, 0xFF, 0xFF, 0xFE}; const uint16_t c = crc16Ccitt(f, 15); f[15] = c >> 8; f[16] = c & 0xFF;
+      const bool good = adsFrameCrcOk(f); f[7] ^= 0x01; const uint8_t zero[18] = {};
+      check(good && !adsFrameCrcOk(f) && !adsFrameCrcOk(zero), "ADS131M04: Rahmen mit gekipptem Bit und ein stummer Wandler (alles 0) fallen durch die Prüfsumme");
+      check(adsStatusReset(0x050F) && !adsStatusReset(0x010F), "ADS131M04: Neustart des Wandlers am STATUS erkannt");
+    }
   }
 
   std::printf("\n%s (%d Fehler)\n", fails ? "NICHT BESTANDEN" : "ALLE TESTS BESTANDEN", fails);

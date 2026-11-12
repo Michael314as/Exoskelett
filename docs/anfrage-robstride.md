@@ -26,6 +26,13 @@ Because the joints are exposed to snow and water, I would like to ask:
    ambient −15 … +10 °C), or the thermal resistance / thermal time constant.
 5. Is the **operating temperature range** (−20 … 50 °C) valid for the encoder and driver at −20 °C after a cold start?
 6. Can the motors **limit torque internally** (parameter) as a second safety layer independent of the host controller?
+7. What **radial load and tilting moment** may the output flange carry? At the knee a push rod is attached to a crank on
+   the output (up to 3.2 kN radial, 25 mm in front of the flange); at hip and shoulder the limb is mounted directly.
+8. **Phase resistance** and **maximum DC bus current** of RS04 and RS03 at peak torque (to size fuses and battery).
+9. Is the reported position after power-up **absolute within one output revolution** (0–2π), also when the output was
+   turned by hand while powered off?
+10. Does the parameter **0x7028 (canTimeout)** stop the motor in operation-control mode, and must it be written after
+    every power-up?
 
 Thank you very much. I am happy to share test results from our sealed housing with you.
 
@@ -38,4 +45,4 @@ Best regards,
 **Auf Deutsch (zum Nachlesen):** Wir fragen nach IP67-Versionen von RS03/RS04, nach Preis und Lieferzeit (erst 1 RS04,
 später 5 RS04 + 2 RS03 nach Deutschland), nach der Drehmoment-Drehzahl-Kurve bei 36 V, nach dem Dauermoment ohne die große
 Kühlplatte des Herstellers (unser Motor sitzt in einer kleinen Kunststoffkapsel), ob −20 °C beim Kaltstart gilt und ob man
-im Motor selbst eine Momentgrenze als zweite Sicherung einstellen kann.
+im Motor selbst eine Momentgrenze als zweite Sicherung einstellen kann. Neu (Durchsicht Nov 2026): zulässige Querkraft am Abtrieb (Schubstange am Knie), Strangwiderstand und Busstrom bei Spitze (Sicherungen), ob der Winkel nach dem Einschalten absolut ist, und ob der Bus-Wächter `canTimeout` im Betriebsmodus wirkt.

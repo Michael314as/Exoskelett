@@ -17,13 +17,13 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `laser/zentrierfeder_halter.dxf` | Edelstahl 1.4301 | 3 mm | 4 | 28 × 30 | 2 | 7.6 mm | Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder |
 | `laser/motortraeger_wange.dxf` | Alu 6082 T6 | 8 mm | 12 | 40 × 120 | 5 | 13.4 mm | Wangen zwischen Schiene bzw. Schwinge und Motorträger (2 je Kapsel an Knie und Ellbogen, 1 je Kapsel an Hüfte und Schulter); Langloch zum Ausrichten |
 | `laser/abtriebsflansch_rs04.dxf` | Alu 6082 T6 | 8 mm | 4 | 90 × 90 | 14 | 6.2 mm | Flansch Abtrieb RS04 → Oberschenkelplatte (Hüfte) bzw. Oberarmschiene (Schulter); 9 × M5 auf Ø 36 |
-| `laser/kurbel_knie.dxf` | Alu 6082 T6 | 10 mm | 2 | 99 × 54 | 11 | 6.2 mm | Kurbel BA-01: auf dem Abtrieb des Kniemotors (9 × M5), Zapfen M8 bei 60 mm |
-| `laser/kurbel_ellbogen.dxf` | Alu 6082 T6 | 8 mm | 2 | 83 × 46 | 8 | 5.6 mm | Kurbel AR-04: auf dem Abtrieb des Ellbogenmotors (6 × M4), Zapfen M6 bei 50 mm |
-| `laser/kniehebel.dxf` | Alu 6082 T6 | 10 mm | 2 | 96 × 48 | 5 | 5.7 mm | Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen M8 bei 60 mm |
-| `laser/ellbogenhebel.dxf` | Alu 6082 T6 | 8 mm | 2 | 80 × 40 | 5 | 4.7 mm | Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen M6 bei 50 mm |
-| `laser/kurbel_rumpf_beugen.dxf` | Alu 6082 T6 | 10 mm | 1 | 89 × 54 | 11 | 6.2 mm | Kurbel am RS04 des Rumpfs (Beugen), Zapfen M8 bei 50 mm |
-| `laser/hebel_lendengelenk.dxf` | Alu 6082 T6 | 10 mm | 1 | 86 × 48 | 5 | 6.7 mm | Hebel am Lendengelenk (oberer Rahmen), Bolzen Ø 10, Zapfen M8 bei 50 mm |
-| `laser/kurbel_rumpf_drehen.dxf` | Alu 6082 T6 | 8 mm | 1 | 73 × 46 | 8 | 5.6 mm | Kurbel am RS03 des Rumpfs (Drehen), Zapfen M6 bei 40 mm |
+| `laser/kurbel_knie.dxf` | Alu 6082 T6 | 10 mm | 2 | 99 × 54 | 11 | 6.2 mm | Kurbel BA-01: auf dem Abtrieb des Kniemotors (9 × M5 + 2 Stifte Ø 6), Zapfen bei 60 mm: Passschraube Ø 8 (ISO 7379, 12.9), Loch Ø 7,8 auf 8 H7 reiben |
+| `laser/kurbel_ellbogen.dxf` | Alu 6082 T6 | 8 mm | 2 | 83 × 46 | 8 | 5.6 mm | Kurbel AR-04: auf dem Abtrieb des Ellbogenmotors (6 × M4 + 2 Stifte Ø 5 nach dem Motor bohren), Zapfen bei 50 mm: Passschraube Ø 6 (12.9), Loch Ø 5,8 auf 6 H7 reiben |
+| `laser/kniehebel.dxf` | Alu 6082 T6 | 10 mm | 2 | 96 × 48 | 5 | 5.7 mm | Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen bei 60 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben |
+| `laser/ellbogenhebel.dxf` | Alu 6082 T6 | 8 mm | 2 | 80 × 40 | 5 | 4.7 mm | Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen bei 50 mm: Passschraube Ø 6 (12.9), Loch auf 6 H7 reiben |
+| `laser/kurbel_rumpf_beugen.dxf` | Alu 6082 T6 | 10 mm | 1 | 89 × 54 | 11 | 6.2 mm | Kurbel am RS04 des Rumpfs (Beugen), Zapfen bei 50 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben |
+| `laser/hebel_lendengelenk.dxf` | Alu 6082 T6 | 10 mm | 1 | 86 × 48 | 5 | 6.7 mm | Hebel am Lendengelenk (oberer Rahmen), Bolzen Ø 10, Zapfen bei 50 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben |
+| `laser/kurbel_rumpf_drehen.dxf` | Alu 6082 T6 | 8 mm | 1 | 73 × 46 | 8 | 5.6 mm | Kurbel am RS03 des Rumpfs (Drehen), Zapfen bei 40 mm: Passschraube Ø 6 (12.9), Loch auf 6 H7 reiben |
 | `laser/traeger_rumpfkapsel.dxf` | Alu 6082 T6 | 8 mm | 3 | 40 × 120 | 5 | 13.4 mm | Träger der Rumpfkapseln am unteren Rahmen (2 für Beugen, 1 Konsole für Drehen) |
 | `laser/steigbuegel.dxf` | Edelstahl 1.4301 | 4 mm | 2 | 60 × 205 | 11 | 14.7 mm | Steigbügel BE-11: Abwicklung 60 × 205, Laschen an den Linien ±67,5 mm 90° hochkanten (Kantdienstleister) |
 | `laser/drehteller_scheibe.dxf` | Edelstahl 1.4301 | 2 mm | 4 | 64 × 64 | 5 | 7.8 mm | Drehteller BE-14: Laufscheiben über und unter dem Axial-Nadellager AXK (2 je Fuß), M4 für die Wägezellen-Platte |
@@ -50,8 +50,8 @@ Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: D
 | `druck/manschette_schienbein.stl` | PETG-CF | 2 | 74 × 136 × 87 | 79 | ja | 6 | Manschette M2 r = 55 mm, Breite 87 mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss |
 | `druck/manschette_oberarm.stl` | PETG-CF | 2 | 68 × 126 × 87 | 73 | ja | 6 | Manschette M2 r = 50 mm, Breite 87 mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss |
 | `druck/manschette_unterarm.stl` | PETG-CF | 2 | 58 × 110 × 72 | 54 | ja | 6 | Manschette M2 r = 42 mm, Breite 72 mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss |
-| `druck/bohrschablone_rohr25.stl` | PETG | 1 | 150 × 34 × 22 | 40 | ja | 7 | Lochraster der Außenrohre 25 × 25 (Steckbolzen Ø6) |
-| `druck/bohrschablone_rohr20.stl` | PETG | 1 | 150 × 29 × 18 | 33 | ja | 7 | Lochraster der Innenrohre 20 × 20 |
+| `druck/bohrschablone_rohr30.stl` | PETG | 1 | 150 × 39 × 25 | 47 | ja | 7 | Lochraster der Außenrohre 30 × 30 an Ober- und Unterschenkel (Steckbolzen Ø6) |
+| `druck/bohrschablone_rohr25.stl` | PETG | 1 | 150 × 34 × 22 | 40 | ja | 7 | Lochraster der Innenrohre 25 × 25 (Teleskop) und der Armschienen 25 × 25 |
 | `druck/waegezellen_halter.stl` | PETG | 8 | 30 × 34 × 16 | 10 | ja | 2 | Halter je Wägezelle (an der Schiene) |
 | `druck/ueberlastpuffer.stl` | TPU 95A | 16 | 10 × 10 × 6 | 0 | ja | 1 | Überlastpuffer (2 je Wägezelle), 1 mm Spalt einstellen |
 | `druck/tastergriff_rechts.stl` | PETG | 1 | 60 × 38 × 34 | 46 | ja | 2 | Daumentaster rechts (2 Schlaufen) mit Heizfolie innen |

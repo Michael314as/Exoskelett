@@ -1,4 +1,4 @@
-# Kraftverteilung (Entwurf 4)
+# Kraftverteilung (Entwurf 5)
 
 Grobe statische Abschätzung: Welche Kräfte entstehen beim Aufladen und Schleifen, über welche
 Teile laufen sie in den Boden und wie viel davon kann das Exo übernehmen.
@@ -71,40 +71,28 @@ Annahmen der Schritte:
 
 ## 3. Was die Antriebe schaffen
 
-Motor-Klasse „Robotergelenk mittel“ (etwa 9 Nm dauernd, 25 Nm Spitze am Abtrieb), Seiltrommel
-Ø 3 cm. Je Körperseite, nach Reibungsverlusten (Bowdenzug 30 %, offenes Seil über Rollen 10–12 %):
+Seit Entwurf 5 sitzen die Motoren direkt am Gelenk (Übersetzung 1 : 1, an Knie, Ellbogen und Rumpf über eine
+Schubstange). Es gibt keine Seile und Bowdenzüge mehr und damit keine Reibungsverluste auf dem Weg.
+Die Werte sind die Grenzen in der Firmware (`firmware/src/exo_app.h`); Dauer = was die Kapsel auf Dauer wegkühlt
+(geschätzt, wird in P33 gemessen).
 
-| Gelenk | Übersetzung | Dauer (Nm) | Spitze (Nm) |
-| --- | --- | --- | --- |
-| Schulter | Seilscheibe Ø 14 cm, offenes Seilpaar | 37 | 103 |
-| Ellbogen | Seilscheibe Ø 10 cm, Bowdenzug-Paar | 21 | 58 |
-| Hüfte | eigener Motor an der Hüftschwinge, Seilgetriebe 1:6 (Trommel Ø 2 / Scheibe Ø 12 cm) | 47 | 140 |
-| Knie | Bowdenzug-Paar, Kurvenscheibe 5 cm gestreckt bis 8 cm in der Hocke | 21–31 | 58–95 (gestreckt) bis 115 (Hocke, Spitze) |
-
-### Entwurf 4: Mischweg an der Hüfte (gerechnet und entschieden)
+| Gelenk | Motor | Dauer (Nm) | Spitze in der Firmware (Nm) | Bedarf beim Aufrichten eines 3-m-Baums, halbe Last |
+| --- | --- | --- | --- | --- |
+| Schulter | RS04 direkt | ≈ 28 | 100 | ≈ 50–100 |
+| Ellbogen | RS03 über Schubstange | ≈ 16 | 56 | ≈ 30–55 |
+| Hüfte | RS04 direkt | ≈ 28 | 110 | ≈ 75 |
+| Knie | RS04 über Schubstange | ≈ 28 | 110 (strecken), 10 (beugen) | ≈ 50 |
+| Rumpf beugen | RS04 über Schubstange | ≈ 28 | 80 (aufrichten) | mit Last trägt die Lendensperre |
+| Rumpf drehen | RS03 über Kurbel 1 : 1,8 | ≈ 29 | 30 | – |
 
 Bedarf je Seite in tiefer Hocke beim Aufrichten eines 3-m-Baums: Hüfte etwa 45 Nm (Körper) + 106 Nm (Baum) ≈ 150 Nm,
-Knie etwa 33 + 65 ≈ 100 Nm. Soll das Exo die Hälfte tragen: Hüfte ≈ 75 Nm, Knie ≈ 50 Nm.
+Knie etwa 33 + 65 ≈ 100 Nm. Die Spitze reicht also für mehr als die Hälfte. **Der Engpass ist die Wärme:** Mit
+≈ 28 Nm Dauermoment kann eine Kapsel die Spitze nur etwa 10–15 s halten, dann nimmt der Wärmeschutz die Kraft weich
+zurück. Für kurzes Aufrichten und Umsetzen passt das; langes Halten eines schweren Baums in der Hocke nicht. Der Wert
+28 Nm ist geschätzt (der Hersteller nennt 40 Nm mit einer Kühlplatte 345 × 345 mm, die die Kapsel nicht hat) und der
+wichtigste Messwert am Prüfstand (P33).
 
-| | ein Seil pro Bein (Entwurf 3.2) | Mischweg (Entwurf 4) |
-|---|---|---|
-| Hüfte Spitze | ~140 Nm | ~140 Nm |
-| Knie Spitze | ~120 Nm | ~95–115 Nm |
-| Hüfte und Knie getrennt regelbar | nein (festes Verhältnis 1,2 : 1) | **ja** |
-| Spreizen | Seile durch hohle Achse, 4 Umlenkrollen | Motor spreizt mit, nur ein biegsamer Bowdenzug fürs Knie |
-| Motoren | 6 | 8 (+300 bis 1 000 €, +1,5 bis 2 kg nah am Schwerpunkt) |
-
-Entscheidend war nicht die Kraft (beide Wege reichen), sondern dass Hüfte und Knie in beide Richtungen getrennt geregelt
-werden können: Nur so läuft das Bein beim Gehen frei mit und das Exo-Bein lässt sich je Gelenk sauber ausgleichen.
-Ein Hüftmotor ohne Seilgetriebe reicht nicht (25 Nm); ein Motor mit großem Getriebe wäre stark genug, ließe sich aber
-nicht mehr leicht von Hand bewegen.
-
-Gegenüber Entwurf 3 bringt die neue Seilführung an der Schulter rund 25 % mehr (offenes Seil statt Bowdenzug) und
-am Knie in der Hocke rund 33 % mehr (Kurvenscheibe statt fester Rolle), ohne stärkere Motoren. Dazu kommt das Seil
-nicht mehr an die Gelenke: Vorher lief es in tiefer Hocke durch das Kniegelenk, und der Hebel an der Hüfte schrumpfte.
-
-Seilkraft bei Motorspitze: etwa 1.700 N. Dyneema 3 mm hält ein Vielfaches; Bowden-Innenzug
-deshalb **2 mm Edelstahl 7 × 7 oder Dyneema in PTFE-Hülle**, Software begrenzt auf etwa 1.000 N.
+Die frühere Rechnung für den Seilantrieb (Entwurf 3 und 4) steht in der Git-Historie dieses Dokuments.
 
 ### Bewertung
 
@@ -154,14 +142,10 @@ kaum noch, was gefährlich ist: Man merkt nicht mehr, wenn etwas zu schwer wird.
 
 ## 5. Folgen für die Konstruktion
 
-- Schulter- und Ellbogengelenke mit **großer Seilscheibe** (Ø 10–14 cm), Schulter mit offenem Seilpaar,
-  weil dort am meisten Moment gebraucht wird. Bowdenzug nur dort, wo ein Seil über mehrere bewegte
-  Gelenke müsste (Ellbogen).
-- **Seilscheiben auf den Gelenkachsen** statt Rollen daneben: konstanter Hebel, das Seil kommt nie ans
-  Gelenk. Am Knie eine Kurvenscheibe, die in der Hocke den größten Hebel gibt.
-- Jede Rolle kostet ein paar Prozent: so wenige wie möglich, Kugellager, Durchmesser mindestens
-  10 × Seildicke.
-- Schlaufenkopf und Unterarmschiene **biegesteif** (Alu 25 × 25 × 2), denn bis zu rund 1.000 N greifen
+- Motoren **direkt auf den Gelenkachsen** (Hüfte, Schulter) oder über eine starre Schubstange mit Parallelogramm
+  (Knie, Ellbogen, Rumpf): konstanter Hebel, kein Spiel, nichts kann vereisen oder abspringen.
+- Kurbelzapfen werden einseitig gebogen: Passschrauben 12.9 mit glattem Schaft ([festigkeit.md](festigkeit.md)).
+- Schlaufenkopf und Unterarmschiene **biegesteif** (Alu 25 × 25 × 3), denn bis zu rund 1.000 N greifen
   hier außermittig an.
 - Schulterbügel und Rahmen-Eckverbindungen mit **Doppelplatten**, dort sammelt sich die Last
   beider Arme.

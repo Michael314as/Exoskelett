@@ -4,7 +4,7 @@ CXXFLAGS ?= -O2 -std=c++17 -Wall -Wextra -Werror
 
 test: build/sim_test build/teensy_host build/esp32_host
 	./build/sim_test
-	./build/teensy_host && echo "Teensy-Code: kompiliert und läuft (mit Platzhaltern)"
+	./build/teensy_host
 	./build/esp32_host
 
 build/sim_test: test/sim_test.cpp src/exo_core.h src/exo_app.h src/drivers.h src/settings.h esp32/status.h

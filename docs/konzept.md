@@ -60,7 +60,7 @@ es tragen muss.**
 ```
  Schulterbügel ── Schulterkapsel (RS04 direkt) ── Oberarm (Ellbogenkapsel RS03 + Schubstange, Anzeige rechts) ── Ellbogen ── Unterarm ── Schlaufenträger
        │                                                                                                         (rechts unten + außen, links unten)
- Rückenrahmen ── flache Elektronikbox (Steuerung, Wandler), Akkus seitlich
+ Rückenrahmen ── flache Elektronikbox (Steuerung, Wandler), Akkus stehend oben im Schutzbügel
        │            └── Gurtsystem: Hüftgurt, Schultergurte, Lageverstellriemen, Brustgurt, Polster
  Gabel des Abspreizgelenks (Achse nach vorne durchs Hüftgelenk, Zentrierfedern ±20°)
        │
@@ -264,7 +264,7 @@ in Prozent mit Restzeit** und die **Stufe**, unten **Fehler und Warnungen im Kla
 ## 6d. Tragekomfort: Lendengelenk und kleine Freiheitsgrade
 
 Ein starrer Rücken zwingt dich, aus den Knien zu heben, und drückt bei jedem Bücken Hüftgurt und Schultergurte gegen
-den Körper. Deshalb hat Entwurf 4 jetzt:
+den Körper. Deshalb gibt es seit Entwurf 4:
 
 | Gelenk | Bewegung | Wie | Warum |
 |---|---|---|---|

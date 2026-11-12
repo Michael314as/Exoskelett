@@ -1,4 +1,4 @@
-// Gesamtsteuerung (Entwurf 4): 8 Gelenke, 3 Schlaufenwinden, Taster, Sicherheit, LED-Ring.
+// Gesamtsteuerung (Entwurf 5): 10 Gelenke, 3 Schlaufenwinden, Taster, Sicherheit, LED-Ring.
 // Eingänge und Ausgänge sind reine Daten; die Hardware liest/schreibt main_teensy.cpp.
 //
 // Moment je Gelenk = Schwerkraft der Exo-Schiene + Vorsteuerung (Baumlast, Körpergewicht im Stand)
@@ -55,6 +55,9 @@ struct Outputs {
   bool warnBackward = false;           // Rücklage: Rumpf zu weit nach hinten
   float heat[NJ] = {};                 // Wärmeschätzung je Motor (1 = Dauerbetrieb mit Nennmoment)
   bool heaterLegs = false, heaterArms = false;   // Heizfolien der Gelenkkapseln (Beine: Hüfte + Knie, Arme: Schulter + Ellbogen)
+  const char* notice = "";             // Hinweis im Klartext für die Anzeige, solange kein Fehler ansteht („Akku schwach“, „Motor warm“ …)
+  float powerLimit = 1.f;              // Abregelung bei Spannungseinbruch (1 = volle Kraft)
+  float tare[NJ] = {};                 // beim Einschalten genullter Anteil der Manschettenkraft [N]
 };
 
 inline JointConfig defaultJoint(JointId id) {
@@ -86,13 +89,15 @@ inline JointConfig defaultJoint(JointId id) {
   // Glieder: 0,9 rad/s je N, bis 8 rad/s (zügiges Gehen und Armschwung erreichen 5–7 rad/s; RS04/RS03 schaffen am 36-V-Akku ≈ 15 rad/s).
   c.filterHz = 40.f; c.deadbandN = 0.3f; c.admit = 0.9f; c.velMax = 8.f;
   switch (id) {
-    case HipL: case HipR:   c.kdJoint = 4.0f; c.viscComp = 0.4f; break;    // Bein mit Kniekapsel ≈ 0,35 kg·m²
-    case KneeL: case KneeR: c.kdJoint = 2.1f; c.viscComp = 0.5f; break;    // Unterschenkel + Fuß 0,18 kg·m² um die Knieachse (aus der Bauteilliste)
+    case HipL: case HipR:   c.kdJoint = 4.0f; c.viscComp = 0.4f; c.fallDamp = 15.f; break;    // Bein mit Kniekapsel ≈ 0,35 kg·m²
+    case KneeL: case KneeR: c.kdJoint = 2.1f; c.viscComp = 0.5f; c.fallDamp = 20.f; break;    // Unterschenkel + Fuß 0,18 kg·m² um die Knieachse (aus der Bauteilliste)
     case ShL: case ShR:     c.kdJoint = 2.3f; c.viscComp = 0.4f; break;    // Exo-Arm mit Ellbogenkapsel ≈ 0,20 kg·m²
-    case Lumb:              c.kdJoint = 10.f; c.viscComp = 0.5f; c.admit = 0.25f; c.velMax = 2.f; break;   // Oberteil träge, Gasfedern tragen: langsam mitgehen
-    case Twist:             c.kdJoint = 7.f;  c.viscComp = 0.3f; c.admit = 0.35f; c.velMax = 2.f; break;   // Rucksack drehen ≈ 0,6 kg·m²
+    case Lumb:              c.kdJoint = 10.f; c.viscComp = 0.5f; c.admit = 0.25f; c.velMax = 2.f; c.tareMaxN = 120.f; break;   // Oberteil träge, Gasfedern tragen: langsam mitgehen
+    case Twist:             c.kdJoint = 7.f;  c.viscComp = 0.3f; c.admit = 0.35f; c.velMax = 2.f; c.tareMaxN = 60.f; break;   // Rucksack drehen ≈ 0,6 kg·m²
     case ElL: case ElR: default: c.kdJoint = 0.75f; c.viscComp = 0.25f; break;   // Unterarm-Schiene ≈ 0,065 kg·m²
   }
+  // Gedämpftes Absinken (Sturz, weicher Fehler): Hüfte 15, Knie 20 Nm·s/rad, höchstens 80 Nm. Bei 1,5 rad/s Einsinken hält ein Knie
+  // damit ≈ 30 Nm, etwa den Anteil des Exo-Oberteils in halber Hocke. Die früheren 4 Nm·s/rad hätten das Absinken kaum gebremst.
   return c;
 }
 
@@ -110,6 +115,7 @@ class App {
   float kneeSynergy = 0.6f;                  // Oberschenkel-Druck hilft auch dem Knie (Aufstehen = Hüfte und Knie)
   int level = 1;
   uint16_t jointMask = 0x3FF;                // nicht aktive Gelenke bleiben stromlos (Prüfstand)
+  float loadedLoopN = 49.f;                  // ab hier gilt eine Schlaufe als belastet (≈ 5 kg): Lendensperre, Öffnen nur mit Warnung
 
   App() { for (int i = 0; i < NJ; i++) joint[i] = Joint(defaultJoint(JointId(i))); setLevel(1); }
 
@@ -126,8 +132,16 @@ class App {
     Press lp[NL];
     for (int i = 0; i < NL; i++) {
       lp[i] = btnLoop[i].step(in.btnLoop[i], dt);
-      if (comboActive_ && i != LoopL1) continue;
-      loop[i].command(lp[i]); if (lp[i] != Press::None) vibe_ = 0.15f;
+      if (comboActive_ && i != LoopL1) { openWarn_[i] = 0.f; continue; }
+      Press p = lp[i];
+      // Öffnen unter Last (Baum hängt in der Schlaufe): „lang“ löst erst nur die Vibrationswarnung aus; geöffnet wird, wenn der
+      // Taster danach noch 1 s gehalten bleibt. Loslassen bricht ab. Ohne Last öffnet „lang“ wie bisher sofort.
+      if (p == Press::Long && loop[i].state != LoopState::Open && in.loopN[i] > loadedLoopN) { openWarn_[i] = 1.f; vibe_ = 1.f; p = Press::None; }
+      else if (openWarn_[i] > 0.f) {
+        if (!in.btnLoop[i]) openWarn_[i] = 0.f;
+        else if ((openWarn_[i] -= dt) <= 0.f) { openWarn_[i] = 0.f; p = Press::Long; }
+      }
+      loop[i].command(p); if (p != Press::None) vibe_ = std::fmax(vibe_, 0.15f);
     }
     if (comboRelease_) { comboActive_ = comboRelease_ = false; }
     if (in.btnLoop[LoopR1] && in.btnLoop[LoopR2]) { both_ += dt; if (both_ > 2.f && !levelSent_) { setLevel((level + 1) % 3); levelSent_ = true; vibe_ = 0.4f; } }
@@ -137,30 +151,54 @@ class App {
     float maxAssist = 0.f;
     for (auto& j : joint) maxAssist = std::fmax(maxAssist, std::fabs(j.lastForce));
     s.anyAssist = maxAssist > 8.f;
-    sup.step(s, in.standingStill, dt);
+    // Plausibilität der Eingänge: keine Zahl darf „keine Zahl“ sein, und jedes aktive Gelenk muss in seinem Bereich stehen.
+    // Ein Winkel weit außerhalb heißt: Nullpunkt falsch (Motor getauscht, nie eingemessen) oder Encoder gestört. Dann stimmen
+    // weder die weichen Wände noch Schwerkraft und Vorsteuerung.
+    bool tareOk = true;
+    for (int i = 0; i < NJ; i++) {
+      if (!((jointMask >> i) & 1u)) continue;
+      const JointInput& x = in.joint[i]; const JointConfig& c = joint[i].cfg;
+      if (!std::isfinite(x.q) || !std::isfinite(x.qd) || !std::isfinite(x.cuffN)) { s.sensorsOk = false; continue; }
+      if (x.q < c.qMin - c.angleMargin || x.q > c.qMax + c.angleMargin) s.anglesOk = false;
+      // Nullen beim Einschalten: Manschettenkraft im ruhigen Stand mitteln (0,3 s), beim Übergang auf AKTIV als Nullpunkt übernehmen
+      if (sup.mode == Mode::Zeroing) {
+        tareLp_[i] = wasZeroing_ ? tareLp_[i] + (x.cuffN - tareLp_[i]) * clampf(dt / 0.3f, 0.f, 1.f) : x.cuffN;
+        if (std::fabs(tareLp_[i]) > c.tareMaxN) tareOk = false;
+      }
+    }
+    if (!std::isfinite(in.trunkPitch) || !std::isfinite(s.trunkTiltRate) || !std::isfinite(s.batteryV)) s.imuOk = false;
+    wasZeroing_ = sup.mode == Mode::Zeroing;
+    sup.step(s, in.standingStill, dt, tareOk);
+    if (wasZeroing_ && sup.mode == Mode::Active) for (int i = 0; i < NJ; i++) tare_[i] = ((jointMask >> i) & 1u) ? tareLp_[i] : 0.f;
+    zeroBlocked_ = sup.mode == Mode::Zeroing && !tareOk;
 
     // Standbein erkennen (geglättet, damit beim Aufsetzen nichts springt)
     for (int k = 0; k < 2; k++) { stance_[k] += ((in.footContact[k] ? 1.f : 0.f) - stance_[k]) * clampf(dt / 0.08f, 0.f, 1.f); o.stance[k] = stance_[k]; }
 
     JointInput ji[NJ];
-    for (int i = 0; i < NJ; i++) ji[i] = in.joint[i];
+    for (int i = 0; i < NJ; i++) { ji[i] = in.joint[i]; ji[i].cuffN -= tare_[i]; o.tare[i] = tare_[i]; }
     computeCoupling(in, ji);
 
     // Wärmeschutz je Motor, zweifach: Schätzung (Motormoment / Dauermoment in der Kapsel)² mit 3 min Zeitkonstante, und die gemessene
     // Wicklungstemperatur aus der Motor-Rückmeldung (ab 100 °C zurücknehmen, der Motor selbst schaltet bei 135–145 °C ab).
+    o.powerLimit = sup.powerLimit();
+    bool motorWarm = false;
     for (int i = 0; i < NJ; i++) {
       const float r = joint[i].lastTotal * joint[i].cfg.motorPerJoint / joint[i].cfg.motorRatedNm;
       heat_[i] += (r * r - heat_[i]) * clampf(dt / 180.f, 0.f, 1.f); o.heat[i] = heat_[i];
       const float byModel = clampf(1.f - 0.6f * (heat_[i] - 1.f), 0.4f, 1.f), byTemp = clampf(1.f - (in.joint[i].motorTempC - 100.f) / 40.f, 0.4f, 1.f);
-      ji[i].limitScale = std::fmin(byModel, byTemp);
+      motorWarm |= ji[i].limitScale < 0.999f && ((jointMask >> i) & 1u);
+      // Spannungseinbruch: alle Momentgrenzen gemeinsam zurücknehmen, bevor der Akku unter die Abschaltgrenze fällt
+      ji[i].limitScale = std::fmin(byModel, byTemp) * o.powerLimit;
     }
-    // Schutz bei Sturz: Beine nicht schlaff, sondern 1,5 s weich gedämpft (bremst das Hinsetzen), dann aus
-    const bool falling = sup.mode == Mode::SoftOff && sup.reason && !std::strcmp(sup.reason, "Sturz erkannt");
-    if (falling && fallT_ < 0.f) fallT_ = 0.f;
-    if (!falling) fallT_ = -1.f;
+    // Schutz bei Sturz und bei weichen Fehlern (Sensor, Lagesensor, Gelenkwinkel): Beine nicht schlaff, sondern 1,5 s gedämpft
+    // (bremst das Einsinken), dann aus. Die Dämpfung braucht nur die Gelenkgeschwindigkeit aus dem Motor, keine Manschette.
+    const float damp = sup.legDamp();
     if (lockOn_ > 0.3f) ji[Lumb].limitScale = 0.f;   // Lendensperre trägt: Beugemotor entlasten (kühlt ab)
     for (int i = 0; i < NJ; i++) {
-      if (falling && fallT_ < 1.5f && i <= KneeR) { o.tau[i] = o.tauTotal[i] = clampf(-4.f * in.joint[i].qd, -60.f, 60.f) * (1.f - fallT_ / 1.5f); continue; }
+      if (damp > 0.f && sup.scale <= 0.f && joint[i].cfg.fallDamp > 0.f && ((jointMask >> i) & 1u)) {
+        joint[i].off(); o.tau[i] = o.tauTotal[i] = clampf(-joint[i].cfg.fallDamp * in.joint[i].qd, -80.f, 80.f) * damp; continue;
+      }
       if (sup.scale <= 0.f || !((jointMask >> i) & 1u)) { joint[i].off(); o.tau[i] = 0.f; continue; }
       o.tau[i] = joint[i].step(ji[i], dt, sup.scale);
       o.vDes[i] = joint[i].lastVDes; o.kd[i] = joint[i].lastKd; o.guard[i] = joint[i].guard; o.tauTotal[i] = joint[i].lastTotal;
@@ -171,13 +209,12 @@ class App {
     // Wartende Winden behalten ihren Befehl und starten, sobald die laufende fertig ist (ihre Zeitüberwachung läuft erst dann).
     if (activeWinch_ >= 0 && !loop[activeWinch_].moving()) activeWinch_ = -1;
     for (int i = 0; i < NL && activeWinch_ < 0; i++) if (loop[i].moving()) activeWinch_ = i;
-    for (int i = 0; i < NL; i++) o.winch[i] = (i == activeWinch_) ? loop[i].step(in.loopCurrentA[i], in.loopOpenSwitch[i], dt) : 0.f;
+    // Not-Aus gedrückt: auch die Winden stehen (ihre Zeitüberwachung hält an); die Schlaufen halten über das Schneckengetriebe
+    for (int i = 0; i < NL; i++) o.winch[i] = (i == activeWinch_ && in.safety.estopOk) ? loop[i].step(in.loopCurrentA[i], in.loopOpenSwitch[i], dt) : 0.f;
     if (activeWinch_ >= 0 && !loop[activeWinch_].moving()) activeWinch_ = -1;
-    // Anzeige
-    if (fallT_ >= 0.f) fallT_ += dt;
     // Lendengelenk sperren, solange ein Baum (> 5 kg) in den Schlaufen hängt; Rücklage-Warnung
     const float loadN = in.loopN[LoopR1] + in.loopN[LoopR2] + in.loopN[LoopL1];
-    lockT_ = loadN > 49.f ? lockT_ + dt : 0.f; o.lumbarLock = lockT_ > 0.3f && sup.mode == Mode::Active;
+    lockT_ = loadN > loadedLoopN ? lockT_ + dt : 0.f; o.lumbarLock = lockT_ > 0.3f && sup.mode == Mode::Active;
     // Frostschutz der Gelenkkapseln: Heizfolie an, wenn eine Kapsel der Gruppe unter +3 °C fällt und die Gruppe kaum arbeitet
     // (unter Last heizt der Motor selbst); aus über +8 °C. Kälteste Wicklungstemperatur aus der Motor-Rückmeldung.
     for (int gidx = 0; gidx < 2; gidx++) {
@@ -194,6 +231,12 @@ class App {
     lockOn_ = o.lumbarLock ? lockOn_ + dt : 0.f; o.lumbarDuty = !o.lumbarLock ? 0.f : lockOn_ < 0.2f ? 1.f : 0.35f;
     o.warnBackward = sup.mode == Mode::Active && in.trunkPitch < -0.15f;
     if (o.warnBackward) { warnT_ += dt; if (std::fmod(warnT_, 0.6f) < 0.15f) vibe_ = std::fmax(vibe_, 0.05f); } else warnT_ = 0.f;
+    // Akku schwach: alle 20 s ein langer Vibrationspuls, solange das Exo arbeitet
+    if (sup.lowBattery && sup.mode == Mode::Active) { lowT_ += dt; if (lowT_ > 20.f) lowT_ = 0.f; if (lowT_ < 0.4f) vibe_ = std::fmax(vibe_, 0.05f); } else lowT_ = 0.f;
+    // Hinweis für die Anzeige (ein Fehlergrund aus der Zustandsmaschine hat Vorrang, siehe main_teensy.cpp)
+    o.notice = zeroBlocked_ ? "Nullen: Manschetten entlasten" : sup.mode != Mode::Active ? "" : sup.lowBattery ? "Akku schwach"
+             : o.powerLimit < 0.999f ? "Akku unter Last: weniger Kraft" : motorWarm ? "Motor warm" : in.safety.parkStandDown ? "Parkstütze unten"
+             : o.warnBackward ? "Rücklage" : "";
     o.led = sup.led(s);
     o.ledCount = int(std::round(12.f * exo::clampf((in.safety.batteryV - 30.f) / (41.f - 30.f), 0.f, 1.f)));
     o.workLight = light;
@@ -204,7 +247,9 @@ class App {
  private:
   float both_ = 0.f, vibe_ = 0.f, stance_[2] = {1.f, 1.f};
   int activeWinch_ = -1;
-  float heat_[NJ] = {}, fallT_ = -1.f, lockT_ = 0.f, lockOn_ = 0.f, warnT_ = 0.f;
+  float heat_[NJ] = {}, lockT_ = 0.f, lockOn_ = 0.f, warnT_ = 0.f, lowT_ = 0.f;
+  float tare_[NJ] = {}, tareLp_[NJ] = {}, openWarn_[NL] = {};
+  bool wasZeroing_ = false, zeroBlocked_ = false;
   bool heatLegs_ = false, heatArms_ = false;
   bool levelSent_ = false, comboActive_ = false, comboRelease_ = false;
 

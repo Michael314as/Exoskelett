@@ -87,7 +87,7 @@ Ausführlich in [docs/kraftverteilung.md](docs/kraftverteilung.md). Das Wichtigs
 
 - Bauraum 18 × 18 × 18 cm: größere Teile in Segmente teilen und verschrauben.
 - Für draußen im Winter PETG statt PLA; TPU für Polster, Puffer und Zahnleisten.
-- Tragende Teile (Rahmen, Achsen, Schlaufenkopf, Seilscheiben) aus Metall. Gedruckt werden Manschetten, Gehäuse, Kabel- und Seilführungen, Sensorhalter und Bohrschablonen.
+- Tragende Teile (Rahmen, Achsen, Schlaufenkopf, Kurbeln, Hebel) aus Metall. Gedruckt werden Manschetten, Gehäuse, Kabelführungen, Sensorhalter und Bohrschablonen.
 
 ## Offene Fragen
 
@@ -113,7 +113,7 @@ Der Weg vom Konzept zum tragbaren Exo steht in [`docs/entwicklungsplan.md`](docs
 
 ```
 docs/
-  konzept.md                 Konzept Entwurf 4: Aufbau, Antriebe, Greifer, Füße, Kosten
+  konzept.md                 Konzept Entwurf 5: Aufbau, Antriebe, Greifer, Füße, Kosten
   steuerung.md               Sensor-Manschetten, Regelung, Elektronik, Sicherheit
   bedienung-und-features.md  Bedienung, Komfort-Features, Fertigung ohne Maschinen, Kosten
   stueckliste.md             Jedes Teil mit Herstellweg (Kauf, Laser, Druck, Bohren), Druckgrößen, Werkzeug

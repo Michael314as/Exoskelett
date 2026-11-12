@@ -1,4 +1,4 @@
-// Treiber: Motor-Protokoll (RobStride RS03/RS04/RS06, CAN 2.0 mit 29-Bit-ID, „Operation Control“-Modus) und Wägezellen-Verstärker HX711.
+// Treiber: Motor-Protokoll (RobStride RS03/RS04, CAN 2.0 mit 29-Bit-ID, „Operation Control“-Modus), Wägezellen-Wandler ADS131M04 und HX711.
 // Hardwareunabhängig geschrieben: Das Verpacken/Entpacken der CAN-Daten und das Einlesen der Bits ist hier,
 // das eigentliche Senden/Empfangen (FlexCAN_T4, digitalWrite) in main_teensy.cpp. Dadurch auf dem PC testbar.
 #pragma once
@@ -18,7 +18,11 @@ constexpr MotorLimits kRS04{12.57f, 15.f, 120.f, 5000.f, 100.f};   // RS04: ±15
 constexpr MotorLimits kRS03{12.57f, 20.f, 60.f, 5000.f, 100.f};    // RS03: ±20 rad/s, ±60 Nm
 constexpr MotorLimits kRS06{12.57f, 50.f, 36.f, 5000.f, 100.f};    // RS06: ±50 rad/s, ±36 Nm
 constexpr uint8_t kHostId = 0xFD;                                  // eigene ID am Bus
-enum : uint8_t { kTypeGetId = 0, kTypeControl = 1, kTypeFeedback = 2, kTypeEnable = 3, kTypeStop = 4, kTypeSetZero = 6 };
+enum : uint8_t { kTypeGetId = 0, kTypeControl = 1, kTypeFeedback = 2, kTypeEnable = 3, kTypeStop = 4, kTypeSetZero = 6, kTypeWriteParam = 18 };
+// Parameter (Typ 18, gehen beim Ausschalten verloren, deshalb bei jedem Einschalten setzen). Quelle: RS04/RS03 User Manual, 4.1.13.
+constexpr uint16_t kParamCanTimeout = 0x7028;                      // Bus-Wächter im Motor: 20000 = 1 s, 0 = aus (Werkseinstellung!)
+constexpr uint32_t kCanTimeoutTicks = 2000;                        // 0,1 s ohne Befehl → der Motor geht von selbst in „Reset“ (stromlos)
+enum : uint8_t { kMotorReset = 0, kMotorCali = 1, kMotorRun = 2 }; // Betriebszustand aus der Rückmeldung (ID-Bit 23–22)
 
 inline uint32_t floatToUint(float x, float lo, float hi, int bits) {
   x = clampf(x, lo, hi);
@@ -46,12 +50,26 @@ inline uint32_t packSpecial(uint8_t type, uint8_t motorId, uint8_t out[8]) {
   if (type == kTypeStop || type == kTypeSetZero) out[0] = 1;
   return (uint32_t(type) << 24) | (uint32_t(kHostId) << 8) | motorId;
 }
+// Einzelnen Parameter schreiben (Typ 18): Byte 0–1 Index (Low-Byte zuerst), Byte 2–3 = 0, Byte 4–7 Wert (Low-Byte zuerst)
+inline uint32_t packParamWrite(uint8_t motorId, uint16_t index, uint32_t value, uint8_t out[8]) {
+  out[0] = index & 0xFF; out[1] = index >> 8; out[2] = out[3] = 0;
+  for (int i = 0; i < 4; i++) out[4 + i] = (value >> (8 * i)) & 0xFF;
+  return (uint32_t(kTypeWriteParam) << 24) | (uint32_t(kHostId) << 8) | motorId;
+}
+// Winkel auf −π…+π bringen. Der Motor meldet nach dem Einschalten 0…2π (zero_sta = 0, Werkseinstellung) und zählt danach bis ±4π
+// weiter: Ein Gelenk, das knapp unter seinem Nullpunkt steht, käme sonst nach dem Einschalten mit +6,2 rad zurück.
+inline float wrapPi(float a) {
+  const float pi = 3.14159265f;
+  while (a > pi) a -= 2.f * pi;
+  while (a <= -pi) a += 2.f * pi;
+  return a;
+}
 // Rückmeldung Typ 2: ID-Bit 15–8 Motor-ID, Bit 21–16 Fehler, Bit 23–22 Modus; Daten p16 v16 t16 Temperatur·10
-struct MotorState { uint8_t id = 0, fault = 0; float pos = 0, vel = 0, torque = 0, tempC = 0; bool valid = false; };
+struct MotorState { uint8_t id = 0, fault = 0, mode = 0; float pos = 0, vel = 0, torque = 0, tempC = 0; bool valid = false; };
 inline MotorState unpackReply(uint32_t canId, const uint8_t in[8], const MotorLimits& L) {
   MotorState s;
   if (((canId >> 24) & 0x1F) != kTypeFeedback) return s;
-  s.id = (canId >> 8) & 0xFF; s.fault = (canId >> 16) & 0x3F; s.valid = true;
+  s.id = (canId >> 8) & 0xFF; s.fault = (canId >> 16) & 0x3F; s.mode = (canId >> 22) & 0x3; s.valid = true;
   s.pos = uintToFloat((uint32_t(in[0]) << 8) | in[1], -L.pMax, L.pMax, 16);
   s.vel = uintToFloat((uint32_t(in[2]) << 8) | in[3], -L.vMax, L.vMax, 16);
   s.torque = uintToFloat((uint32_t(in[4]) << 8) | in[5], -L.tMax, L.tMax, 16);
@@ -65,6 +83,8 @@ struct Transmission {
   float eta = 0.88f;     // Reibung im Seilweg
   float motorTorqueFor(float jointTorque) const { return jointTorque / (ratio * eta); }
   float jointAngleFrom(float motorAngle) const { return motorAngle / ratio; }
+  // Gelenkwinkel aus Motorwinkel und gespeichertem Nullpunkt, unabhängig davon, in welcher Umdrehung der Motor gerade zählt
+  float jointAngleFrom(float motorAngle, float motorZero) const { return wrapPi(motorAngle - motorZero) / ratio; }
   float jointVelFrom(float motorVel) const { return motorVel / ratio; }
   float motorVelFor(float jointVel) const { return jointVel * ratio; }
   float motorKdFor(float jointKd) const { return jointKd / (ratio * ratio * eta); }   // Kd am Gelenk = Kd am Motor · Übersetzung² · η
@@ -104,6 +124,15 @@ inline uint16_t adsParseFrame(const uint8_t in[18], int32_t ch[4]) {
   return uint16_t((in[0] << 8) | in[1]);
 }
 inline bool adsStatusDataReady(uint16_t status) { return (status & 0x000F) == 0x000F; }   // DRDY0…3 gesetzt
+inline bool adsStatusReset(uint16_t status) { return (status & 0x0400) != 0; }            // Wandler hat neu gestartet: Takt und Verstärkung sind weg
+// Prüfsumme des Antwortrahmens: CRC-16-CCITT (Polynom 0x1021, Start 0xFFFF) über STATUS und die 4 Kanäle (15 Bytes),
+// der Wandler schickt sie als 6. Wort. Erkennt gekippte Bits auf dem Kabel und einen stummen Wandler (alles 0 bzw. alles 1).
+inline uint16_t crc16Ccitt(const uint8_t* d, int n) {
+  uint16_t c = 0xFFFF;
+  for (int i = 0; i < n; i++) { c ^= uint16_t(d[i]) << 8; for (int k = 0; k < 8; k++) c = (c & 0x8000) ? uint16_t((c << 1) ^ 0x1021) : uint16_t(c << 1); }
+  return c;
+}
+inline bool adsFrameCrcOk(const uint8_t in[18]) { return crc16Ccitt(in, 15) == uint16_t((in[15] << 8) | in[16]); }
 
 // Kalibrierung: Rohwert → Newton, mit Nullpunkt aus dem Nullen und Plausibilitätsprüfung
 struct CellCal {

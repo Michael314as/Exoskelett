@@ -35,3 +35,21 @@ jobs:
         with:
           name: exo-firmware-teensy41
           path: firmware/build/teensy/exo.hex
+
+  esp32:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: ESP32-Core und Bibliotheken
+        run: |
+          arduino-cli config init
+          arduino-cli config set board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
+          arduino-cli lib install GxEPD2 NimBLE-Arduino
+      - name: Sketch für ESP32-C3 bauen (Anzeige am Oberarm, Bluetooth)
+        run: |
+          mkdir -p build/esp32_display_ble
+          cp firmware/esp32/esp32_display_ble.ino firmware/esp32/status.h build/esp32_display_ble/
+          arduino-cli compile --fqbn esp32:esp32:esp32c3 --warnings default build/esp32_display_ble

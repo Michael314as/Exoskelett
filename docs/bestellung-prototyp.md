@@ -50,10 +50,10 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | EL-01 | Hauptplatine | PJRC Teensy 4.1 (2,4 × 0,7 Zoll = 61 × 18 mm, ≈ 9 g), 2 × CAN-Transceiver SN65HVD230 (CAN1 Beine + Rumpf beugen, CAN3 Arme + Rumpf drehen), CR2032 | 1 | 0.08 kg | [PJRC Teensy 4.1 (Maße)](https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4) |
 | EL-02 | Spannungswandler | Mean Well DDR-60L-24 (Eingang 18–75 V, 24 V / 2,5 A, 60 W, 92 %) + Pololu D36V28F5 (Eingang 5,3–50 V, 5 V / 3,2 A) + Pololu D36V28F12 für das Licht | 1 | 0.25 kg | [Mean Well DDR-60L-24 / Pololu D36V28F5](https://www.pololu.com/product/3782) |
 | EL-03 | Windentreiber | 3 × Pololu G2 18v17 | 3 | 0.09 kg | Händler nach Ausführung |
-| EL-04 | Schütz, Hauptsicherung | HELLA Hochstromrelais 24 V / 80 A (Schließer), Midi-Sicherung 40 A | 1 | 0.20 kg | Händler nach Ausführung |
+| EL-04 | Schütz, Hauptsicherung | Gleichstromschütz ≥ 60 V DC / 100 A mit Spule 24 V (EV-Relais, Schließer), Midi-Sicherung 60 A träge | 1 | 0.20 kg | Händler nach Ausführung |
 | EL-06 | Ideal-Dioden-Modul | 2 × LTC4359-Modul | 1 | 0.03 kg | Händler nach Ausführung |
 | EL-07 | Lagesensor | BNO085 (Adafruit 4754) | 1 | 0.01 kg | Händler nach Ausführung |
-| EL-08 | Stromschiene mit Sicherungen | Cu 6 × 6, 8 × Flachsicherung 15 A | 1 | 0.12 kg | Händler nach Ausführung |
+| EL-08 | Stromschiene mit Sicherungen | Cu 6 × 6, 6 × Sicherung 20 A (RS04, Rumpf), 4 × 15 A (RS03, Reserve) | 1 | 0.12 kg | Händler nach Ausführung |
 | EL-09 | Leistungsleitungen | Silikonlitze 4 mm² / 1,5 mm² | 1 | 0.20 kg | Händler nach Ausführung |
 | EL-10 | CAN-Bus | geschirmte Twisted-Pair-Leitung, 2 Stränge | 1 | 0.05 kg | Händler nach Ausführung |
 | EL-11 | Rundstecker | M16 IP67 (Binder Serie 423) | 7 | 0.21 kg | Händler nach Ausführung |
@@ -90,7 +90,7 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | SG-03 | Schnappschäkel | Wichard Schnappschäkel 50 mm, festes Auge, Edelstahl (Bruchlast 2 000 kg) | 3 | 0.09 kg | Händler nach Ausführung |
 | SG-06 | Bandantrieb | Schneckengetriebemotor 5840-31ZY 24 V, 27 U/min (gleiche Baugröße 58 × 40 mm wie die 10-U/min-Variante) + Stachelrad r 16 mm | 3 | 0.75 kg | [5840-31ZY 24 V 10 U/min](https://probots.co.in/pb-5840-31zy-24v-10-rpm-dc-worm-gear-reduction-motor.html) |
 | SG-07 | Bedienteil Hand | Wippschalter IP67, LED, Handschlaufe | 2 | 0.10 kg | Händler nach Ausführung |
-| BD-01 | Not-Aus mit LED-Ring | Eaton M22-PVT + M22-K11 + WS2812B-Ring 12 LEDs | 1 | 0.09 kg | Händler nach Ausführung |
+| BD-01 | Not-Aus mit LED-Ring | Eaton M22-PVT + 2 × M22-K01 (zwei Öffner: Schützspule und Rückmeldung) + WS2812B-Ring 12 LEDs | 1 | 0.09 kg | Händler nach Ausführung |
 | BD-02 | Ein/Aus-Taster | Drucktaster IP67 | 1 | 0.02 kg | Händler nach Ausführung |
 | BD-03 | Anzeige Oberarm | Waveshare 1,54" E-Paper + ESP32-C3 SuperMini | 1 | 0.06 kg | Händler nach Ausführung |
 | BD-04 | Arbeitslicht | LED-Strahler 10 W, 12 V | 2 | 0.24 kg | Händler nach Ausführung |
@@ -103,8 +103,8 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | RA-02 | Querrohr | EN AW-6082 T6 Vierkantrohr 20 × 20 × 2 | 1 | 0.09 kg | Händler nach Ausführung |
 | HU-04 | Nabe | Alu-Block 56 × 40 × 40, 2 Gleitlager iglidur G Ø 16 | 2 | 0.40 kg | Händler nach Ausführung |
 | HU-05 | Hüftschwinge | EN AW-6082 Vierkantrohr 35 × 35 × 3 | 2 | 1.10 kg | Händler nach Ausführung |
-| BA-02 | Schubstange Knie | Stahlrohr E235 Ø 12 × 2, L ≈ 310 mm, Gewinde M8 eingeschweißt oder eingeklebt | 2 | 0.30 kg | Händler nach Ausführung |
-| BE-01 | Oberschenkelschiene | 6082 Vierkant 30 × 30 × 2,5 außen / 25 × 25 × 2,5 innen | 2 | 0.90 kg | Händler nach Ausführung |
+| BA-02 | Schubstange Knie | Stahlrohr E235 Ø 12 × 2, L ≈ 310 mm, Gewindeeinsätze M8 eingeschweißt; Kurbelzapfen Passschraube ISO 7379 Ø 8, 12.9 | 2 | 0.30 kg | Händler nach Ausführung |
+| BE-01 | Oberschenkelschiene | 6082 Vierkant 30 × 30 × 2 außen / 25 × 25 × 2,5 innen (1 mm Spiel) | 2 | 0.90 kg | Händler nach Ausführung |
 | BE-06 | Unterschenkelschiene | 6082 Vierkant 30 × 30 × 2 / 25 × 25 × 2 | 2 | 0.80 kg | Händler nach Ausführung |
 | BE-09 | Fersenbügel | Alu-Rundstab Ø 16 | 2 | 0.30 kg | Händler nach Ausführung |
 | SC-01 | Schulterbügel | 6082 Vierkant 30 × 30 × 3 | 2 | 0.60 kg | Händler nach Ausführung |

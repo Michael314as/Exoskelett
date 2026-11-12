@@ -1,28 +1,53 @@
-# Verdrahtung (Entwurf 4)
+# Verdrahtung (Entwurf 5)
 
 Muss mit den `PIN_*`-Konstanten in [`firmware/src/main_teensy.cpp`](../firmware/src/main_teensy.cpp) übereinstimmen.
 
 ## Leistung
 
 ```
-Stihl AP 500 S (36 V) ── Adapter ── Hauptsicherung 40 A (ATO/Midi) ── Not-Aus-Pilz (Öffner) ──┬── Schütz (Spule über Teensy Pin 47 + Treiber)
-                                                                                              │      └── 8 Motoren (Sternverteilung, je Abgang 15-A-Sicherung; 2 davon an den Hüften)
-                                                                                              ├── DC/DC 36→24 V 5 A ── 3 Windentreiber, LED-Strahler (über 12-V-Regler)
-                                                                                              └── DC/DC 36→5 V 3 A ── Teensy, ESP32-C3 + E-Paper (rechter Oberarm), ADS131M04, HX711, IMU, LED-Ring
-Not-Aus-Rückmeldung: zweiter Kontakt des Pilzes → Pin 46 (offen = Not-Aus gedrückt)
+Stihl AP 500 S (36 V) ── Adapter ── Hauptsicherung (Midi/Mega, träge) ── Schütz (Hauptkontakt) ──┬── 10 Motoren (Sternverteilung, je Abgang eigene Sicherung)
+                                │                                                               └── Bremswiderstand-Schaltung
+                                ├── DC/DC 36→24 V 5 A ── 3 Windentreiber, Hubmagnet Lendensperre, 12-V-Regler (Licht, Heizfolien)
+                                └── DC/DC 36→5 V 3 A ── Teensy, ESP32-C3 + E-Paper (rechter Oberarm), ADS131M04, HX711, IMU, LED-Ring
+
+Schützspule:   +24 V ── Not-Aus-Pilz Kontakt 1 (Öffner) ── Spule ── MOSFET (Teensy Pin 47) ── Masse
+Rückmeldung:   Not-Aus-Pilz Kontakt 2 (Öffner) ── Pin 46 (offen = Not-Aus gedrückt)
 ```
+
+**Not-Aus (geändert in der Durchsicht Nov 2026):** Der Pilz sitzt **nicht** mehr in der dicken Akkuleitung, sondern
+unterbricht den Strom der Schützspule. Grund: Der Kontaktblock eines üblichen Not-Aus-Tasters (Eaton M22-K01) ist für
+wenige Ampere Steuerstrom gebaut. 40 A und mehr Gleichstrom bei 36–42 V würde er nicht trennen, der Lichtbogen bliebe
+stehen und der Kontakt verschweißt. So wie jetzt gezeichnet fällt das Schütz ab, sobald der Pilz gedrückt ist, ganz
+ohne Software. Die Steuerung (5 V) bleibt dabei an, damit Ring und Display den Grund zeigen und die Winden-Notöffnung
+von Hand möglich bleibt. Die Motoren und der Bremswiderstand hängen hinter dem Schütz und sind stromlos.
+
+**Schütz:** Es muss ein **Gleichstromschütz** sein, das für mindestens 60 V DC und 100 A zugelassen ist und unter Last
+trennen kann (z. B. Bauart „EV-Relais“ mit Blasmagnet, Spule 24 V). Ein Kfz-Hochstromrelais für 24-V-Bordnetze ist
+dafür nicht ausgelegt: Der volle Akku hat 42 V, beim Bremsen bis 46 V. Bei gepolten Schützen auf die Stromrichtung
+achten (Plus vom Akku an den markierten Anschluss).
+
+**Sicherungen:** Die Werte hängen vom wirklich gemessenen Strom ab (Prüfpunkt P43). Bis dahin als Startwert:
+Hauptsicherung 60 A träge, je Motor RS04 20 A, je Motor RS03 15 A. Die früher eingetragenen 40 A / 15 A lösen
+möglicherweise aus, wenn zwei Kniemotoren beim Aufstehen gleichzeitig Spitzenmoment geben; das wäre ein plötzlicher
+Kraftverlust in der Hocke. Der Stihl-Akku schaltet selbst bei Überstrom ab (Wert nicht veröffentlicht), auch das
+zeigt erst die Messung. Die Firmware nimmt die Kraft zurück, sobald die Spannung unter Last einbricht (unter 33 V).
 
 | Leitung | Querschnitt | Hinweis |
 |---|---|---|
-| Akku → Hauptsicherung → Not-Aus → Schütz | 4 mm² | so kurz wie möglich, Kabelschuhe gecrimpt |
-| Schütz → Motoren (je Motor) | 1,5 mm² | XT30-Stecker oder Motor-Originalstecker |
+| Akku → Hauptsicherung → Schütz → Verteiler | 6 mm² | so kurz wie möglich, Kabelschuhe gecrimpt |
+| Verteiler → Motoren (je Motor) | 1,5 mm² (RS04: 2,5 mm²) | XT30-Stecker oder Motor-Originalstecker |
+| Schützspule über Not-Aus | 0,5 mm² | Freilaufdiode direkt an der Spule |
 | CAN-Bus | verdrillt, geschirmt | 120-Ω-Abschluss am Teensy und am letzten Motor |
 | Wägezellen | 4-adrig geschirmt | Schirm nur am Teensy-Ende auf Masse |
-| Hüftmotoren | 1,5 mm² + CAN in einem Kabel | über die Hüftschwinge, mit Schlaufe am Abspreizgelenk (±20°) |
+| Hüftmotoren | Leistung + CAN in einem Kabel | über die Hüftschwinge, mit Schlaufe am Abspreizgelenk (±20°) |
 | Fußkontakt (4 Wägezellen + HX711 je Fuß) | 4-adrig geschirmt, HX711 vergossen im Steigbügel | am Unterschenkel entlang, Stecker am Knie |
 | Display | 4-adrig (5 V, Masse, TX, frei) | im Gewebeschlauch über die Schulter zum rechten Oberarm |
-| Steuerung 5 V | 0,5 mm² | eigene Sicherung 2 A |
+| Steuerung 5 V | 0,5 mm² | eigene Sicherung 2 A, **vor** dem Schütz abgezweigt |
 
+**HX711-Platinen:** Die üblichen Platinen sind auf 10 Messungen/s gebrückt. Für die Schlaufen-Vorsteuerung und den
+Fußkontakt müssen sie auf **80 Messungen/s** umgelötet werden (Pin RATE auf 3,3 V). Die Firmware meldet einen
+Sensorfehler, wenn eine Zelle länger als 0,3 s keinen neuen Wert liefert.
+**IMU:** I2C mit 400 kHz, Leitung unter 20 cm, Pullups 2,2 kΩ.
 **Spannungsmessung Akku:** Teiler 140 kΩ / 10 kΩ an Pin 17 (Faktor 15), 100 nF gegen Masse.
 **Schütz-Ansteuerung:** Pin 47 (ab Rev. M2, vorher 31) über Logic-Level-MOSFET mit Freilaufdiode. Beim Reset ist der Pin hochohmig, ein
 Pulldown 10 kΩ hält das Schütz dann sicher offen.
@@ -77,4 +102,5 @@ IDs vor dem Einbau einzeln mit dem Hersteller-Tool setzen (CAN-USB-Adapter, RobS
 **Rumpf-Wägezellen:** ab Rev. M2 am ADS131M04 (Wandler B Kanal 2/3, Wandler C Kanal 0/1), siehe oben.
 **CAN-Busse (Rev. M2):** zwei Stränge mit je 5 Motoren und je 120 Ω an beiden Enden: CAN1 (IDs 1–4, 9), CAN3 (IDs 5–8, 10).
 **Zusätzliche Ausgänge (Entwurf 5):** Pin 42 Heizfolien der Beinkapseln, Pin 43 Heizfolien der Armkapseln, je über einen Logic-MOSFET aus dem 12-V-Wandler (Lötpunkte auf der Unterseite des Teensy 4.1; die SD-Karte wird nicht benutzt).
-**Bremswiderstand:** zwischen Akku-Plus und Minus hinter dem Schütz, eigene Schaltung (Komparator + MOSFET, ein ab 46 V, aus ab 44 V), 10 Ω / 200 W am Rahmen gekühlt; arbeitet unabhängig von der Software.
+**Bremswiderstand:** zwischen Akku-Plus und Minus hinter dem Schütz, eigene Schaltung (Komparator + MOSFET, ein ab 46 V, aus ab 44 V), am Rahmen gekühlt; arbeitet unabhängig von der Software. Mit 10 Ω nimmt er bei 46 V nur etwa 210 W auf. Senkt man 20 kg mit einem Arm schnell ab, können kurz 300–400 W zurückkommen. Deshalb **4,7 Ω / 300 W** einplanen (450 W bei 46 V) und in P37 messen.
+**Motor-Wächter:** Die Firmware schreibt jedem Motor beim Einschalten den Parameter `canTimeout` (0x7028, 0,1 s). Fällt der Teensy oder das Kabel aus, geht der Motor von selbst in den Leerlauf.
