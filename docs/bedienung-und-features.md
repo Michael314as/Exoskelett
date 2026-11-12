@@ -1,4 +1,4 @@
-# Bedienung, Features und Fertigung (Entwurf 4)
+# Bedienung, Features und Fertigung (Entwurf 5)
 
 Ziel: Das Exo soll sich anfühlen wie ein gutes Werkzeug von einem Profi-Hersteller: Man steigt in Sekunden ein,
 nichts klappert, nichts drückt, es reagiert weich und leise, man weiß jederzeit, was es tut. Und es lässt sich trotzdem
@@ -13,12 +13,12 @@ Baugruppen (14 bis 18) eingezeichnet. Mit „Umgebung“ wechselst du zwischen W
 
 | Gefühl | Woher es kommt | Wie wir es erreichen |
 |---|---|---|
-| **Kein Spiel, kein Klappern** | Spiel in Gelenken, lose Seile | Passschrauben statt Gewinde in Lagern, vorgespannte Seilpaare, Spannschrauben, Gummipuffer an allen Anschlägen |
+| **Kein Spiel, kein Klappern** | Spiel in Gelenken, lose Seile | Passschrauben statt Gewinde in Lagern, spielfreie Schubstangen mit Gelenkköpfen, Gummipuffer an allen Anschlägen |
 | **Weich und ruhig** | Ruckartiges Ein- und Ausschalten | Momente werden immer über 0,3 s ein- und ausgeblendet; Dämpfung in der Regelung; Motoren mit Planetengetriebe sind leise |
 | **Leicht anzuziehen** | Viele Gurte, Fummelei | 3 Magnet-Schnellverschlüsse + Steigbügel-Ratsche, Parkstütze zum Hineinsteigen (siehe 2.1) |
 | **Passt wie maßgeschneidert** | Manschetten drücken | Schalen nach Abguss deines Arms/Beins drucken, Abstandsgewirke-Polster, abnehmbar und waschbar |
 | **Man weiß, was es tut** | Kein Feedback | LED-Ring am Schultergurt, Vibration, kurze Töne, Anzeige für Akku und Modus |
-| **Sieht nach Produkt aus** | Offene Kabel, rohes Alu, Schraubenwirrwarr | Eloxierte bzw. pulverbeschichtete Teile (als Dienstleistung), Kabel in Gewebeschlauch innen an den Schienen, gedruckte Abdeckungen über Seilscheiben und Box |
+| **Sieht nach Produkt aus** | Offene Kabel, rohes Alu, Schraubenwirrwarr | Eloxierte bzw. pulverbeschichtete Teile (als Dienstleistung), Kabel in Gewebeschlauch innen an den Schienen, gedruckte Abdeckungen über Kurbeln und Box |
 | **Vertrauen** | Angst, dass etwas zuschnappt | Sanfter Start, sichere Grenzen, Not-Aus, das Exo „gibt nach“ statt zu drücken, Schlaufen von Hand lösbar |
 
 ---
@@ -55,7 +55,7 @@ Ein Baumzähler oder eine Waage für die Abrechnung ist für den Anfang bewusst 
 ### 2.5 Komfort im Winter
 - **Heizgriffe** in den Daumentaster-Griffen (Heizfolien wie bei Motorrädern), drei Stufen. Etwa 25 €.
 - **Abstandsgewirke** (3D-Mesh) als Polster: atmet, trocknet schnell, abnehmbar und waschbar. Etwa 25 €.
-- **Schutzhauben** aus Cordura über Box und Seilscheiben gegen Schnee und Harz. Etwa 30 €.
+- **Schutzhauben** aus Cordura über Box und Gelenkkapseln gegen Schnee und Harz. Etwa 30 €.
 
 ### 2.6 Transport
 - Das Exo zerfällt mit **3 Schnellkupplungen** (Steckbolzen mit Kugelsperre) in Rücken, linkes und rechtes Bein.
@@ -72,11 +72,11 @@ Ein Baumzähler oder eine Waage für die Abrechnung ist für den Anfang bewusst 
 
 | Was du tust | Was passiert |
 |---|---|
-| Ein/Aus kurz | Exo an; 2 s stehen bleiben (Ring pulsiert weiß), dann grün |
+| Ein/Aus kurz | Exo an; 2 s locker stehen bleiben, Arme hängen lassen (Ring pulsiert weiß, das Exo nullt die Manschetten), dann grün |
 | Ein/Aus doppelt | Arbeitslicht an/aus |
-| Ein/Aus lang | Exo aus (weich, Seile werden locker) |
+| Ein/Aus lang | Exo aus (weich); nach einem Fehler (Ring rot): Fehler quittieren |
 | Daumentaster kurz | Schlaufe zu (Vibration kurz) |
-| Daumentaster lang | Schlaufe auf (Vibration lang) |
+| Daumentaster lang | Schlaufe auf (Vibration lang). Hängt Last in der Schlaufe, vibriert es erst nur: weiter halten (1 s), dann öffnet sie |
 | Beide Daumentaster rechts 2 s | Unterstützungsstufe wechseln (Ring zeigt 1–3 LEDs) |
 | Bewegen | Exo hilft, über die Sensor-Manschetten |
 
@@ -89,10 +89,10 @@ Mehr Knöpfe gibt es nicht. Alles andere stellt man selten in der App ein.
 | Teil | Wie | Werkzeug/Dienst |
 |---|---|---|
 | Alu-Rohre, Schienen | ablängen, bohren nach gedruckter **Bohrschablone** | Kapp- oder Handsäge, Bohrständer |
-| Platten, Seilscheiben, Kurvenscheiben, Steigbügel, Laschen | **online lasern lassen** (DXF hochladen, Alu 4–10 mm oder Edelstahl), Stückpreis wenige Euro | Laser-Dienstleister |
+| Platten, Kurbeln, Hebel, Motorträger, Steigbügel, Laschen | **online lasern lassen** (DXF hochladen, Alu 4–10 mm oder Edelstahl), Stückpreis wenige Euro | Laser-Dienstleister |
 | Gelenkachsen | Passschrauben M10/M12 kaufen, keine Drehteile | – |
-| Lager, Rollen | fertig kaufen (Flanschlager, Seilrollen mit Kugellager) | – |
-| Seiltrommeln | Alu-Rohr + gelaserte Bordscheiben verschraubt, oder Trommel vom Motorhersteller | Bohrständer |
+| Lager, Rollen | fertig kaufen (Flanschlager, Gelenkköpfe) | – |
+| Kurbelzapfen | Passschrauben ISO 7379 (12.9), Bohrungen auf H7 reiben | Bohrständer, Reibahle |
 | Manschetten, Gehäuse, Abdeckungen, Schlaufenkopf-Hülle, Bohrschablonen | 3D-Druck PETG/TPU | Bambu Lab A1 mini |
 | Passgenaue Schalen | Abguss mit Gipsbinde → Handy-3D-Scan (Foto-App) → Schale in CAD anpassen → drucken | Handy, A1 mini |
 | Oberfläche | **eloxieren** (Alu, 80–150 € als Sammelauftrag) oder **pulverbeschichten** (60–120 €) beim Betrieb um die Ecke | Dienstleister |

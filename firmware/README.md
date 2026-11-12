@@ -8,7 +8,7 @@ leicht, weich, ohne Zittern, mit spürbarer Verstärkung und sicherem Abschalten
 |---|---|
 | `src/exo_core.h` | Gelenkregler (Manschettenkraft → Moment), Taster-Erkennung, Schlaufenwinde, Sicherheits-Zustandsmaschine |
 | `src/exo_app.h` | Gesamtsteuerung: 8 Gelenke, Kopplung der Manschetten über die Hebel, Vorsteuerung aus Baumlast und Körpergewicht, Standbein/Schwungbein, 3 Winden, Bedienung, LED-Ring |
-| `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (RobStride RS06, 29-Bit-ID, Betriebsmodus Typ 1 / Rückmeldung Typ 2 mit Temperatur), Typ 1 mit Mitgehen (`packMitCommand`: Moment, Sollgeschwindigkeit, Kd), Wägezellen-Wandler ADS131M04 (Manschetten) und HX711 (Schlaufen, Steigbügel), Kalibrierung, Übersetzung |
+| `src/drivers.h` | Treiber: CAN-Protokoll der Motoren (RobStride RS04/RS03, 29-Bit-ID, Betriebsmodus Typ 1 / Rückmeldung Typ 2 mit Temperatur), Typ 1 mit Mitgehen (`packMitCommand`: Moment, Sollgeschwindigkeit, Kd), Wägezellen-Wandler ADS131M04 (Manschetten) und HX711 (Schlaufen, Steigbügel), Kalibrierung, Übersetzung |
 | `src/settings.h` | Einstellungen und Kalibrierung im EEPROM (mit Prüfsumme), Werkstatt-Konsole, Wartungshinweise |
 | `src/main_teensy.cpp` | Teensy 4.1: Pinplan, 200-Hz-Takt, Schütz, Motoren über CAN, 8 Wägezellen, Lagesensor, LED-Ring, Watchdog, Statuszeile an den ESP32-C3 |
 | `esp32/` | ESP32-C3: E-Paper-Anzeige und Bluetooth zum Handy |
@@ -52,10 +52,14 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Stabilität** | Mitgehen: kein Schwingen bei Manschette 2 / 6 / 15 kN/m in allen Stufen. Rückfallebene Momentbetrieb: stabil bis K = 5,5 |
 | **Weichheit:** plötzliche Bewegung | Vorsteuer-Moment ändert sich höchstens 0,8 Nm je Takt (nichts ruckt), kein Überschwingen |
 | **Knie mit Schienbein-Manschette** | Schwungbein: geht beim Strecken und Beugen mit; Standbein: Schienbein-Druck beugt nie |
-| **Beinseil** | Moment nie negativ (Seil kann nicht drücken), Vorspannung bleibt |
 | **Aufwachen** | Nullen 2 s, dann steigt die Unterstützung über 3 s an |
-| **Sensorfehler, Not-Aus** | im selben Regeltakt (2 ms) alle Momente 0, Ring rot |
-| **Sturz** | Motoren in 0,1 s weich aus |
+| **Not-Aus, Motorausfall** | im selben Regeltakt (2 ms) alle Momente 0, Schütz offen, Ring rot |
+| **Sensorfehler** (Stecker, eingefrorener Wert, NaN, unmöglicher Winkel) | Unterstützung im selben Takt 0, Hüften und Knie 1,5 s gedämpft, dann Fehler |
+| **Sturz** | erst nach 20 ms bestätigt; Arme in 0,1 s weich aus, Beine 1,5 s gedämpft (Schütz bleibt so lange zu) |
+| **Nullen** | Manschetten-Vorlast wird beim Einschalten abgezogen; mit mehr als 30 N Vorlast startet das Exo nicht |
+| **Akku** | Warnung unter 32 V, Kraft läuft unter 30 V in 2 s aus; bei Spannungseinbruch unter Last sinkt die Momentgrenze stufenlos |
+| **Schlaufe unter Last** | öffnet erst nach Vorwarnung und einer weiteren Sekunde Halten |
+| **Nachgespielte Hardware** (`test/teensy_host.cpp`) | der echte Teensy-Code läuft auf dem PC gegen nachgebildete Motoren und Messwandler: Motoren werden einzeln eingeschaltet und bekommen den Bus-Wächter, ein stummer Motor, ein Übertragungsfehler oder ein eingefrorener Wandler führt zum richtigen Fehler |
 | **Parkstütze unten** | keine Unterstützung, Ring gelb |
 | **Bedienung** | kurz/lang/doppelt sicher erkannt; Doppeltipp = Licht; Schlaufe zieht bis zur Zugkraft zu und hält stromlos; Stufenwechsel |
 | **Kopplung** | 40 N nur am Unterarm: Schulter hilft mit +14 Nm (vorher 0) |
@@ -63,8 +67,7 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 | **Beine im Stand** | Hocke: Hüfte −14 Nm, Knie −20 Nm von selbst; mit Baum 300 N: −29 / −40 Nm |
 | **Schwungbein** | keine Gewichtsvorsteuerung, Bein anheben: Hüfte +10 Nm, Knie +5 Nm (Beugen begrenzt 10 Nm); Standbein beugt nie aktiv |
 | **Treiber** | Momentbefehl auf 0,01 Nm genau verpackt, Mitgeh-Befehl (v_soll, Kd, Kp = 0) richtig, Kd/Geschwindigkeit über die Übersetzung umgerechnet, Motorantwort richtig gelesen, ADS131M04-Register und -Rahmen (Vorzeichen) richtig, HX711-Werte inkl. negativer Zahlen richtig, Sensor am Anschlag erkannt |
-| **Motorauswahl** | 100 Nm Spitze an der Schulter brauchen 24,3 Nm am Motor: RobStride RS06 schafft 36 Nm (Reserve 48 %) |
-| **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (`tools/build_teensy.sh`, 102 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern (SPI, zwei CAN-Busse) |
+| **Teensy-Code** | baut mit ARM-GCC für den Teensy 4.1 (`tools/build_teensy.sh`, 107 KB, keine Warnung im eigenen Code); zusätzlich PC-Lauf mit Platzhaltern (SPI, zwei CAN-Busse) |
 | **Einstellungen, Konsole** | Prüfsumme erkennt kaputtes EEPROM, Kalibrierung mit Gewicht, Fehlbedienung abgewiesen |
 | **Statuszeile** | Teensy → ESP32-C3: Modus, Akku, Stufe, Restzeit, Uhrzeit, Stunden, Grund; kaputte Zeilen werden verworfen |
 | **ESP32-Sketch** | kompiliert auf dem PC mit Platzhaltern; jede gültige Zeile geht ans Handy, E-Paper zeichnet nur bei Änderung (auch bei neuem Fehlergrund), überlange Zeilen laufen nicht über |
@@ -81,10 +84,15 @@ Auf GitHub laufen die Tests bei jeder Änderung automatisch (`.github/workflows/
 
 ## Was noch fehlt
 
+- **Annahmen über die Motoren, die erst am echten Motor geprüft werden können** (Prüfpunkte P40, P41): Der Winkel
+  nach dem Einschalten ist absolut über eine Umdrehung des Abtriebs (laut Handbuch 0–2π); der Parameter `canTimeout`
+  (0x7028) wird nach jedem Einschalten neu geschrieben und stoppt den Motor ohne Befehle; die Betriebsart steht in
+  den Bits 22–23 der Rückmeldung.
+
 - **Auf echter Hardware laufen lassen:** `exo.hex` auf einen Teensy 4.1 flashen, Motoren und Sensoren anschließen,
   Prüfprotokoll [docs/pruefung.md](../docs/pruefung.md) P5–P20.
-- **ESP32-C3 bauen:** Der Sketch ist auf dem PC mit Platzhaltern kompiliert und getestet; der Build mit dem echten
-  ESP32-Compiler (Arduino-IDE, Board „ESP32C3 Dev Module“) ist hier nicht gelaufen.
+- **ESP32-C3:** Der Sketch wird im GitHub-Workflow mit dem echten ESP32-Compiler gebaut (Job `esp32`); auf einem
+  echten Board ist er noch nicht gelaufen.
 - **Abgleich mit echter Hardware:** Reibung, Trägheit und Schwerkraft sind geschätzt. Am Prüfstand (Konsole `pruefstand`,
   `log 1`) aufnehmen und mit `python3 tools/auswertung.py log.csv` bestimmen, dann eintragen ([docs/montage.md](../docs/montage.md), Abschnitt 6).
 - Ob es sich wirklich gut anfühlt, entscheidest du am Prüfstand und beim Tragen.

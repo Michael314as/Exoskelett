@@ -1,8 +1,8 @@
 // ESP32-C3: E-Paper am rechten Oberarm (Uhrzeit, Akku mit Restzeit, Stufe, Fehler) und Bluetooth (BLE) zum Handy.
 // Bauen mit Arduino-IDE oder PlatformIO (Board „ESP32C3 Dev Module“). Bibliotheken: GxEPD2, NimBLE-Arduino.
 // Verbindung: Teensy Pin 1 (TX) → ESP32-C3 GPIO 20 (RX), Masse verbinden. Kein Rückkanal nötig.
-// Hinweis: Mit dem echten ESP32-Compiler ist diese Datei noch nicht gebaut worden. Auf dem PC wird sie mit
-// Platzhaltern für Kern, GxEPD2 und NimBLE kompiliert und getestet (test/esp32_host.cpp, Teil von make test).
+// Wird im GitHub-Workflow mit dem echten ESP32-Compiler gebaut (Job „esp32“) und auf dem PC mit Platzhaltern für
+// Kern, GxEPD2 und NimBLE getestet (test/esp32_host.cpp, Teil von make test). Auf einem Board noch nicht gelaufen.
 #include <GxEPD2_BW.h>
 #include <NimBLEDevice.h>
 #include "status.h"

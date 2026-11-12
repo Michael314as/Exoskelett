@@ -9,23 +9,24 @@ noch die CE-Konformität dazu (siehe unten).
 | Bereich | Stand | Nachweis |
 |---|---|---|
 | Konzept, Kräfte, Steuerungskonzept | fertig | [konzept.md](konzept.md), [kraftverteilung.md](kraftverteilung.md), [steuerung.md](steuerung.md) |
-| Steuerung (Regler, Sicherheit, Bedienung) | fertig, Entwurf 4 | Physik-Simulation, 70+ automatische Prüfungen inkl. Kopplung, Baumlast-Vorsteuerung, Standbein/Schwungbein, Winden nacheinander, Wärmeschutz, Sturzdämpfung, Lendensperre, Rückneigungswarnung (`make -C firmware test`) |
-| Firmware Teensy 4.1 | baut | ARM-GCC, `exo.hex` (87 KB), keine Warnung im eigenen Code (`firmware/tools/build_teensy.sh`) |
-| Firmware ESP32-C3 (Anzeige Oberarm, Handy) | auf dem PC geprüft | Sketch mit Platzhaltern kompiliert und getestet (`test/esp32_host.cpp`); der Build mit dem echten ESP32-Compiler ist noch nicht gelaufen |
+| Steuerung (Regler, Sicherheit, Bedienung) | fertig, Entwurf 5 (Rev. S1) | Physik-Simulation, über 100 automatische Prüfungen inkl. abgestufter Fehlerreaktion, Nullen, Sensor-Frische, Akku-Abregelung, Kopplung, Baumlast-Vorsteuerung, Standbein/Schwungbein, Winden nacheinander, Wärmeschutz, Sturzdämpfung, Lendensperre, Rückneigungswarnung (`make -C firmware test`) |
+| Firmware Teensy 4.1 | baut | ARM-GCC, `exo.hex` (107 KB), keine Warnung im eigenen Code (`firmware/tools/build_teensy.sh`) |
+| Firmware ESP32-C3 (Anzeige Oberarm, Handy) | baut | Sketch mit Platzhaltern getestet (`test/esp32_host.cpp`) und im GitHub-Workflow mit dem echten ESP32-Compiler gebaut (Job `esp32`) |
 | Laserteile | 27 DXF (Entwurf 5) | automatische Prüfung: geschlossene Konturen, Stege ≥ 4 mm je Bohrung ([fertigung/](../fertigung/)); neu in Entwurf 5: Motorträger RS04/RS03, Wangen, Abtriebsflansch, Kurbeln und Hebel an Knie und Ellbogen |
 | Druckteile | 19 STL | wasserdicht, passen in den A1 mini; neu in Entwurf 5: Kapselhauben (RS04, RS03), Kurbelschutz |
+| Festigkeit | Rahmen und Antriebsteile gerechnet | [festigkeit.md](festigkeit.md): Rohre, Teleskop-Spiel, Schubstangen, Kurbelzapfen, Kurbelsitz, Lendensperre; Schweißnähte und Motorlager noch offen |
 | Stückliste, Verdrahtung | fertig | [stueckliste.md](stueckliste.md), [verdrahtung.md](verdrahtung.md) (Pinplan = Firmware) |
 | Schätzwerte bis zur Messung | mit Quellen | [schaetzwerte.md](schaetzwerte.md): Schlaufenkraft, Motorwärme, Reaktionszeit, Gewicht |
 | Bestellliste Prototyp | fertig | [bestellung-prototyp.md](bestellung-prototyp.md): alle Teile nach Bezugsweg, Reihenfolge in 5 Stufen (Prüfstand zuerst) |
 | Montage, Kalibrierung | fertig | [montage.md](montage.md), Werkstatt-Konsole in der Firmware (`null`, `kal`, `speichern`) |
-| Abnahme | Protokoll fertig | [pruefung.md](pruefung.md): 40 Punkte mit messbaren Kriterien |
+| Abnahme | Protokoll fertig | [pruefung.md](pruefung.md): über 50 Punkte mit messbaren Kriterien, darunter die Ausfallprüfungen P40–P46 |
 | Prüfstand-Modus, Messdaten-Log, Parameterbestimmung | fertig | `tools/auswertung.py` findet bekannte Werte aus einem Simulations-Log auf 20 % genau (`make -C firmware ident`) |
 | Risikobeurteilung | fertig | [risikobeurteilung.md](risikobeurteilung.md) |
 | Wartung | fertig | [wartung.md](wartung.md), Hinweise aus den Betriebsstunden in der Firmware |
 
 Bei der Arbeit an diesen Punkten gefundene und behobene Fehler: zu viel Dämpfung, zu großes Totband,
 Stufenwechsel hätte Schlaufen geöffnet, fehlendes Include für den ARM-Build, doppelt belegte Pins, Motoren-Fehler
-beim Einschalten, blockierendes E-Paper im Regeltakt, zu dünne Stege an fünf Laserteilen.
+beim Einschalten, blockierendes E-Paper im Regeltakt, zu dünne Stege an fünf Laserteilen. Die kritische Durchsicht vom November 2026 ([durchsicht-2026-11.md](durchsicht-2026-11.md)) hat weitere gefunden, unter anderem: Stehen auf einem Bein hätte einen Sensorfehler ausgelöst, eingefrorene Sensorwerte blieben unbemerkt, der Gelenk-Nullpunkt ließ sich nicht einstellen, der Not-Aus-Taster hätte den vollen Motorstrom schalten müssen, die Kurbelzapfen wären im Gewinde gebrochen.
 
 ## Was nur mit Hardware geht (Reihenfolge)
 
@@ -33,7 +34,7 @@ beim Einschalten, blockierendes E-Paper im Regeltakt, zu dünne Stege an fünf L
 |---|---|---|
 | 1. Kaufteile bestellen; **Lochbild Flanschlager und Motor mit Datenblatt abgleichen**, Parameter in `tools/fertigung.py` anpassen | richtige DXF | 1 Woche |
 | 2. Prototyp-Satz Laserteile bestellen, drucken, montieren ([montage.md](montage.md)) | Exo Nr. 1 | 4–8 Wochen |
-| 3. Abnahme P1–P20 am Prüfstand | gemessene Werte | 1–2 Wochen |
+| 3. Abnahme P1–P20 und P40–P45 am Prüfstand | gemessene Werte | 1–2 Wochen |
 | 4. Prüfstand-Log aufnehmen (`pruefstand`, `log 1`), mit `tools/auswertung.py` Trägheit, Reibung, Schwerkraft bestimmen, in Simulation und Firmware eintragen, Verstärkung neu einstellen | Firmware v1.0 | 1 Woche |
 | 5. Abnahme P21–P30 am Körper | Exo freigegeben | 1–2 Wochen |
 | 6. Eine Saison Einsatz, Mängelliste führen | Änderungsliste | 1 Saison |

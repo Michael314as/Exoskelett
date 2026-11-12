@@ -21,7 +21,7 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 
 | Teil | Menge | Material, Maß | Herstellweg | etwa |
 |---|---|---|---|---|
-| Rückenrahmen senkrecht | 2 | Alu-Vierkantrohr 25 × 25 × 2, je 60 cm | Säge + Bohren | 15 € |
+| Rückenrahmen senkrecht | 2 | Alu-Vierkantrohr 30 × 30 × 2, je 60 cm | Säge + Bohren | 15 € |
 | Rückenrahmen quer | 3 | Alu-Vierkantrohr 20 × 20 × 2, je 22 cm | Säge + Bohren | 6 € |
 | Eck-Doppelplatten | 12 | Alu 4 mm, 60 × 60 | Laser | 25 € |
 | Gurtsystem: Hüftgurt, S-Schultergurte, Lageverstellriemen, Brustgurt, Lenden- und Schulterblattpolster | 1 Satz | Trekkingrucksack-Ersatzteile oder genäht (Gurtband 50 mm, Abstandsgewirke), Magnet- und Leiterschnallen | Kauf / Nähen | 80–130 € |
@@ -30,8 +30,8 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Zentrierfedern + Gummipuffer | 4 + 4 | Druckfeder Ø 13, TPU | Kauf / Druck | 10 € |
 | Hüftschwinge | 2 | Alu-Vierkantrohr 35 × 35 × 3 + Eckplatten | Säge + Bohren, Laser | 25 € |
 | Hüftlager | 2 | Flanschlager UCFL/KFL, 2RS | Kauf | 20 € |
-| Ober-/Unterschenkelschienen außen | 4 | Alu 25 × 25 × 2 | Säge + Bohren (Lochraster per Schablone) | 15 € |
-| Ober-/Unterschenkelschienen innen | 4 | Alu 20 × 20 × 2 | Säge + Bohren | 10 € |
+| Ober-/Unterschenkelschienen außen | 4 | Alu 30 × 30 × 2 (innen 26 mm, damit das Innenrohr gleitet) | Säge + Bohren (Lochraster per Schablone) | 15 € |
+| Ober-/Unterschenkelschienen innen | 4 | Alu 25 × 25 × 2,5 (Oberschenkel) / 25 × 25 × 2 (Unterschenkel) | Säge + Bohren | 10 € |
 | Lagerplatten für die Flanschlager (KFL001 Lochabstand 48 mm: Knie, Schulter; KFL08 37 mm: Ellbogen, Knöchel; KFL002 53 mm: Hüfte) | 8 + 8 + 2 | Alu 6082, 6 / 8 mm | Laser | 35 € |
 | Kniegelenk-Lager | 2 | Flanschlager klein, 2RS | Kauf | 14 € |
 | Passschrauben, Nylonmuttern | 1 Satz | M10/M12, Edelstahl | Kauf | 25 € |
@@ -58,7 +58,7 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Druckausgleichselemente M12 | 8 | Membran (z. B. GORE) | Kauf | 50 € |
 | Heizbänder Silikon 12 V 4 W (Abtriebsseite) | 8 | | Kauf | 50 € |
 | Kurbeln Knie (r 60) / Ellbogen (r 50), Hebel Knie / Ellbogen | 2 + 2 + 2 + 2 | Alu 6082, 8–10 mm | Laser | 30 € |
-| Schubstangen | 2 + 2 | Stahlrohr Ø 12 × 2 (Knie), Ø 10 × 1,5 (Ellbogen), Gewinde M8 / M6 | Säge + Kleben/Löten | 15 € |
+| Schubstangen | 2 + 2 | Stahlrohr Ø 12 × 2 (Knie), Ø 10 × 1,5 (Ellbogen), Gewindeeinsätze M8 / M6 eingeschweißt; dazu Kurbelzapfen als **Passschrauben ISO 7379, 12.9** (5 × Ø 8, 2 × Ø 6) und Passstifte Ø 6 / Ø 5 für die Kurbeln am Motorabtrieb | Säge + Schweißen, Reibahle 8 H7 / 6 H7 | 35 € |
 | Gelenkköpfe Edelstahl, DIN ISO 12240-4 | 4 × M8 + 4 × M6 | wartungsfrei (z. B. SKF SIKAC 8 M / 6 M) | Kauf | 70 € |
 | Federpaket Knie (Druckfeder mit Hülse in der Stange) | 2 | Federstahl | Kauf + Druck | 15 € |
 | Rumpfantrieb: Kurbeln, Hebel am Lendengelenk, Träger (Laser), Stangen Ø 12 / Ø 10, 4 Gelenkköpfe | 1 Satz | Laser + Kauf | 60 € |
@@ -71,8 +71,8 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 
 | Teil | Menge | Material, Maß | Herstellweg | etwa |
 |---|---|---|---|---|
-| Schulterbügel | 2 | Alu 20 × 20 × 2 + Laschen | Säge + Bohren, Laser | 15 € |
-| Ober-/Unterarmschienen | 4 | Alu 20 × 20 × 2 / 25 × 25 × 2 | Säge + Bohren | 12 € |
+| Schulterbügel | 2 | Alu 30 × 30 × 3 + Laschen | Säge + Bohren, Laser | 15 € |
+| Ober-/Unterarmschienen | 4 | Alu 25 × 25 × 3 | Säge + Bohren | 12 € |
 | Schulter-/Ellbogenlager | 4 | Flanschlager klein | Kauf | 28 € |
 | Manschetten-Schalen M2 (Oberarm, Unterarm, Oberschenkel, Schienbein; 3 Größen) | 8 | PETG-CF 4 mm, 45 % breiter, nach Handy-Scan | Druck (größte ~17 × 12 × 9 cm) | 30 € |
 | Viskopolster mit Wechselbezug | 8 | dichter PU-Viskoschaum 4 mm, perforiert, Funktionsstoff, Klett nur am Bezug | Kauf, Schere | 40 € |
@@ -99,7 +99,7 @@ Dazu einmalig Werkzeug 280–500 €. Stihl-Akku vorhanden. Erster Schritt Prüf
 | Knopfzelle CR2032 + Halter (Uhr) | 1 | Kauf | 3 € |
 | DC/DC 36→24 V, 36→5 V | 2 | Kauf | 30 € |
 | Motortreiber für Winden (Pololu G2 18v17, 44,95 $) | 3 | Kauf | 125 € |
-| Hauptsicherung, Schütz, Pilz-Not-Aus | 1 Satz | Kauf | 50 € |
+| Hauptsicherung (Startwert 60 A träge), **Gleichstromschütz ≥ 60 V DC / 100 A, Spule 24 V**, Pilz-Not-Aus mit 2 Öffnern (schaltet die Schützspule, siehe [verdrahtung.md](verdrahtung.md)) | 1 Satz | Kauf | 90 € |
 | Stihl-Akku-Adapter | 1 | Druck oder Kauf | 20–80 € |
 | Stecker IP67, Kabel, Gewebeschlauch | 1 Satz | Kauf, crimpen | 60 € |
 | Platine | 1 | Lochraster oder bestellt | 10 € |
