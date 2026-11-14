@@ -149,6 +149,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
       <button role="tab" data-tab="cg" aria-selected="false">Schwerpunkt</button>
       <button role="tab" data-tab="bom" aria-selected="false">Stückliste</button>
       <button role="tab" data-tab="weight" aria-selected="false">Gewicht</button>
+      <button role="tab" data-tab="sens" aria-selected="false">Sensoren und Manschetten</button>
       <button role="tab" data-tab="care" aria-selected="false">Schutz und Wartung</button>
       <button role="tab" data-tab="disp" aria-selected="false">Darstellung</button>
     </div>
@@ -182,6 +183,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
       <table class="jt" id="bomt"><thead><tr><th>ID</th><th>Benennung</th><th>Herstellung</th><th>Kaufteil / Halbzeug</th><th>Stück</th><th>je</th><th>gesamt</th></tr></thead><tbody></tbody><tfoot></tfoot></table>
     </div>
     <div class="pane" data-pane="weight" hidden><div id="wout"></div></div>
+    <div class="pane" data-pane="sens" hidden><div id="sout"></div></div>
     <div class="pane" data-pane="care" hidden><div id="cout"></div></div>
     <div class="pane" data-pane="disp" hidden>
       <div class="row">
@@ -526,7 +528,7 @@ const PART_INFO = [
     care: 'Anschlag gegen Überstrecken. Die Unterarmschiene trägt den Schlaufenträger, deshalb biegesteif.' },
   { key: 'sensor', name: 'Sensoren: Manschetten, Fußkontakt, Schlaufenlast', dist: 0.5,
     what: 'So weiß das Exo, was du willst und was es trägt: Manschetten messen deine Bewegung, Fußsensoren das Standbein, die Schlaufenköpfe das Baumgewicht.',
-    how: 'Die blauen Manschetten (Rev. M2) an Oberarm, Unterarm, Oberschenkel und jetzt auch am Schienbein sitzen auf je einer Wägezelle (Biegebalken wie in Küchenwaagen). Die Schale ist breit und dünn gepolstert, ein BOA-Drehverschluss zieht sie gleichmäßig straff. Zwischen Schale und Zelle läuft ein kleiner Längsschlitten: Rutscht die Manschette beim Beugen etwas längs, gleitet sie mit, statt über die Haut zu scheuern oder die Zelle falsch zu drücken. Drei schnelle Messwandler (ADS131M04, 1000 Messungen/s) in der Elektronikbox lesen alle Manschetten gleichzeitig. Die Steuerung „geht mit“: Drückst du, läuft das Gelenk mit einer Geschwindigkeit proportional zum Druck mit, die Dämpfung dafür rechnet der Motor selbst. Ein Drucksensor im Steigbügel meldet, ob das Bein belastet ist. In jedem Schlaufenkopf misst eine kleine Wägezelle, wie stark der Baum zieht: Diesen Anteil trägt das Exo von selbst. „Arm heben“ oder „Hocke“ bewegen: rote Pfeile zeigen deinen Druck.',
+    how: 'Die blauen Manschetten (Rev. M3) an Oberarm, Unterarm, Oberschenkel und jetzt auch am Schienbein sitzen auf je einer Wägezelle (Biegebalken wie in Küchenwaagen). Die Schale ist breit und dünn gepolstert, ein BOA-Drehverschluss zieht sie gleichmäßig straff. Zwischen Schale und Zelle läuft ein kleiner Längsschlitten: Rutscht die Manschette beim Beugen etwas längs, gleitet sie mit, statt über die Haut zu scheuern oder die Zelle falsch zu drücken. Drei schnelle Messwandler (ADS131M04, 1000 Messungen/s) in der Elektronikbox lesen alle Manschetten gleichzeitig. Die Steuerung „geht mit“: Drückst du, läuft das Gelenk mit einer Geschwindigkeit proportional zum Druck mit, die Dämpfung dafür rechnet der Motor selbst. Ein Drucksensor im Steigbügel meldet, ob das Bein belastet ist. In jedem Schlaufenkopf misst eine kleine Wägezelle, wie stark der Baum zieht: Diesen Anteil trägt das Exo von selbst. „Arm heben“ oder „Hocke“ bewegen: rote Pfeile zeigen deinen Druck.',
     parts: '8 Wägezellen 20 kg (Manschetten), 4 Rumpf-Wägezellen, 3 Messwandler ADS131M04, 3 Wägezellen 50 kg (Schlaufenköpfe) und 2 Fußsensoren an HX711, 8 BOA-Verschlüsse, 8 Längsschlitten mit iglidur-Buchsen, gedruckte PETG-CF-Schalen, Viskopolster.',
     care: 'Schalen straff, Polster dünn, sonst wird die Regelung schwammig. Beim Einschalten 2 s ruhig stehen, dann stellt die Steuerung die Nullpunkte.' },
   { key: 'loop', name: 'Schlaufengreifer (Spannband)', dist: 0.6,
@@ -627,6 +629,13 @@ function sensorCuff(g, y, zc, r, h, zr, sd, id) {
   const bw = Math.max(0.006, zin - Math.abs(zcell) - 0.0063);
   box(g, 0.026, 0.03, bw, M.aluDark, 0, y + 0.024, sd * (Math.abs(zcell) + 0.0063 + bw / 2));          // Halter an der Schiene
   for (const dy of [0.012, -0.044]) box(g, 0.008, 0.006, 0.008, M.tpu, 0.012, y + dy, zcell);         // Überlast-Puffer
+  { // Sensorstecker M8 4-polig am Zellenende (Zelle tauschen ohne Löten), Leitung geschirmt hinter die Schiene in den Kabelkanal
+    const pc = catNow; catNow = 'elec';
+    const pl = put(g, mesh(cyl(0.0048, 0.0048, 0.022, 14), M.conn), -0.014, y - 0.03, zcell, 0, 0, Math.PI / 2); pl.userData.id = 'SE-12';
+    const rg = put(g, mesh(new THREE.TorusGeometry(0.005, 0.0012, 6, 14), M.harnS), -0.022, y - 0.03, zcell, 0, Math.PI / 2, 0); rg.userData.id = 'SE-12';
+    const cv = new THREE.CatmullRomCurve3([V(-0.025, y - 0.03, zcell), V(-0.032, y - 0.045, (zcell + zr) / 2), V(-0.022, y - 0.07, zr)]);
+    const cb = mesh(new THREE.TubeGeometry(cv, 12, 0.0022, 6), M.harnS); g.add(cb); cb.userData.id = 'SE-12';
+    catNow = pc; }
   cur = prev;
   const arr = new THREE.ArrowHelper(V(1, 0, 0), V(0.02, y, zc), 0.1, 0xD32F2F, 0.025, 0.018); arr.visible = false; g.add(arr);
   if (id) cuffArrows[id] = { arr, y, zc };
@@ -1209,6 +1218,11 @@ cur = 'wiring';
   for (const z of [-0.085, 0.085]) { box(g, 0.016, 0.05, 0.04, M.aluDark, xw + 0.008, 0.23, z); for (let i = 0; i < 4; i++) box(g, 0.006, 0.05, 0.002, M.alu, xw + 0.019, 0.23, z - 0.015 + i * 0.01); }   // DC/DC 24 V und 5 V
   // Leistung: Kupferschiene mit einer Sicherung je Kapsel, Leitungen zu den Steckern, CAN-Kette
   box(g, 0.006, 0.006, 0.2, M.copper, bx + 0.02, 0.2, 0);
+  { const pc = cur; cur = 'sensor';   // Akkustrom und -spannung: Shunt am Anfang der Kupferschiene + INA228; Außentemperatur unter der Box
+    const sh = box(g, 0.008, 0.008, 0.022, M.chrome, bx + 0.02, 0.2, -0.112); sh.userData.id = 'SE-13';
+    const ina = box(g, 0.003, 0.016, 0.02, M.pcb, bx + 0.012, 0.214, -0.112); ina.userData.id = 'SE-13';
+    const tp = put(g, mesh(cyl(0.006, 0.006, 0.012, 14), M.gh), bx + 0.005, 0.176, 0.06); tp.userData.id = 'SE-14';
+    cur = pc; }
   const mot = [];   // Stecker: unten Beine (Hüft- und Kniekapsel), oben seitlich Arme (Schulter- und Ellbogenkapsel)
   for (const [y, z] of [[0.19, -0.09], [0.19, 0.09], [0.33, -0.105], [0.33, 0.105]]) mot.push(V(-0.2, y, z));
   mot.forEach((m, i) => {
@@ -1697,10 +1711,13 @@ const DB = [
   ['BE-12', 'Spikes', 'Kauf', 'Schraubspikes M5, Hartmetallspitze', '6 je Fuß, tauschbar', 0.005, 'BE-11'],
   ['BE-14', 'Drehteller Steigbügel', 'Kauf + Laser', 'Axial-Nadellager AXK 3047 + Zentrierfeder, Edelstahlscheiben', 'Fußspitze drehen ±20° (Wenden, Fuß nach außen stellen) ohne das Knie zu verdrehen', 0.08, 'BE-11 SE-06'],
   ['BE-13', 'Fersenschale, Ristriemen', 'Druck + Kauf', 'PETG, Steigeisen-Ratschenriemen', '', 0.1, 'BE-11'],
-  ['SE-01', 'Manschette M2', 'Druck', 'PETG-CF-Schale 4 mm, 45 % breiter (Oberarm 87, Unterarm 73, Oberschenkel 102, Schienbein 87 mm), Viskopolster 4 mm perforiert mit Wechselbezug, 3 Größen', 'Oberarm, Unterarm, Oberschenkel, Schienbein (neu mit Sensor): straff und breit = wenig Druck je cm², kaum Nachgeben', 0.13, 'SE-02 SE-10 SE-11 BE-01 BE-06 AR-01 AR-02'],
+  ['SE-01', 'Manschette M3', 'Druck', 'Schale PETG-CF 4 mm (Prototyp) bzw. PP-Copolymer 3 mm tiefgezogen (kältezäh, warm nachformbar); Breite Oberarm 87, Unterarm 73, Oberschenkel 102, Schienbein 87 mm; Polster Plastazote LD45 4 mm (geschlossenzellig, bleibt bei Frost weich, nimmt kein Wasser auf) mit Abstandsgewirke-Bezug auf Klett, waschbar; 3 Größen je Glied', 'Oberarm, Unterarm, Oberschenkel, Schienbein (neu mit Sensor): straff und breit = wenig Druck je cm², kaum Nachgeben', 0.13, 'SE-02 SE-10 SE-11 BE-01 BE-06 AR-01 AR-02'],
   ['SE-02', 'Wägezelle Manschette', 'Kauf', 'Biegebalken YZC-133, 20 kg, 80 × 12,7 × 12,7 mm', 'misst nur quer zur Schiene; Längskräfte nimmt der Schlitten', 0.03, 'SE-01 SE-03 SE-04 SE-11'],
   ['SE-03', 'Messwandler Manschetten', 'Kauf', 'TI ADS131M04 (4 Kanäle gleichzeitig, 24 Bit, SPI), 3 Stück auf einer Platine in der Elektronikbox, gemeinsamer 8,192-MHz-Takt', '1 000 Messungen/s (vorher HX711 80/s): Reaktionszeit ≈ 3 statt ≈ 35 ms; 12 Kanäle = 8 Glieder + 4 Rumpf', 0.005, 'SE-02 SE-09 EL-01 KB-02 KB-03'],
-  ['SE-04', 'Überlastpuffer, Halter', 'Druck + Laser', 'TPU, Alu', 'Spalt 1 mm', 0.02, 'SE-02'],
+  ['SE-04', 'Überlastpuffer, Klemmhalter', 'Druck + Laser', 'TPU-Puffer, Alu-Klemmhalter mit Flügelschraube M5', 'Puffer: Spalt 1 mm, schützt die Zelle bei Stoß; Halter: auf der Schiene ±40 mm verschiebbar, damit die Manschette an der dicksten Stelle des Glieds sitzt', 0.02, 'SE-02 BE-01 AR-01'],
+  ['SE-12', 'Sensorstecker und -leitung', 'Kauf', 'Binder Serie 718 M8 4-polig IP67 (Stecker am Zellenkabel, Buchse an der Leitung), Leitung LiYCY 4 × 0,14 mm² geschirmt', 'jede Manschettenzelle steckbar; Leitung im Kabelkanal, getrennt von den Leistungsleitungen (≥ 2 cm), Schirm einseitig an der Box', 0.01, 'SE-02 KB-02 KB-03 SE-03'],
+  ['SE-13', 'Akkustrom und -spannung', 'Kauf', 'TI INA228 (85 V, 20 Bit, I²C) + Shunt 0,2 mΩ 4-Leiter', 'Vorschlag zu offener Entscheidung 4: misst Strom, Spannung, Energie → Leistungsgrenze ≈ 2,5 kW, Restlaufzeit, Fehlersuche am Prüfstand', 0.01, 'EL-08 EL-01'],
+  ['SE-14', 'Außentemperatur', 'Kauf', 'TI TMP117 (±0,1 °C, I²C) in Kunststoffhülse unter der Box', 'schaltet die Kapselheizung, warnt bei Frost vor schwachem Akku', 0.003, 'EL-01 AN-03'],
   ['SE-10', 'BOA-Drehverschluss', 'Kauf', 'BOA Fit System, Orthesen-Drehverschluss mit Stahlseil-Schnürung (z. B. Typ L6 / H+), 2 Bänder je Manschette', 'gleichmäßig straff in feinen Rasten, mit Handschuhen bedienbar, Ziehen am Rad = sofort auf; ersetzt den Klettgurt, der nachgibt und vereist', 0.03, 'SE-01'],
   ['SE-11', 'Längsschlitten Manschette', 'Kauf + Laser', '2 × Edelstahlstange Ø 5 mm, 2 Gleitbuchsen iglidur JSM-0506 (Trockenlauf, kältefest), Alu-Schlitten, 2 Zentrierfedern ≈ 0,5 N/mm, ±12 mm Weg', 'Achsen von Mensch und Exo liegen nie genau übereinander: Beim Beugen wandert die Manschette sonst über die Haut (Scheuern) und drückt längs auf die Zelle (falsche Absicht)', 0.05, 'SE-01 SE-02'],
   ['SE-06', 'Fußkontakt', 'Kauf', '4 × Halbbrücken-Wägezelle 50 kg (Personenwaagen-Bauform 34 × 34 × 8 mm, 1,0 mV/V, Grenzlast 150 %) je Steigbügel, als Vollbrücke an einem HX711', 'misst die Fußlast (bis 200 kg, Grenzlast 300 kg) → Standbein / Schwungbein. Ein FSR 406 (0,2–20 N) wäre unter dem Körpergewicht überlastet.', 0.15, 'BE-11 KB-02'],
@@ -1735,7 +1752,7 @@ const DB = [
   ['BD-04', 'Arbeitslicht', 'Kauf', 'LED-Strahler 10 W, 12 V', 'zwei Stück am Rahmen', 0.12, 'RA-01 KB-04'],
 ];
 // Stückzahl je Seite bzw. gesamt (Teile, die im Modell als ein Körper zusammengefasst sind)
-const MULT = { 'VK-08': 4, 'VK-09': 2, 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 4, 'SE-02': 4, 'SE-03': 3, 'SE-04': 4, 'SE-10': 4, 'SE-11': 4, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-04': 4, 'KB-07': 1, 'SE-09': 2, 'RA-11': 2 };
+const MULT = { 'VK-08': 4, 'VK-09': 2, 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 4, 'SE-12': 4, 'SE-02': 4, 'SE-03': 3, 'SE-04': 4, 'SE-10': 4, 'SE-11': 4, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-04': 4, 'KB-07': 1, 'SE-09': 2, 'RA-11': 2 };
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const SRC = {
   'EL-01': ['PJRC Teensy 4.1 (Maße)', 'https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4'], 'EL-02': ['Mean Well DDR-60L-24 / Pololu D36V28F5', 'https://www.pololu.com/product/3782'], 'SE-06': ['50-kg-Halbbrücken-Wägezelle', 'https://www.sparkfun.com/products/10245'],
@@ -1765,6 +1782,9 @@ const KEB = { mfr: 'Jagwire', typ: 'Pro Compressionless Brake Housing 5 mm, KEB-
 const KFL = (b, d, l, h, m, kg, url) => ({ mfr: 'AMI / FYH / NIS (Normbauform)', typ: `KFL${b} Flanschlager, 2-Loch, Zinkdruckguss, Rillenkugellager mit Madenschraube, 2RS`, dat: [['Bohrung', `${d} mm`], ['Lochabstand', `${l} mm (Lochplatten in fertigung/ angepasst)`], ['Länge', `${h} mm`], ['Schrauben', m], ['Masse', kg]], src: [['Händlerdaten', url]] });
 const XT = { mfr: 'AMASS (Changzhou, China)', typ: 'XT30-Serie: XT30APW-M (Platine, gewinkelt), XT30UW-F (Kabel), XT30U-M/F (Kabel–Kabel)', dat: [['Belegung', 'Pin 1 Plus (VBAT+, rot), Pin 2 Minus (GND, schwarz); verpolsicher durch die abgeschrägte Seite'], ['Strom', 'Mittelwert je Motor hier ≈ 1–4 A, beim Halten mit Spitzenmoment kurz ≈ 15–20 A (Schätzung aus der Wärme); gleicher Stecker wie ab Werk am Motor'], ['Maße', '≈ 10 × 5 × 16 mm je Hälfte']], src: [['RobStride-Handbuch, Kap. 2.3–2.5', 'https://github.com/RobStride/Product_Information']] };
 const REAL = {
+  'SE-13': { mfr: 'Texas Instruments', typ: 'INA228: Strom-, Spannungs- und Energiemesser, 20 Bit, bis 85 V, I²C', dat: [['Messbereich', 'Shunt-Spannung ±163,84 mV oder ±40,96 mV; mit 0,2 mΩ ≈ ±200 A'], ['Shunt', '0,2 mΩ, 4-Leiter, ≈ 2 W bei 100 A Spitze'], ['Hinweis', 'Vorschlag zu offener Entscheidung 4 (Stromsensor)']], src: [['TI INA228', 'https://www.ti.com/product/INA228']] },
+  'SE-14': { mfr: 'Texas Instruments', typ: 'TMP117 digitaler Temperatursensor, I²C', dat: [['Genauigkeit', '±0,1 °C von −20 bis +50 °C'], ['Auflösung', '16 Bit (0,0078 °C)']], src: [['TI TMP117', 'https://www.ti.com/product/TMP117']] },
+  'SE-12': { mfr: 'binder', typ: 'Serie 718, M8-Rundsteckverbinder 4-polig, umspritzt', dat: [['Schutzart', 'IP67 gesteckt'], ['Bauform', 'Stecker am Zellenkabel, Buchse an der Leitung, verschraubt']], src: [['binder M8', 'https://www.binder-connector.com/']] },
   'AS-05': XT, 'AS-07': XT,
   'AS-10': { mfr: 'Lapp', typ: 'SKINTOP ST-M 16 × 1,5 Kabelverschraubung, Polyamid', dat: [['Schutzart', 'IP68'], ['Klemmbereich', '4,5–10 mm'], ['Temperatur', '−20 … +100 °C']], src: [['Lapp SKINTOP ST-M', 'https://www.lappkabel.de/']] },
   'AN-H': AK, 'AN-K': AK, 'AN-S': AK, 'AN-E': AK3,
@@ -1894,7 +1914,7 @@ function classify(m, key, c) {
   }
   return 'RA-03';
 }
-const NO_SIDE = /^(EL|AN-01|AN-L|AN-D|AN-06|RA-02|RA-13|GU-01|KB-04|KB-06|BD-01|BD-02|VK-04)/;
+const NO_SIDE = /^(EL|AN-01|AN-L|AN-D|AN-06|RA-02|RA-13|GU-01|KB-04|KB-06|BD-01|BD-02|VK-04|SE-13|SE-14)/;
 const PIDS = {};   // pid → { id, base, side, meshes: [], key }
 G.chest.position.copy(G.torso.position); G.chest.quaternion.copy(G.torso.quaternion); root.updateMatrixWorld(true);
 for (const ch of [...G.torso.children]) {
@@ -2357,6 +2377,40 @@ function renderCare() {
 }
 $('cout').addEventListener('click', (e) => { const b = e.target.closest('[data-pid]'); if (b) select(b.dataset.pid, true); });
 
+
+// ---------- Sensoren: was gemessen wird, womit, wo, wie angeschlossen ----------
+const SENS = [
+  ['Absicht Arme und Beine (Kraft zwischen dir und der Manschette)', 'Biegebalken-Wägezelle YZC-133, 20 kg, 4 je Seite', 'Manschetten an Oberarm, Unterarm, Oberschenkel, Schienbein', 'M8-Stecker am Halter → geschirmte Leitung im Kabelkanal → ADS131M04 (24 Bit) in der Box', '1 000/s', 'Mitgehen: Das Exo folgt dir, sobald du drückst oder ziehst (≈ 3 ms Verzug)', 'SE-02'],
+  ['Absicht Rumpf', '4 × Wägezelle 20 kg in Gurtankern und hinter dem Schulterblattpolster', 'Rücken', 'ADS131M04', '1 000/s', 'Vorbeugen, Aufrichten, Drehen erkennen', 'SE-09'],
+  ['Gelenkwinkel und -geschwindigkeit', 'im Motor: 2 × 14-Bit-Absolutencoder (Motor und Abtrieb)', 'jede Gelenkkapsel', 'CAN 1 Mbit/s, 2 Stränge', '500/s', 'Haltung, Grenzen, Schwerpunkt: kein zusätzlicher Winkelsensor nötig', 'AN-K'],
+  ['Gelenkmoment', 'im Motor: Phasenstrom × Momentkonstante (RS04 2,1 Nm/A)', 'jede Gelenkkapsel', 'CAN', '500/s', 'Last, Überlast, Plausibilität gegen die Manschettenkraft', 'AN-H'],
+  ['Motortemperatur', 'im Motor: Wicklung und Treiber', 'jede Gelenkkapsel', 'CAN', '10/s', 'Wärmemodell, Pause vor der Abschaltung', 'AN-S'],
+  ['Rumpflage, Sturz', 'BNO085 (9 Achsen mit Sensorfusion)', 'Elektronikbox', 'I²C', '400/s', 'Neigung, Sturzerkennung → weich stromlos', 'EL-07'],
+  ['Fußlast', '4 × Halbbrücken-Zelle 50 kg je Steigbügel, HX711', 'Steigbügel', '6-adrig geschirmt (KB-02)', '80/s', 'Standbein oder Schwungbein, Schwerpunkt über der Standfläche', 'SE-06'],
+  ['Baumgewicht', 'Wägezelle YZC-1B, 50 kg', 'Schlaufenkopf', 'Armkabelbaum (KB-03)', '80/s', 'Vorsteuerung: Exo hält das Baumgewicht, du nur die Richtung', 'SE-07'],
+  ['Akkustrom und -spannung', 'INA228 + Shunt 0,2 mΩ', 'Box, Anfang der Kupferschiene', 'I²C', '1 000/s', 'Leistungsgrenze 2,5 kW, Restlaufzeit, Fehlersuche (Vorschlag zu Entscheidung 4)', 'SE-13'],
+  ['Außentemperatur', 'TMP117', 'unter der Box', 'I²C', '1/s', 'Kapselheizung, Frostwarnung', 'SE-14'],
+  ['Kapseltemperatur', 'NTC in der Heizfolie', 'jede Gelenkkapsel', 'zweiadrig im Kabelbaum', '1/s', 'Heizung regeln, Kondenswasser vermeiden', 'AN-03'],
+  ['Schalter', 'Not-Aus (Öffner + Schließer), Endschalter Parkstütze, Wippe am Bedienteil', 'Brust, Rahmen, Hand', 'direkt an den Teensy', '–', 'Sicherheit und Bedienung', 'BD-01'],
+];
+const CUFFS = [
+  ['Oberarm', '87 mm', 'S 26–30 · M 30–34 · L 34–38 cm', '±40 mm', 'unterhalb des Deltamuskels, frei vom Ellbogen'],
+  ['Unterarm', '73 mm', 'S 22–25 · M 25–28 · L 28–31 cm', '±40 mm', 'Drehring: Hand drehen ±60° ohne gegen das Exo zu arbeiten'],
+  ['Oberschenkel', '102 mm', 'S 44–50 · M 50–56 · L 56–63 cm', '±40 mm', 'mittleres Drittel, wo der Muskel am breitesten ist'],
+  ['Schienbein', '87 mm', 'S 32–36 · M 36–40 · L 40–44 cm', '±40 mm', 'unter dem Knie, liegt vorne auf dem Schienbein auf'],
+];
+function renderSens() {
+  const pidOf = (id) => [id + '-K-R', id + '-R', id, id + '-K'].find((q) => PIDS[q]);
+  const link = (id, t) => { const p = pidOf(id); return p ? `<button class="chip" data-pid="${p}">${t}</button>` : t; };
+  $('sout').innerHTML = `<p class="note" style="margin:0 0 8px">Was das Exo misst, womit, wo es sitzt und wie es angeschlossen ist. Gelenkwinkel, Moment und Temperatur liefern die Motoren selbst; zusätzlich braucht es vor allem die Kraft zwischen dir und den Manschetten. Ein Klick zeigt das Teil im Modell.</p>
+  <table class="jt wt"><thead><tr><th>Was</th><th>Sensor</th><th>Ort</th><th>Anschluss</th><th>Rate</th><th>Wozu</th></tr></thead><tbody>${SENS.map((r) => `<tr><td>${link(r[6], r[0])}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="n">${r[4]}</td><td>${r[5]}</td></tr>`).join('')}</tbody></table>
+  <h3 style="font-size:13px;margin:14px 0 6px">Manschetten (Rev. M3)</h3>
+  <p class="note" style="margin:0 0 6px">Aufbau von innen nach außen: Bezug aus Abstandsgewirke (Klett, waschbar) → Polster Plastazote 4 mm (bleibt bei Frost weich, Visko wäre hart) → Schale (PETG-CF für den Prototyp, später PP tiefgezogen und warm nachformbar) → zwei BOA-Bänder hinten → Steg → Längsschlitten ±12 mm (gleicht den Achsversatz aus, nichts scheuert) → Wägezelle 20 kg mit Überlastpuffer → Klemmhalter auf der Schiene, ±40 mm verschiebbar → M8-Stecker → Kabelkanal.</p>
+  <table class="jt wt"><thead><tr><th>Glied</th><th>Breite</th><th>Größen (Umfang, Richtwerte)</th><th>längs verstellbar</th><th>Sitz</th></tr></thead><tbody>${CUFFS.map((r) => `<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td>${r[2]}</td><td class="n">${r[3]}</td><td>${r[4]}</td></tr>`).join('')}</tbody></table>
+  <p class="note">Größe des ganzen Exos: Teleskopschienen (Lochraster 20 mm) für die Gliedlängen, Manschetten in 3 Größen plus BOA-Feineinstellung für den Umfang, Klemmhalter für die Lage. Anziehen: Manschette anlegen, BOA drehen bis sie satt sitzt; Ausziehen: am Rad ziehen, sofort offen.</p>`;
+}
+$('sout').addEventListener('click', (e) => { const b = e.target.closest('[data-pid]'); if (b) select(b.dataset.pid, true); });
+
 // ---------- Start und Takt ----------
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); labelR.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(stage);
@@ -2375,11 +2429,13 @@ function buildBom() {
   $('bomt').querySelector('tfoot').innerHTML = `<tr><td colspan="4" style="text-align:left;font-weight:600">Exo gesamt (${n} Stück)</td><td></td><td></td><td style="font-weight:600">${all.toFixed(1)} kg</td></tr>`;
 }
 $('bomt').addEventListener('click', (e) => { const r = e.target.closest('[data-pid]'); if (r) select(r.dataset.pid, true); });
-resize(); buildTree(); buildBom(); insp(); setMode('free'); renderWeight(); vkLabel(); renderCare();
+resize(); buildTree(); buildBom(); insp(); setMode('free'); renderWeight(); vkLabel(); renderCare(); renderSens();
 PIDS['EN-01-L'].meshes.forEach((m) => { m.userData.off = true; }); paint();
 camera.position.copy(CAMS.iso); controls.target.set(0, 0.95, 0);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let last = performance.now(), slowT = 0, cgInfo = null;
+// Gleichgewicht schon vor dem ersten Bild einpendeln: sonst neigt sich der Rumpf beim Start sichtbar vor und schaukelt nach
+for (let i = 0; i < 30; i++) { pose(0.016); root.updateMatrixWorld(true); const c = cog(); const e = 0.03 - c.fwd; if (Math.abs(e) < 0.001) break; balT = clamp(balT + 1.0 * e, 0, deg(30)); bal.extra = balT; }
 renderer.setAnimationLoop((now) => {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   const lim = simStep(dt);
@@ -2390,7 +2446,7 @@ renderer.setAnimationLoop((now) => {
   { const busy = Math.abs(live.fUp) > 1.5 || Math.abs(live.fFo) > 1.5 || Math.abs(live.fTh) > 1.5, col = feat.standT > 0.5 ? 0xffc400 : busy ? 0x2f7dff : 0x10d060, n = Math.round(feat.akku * 12);
     ledMats.forEach((m, i) => { m.emissive.setHex(col); m.emissiveIntensity = i < n ? 1.6 : 0.08; }); }
   if ((slowT += dt) > 0.1) {
-    slowT = 0; drawDisplay(); renderJoints(); cgInfo = cog(); balT = clamp(balT + 2.0 * (0.03 - cgInfo.fwd), 0, deg(30)); renderCg(cgInfo);
+    slowT = 0; drawDisplay(); renderJoints(); cgInfo = cog(); { const e = 0.03 - cgInfo.fwd; if (Math.abs(e) > 0.004) balT = clamp(balT + 0.8 * e, 0, deg(30)); }   // ruhig nachführen: kleine Verstärkung, Totband 4 mm (sonst schaukelt der Rumpf) renderCg(cgInfo);
     for (const id of SL) if (document.activeElement !== $(id)) $(id).value = st[id];
     const anyLim = Object.values(lim).some(Boolean) || Object.values(J).some((v) => v.lim);
     $('live').innerHTML = `<b>${mode === 'free' ? 'Frei' : NOTES[mode].split(':')[0]}</b>${gait.on ? ` · Standbein ${gait.stance[1] ? 'rechts' : 'links'}` : ''} · t ${simT.toFixed(1)} s · ${anyLim ? '<span style="color:var(--crit)">Motor am Limit</span>' : 'folgt'}<br>Schwerpunkt ${(cgInfo.fwd * 100).toFixed(1)} cm vor Knöchel · ${cgInfo.inside ? 'steht' : 'kippt'}${selPid ? `<br>Auswahl <b>${selPid}</b> ${nameOf(selPid)}` : ''}`;
