@@ -2,6 +2,7 @@
 
 Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnittener Christbäume entlastet.
 
+> **Zum Anschauen zuerst:** `visualisierung/exo-gesamtbild.html` (Gesamtbild mit Datenblättern, Wie viel stärker, Realismus-Ampel; Rechenweg in `docs/realismus-check.md`).
 > **3D:** `visualisierung/exo-konstruktion.html` (Konzeptzeichnung) und `visualisierung/exo-technik.html` (technische Ansicht mit Bauteil-IDs, realen Kaufteilen, Bewegung nach Motorkennlinie, Schwerpunkt, Maßen).
 
 > **Stand: Entwurf 5 – Gelenkkapseln.** Die Motoren (RobStride RS04 an Hüfte, Knie, Schulter; RS03 am Ellbogen) sitzen direkt an den Gelenken in dichten, beheizten Kapseln; Knie und Ellbogen werden über starre Schubstangen angetrieben. Keine Seile, Bowdenzüge oder Umlenkrollen mehr, die vereisen oder reißen können. Rumpf beugt und dreht mit Motor (±25° / ±15°), Akkus stehen geschützt oben im Rucksack. Manschetten M2: Das Exo **geht mit** (Mitgeh-Regelung, 1000 Messungen/s, Dämpfung im Motor, Schwingungswächter), straffe breite Schalen mit BOA-Verschluss und Längsschlitten, neu auch am Schienbein: in der Simulation 1,3–3 N an jeder Manschette statt bis 12 N, bei schnellem Schwung ≈ 5 N statt 20–24 N ([docs/steuerung.md](docs/steuerung.md)). Gewicht laut Bauteilliste 44,3 kg, Material ≈ 6.000–7.100 €. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md).
@@ -136,6 +137,7 @@ tools/
   kraftverteilung.py         Rechnung zu kraftverteilung.md
   fertigung.py               erzeugt und prüft alle Fertigungsdateien
 visualisierung/
+  exo-gesamtbild.html        3D: Gesamtbild, Referenzbauteile, Kraftgewinn, Realismus-Ampel
   exo-konstruktion.html      3D: Konstruktion im Detail, Baugruppen erklärt, Kraftfluss
   use-case-christbaum.html   3D: beide Use Cases (Aufladen, Schleifen) mit dem Exo laut Konzept
 ```
