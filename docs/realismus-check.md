@@ -121,13 +121,28 @@ Beim Zeichnen gefunden:
 | Anschlussdom am Kniemotor hinten wäre mit der hinteren Wange des Motorträgers kollidiert | | Kabelausgang hinten unten (225°) an Hüfte, Knie, Ellbogen |
 
 Gewicht laut Stückliste jetzt **46,9 kg** (vorher ≈ 44 kg): + 1,05 kg Verkleidung, + 1,6 kg Schrauben, Adapter, Stecker,
-Kanäle und die fehlenden Kabel. Sparvorschläge (Reiter „Gewicht“, Schätzungen):
+Kanäle und die fehlenden Kabel. Ohne Funktionsverlust ≈ 2,7 kg sparbar. Sparvorschläge (Reiter „Gewicht“, Schätzungen):
 
 | Vorschlag | spart | Bewertung |
 |---|---|---|
 | Rumpfmotoren weglassen (offene Entscheidung 3) | ≈ 3,8 kg | ändert die Funktion, Michael entscheidet |
-| Feste Schienenlängen statt Teleskop (nur für eine Person) | ≈ 0,7 kg | ohne Funktionsverlust |
+| Feste Schienenlängen statt Teleskop | (≈ 0,7 kg) | verworfen: Größe soll verstellbar bleiben |
 | Rahmen und Schienen aus CFK-Rohr | ≈ 1,9 kg | teurer, Klebung bei Kälte prüfen |
 | Taschen in den Laserteilen | ≈ 0,5 kg | ohne Funktionsverlust |
 | Schubstangen Alu 7075 Ø 14 × 2 statt Stahl Ø 12 × 2 | ≈ 0,25 kg | Knicklast 9 kN bei 3,7 kN Last |
 | Kühlstifte kürzen | – | nicht empfohlen, Halten ist schon knapp (Abschnitt 2) |
+
+## 7. Regen, Schmutz, Bedienung, Wartung (Stand 14. Nov 2026)
+
+Reiter „Schutz und Wartung“ in der technischen Zeichnung. Kurz:
+
+- **Dicht (IP65):** Gelenkkapseln (O-Ringe, V-Ring, Druckausgleich, Dom mit O-Ring-Deckel, Kabelverschraubung IP68) und
+  Elektronikbox (EPDM-Dichtung, Kabel nur von unten mit Tropfschlaufe; vorher IP54).
+- **Kühlung bleibt offen:** Der Kühlkörper sitzt bewusst außerhalb der Dichtung und darf nass werden. Gegen Äste nur ein Gitter
+  (≈ 20 mm Maschen), keine geschlossene Haube, weil das Halten thermisch ohnehin knapp ist (Abschnitt 2).
+- **Neu gezeichnet:** Regenklappe über dem Akkuschacht (VK-07, Akku ist nur IPX4), Faltenbälge über den Gelenkköpfen der
+  Schubstangen (VK-08), Vierteldrehverschlüsse an den Abdeckungen (VK-09, ohne Werkzeug, mit Handschuhen).
+- **Sonst:** Ablaufbohrungen Ø 4 und Endkappen in den Schienen (kein Eis im Rohr), Kanaldeckel mit Ablaufschlitz,
+  gedichtete Lager (2RS) und schmierfreie Gleitlager.
+- **Wartung:** nach jedem Einsatz abspülen (kein Hochdruck), jede Saison Schrauben nachziehen und Spannband tauschen;
+  Motor tauschen ≈ 20 min mit Innensechskant 3 und 4 mm. Bordwerkzeug: Innensechskant 3, 4, 5 mm, Gabelschlüssel 10 und 13 mm.

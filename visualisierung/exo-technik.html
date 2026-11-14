@@ -149,6 +149,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
       <button role="tab" data-tab="cg" aria-selected="false">Schwerpunkt</button>
       <button role="tab" data-tab="bom" aria-selected="false">Stückliste</button>
       <button role="tab" data-tab="weight" aria-selected="false">Gewicht</button>
+      <button role="tab" data-tab="care" aria-selected="false">Schutz und Wartung</button>
       <button role="tab" data-tab="disp" aria-selected="false">Darstellung</button>
     </div>
     <div class="pane" data-pane="sim">
@@ -181,6 +182,7 @@ table.jt{border-collapse:collapse;width:100%;font:400 12px/1.3 var(--font-mono);
       <table class="jt" id="bomt"><thead><tr><th>ID</th><th>Benennung</th><th>Herstellung</th><th>Kaufteil / Halbzeug</th><th>Stück</th><th>je</th><th>gesamt</th></tr></thead><tbody></tbody><tfoot></tfoot></table>
     </div>
     <div class="pane" data-pane="weight" hidden><div id="wout"></div></div>
+    <div class="pane" data-pane="care" hidden><div id="cout"></div></div>
     <div class="pane" data-pane="disp" hidden>
       <div class="row">
         <label class="chk"><input type="checkbox" id="body" checked> Körper</label>
@@ -770,6 +772,11 @@ cur = 'power';
     box(g, 0.07, 0.164, 0.116, M.stihl, xb, yb, zb); box(g, 0.072, 0.03, 0.118, M.stihlGrey, xb, yb + 0.068, zb);   // Stihl AP 500 S, Griff oben
     box(g, 0.012, 0.012, 0.03, M.red, xb + 0.032, yb + 0.084, zb);                                  // Rastung (Entriegeln)
     for (const dz of [-0.015, 0, 0.015]) box(g, 0.01, 0.004, 0.004, M.chrome, xb, yb - 0.083, zb + dz);   // Kontakte unten
+    { const prevC = catNow; catNow = 'vk';   // Regenklappe: oben über dem Schacht, Scharnier hinten, Magnet vorne, Dichtlippe
+      const lid = box(g, 0.086, 0.004, 0.128, M.vk, xb - 0.002, yb + 0.092, zb); lid.userData.id = 'VK-07';
+      const lip = box(g, 0.009, 0.012, 0.128, M.vk, xb + 0.04, yb + 0.087, zb); lip.userData.id = 'VK-07';
+      const hinge = put(g, mesh(cyl(0.003, 0.003, 0.12, 10), M.chrome), xb - 0.046, yb + 0.092, zb, Math.PI / 2); hinge.userData.id = 'VK-07';
+      catNow = prevC; }
   }
   box(g, 0.004, 0.03, 0.04, M.pcb, -0.226, 0.3, 0.07);  box(g, 0.004, 0.03, 0.04, M.pcb, -0.311, 0.2, 0.07);                                                            // Ideal-Dioden-Modul: Akkus parallel
   put(g, mesh(cyl(0.006, 0.006, 0.003, 16), std(0xC0C4C8, 0.3, 0.9)), -0.227, 0.31, 0.035, 0, 0, Math.PI / 2);   // Knopfzelle für die Uhr
@@ -1069,6 +1076,8 @@ function pushRod(key, crankMat, Mc, Kc, Lp, rCrank, rRod) {
   dynTube(M.steel, rRod, key, () => { const a = crank(), b = Lp(); return [a.clone().lerp(b, 0.07), b.clone().lerp(a, 0.07)]; });   // Stange
   dynTube(M.chrome, rRod + 0.0035, key, () => { const a = crank(), b = Lp(); return [a, a.clone().lerp(b, 0.07)]; });                 // Gelenkkopf oben
   dynTube(M.chrome, rRod + 0.0035, key, () => { const a = crank(), b = Lp(); return [b.clone().lerp(a, 0.07), b]; });                 // Gelenkkopf unten
+  // Schutzmanschetten (Faltenbalg) über den Gelenkköpfen: Dreck und Wasser bleiben aus dem Kugelgelenk
+  for (const end of [0, 1]) { const d = dynTube(M.tpu, rRod + 0.0055, key, () => { let a = crank(), b = Lp(); if (end) [a, b] = [b, a]; return [a.clone().lerp(b, 0.025), a.clone().lerp(b, 0.1)]; }); if (key !== 'trunkdrive') d.m.userData.id = 'VK-08'; }
   return crank;
 }
 const crankPin = {};
@@ -1325,6 +1334,8 @@ function vkPlate(g, cx, y0, y1, w, zp, dz, sd, id, j) {
   for (const s2 of [-1, 1]) out.push(put(g, mesh(rgeo(0.002, L, dz, 0.0009), M.vk), cx + s2 * w / 2, yc, zp - sd * dz / 2));
   out.push(put(g, mesh(rgeo(w, 0.002, dz, 0.0009), M.vk), cx, Math.max(y0, y1), zp - sd * dz / 2));   // oben zu, unten offen (Schnee fällt raus)
   for (const m of out) { m.userData.id = id; m.userData.j = j; }
+  for (const s2 of [-1, 1]) { const q = put(g, mesh(cyl(0.008, 0.008, 0.004, 18), M.conn), cx + s2 * w * 0.32, yc + L * 0.3, zp + sd * 0.003, Math.PI / 2); q.userData.id = 'VK-09'; q.userData.j = j;   // Vierteldrehverschluss mit Flügelgriff
+    const wing = put(g, mesh(rgeo(0.013, 0.004, 0.004, 0.0015), M.conn), cx + s2 * w * 0.32, yc + L * 0.3, zp + sd * 0.006); wing.userData.id = 'VK-09'; wing.userData.j = j; }
   catNow = prevC; cur = prev; return out;
 }
 // Runde Gelenkkappe: Deckel bei zp, Rand nach innen
@@ -1627,7 +1638,7 @@ const DB = [
   ['KB-02', 'Kabelbaum Bein', 'Fertigung', '6-adrig geschirmt', 'Oberschenkel-Verstärker, Fußkontakt', 0.1, 'SE-03 SE-06 EL-11'],
   ['KB-03', 'Kabelbaum Arm', 'Fertigung', '12-adrig, Gewebeschlauch', 'Manschetten, Winden, Schlaufen-Wägezellen, Bedienteil', 0.15, 'SG-06 SG-07 SE-07 EL-11'],
   ['KB-04', 'Kabel Licht, Anzeige, Not-Aus', 'Fertigung', 'LiYCY 4 × 0,25 mm²', '', 0.05, 'BD-01 BD-03 BD-04'],
-  ['AN-01', 'Elektronikbox', 'Laser + Druck', 'Alu 1,5 mm gekantet, PETG-Deckel, 60 × 140 × 220 mm (tief × hoch × breit)', 'IP54; nur noch Steuerung, Wandler, Sicherungen (die Motoren sitzen in den Gelenkkapseln)', 0.45, 'RA-01 EN-02 EL-01'],
+  ['AN-01', 'Elektronikbox', 'Laser + Druck', 'Alu 1,5 mm gekantet, PETG-Deckel, 60 × 140 × 220 mm (tief × hoch × breit)', 'IP65 (umlaufende EPDM-Dichtung, Druckausgleichselement, alle Kabel von unten mit Tropfschlaufe); nur Steuerung, Wandler, Sicherungen; Deckel mit 4 unverlierbaren Schrauben', 0.45, 'RA-01 EN-02 EL-01'],
   ['AN-H', 'Hüftkapsel-Motor', 'Kauf', MOT4, 'direkt auf der Hüftachse; Gehäuse an der Hüftschwinge, Abtrieb am Oberschenkel; 110 Nm strecken', MOTORS.RS04.kg, 'AN-04 AN-02 HU-07 KB-01'],
   ['AN-K', 'Kniekapsel-Motor', 'Kauf', MOT4, 'oben am Oberschenkel; treibt das Knie über Kurbel und Schubstange 1:1', MOTORS.RS04.kg, 'AN-04 AN-02 BA-01 KB-01'],
   ['AN-S', 'Schulterkapsel-Motor', 'Kauf', MOT4, 'direkt auf der Schulterachse; Gehäuse an der Schulterschwinge, Abtrieb an der Oberarmschiene; 100 Nm', MOTORS.RS04.kg, 'AN-04 AN-02 SC-09 KB-03'],
@@ -1651,12 +1662,15 @@ const DB = [
   ['AS-10', 'Kabelverschraubung', 'Kauf', 'Lapp SKINTOP ST-M 16 × 1,5 (Polyamid) mit Mehrfach-Dichteinsatz', 'IP68; Kabelbaum Ø 4,5–10 mm', 0.006, 'AS-09 KB-01 KB-05'],
   ['KB-05', 'Kabelbaum Armkapseln', 'Fertigung', '2 × 2,5 mm² Silikonlitze + CAN-Paar geschirmt in Gewebeschlauch 10 mm', 'Schulter- und Ellbogenkapsel: Leistung + CAN (fehlte in der alten Zeichnung)', 0.15, 'AN-S AN-E AS-07 EL-11'],
   ['KB-06', 'Kabel Rumpfkapseln', 'Fertigung', '2 × 2,5 mm² + CAN, kurz', 'von der Unterseite der Box zu den beiden Kapseln am Kreuzbein', 0.06, 'AN-L AN-D EL-08'],
-  ['KB-07', 'Kabelkanäle', 'Kauf + Zuschnitt', 'PA6 U-Profil 16 × 12 mm, Wand 1,5 mm, mit Rastdeckel, auf die Schienen geklebt + Kabelbinderösen', 'Oberschenkel, Unterschenkel, Oberarm, Unterarm (Satz je Seite): keine freien Kabel, an denen Äste hängen bleiben', 0.07, 'KB-01 KB-02 KB-03 VK-05'],
+  ['KB-07', 'Kabelkanäle', 'Kauf + Zuschnitt', 'PA6 U-Profil 16 × 12 mm, Wand 1,5 mm, mit Rastdeckel, auf die Schienen geklebt + Kabelbinderösen; Deckel unten mit Ablaufschlitz', 'Oberschenkel, Unterschenkel, Oberarm, Unterarm (Satz je Seite): keine freien Kabel, an denen Äste hängen bleiben', 0.07, 'KB-01 KB-02 KB-03 VK-05'],
   ['VK-01', 'Schutzgitter Kühlkörper', 'Druck', 'PA6-GF 1,5 mm, Stege 3 mm, Maschen ≈ 20 mm, eingerastet', 'Äste verhaken sich nicht zwischen den Kühlstiften, Luft kommt weiter durch', 0.035, 'AN-05'],
   ['VK-02', 'Abdeckung Knieantrieb', 'Tiefziehen', 'PE-HD 2 mm signalorange, 4 × M5 mit Gummipuffern auf der Oberschenkelschiene', 'deckt Kurbel, Schubstange und Gelenkköpfe außen, vorne und hinten ab; unten offen (Schnee fällt raus)', 0.11, 'BA-01 BA-02 BA-03 BE-01'],
   ['VK-03', 'Abdeckung Ellbogenantrieb', 'Tiefziehen', 'PE-HD 2 mm signalorange, 3 × M4 mit Gummipuffern auf der Oberarmschiene', 'wie am Knie: nichts kommt zwischen Kurbel, Stange und Schiene', 0.06, 'AR-04 AR-06 AR-07 AR-01'],
   ['VK-04', 'Rückenschale', 'Tiefziehen', 'PE-HD 2 mm, an 6 Punkten mit Gummipuffern am Rahmen', 'über Box-Unterseite, Kabelbäumen, Gasfedern und Rumpfkapseln; Akkuschacht oben bleibt frei', 0.24, 'AN-01 RA-01 RA-10'],
   ['VK-05', 'Deckel Kabelkanal', 'Kauf', 'PA6-Rastdeckel zum Kanal KB-07', 'gehört zum Kanal, hier für die Ansicht getrennt', 0.01, 'KB-07'],
+  ['VK-07', 'Regenklappe Akkuschacht', 'Druck + Kauf', 'PETG 2 mm, Scharnierstift Edelstahl Ø 3, Magnetverschluss, Dichtlippe TPE', 'hält Regen und Schnee aus dem Schacht (Akku nur IPX4); mit Handschuh aufklappbar, Akku wechseln ohne das Exo abzulegen', 0.04, 'EN-02 EN-01'],
+  ['VK-08', 'Schutzmanschette Gelenkkopf', 'Kauf', 'Kugelgelenk-Manschette (Faltenbalg) aus Chloropren, passend zu Gelenkkopf M8 bzw. M6, mit Spannring', 'Dreck, Nadeln und Wasser bleiben aus dem Kugelgelenk; Gelenkköpfe bleiben wartungsfrei', 0.005, 'BA-03 AR-07'],
+  ['VK-09', 'Vierteldrehverschluss', 'Kauf', 'Kunststoff-Vierteldrehverschluss mit Flügelgriff (z. B. Southco-82-Serie, nach Blechdicke 2 mm wählen)', 'Abdeckung ohne Werkzeug ab und wieder dran, auch mit Handschuhen', 0.004, 'VK-02 VK-03'],
   ['VK-06', 'Gelenkkappe', 'Druck', 'PETG 2 mm, rund, Bürstendichtung zum Hebel', 'über Hebel und unterem Gelenkkopf an Knie und Ellbogen: keine Klemmstelle, nichts verhakt sich', 0.04, 'BA-04 AR-08 VK-02 VK-03'],
   ['HU-01', 'Abspreizgabel', 'Laser', 'EN AW-6082 8 mm, verschraubt', 'Achse nach vorne durch das Hüftgelenk', 0.25, 'RA-01 HU-02 HU-04'],
   ['HU-02', 'Achsbolzen', 'Kauf', 'Passschraube Ø 16 + Kugelsperrbolzen GN 113.3-16', 'roter Ring: Bein abnehmen', 0.1, 'HU-01 HU-04'],
@@ -1670,12 +1684,12 @@ const DB = [
   ['BA-03', 'Gelenkköpfe Knie', 'Kauf', 'Gelenkkopf M8 Edelstahl, DIN ISO 12240-4 (z. B. SKF SIKAC 8 M), wartungsfrei', 'gleichen 8° Schräglauf der Stange aus; Tragzahl vor Bestellung im Katalog prüfen (≥ 8 kN)', 0.03, 'BA-01 BA-02 BA-04'],
   ['BA-04', 'Kniehebel', 'Laser', 'EN AW-6082 10 mm, r 60 mm, Nabe auf dem Kniebolzen', 'Hebelbereich +55° … −55°', 0.06, 'BA-03 BE-04'],
   ['BA-05', 'Federpaket', 'Kauf + Druck', 'Druckfeder in Hülse in der Schubstange, vorgespannt', 'gibt beim Beugen ab ≈ 11 Nm nach (mechanische Grenze); Strecken starr', 0.04, 'BA-02'],
-  ['BE-01', 'Oberschenkelschiene', 'Halbzeug', '6082 Vierkant 30 × 30 × 2 außen / 25 × 25 × 2,5 innen (1 mm Spiel)', 'Teleskop, Überlappung ≥ 80 mm', 0.45, 'HU-07 BE-03 SE-01'],
+  ['BE-01', 'Oberschenkelschiene', 'Halbzeug', '6082 Vierkant 30 × 30 × 2 außen / 25 × 25 × 2,5 innen (1 mm Spiel)', 'Teleskop, Überlappung ≥ 80 mm; Ablaufbohrung Ø 4 am tiefsten Punkt, Endkappen PE: kein stehendes Wasser im Rohr (Frost)', 0.45, 'HU-07 BE-03 SE-01'],
   ['BE-02', 'Steckbolzen Lochraster', 'Kauf', 'Kugelsperrbolzen Ø 6', 'Lochabstand 20 mm', 0.02, 'BE-01 BE-06'],
   ['BE-03', 'Knieplatten', 'Laser', 'Alu 6 mm', '', 0.06, 'BE-01 BE-04'],
   ['BE-04', 'Kniegelenklager', 'Kauf', 'Flanschlager KFL001 (12 mm, Lochabstand 48 mm) + Passschraube M12', 'Achse auf Höhe des Kniegelenks', 0.12, 'BE-03 BA-04'],
   ['BE-05', 'Knieanschlag', 'Druck', 'TPU 95A', 'gegen Überstrecken', 0.01, 'BE-04'],
-  ['BE-06', 'Unterschenkelschiene', 'Halbzeug', '6082 Vierkant 30 × 30 × 2 / 25 × 25 × 2', '', 0.4, 'BE-04 BE-08 SE-01'],
+  ['BE-06', 'Unterschenkelschiene', 'Halbzeug', '6082 Vierkant 30 × 30 × 2 / 25 × 25 × 2', 'Ablaufbohrung Ø 4 am tiefsten Punkt, Endkappen PE', 0.4, 'BE-04 BE-08 SE-01'],
   ['BE-08', 'Knöchellager', 'Kauf', 'Flanschlager KFL08 (8 mm, Lochabstand 37 mm)', 'Fußspitze hoch/runter', 0.07, 'BE-06 BE-09'],
   ['BE-09', 'Fersenbügel', 'Halbzeug, gebogen', 'Alu-Rundstab Ø 16', 'führt hinter die Ferse', 0.15, 'BE-08 BE-10'],
   ['BE-10', 'Kippgelenk', 'Kauf', 'Bolzen Ø 8 mit Gummibuchse', 'Achse nach vorne durch den Knöchel', 0.03, 'BE-09 BE-11'],
@@ -1721,7 +1735,7 @@ const DB = [
   ['BD-04', 'Arbeitslicht', 'Kauf', 'LED-Strahler 10 W, 12 V', 'zwei Stück am Rahmen', 0.12, 'RA-01 KB-04'],
 ];
 // Stückzahl je Seite bzw. gesamt (Teile, die im Modell als ein Körper zusammengefasst sind)
-const MULT = { 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 4, 'SE-02': 4, 'SE-03': 3, 'SE-04': 4, 'SE-10': 4, 'SE-11': 4, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-04': 4, 'KB-07': 1, 'SE-09': 2, 'RA-11': 2 };
+const MULT = { 'VK-08': 4, 'VK-09': 2, 'RA-03': 6, 'RA-05': 2, 'RA-01': 1, 'BE-02': 4, 'BE-12': 6, 'SE-01': 4, 'SE-02': 4, 'SE-03': 3, 'SE-04': 4, 'SE-10': 4, 'SE-11': 4, 'SG-02': { R: 2, L: 1 }, 'SG-03': { R: 2, L: 1 }, 'SG-04': { R: 2, L: 1 }, 'SG-05': { R: 2, L: 1 }, 'SG-06': { R: 2, L: 1 }, 'SE-07': { R: 2, L: 1 }, 'EL-11': 7, 'EL-03': 3, 'BA-03': 2, 'AR-07': 2, 'AN-04': 4, 'KB-07': 1, 'SE-09': 2, 'RA-11': 2 };
 const multOf = (base, side) => { const m = MULT[base]; return m === undefined ? 1 : typeof m === 'number' ? m : m[side] || 1; };
 const SRC = {
   'EL-01': ['PJRC Teensy 4.1 (Maße)', 'https://eckstein-shop.de/Maintain_1::PJRC-Marken-EN?qf=4'], 'EL-02': ['Mean Well DDR-60L-24 / Pololu D36V28F5', 'https://www.pololu.com/product/3782'], 'SE-06': ['50-kg-Halbbrücken-Wägezelle', 'https://www.sparkfun.com/products/10245'],
@@ -1880,7 +1894,7 @@ function classify(m, key, c) {
   }
   return 'RA-03';
 }
-const NO_SIDE = /^(EL|AN-01|AN-L|AN-D|AN-06|RA-02|RA-13|GU-01|KB-04|KB-06|BD-01|BD-02|VK-03)/;
+const NO_SIDE = /^(EL|AN-01|AN-L|AN-D|AN-06|RA-02|RA-13|GU-01|KB-04|KB-06|BD-01|BD-02|VK-04)/;
 const PIDS = {};   // pid → { id, base, side, meshes: [], key }
 G.chest.position.copy(G.torso.position); G.chest.quaternion.copy(G.torso.quaternion); root.updateMatrixWorld(true);
 for (const ch of [...G.torso.children]) {
@@ -2289,16 +2303,59 @@ function renderWeight() {
   const R = [
     ['Rumpfmotoren weglassen (offene Entscheidung 3)', trunk, 'Beide Kapseln am Kreuzbein mit Kurbel, Stange, Kabel. Rumpf aufrichten tragen dann Gasfedern und Lendensperre allein; Rumpf drehen nur noch passiv.', 'größter Hebel, ändert aber die Funktion: du entscheidest'],
     ['Zweiten Akku im Fahrzeug lassen', 0, 'Wechsel nach ≈ 2 h statt ihn am Körper zu tragen (2,0 kg). In der Summe oben schon nicht enthalten.', 'schon so gerechnet'],
-    ['Feste Schienenlängen statt Teleskop', rails * 0.3, 'Für eine Person (1,75 m) zugeschnitten: kein Überlapp von 8 cm, kein zweites Profil, keine Steckbolzen. ≈ 30 % der Schienenmasse.', 'nur wenn das Exo nicht für andere passen muss'],
+    ['Feste Schienenlängen statt Teleskop', 0, 'Würde ≈ ' + (rails * 0.3).toFixed(1).replace('.', ',') + ' kg sparen, aber die Größe soll verstellbar bleiben (Michael, 14. Nov 2026).', 'verworfen'],
     ['Rahmen und Schienen aus CFK-Rohr', (rails * 0.7 + frame) * 0.4, 'Gewickelte CFK-Rohre mit eingeklebten Alu-Endstücken statt Vierkant 6082: ≈ 40 % leichter bei gleicher Steifigkeit. Teurer, Klebung muss geprüft werden (Kälte!).', 'Prüfstand: Klebung bei −15 °C'],
     ['Taschen in den Laserteilen', lasers * 0.25, 'Motorträger, Gabeln, Platten: Taschen an Stellen mit wenig Spannung (FEM oder Faustregel: Steg ≥ 2 × Blechdicke).', 'ohne Funktionsverlust'],
     ['Schubstangen aus Alu 7075 Ø 14 × 2', rods * 0.55, 'Statt Stahl Ø 12 × 2: Knicklast ≈ 9 kN statt 16 kN, Last 3,7 kN → Sicherheit 2,5.', 'ohne Funktionsverlust'],
     ['Kühlstifte kürzen', 0, 'Nicht empfohlen: Die Herstellerdaten zeigen, dass das Halten im Stillstand schon jetzt knapp ist (≈ 20 Nm Dauer in der Kapsel).', 'nein'],
   ];
-  const sum = R.slice(2, 6).reduce((s2, r) => s2 + r[1], 0);
-  $('wout').innerHTML = `<p class="note" style="margin:0 0 8px">Exo laut Stückliste: <b style="color:var(--fg)">${all.toFixed(1)} kg</b> getragen. Neu in dieser Zeichnung: Verkleidung ${vk.toFixed(2)} kg, Anschlüsse, Schrauben, Kanäle und fehlende Kabel ${as.toFixed(2)} kg. Ohne die Funktion zu ändern, lassen sich ≈ <b style="color:var(--fg)">${sum.toFixed(1)} kg</b> sparen (Zeilen 3–6, Schätzungen).</p>
+  const sum = R.slice(3, 6).reduce((s2, r) => s2 + r[1], 0);
+  $('wout').innerHTML = `<p class="note" style="margin:0 0 8px">Exo laut Stückliste: <b style="color:var(--fg)">${all.toFixed(1)} kg</b> getragen. Neu in dieser Zeichnung: Verkleidung ${vk.toFixed(2)} kg, Anschlüsse, Schrauben, Kanäle und fehlende Kabel ${as.toFixed(2)} kg. Ohne die Funktion zu ändern, lassen sich ≈ <b style="color:var(--fg)">${sum.toFixed(1)} kg</b> sparen (Zeilen 4–6, Schätzungen).</p>
   <table class="jt wt"><thead><tr><th>Vorschlag</th><th>spart</th><th>Wie</th><th>Bewertung</th></tr></thead><tbody>${R.map((r) => `<tr><td>${r[0]}</td><td class="n">${r[1] ? '≈ ' + r[1].toFixed(2) + ' kg' : '–'}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table>`;
 }
+
+
+// ---------- Schutz gegen Regen und Schmutz, Bedienung, Wartung ----------
+const CARE = {
+  schutz: [
+    ['Gelenkkapseln (Motoren)', 'O-Ringe am Mantel, V-Ring am Abtrieb, Druckausgleich M12 (atmet, lässt kein Wasser rein), Dom mit O-Ring-Deckel, Kabelverschraubung IP68', 'IP65: Regen, Schnee, Gartenschlauch', 'AN-02-K-R'],
+    ['Kühlkörper', 'bewusst außerhalb der Dichtung: darf nass werden, Stifte lassen Wasser und Schnee ablaufen; Gitter mit ≈ 20 mm Maschen hält Äste fern, die Luft kommt durch. Keine geschlossene Haube: die würde genau die Kühlung nehmen, die beim Halten schon knapp ist', 'Kühlung bleibt voll', 'VK-01-K-R'],
+    ['Elektronikbox', 'EPDM-Dichtung, Druckausgleich, Kabel nur von unten mit Tropfschlaufe, Rundstecker M16 IP67', 'IP65', 'AN-01'],
+    ['Akku', 'Stihl AP 500 S ist IPX4; Regenklappe über dem Schacht, Kontakte unten mit Ablauf', 'trocken auch bei Dauerregen', 'VK-07-R'],
+    ['Stecker', 'außen nur M16 IP67; XT30 und GH1.25 nur innen im Dom', 'kein offener Kontakt', 'AS-07-K-R'],
+    ['Lager', 'Flanschlager mit beidseitig gedichteten Kugellagern (2RS), Gleitlager iglidur schmierfrei', 'ohne Fett, nimmt keinen Dreck auf', 'BE-04-R'],
+    ['Gelenkköpfe der Schubstangen', 'Faltenbälge aus Chloropren', 'Kugel bleibt sauber', 'VK-08-R'],
+    ['Schienen (Vierkantrohr)', 'Ablaufbohrung Ø 4 unten, Endkappen', 'kein Eis im Rohr', 'BE-01-R'],
+    ['Kabel', 'in Kanälen mit Rastdeckel (Ablaufschlitz unten) oder im Gewebeschlauch; über den Gelenken Schlaufe', 'keine freien Kabel', 'KB-07-R'],
+    ['Verkleidung', 'PE-HD 2 mm: nimmt kein Wasser auf, bleibt bei Frost zäh; oben zu, unten offen, damit Wasser, Schnee und Nadeln herausfallen', 'Mechanik bleibt sauber', 'VK-02-K-R'],
+  ],
+  bedienung: [
+    'Anziehen: Exo steht auf der Parkstütze, hineinsteigen, Hüftgurt und Magnetschnalle zu, Manschetten mit dem Drehverschluss anziehen.',
+    'Akku wechseln ohne Ablegen und ohne Werkzeug: Regenklappe auf, Griff über die Schulter, rote Rastung drücken.',
+    'Verkleidung mit Vierteldrehverschlüssen: mit Handschuhen bedienbar, kein Werkzeug.',
+    'Stecker verwechslungssicher: jede Leitung trägt die Gelenk-ID (z. B. „K-R“) auf Schrumpfschlauch, Rundstecker mit Kodierung.',
+    'Zustand auf einen Blick: LED-Ring (grün bereit, blau arbeitet, gelb steht) und Anzeige am Oberarm mit Klartext, z. B. „Knie rechts warm, 2 min Pause“.',
+    'Signalorange Verkleidung: im Wald gut zu sehen (Arbeitssicherheit, Jagdzeit).',
+  ],
+  wartung: [
+    ['nach jedem Einsatz', 'abbürsten oder mit dem Gartenschlauch abspülen (kein Hochdruckreiniger auf Dichtungen), Kühlgitter frei, Akku laden', 'Bürste', '5 min'],
+    ['wöchentlich im Einsatz', 'Sichtprüfung: Faltenbälge, Kabelkanäle, Verkleidung fest, Spiel in den Gelenkköpfen, Spannband', '–', '10 min'],
+    ['jede Saison', 'Schrauben nach Drehmomentliste nachziehen, Spannband tauschen, Gasfedern und O-Ringe prüfen, Firmware-Update über USB', 'Drehmomentschlüssel 2–10 Nm', '1 h'],
+    ['Motor tauschen', 'Abdeckung ab (2 Verschlüsse), Domdeckel (2 Schrauben), XT30 und GH1.25 ziehen, Kurbel ab (9 × M5), Motor ab (10 × M4), neue Motor-ID per CAN setzen', 'Innensechskant 3 und 4 mm', '≈ 20 min'],
+    ['Bein oder Arm abnehmen (Transport)', 'Kugelsperrbolzen ziehen, Rundstecker lösen', 'ohne Werkzeug', '1 min'],
+  ],
+  werkzeug: 'Bordwerkzeug: Innensechskant 3, 4 und 5 mm (alle Schrauben M4, M5, M6 als Zylinderkopf), Gabelschlüssel 10 und 13 mm (Gelenkköpfe), ein Satz Ersatzsicherungen. Das ganze Exo braucht damit fünf Werkzeuge.',
+};
+function renderCare() {
+  const link = (pid, t) => PIDS[pid] ? `<button class="chip" data-pid="${pid}">${t}</button>` : t;
+  $('cout').innerHTML = `<p class="note" style="margin:0 0 8px">Wo Regen, Schnee und Dreck hinkommen und was dagegen getan ist. Ein Klick auf eine Baugruppe zeigt sie im Modell.</p>
+  <table class="jt wt"><thead><tr><th>Baugruppe</th><th>Schutz</th><th>Ergebnis</th></tr></thead><tbody>${CARE.schutz.map((r) => `<tr><td>${link(r[3], r[0])}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>
+  <h3 style="font-size:13px;margin:14px 0 6px">Bedienung</h3><ul class="note" style="margin:0;padding-left:18px">${CARE.bedienung.map((t) => `<li>${t}</li>`).join('')}</ul>
+  <h3 style="font-size:13px;margin:14px 0 6px">Wartung</h3>
+  <table class="jt wt"><thead><tr><th>Wann</th><th>Was</th><th>Werkzeug</th><th>Zeit</th></tr></thead><tbody>${CARE.wartung.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="n">${r[3]}</td></tr>`).join('')}</tbody></table>
+  <p class="note">${CARE.werkzeug}</p>`;
+}
+$('cout').addEventListener('click', (e) => { const b = e.target.closest('[data-pid]'); if (b) select(b.dataset.pid, true); });
 
 // ---------- Start und Takt ----------
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); labelR.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
@@ -2318,7 +2375,7 @@ function buildBom() {
   $('bomt').querySelector('tfoot').innerHTML = `<tr><td colspan="4" style="text-align:left;font-weight:600">Exo gesamt (${n} Stück)</td><td></td><td></td><td style="font-weight:600">${all.toFixed(1)} kg</td></tr>`;
 }
 $('bomt').addEventListener('click', (e) => { const r = e.target.closest('[data-pid]'); if (r) select(r.dataset.pid, true); });
-resize(); buildTree(); buildBom(); insp(); setMode('free'); renderWeight(); vkLabel();
+resize(); buildTree(); buildBom(); insp(); setMode('free'); renderWeight(); vkLabel(); renderCare();
 PIDS['EN-01-L'].meshes.forEach((m) => { m.userData.off = true; }); paint();
 camera.position.copy(CAMS.iso); controls.target.set(0, 0.95, 0);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
