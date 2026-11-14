@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>Christbaum-Exo Gesamtbild</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: großes 3D-Gesamtbild mit Beschriftung wie auf einer Zeichnung, rechts das Datenblatt des gewählten Teils;
+   darunter drei Kapitel (Wie viel stärker, Ist das realistisch, Energie und Wärme). Am Handy alles untereinander. */
+:root{
+  --bg:#EEF2EF; --surface:#F9FBFA; --surface-2:#E2E9E5; --fg:#16211C; --muted:#56665E; --line:#CBD5CF;
+  --accent:#C24A0C; --accent-soft:#F6DCCB; --you:#8E9A94; --exo:#C24A0C; --cool:#3B78B8;
+  --ok:#2E7D4F; --warn:#B7791F; --bad:#B3261E;
+  --stage-top:#F4F7F5; --stage-bot:#DCE4DF;
+  --font-display:"Barlow Semi Condensed","Arial Narrow",sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1512; --surface:#141D19; --surface-2:#1E2A25; --fg:#E4ECE7; --muted:#98A9A0; --line:#2B3933;
+  --accent:#FF8240; --accent-soft:#3A2116; --you:#6F7D76; --exo:#FF8240; --cool:#6FA8E6;
+  --ok:#5FC08A; --warn:#E3B04F; --bad:#FF7A70; --stage-top:#18221E; --stage-bot:#0D1310; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1512; --surface:#141D19; --surface-2:#1E2A25; --fg:#E4ECE7; --muted:#98A9A0; --line:#2B3933;
+  --accent:#FF8240; --accent-soft:#3A2116; --you:#6F7D76; --exo:#FF8240; --cool:#6FA8E6;
+  --ok:#5FC08A; --warn:#E3B04F; --bad:#FF7A70; --stage-top:#18221E; --stage-bot:#0D1310; color-scheme:dark}
+html,body{background:var(--bg)}
+body{color:var(--fg);font:400 15px/1.55 var(--font-body)}
+.wrap{box-sizing:border-box;max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.kicker{margin:0;font:500 11px/1.3 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h1{margin:4px 0 0;font:700 clamp(30px,4.4vw,44px)/1.02 var(--font-display);text-wrap:balance;letter-spacing:.005em}
+h2{margin:0;font:700 clamp(24px,3vw,32px)/1.08 var(--font-display);text-wrap:balance}
+h3{margin:0;font:600 19px/1.2 var(--font-display)}
+p{margin:0}
+.lede{max-width:72ch;color:var(--muted);margin-top:8px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;font:500 13px/1.3 var(--font-mono)}
+.facts span b{font:700 20px/1 var(--font-display);color:var(--fg);margin-right:4px}
+.facts span{color:var(--muted)}
+
+/* Bühne */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}
+.stage{position:relative;height:min(78vh,760px);min-height:460px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  background:linear-gradient(180deg,var(--stage-top),var(--stage-bot))}
+.stage canvas{display:block;position:absolute;inset:0;touch-action:none}
+.overlay{position:absolute;inset:0;pointer-events:none}
+.overlay svg{position:absolute;inset:0;width:100%;height:100%}
+.lbl{position:absolute;pointer-events:auto;cursor:pointer;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent);
+  color:var(--fg);border-radius:6px;padding:3px 8px 4px;font:600 12.5px/1.25 var(--font-body);white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.12);
+  transform:translateY(-50%);transition:background .15s,border-color .15s}
+.lbl small{display:block;font:500 10.5px/1.2 var(--font-mono);color:var(--muted);letter-spacing:.02em}
+.lbl:hover,.lbl:focus-visible{border-color:var(--accent);outline:none}
+.lbl.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.lbl.on small{color:#fff;opacity:.85}
+.tb{position:absolute;left:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.tb.top{top:10px}.tb.bot{bottom:10px;justify-content:space-between;align-items:flex-end}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);pointer-events:auto}
+.seg button,.chip{font:600 13px/1 var(--font-body);color:var(--fg);background:none;border:0;padding:8px 11px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg button:focus-visible,.chip:focus-visible,.dur button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;pointer-events:auto}
+.chip{border:1px solid var(--line);border-radius:999px;background:var(--surface);display:inline-flex;align-items:center;gap:6px;padding:7px 11px}
+.chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.toggles{display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap}
+.live{pointer-events:auto;background:color-mix(in srgb,var(--surface) 94%,transparent);border:1px solid var(--line);border-radius:8px;padding:8px 10px;
+  font:500 12px/1.5 var(--font-mono);min-width:250px;max-width:100%}
+.live b{display:block;font:600 10.5px/1.3 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.live .r{display:grid;grid-template-columns:1fr 54px 92px;gap:8px;font-variant-numeric:tabular-nums}
+.live .r span:nth-child(2){text-align:right}
+.live .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:0}
+.hint{position:absolute;right:12px;top:58px;font:500 11px/1.3 var(--font-mono);color:var(--muted);pointer-events:none}
+
+/* Datenblatt */
+.sheet{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px 16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0;
+  position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+.sheet .sys{font:500 11px/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.sheet .sys i{width:9px;height:9px;border-radius:50%}
+.sheet h3{font-size:24px}
+.sheet .ref{font:500 12.5px/1.4 var(--font-mono);color:var(--muted)}
+.kv{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr);gap:6px 12px;margin:0;font-size:13.5px}
+.kv dt{color:var(--muted);overflow-wrap:anywhere}
+.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.note{font-size:13.5px;padding:10px 12px;border-radius:8px;background:var(--surface-2)}
+.note b{display:block;font:600 11px/1.3 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.note.ok b{color:var(--ok)}.note.warn b{color:var(--warn)}.note.bad b{color:var(--bad)}
+.src{font-size:12.5px;color:var(--muted)}
+.src a{color:inherit}
+
+/* Kapitel */
+section.ch{display:flex;flex-direction:column;gap:14px}
+.chhead{display:flex;flex-direction:column;gap:6px;max-width:80ch}
+.chhead p{color:var(--muted)}
+.panel{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px;min-width:0}
+.dur{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;align-self:flex-start}
+.dur button{font:600 13px/1 var(--font-body);background:var(--surface);color:var(--fg);border:0;padding:9px 13px;cursor:pointer}
+.dur button+button{border-left:1px solid var(--line)}
+.dur button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.bars{display:flex;flex-direction:column;gap:14px}
+.brow{display:grid;grid-template-columns:150px minmax(0,1fr) 92px;gap:12px;align-items:center}
+.brow .nm{font-weight:600;line-height:1.25}
+.brow .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.track{position:relative;height:30px}
+.track .b{position:absolute;top:0;height:13px;border-radius:3px}
+.track .b2{top:16px}
+.track .ylab{position:absolute;font:500 10.5px/13px var(--font-mono);color:var(--muted);white-space:nowrap}
+.fac{font:700 26px/1 var(--font-display);text-align:right;font-variant-numeric:tabular-nums}
+.fac small{display:block;font:500 10.5px/1.3 var(--font-mono);color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .big{font:700 30px/1 var(--font-display);font-variant-numeric:tabular-nums}
+.card .big span{font-size:16px;color:var(--muted);font-weight:600}
+.card p{font-size:14px}
+.card .muted{color:var(--muted);font-size:13px}
+.checks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.check{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative;overflow:hidden}
+.check::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+.check .st{font:600 11px/1.2 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.check h3{font-size:18px}
+.check p{font-size:13.8px}
+.check .vs{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px}
+.check .vs dt{color:var(--muted)}.check .vs dd{margin:0}
+.check .todo{font-size:13px;color:var(--muted)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.chart{width:100%;height:auto;display:block}
+.chart text{font-family:var(--font-mono);font-size:11px;fill:var(--muted)}
+.chart .lab{font-family:var(--font-body);font-size:12.5px;font-weight:600}
+.massbar{display:flex;height:34px;border-radius:6px;overflow:hidden;margin-top:6px}
+.massbar div{height:100%}
+.mlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 18px;margin-top:10px;font-size:13.5px}
+.mlist span{display:flex;align-items:center;gap:8px}
+.mlist i{width:10px;height:10px;border-radius:2px;flex:none}
+.mlist b{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600}
+.foot{color:var(--muted);font-size:13px;max-width:90ch}
+.foot a{color:inherit}
+@media (max-width:1020px){.hero{grid-template-columns:1fr}.sheet{position:static}.cards,.checks{grid-template-columns:1fr 1fr}}
+@media (max-width:680px){.cards,.checks,.two{grid-template-columns:1fr}.brow{grid-template-columns:96px minmax(0,1fr) 62px;gap:8px}
+  .stage{height:72vh;min-height:520px}.live{min-width:0;font-size:11px}.lbl{font-size:11.5px;padding:2px 6px}.lbl small{display:none}.live .r{grid-template-columns:1fr 46px 78px}.hint{display:none}.fac{font-size:22px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Exoskelett · Entwurf 5 mit Durchsicht Nov 2026 · Gesamtbild</p>
+    <h1>So sieht das Christbaum-Exo als Ganzes aus</h1>
+    <p class="lede">Ein Rückenrahmen trägt zehn Gelenkmotoren in dichten Kapseln, zwei Akkus und die Steuerung. Die Last geht über Schienen in den Boden, nicht über deine Knochen. Wähle eine Arbeitshaltung und eine Baugruppe; jedes beschriftete Teil hat rechts sein Datenblatt mit dem echten Referenzbauteil. Darunter steht, wie viel stärker dich das Exo macht und wo der Entwurf noch nicht realistisch ist.</p>
+    <div class="facts">
+      <span><b>≈ 44</b>kg Exo (+2 kg zweiter Akku)</span>
+      <span><b>10</b>Gelenkmotoren</span>
+      <span><b>337</b>Wh je Akku</span>
+      <span><b>≈ 2</b>h je Akku im Mischbetrieb</span>
+      <span><b>× 2</b>an den Armen</span>
+      <span><b>× 1,3</b>an Beinen und Hüfte, kurz</span>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="stage" id="stage">
+      <div class="overlay" id="overlay"><svg id="lines" aria-hidden="true"></svg></div>
+      <div class="tb top">
+        <div class="seg" role="group" aria-label="Arbeitshaltung" id="poses">
+          <button type="button" data-pose="stehen" aria-pressed="true">Stehen</button>
+          <button type="button" data-pose="hocke">Baum anheben</button>
+          <button type="button" data-pose="tragen">Baum tragen</button>
+          <button type="button" data-pose="schleifen">Schleifen</button>
+        </div>
+        <div class="chips" role="group" aria-label="Baugruppe" id="systems"></div>
+      </div>
+      <div class="hint">Ziehen dreht · Scrollen zoomt</div>
+      <div class="tb bot">
+        <div class="live" id="live" aria-live="polite"></div>
+        <div class="toggles">
+          <div class="seg"><button type="button" id="tBody" aria-pressed="true">Körper</button><button type="button" id="tHeat" aria-pressed="false">Wärme</button><button type="button" id="tSpin" aria-pressed="false">Drehen</button></div>
+        </div>
+      </div>
+    </div>
+    <aside class="sheet" id="sheet" aria-live="polite"></aside>
+  </div>
+
+  <section class="ch" id="staerke">
+    <div class="chhead">
+      <p class="kicker">Kapitel 1</p>
+      <h2>Wie viel stärker macht es dich?</h2>
+      <p>Verglichen wird, was du an einem Gelenk selbst schaffst, mit dem, was der Motor zusätzlich liefert. Beides hängt davon ab, wie lange du hältst: Muskeln ermüden, Motoren werden warm. Der Motor muss außerdem zuerst das Exo selbst tragen; dieser Anteil ist abgezogen. Die Werte gelten für einen trainierten Mann um 75 kg und sind Richtwerte.</p>
+    </div>
+    <div class="dur" role="group" aria-label="Haltedauer" id="dur">
+      <button type="button" data-d="2">2 Sekunden</button>
+      <button type="button" data-d="10" aria-pressed="true">10 Sekunden</button>
+      <button type="button" data-d="30">30 Sekunden</button>
+      <button type="button" data-d="120">2 Minuten</button>
+      <button type="button" data-d="inf">dauerhaft</button>
+    </div>
+    <div class="panel">
+      <div class="bars" id="bars"></div>
+      <div class="legend" style="margin-top:14px">
+        <span><i style="background:var(--you)"></i>du allein</span>
+        <span><i style="background:var(--exo)"></i>Exo dazu (nach Abzug des Eigengewichts)</span>
+        <span><i style="background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px);border:1px solid var(--line)"></i>vom Motor nur fürs Exo selbst verbraucht</span>
+      </div>
+    </div>
+    <div class="cards" id="alltag"></div>
+  </section>
+
+  <section class="ch" id="realismus">
+    <div class="chhead">
+      <p class="kicker">Kapitel 2</p>
+      <h2>Ist das realistisch?</h2>
+      <p>Geprüft gegen Herstellerdaten und Vergleichsgeräte. Rot heißt: Der Plan rechnet mit Werten, die das Bauteil nicht liefert. Gelb heißt: geht, aber knapp oder noch geschätzt. Grün heißt: passt mit Reserve.</p>
+    </div>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <section class="ch" id="energie">
+    <div class="chhead">
+      <p class="kicker">Kapitel 3</p>
+      <h2>Energie, Wärme und Gewicht</h2>
+      <p>Die wichtigste Grafik des Projekts ist die linke: Wie lange ein Motor ein Moment halten kann. Im Stillstand, also beim Halten eines Baums, ist das viel kürzer als beim Drehen, weil dann eine Wicklung allein die ganze Wärme abbekommt.</p>
+    </div>
+    <div class="two">
+      <div class="panel"><h3>Wie lange hält ein Hüft-, Knie- oder Schultermotor (RS04)?</h3><svg class="chart" id="cHeat" viewBox="0 0 560 330" role="img" aria-label="Haltezeit über Moment"></svg></div>
+      <div class="panel"><h3>Wie lange reicht ein Akku?</h3><svg class="chart" id="cRun" viewBox="0 0 560 330" role="img" aria-label="Laufzeit je Tätigkeit"></svg></div>
+    </div>
+    <div class="panel">
+      <h3>Wohin die 44 kg gehen</h3>
+      <div class="massbar" id="massbar"></div>
+      <div class="mlist" id="mlist"></div>
+    </div>
+    <p class="foot">Quellen: RobStride-Handbücher RS04 und RS03 (T-N-Kurve, Überlasttabellen drehend und im Stillstand, Seiten 10–11), <a href="https://github.com/RobStride/Product_Information" target="_blank" rel="noopener">github.com/RobStride/Product_Information</a>; Stihl AP 500 S und MSA 300 C-O, <a href="https://stihl.co.uk/en/ap/ap-500-s-battery-124181" target="_blank" rel="noopener">stihl.co.uk</a>; Muskelkraft nach Harbo et al. 2012, <a href="https://link.springer.com/doi/10.1007/s00421-011-1975-3" target="_blank" rel="noopener">Eur J Appl Physiol</a>, Haltedauer nach der Ermüdungskurve von Rohmert (1960); Sarcos Guardian XO nach <a href="https://spectrum.ieee.org/amp/sarcos-guardian-xo-powered-exoskeleton-2650279406" target="_blank" rel="noopener">IEEE Spectrum</a>; Massen aus der technischen Ansicht (exo-technik.html). Ausführlich mit Rechenweg: docs/realismus-check.md.</p>
+  </section>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const D = Math.PI / 180;
+const fmt = (v, d = 0) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+/* ───────────── Daten: Motoren nach Herstellerhandbuch ───────────── */
+// Stillstand (Halten), Kühlplatte des Herstellers, 25 °C: [Moment Nm, Sekunden]
+const STALL = {
+  RS04: [[120, 1], [110, 1], [100, 1.5], [90, 3], [80, 6], [70, 10], [60, 33], [50, 74], [40, 130]],
+  RS03: [[60, 1], [50, 4], [40, 9], [30, 25], [20, 190]],
+};
+const ROTATE04 = [[120, 3], [115, 9], [110, 10], [105, 13], [100, 15], [90, 24], [80, 38], [70, 61], [60, 108], [50, 324]];
+const CONT = { RS04: 20, RS03: 11 };          // Dauer im Stillstand in der Kühlkörper-Kapsel (Schätzung; Hersteller mit großer Platte 28,5 / 13)
+const CONT_MAKER = { RS04: 28.5, RS03: 13 };
+function holdTime(type, T) {                  // Sekunden, die das Moment T im Stillstand gehalten wird
+  if (T <= CONT[type]) return Infinity;
+  const tb = STALL[type];
+  if (T >= tb[0][0]) return tb[0][1];
+  for (let i = 0; i < tb.length - 1; i++) {
+    const [T1, t1] = tb[i], [T2, t2] = tb[i + 1];
+    if (T <= T1 && T >= T2) return Math.exp(Math.log(t1) + (T1 - T) / (T1 - T2) * (Math.log(t2) - Math.log(t1)));
+  }
+  // zwischen letztem Tabellenpunkt und Kapsel-Dauermoment: logarithmisch bis 20 min auslaufen lassen
+  const [Tl, tl] = tb[tb.length - 1];
+  const f = (Tl - T) / (Tl - CONT[type]);
+  return Math.exp(Math.log(tl) + f * (Math.log(1200) - Math.log(tl)));
+}
+function torqueFor(type, sec) {               // Moment, das sec Sekunden gehalten werden kann
+  if (!isFinite(sec)) return CONT[type];
+  let lo = CONT[type], hi = STALL[type][0][0];
+  for (let k = 0; k < 40; k++) { const m = (lo + hi) / 2; holdTime(type, m) >= sec ? lo = m : hi = m; }
+  return lo;
+}
+const fmtHold = t => !isFinite(t) ? 'dauerhaft' : t >= 600 ? '> 10 min' : t >= 90 ? `≈ ${fmt(t / 60)} min` : `≈ ${fmt(t)} s`;
+
+/* ───────────── Baugruppen und Teile (Datenblätter) ───────────── */
+const SYS = {
+  antrieb:  { name: 'Antrieb',   col: '#C24A0C' },
+  kuehlung: { name: 'Kühlung',   col: '#3B78B8' },
+  energie:  { name: 'Energie',   col: '#D9921C' },
+  tragwerk: { name: 'Tragwerk',  col: '#6E7B83' },
+  sensorik: { name: 'Sensoren',  col: '#2F8F83' },
+  greifer:  { name: 'Greifer',   col: '#8A5A9E' },
+};
+const PARTS = {
+  rs04: { sys: 'antrieb', name: 'Gelenkmotor RobStride RS04', short: 'Hüfte · Knie · Schulter', ref: '7 Stück: Hüfte, Knie, Schulter je 2, Rumpf beugen 1',
+    kv: [['Spitze', '120 Nm bei ≈ 95 U/min'], ['Nenn, drehend', '40 Nm (Platte 345 × 345 mm)'], ['Dauer im Stillstand', '28,5 Nm (Hersteller) · ≈ 20 Nm in der Kapsel'],
+      ['100 Nm halten', '1,5 s (Stillstand) · 15 s (drehend)'], ['Spannung', '48 V Nenn, 24–60 V · am Stihl-Akku 30–42 V'], ['Leerlauf', '200 U/min bei 48 V · ≈ 150 U/min bei 36 V'],
+      ['Getriebe', 'Planeten 9 : 1, rückdrehbar'], ['Momentkonstante', '2,1 Nm/A'], ['Masse · Maß', '1,42 kg · Ø ≈ 120 × 52 mm'], ['Preis', '≈ 300 $ (≈ 300–400 € mit Einfuhr)']],
+    verdict: ['warn', 'Stark genug für kurze Spitzen. Halten ist der Engpass: Im Stillstand trägt der Motor 100 Nm nur 1,5 s, 60 Nm etwa 30 s. Der Entwurf rechnet bisher mit 13–15 s bei 100 Nm.'],
+    src: ['RS04-Handbuch, S. 10–11', 'https://github.com/RobStride/Product_Information'] },
+  rs03: { sys: 'antrieb', name: 'Gelenkmotor RobStride RS03', short: 'Ellbogen · Rumpf drehen', ref: '3 Stück: Ellbogen je 1, Rumpf drehen 1',
+    kv: [['Spitze', '60 Nm'], ['Nenn, drehend', '20 Nm (Platte 215 × 220 mm)'], ['Dauer im Stillstand', '13 Nm (Hersteller) · ≈ 11 Nm in der Kapsel'],
+      ['40 Nm halten', '9 s (Stillstand) · 67 s (drehend)'], ['Spannung', '48 V Nenn, 24–60 V'], ['Masse · Maß', '0,88 kg · 106 × 106 × 56 mm'], ['Schutzart', 'IP52 (Händlerangabe)'], ['Preis', '≈ 230 $']],
+    verdict: ['warn', 'Der Ellbogen bekommt 56 Nm für etwa 2 s, 40 Nm für 9 s. Die Firmware rechnet mit 16 Nm Dauer; der Hersteller nennt im Stillstand 13 Nm mit großer Platte.'],
+    src: ['RS03-Handbuch, S. 10–11', 'https://github.com/RobStride/Product_Information'] },
+  stange: { sys: 'antrieb', name: 'Schubstange mit Kurbel und Hebel', short: 'Knie · Ellbogen · Rumpf', ref: 'Parallelogramm 1 : 1, Kurbelzapfen als Passschraube 12.9',
+    kv: [['Knie', 'Stahlrohr Ø 12 × 2, Kurbel 60 mm'], ['Ellbogen', 'Stahlrohr Ø 10 × 1,5, Kurbel 50 mm'], ['größte Stangenkraft', '≈ 3,7 kN (Knie, 110 Nm)'], ['Knicklast', '≈ 16 kN, Sicherheit > 4'],
+      ['Gelenkköpfe', 'SKF SIKAC 8 M / 6 M, ±8° Schräglauf'], ['Federpaket Knie', 'gibt beim Beugen ab ≈ 11 Nm nach']],
+    verdict: ['ok', 'Mit den Passschrauben aus der Durchsicht ausreichend dimensioniert. Kein Seil, nichts vereist.'],
+    src: ['docs/festigkeit.md, docs/konzept.md Abschnitt 5', ''] },
+  kapsel: { sys: 'kuehlung', name: 'Gelenkkapsel mit Stiftkühlkörper', short: 'an jedem Motor', ref: 'Fischer ICK S R 140 (RS03: Ø 120), Stifte auf 30 mm gekürzt',
+    kv: [['Kühlkörper ruhend', '1,85 K/W (ungekürzt)'], ['mit Luftzug', '0,4 K/W (ungekürzt)'], ['Wärmeleitpad', '1 mm, 6 W/mK'], ['Dichtung', '2 O-Ringe, V-Ring am Abtrieb, Druckausgleich M12'],
+      ['Heizband', '4 W an der Abtriebsseite, nur in Pausen bei Frost'], ['Wärme bei 100 Nm', '≈ 0,5–0,8 kW je Motor (Schätzung)'], ['Wärme bei 20 Nm', '≈ 25–40 W je Motor']],
+    verdict: ['warn', 'Kühlt nur die langsame Wärme. Die schnelle Erwärmung der Wicklung bei Spitzen bestimmt der Motor selbst, daran ändert keine Kapsel etwas. Dauermoment am Prüfstand messen (P33).'],
+    src: ['Fischer Elektronik über DigiKey', 'https://www.digikey.de/en/products/detail/fischer-elektronik/ICK-S-R-140-x-50/26281855'] },
+  akku: { sys: 'energie', name: 'Akku Stihl AP 500 S', short: 'stehend im Schutzbügel', ref: '1 Stück, zweiter optional, parallel über Ideal-Dioden',
+    kv: [['Spannung', '36 V Nenn (≈ 30–42 V)'], ['Kapazität', '8,8 Ah · 337 Wh'], ['Masse · Maß', '2,0 kg · 70 × 116 × 164 mm'], ['Vergleichslast', 'Kettensäge MSA 300 zieht 2,5–3,0 kW (≈ 70–85 A)'],
+      ['Exo-Spitze', '≈ 60–95 A für 1–2 s beim Aufrichten'], ['nutzbar bei 0 °C', '≈ 260 Wh (Kälte und Wandler)'], ['Schutzart', 'IPX4']],
+    verdict: ['warn', 'Energie reicht für ≈ 2 Stunden gemischte Arbeit, zwei Akkus für ≈ 4 Stunden. Der Spitzenstrom liegt in der Größe einer Profi-Kettensäge; das hält der Akku, die 60-A-Sicherung ist knapp.'],
+    src: ['Stihl, Technische Daten AP 500 S', 'https://stihl.co.uk/en/ap/ap-500-s-battery-124181'] },
+  ebox: { sys: 'energie', name: 'Elektronikbox', short: 'flach in Lendenhöhe', ref: '60 × 140 × 220 mm',
+    kv: [['Rechner', 'Teensy 4.1, 600 MHz, 2 CAN-Busse'], ['Messung', '3 × TI ADS131M04, 1000 Messungen/s'], ['Not-Aus', 'Pilz-Taster schaltet die Spule des Gleichstromschützes (≥ 60 V / 100 A)'],
+      ['Wandler', 'Mean Well DDR-60L-24 (60 W, 92 %), Pololu 5 V'], ['Sicherungen', 'Haupt 60 A träge · je RS04 20 A · je RS03 15 A'], ['Bremswiderstand', '10 Ω / 200 W ab 46 V'], ['Grundlast', '≈ 8–12 W']],
+    verdict: ['warn', 'Es fehlt ein Stromsensor. Ein Hall-Sensor (ACS758, ≈ 10 €) erlaubt eine echte Leistungsgrenze statt der Schätzung über die Spannung.'],
+    src: ['docs/verdrahtung.md, docs/bestellung-prototyp.md', ''] },
+  rahmen: { sys: 'tragwerk', name: 'Rückenrahmen und Schutzbügel', short: 'Alu geschraubt, CFK-Bügel', ref: 'Alu-Vierkant 30 × 30 × 2, Eck-Doppelplatten 4 mm',
+    kv: [['Rahmen', '2 × senkrecht 60 cm, 3 Querstreben 20 × 20'], ['Schutzbügel', 'CFK-Rundrohr Ø 22 × 1,5, Gummipuffer'], ['Lendengelenk', 'beugen ±, Lendensperre, Gasfedern'], ['Rumpfdrehung', '±15° auf einer Bogenführung'], ['Masse', '≈ 5,6 kg mit Schutz']],
+    verdict: ['ok', 'Geschraubt, ohne Schweißen. Festigkeit nach docs/festigkeit.md mit Entwurf-5-Lasten.'],
+    src: ['docs/stueckliste.md Abschnitt 1', ''] },
+  beine: { sys: 'tragwerk', name: 'Beinschienen und Steigbügel', short: 'Teleskop, bis in den Boden', ref: 'Alu 30 × 30 außen, 25 × 25 innen, Lochraster ±5 cm',
+    kv: [['Hüfte', 'Abspreizgelenk hinter dir, Achse durchs Hüftgelenk, ±20°'], ['Lager', 'Flanschlager KFL / UCFL, 2RS'], ['Fuß', 'Edelstahl-Steigbügel 4 mm, 6 Spikes, Kippgelenk hinter der Ferse'], ['Masse', '≈ 3,7 kg je Bein ohne Motoren']],
+    verdict: ['ok', 'Im Stand und bei gestreckten Knien tragen die Schienen Exo und Baum fast ohne Motorkraft in den Boden. Das ist der größte Nutzen der Beine.'],
+    src: ['docs/konzept.md Abschnitt 4', ''] },
+  gurte: { sys: 'tragwerk', name: 'Gurtsystem', short: 'wie ein Trekkingrucksack', ref: 'Hüftgurt 10 cm, S-Schultergurte, Brustgurt, Polster',
+    kv: [['Aufgabe', 'hält das Exo in Lage, trägt kaum'], ['Hüftgurt', 'nimmt 20–45 kg auf, wenn die Beinmotoren aus sind'], ['Masse', '≈ 1,3 kg']],
+    verdict: ['ok', 'Bewährtes Prinzip von Lastenkraxen.'], src: ['docs/konzept.md Abschnitt 6', ''] },
+  manschette: { sys: 'sensorik', name: 'Manschetten M2 mit Wägezelle', short: 'Oberarm · Unterarm · Oberschenkel · Schienbein', ref: '8 Stück, PETG-CF-Schale, BOA-Verschluss, Längsschlitten',
+    kv: [['Wägezelle', 'Biegebalken YZC-133, 20 kg'], ['Wandler', 'TI ADS131M04, 24 bit, 1000 Messungen/s'], ['Reaktionskette', '≈ 6 ms (Literatur-Ziel ≤ 10 ms)'], ['Druck beim Mitgehen', '2,5–4 N in der Simulation']],
+    verdict: ['ok', 'Schnell genug. Ob sich das Mitgehen gut anfühlt, zeigt erst der Prüfstand (P39).'], src: ['docs/schaetzwerte.md Abschnitt 3', ''] },
+  fuss: { sys: 'sensorik', name: 'Fußkontakt und Lagesensor', short: 'Stand oder Schwung', ref: 'Halbbrücken-Wägezellen 50 kg unter dem Steigbügel, IMU BNO085',
+    kv: [['Fußkontakt', '4 Zellen je Fuß, 34 × 34 mm, vergossen'], ['Lagesensor', 'Adafruit BNO085'], ['Rumpf-Absicht', '4 Wägezellen 20 kg in Gurtankern und Polster']],
+    verdict: ['warn', 'Die Rumpf-Absicht wird an Gurten gemessen, an denen auch Exo und Baum ziehen. Das ist die unsicherste Sensorik im Projekt.'], src: ['docs/durchsicht-2026-11.md Abschnitt 2', ''] },
+  schlaufe: { sys: 'greifer', name: 'Schlaufengreifer (Spannband)', short: 'rechts zwei, links eine', ref: 'Edelstahl-Lochband 20 × 0,3 mm, Schneckengetriebemotor 5840-31ZY 24 V',
+    kv: [['Schließkraft am Stamm', '≈ 150 N'], ['Haltekraft stromlos', '> 400 N (selbsthemmend)'], ['Öffnung', 'bis Ø 16 cm'], ['Bedarf', '50–200 N je Schlaufe, selten ≈ 500 N'], ['Lastmessung', 'Wägezelle 50 kg im Kopf']],
+    verdict: ['warn', 'Getriebewerte stammen von Händlern. Mit Zahnleiste formschlüssig; P20 mit 20-kg-Sandsack prüft das.'], src: ['docs/schaetzwerte.md Abschnitt 1', ''] },
+};
+// Beschriftungen je Baugruppe: [Teil, Anker-Name]
+const LABELS = {
+  alle: [['rs04', 'capHipR'], ['kapsel', 'capShL'], ['akku', 'battR'], ['rahmen', 'frameTop'], ['manschette', 'cuffThighL'], ['schlaufe', 'loopR']],
+  antrieb: [['rs04', 'capHipR'], ['rs04', 'capKneeL'], ['rs04', 'capShR'], ['rs03', 'capElbL'], ['stange', 'rodKneeR'], ['rs04', 'capTrunk']],
+  kuehlung: [['kapsel', 'capShL'], ['kapsel', 'capHipL'], ['kapsel', 'capKneeR']],
+  energie: [['akku', 'battR'], ['ebox', 'ebox']],
+  tragwerk: [['rahmen', 'frameTop'], ['beine', 'railShankR'], ['gurte', 'belt']],
+  sensorik: [['manschette', 'cuffThighL'], ['manschette', 'cuffArmR'], ['fuss', 'stirrupL']],
+  greifer: [['schlaufe', 'loopR'], ['schlaufe', 'loopL']],
+};
+
+/* ───────────── Haltungen: Gelenkwinkel (Grad) und Momente, die das Exo liefert (Nm, je Seite) ───────────── */
+const POSES = {
+  stehen:    { trunk: 2, L: { hip: 0, knee: 3, sh: 6, ab: 8, el: 14 }, R: { hip: 0, knee: 3, sh: 6, ab: 8, el: 14 },
+    tq: { 'Hüfte': 2, 'Knie': 2, 'Schulter': 7, 'Ellbogen': 2, 'Rumpf beugen': 0 }, note: 'Exo trägt sich über die Schienen selbst.' },
+  hocke:     { trunk: 38, L: { hip: 92, knee: 112, sh: 62, ab: 10, el: 18 }, R: { hip: 92, knee: 112, sh: 58, ab: 10, el: 14 },
+    tq: { 'Hüfte': 75, 'Knie': 50, 'Schulter': 60, 'Ellbogen': 40, 'Rumpf beugen': 40 }, note: 'Baum 3 m (41 kg) am Stumpf anheben, Exo übernimmt die Hälfte.' },
+  tragen:    { trunk: 4, L: { hip: 4, knee: 8, sh: 72, ab: 12, el: 62 }, R: { hip: 0, knee: 5, sh: 24, ab: 10, el: 118 },
+    tq: { 'Hüfte': 28, 'Knie': 9, 'Schulter': 55, 'Ellbogen': 21, 'Rumpf beugen': 10 }, note: 'Baum 3 m (41 kg) wie eine Fackel, rechte Schulter hält.' },
+  schleifen: { trunk: 12, L: { hip: 22, knee: 18, sh: -6, ab: 10, el: 12 }, R: { hip: -12, knee: 6, sh: -10, ab: 10, el: 10 },
+    tq: { 'Hüfte': 17, 'Knie': 30, 'Schulter': 14, 'Ellbogen': 26, 'Rumpf beugen': 10 }, note: 'Zwei Bäume 3 m hinter dir, Spitzen auf nassem Schnee.' },
+};
+const JOINT_TYPE = { 'Hüfte': 'RS04', 'Knie': 'RS04', 'Schulter': 'RS04', 'Ellbogen': 'RS03', 'Rumpf beugen': 'RS04' };
+
+/* ───────────── 3D ───────────── */
+const stage = $('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 50);
+camera.position.set(3.1, 1.65, -2.35);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.92, 0); controls.enableDamping = true; controls.minDistance = 1.2; controls.maxDistance = 7;
+controls.maxPolarAngle = 88 * D;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa59f, 0.55));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.position.set(2.2, 4.2, 2.6); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -2, right: 2, top: 2.6, bottom: -1, near: 0.5, far: 10 }); sun.shadow.bias = -0.0004; sun.shadow.radius = 4;
+scene.add(sun);
+const rim = new THREE.DirectionalLight(0xdfe9ff, 0.6); rim.position.set(-3, 2.5, -2.5); scene.add(rim);
+
+// Boden: Scheibe mit Raster wie eine Werkstattplatte
+const floor = new THREE.Mesh(new THREE.CircleGeometry(3.2, 96), new THREE.ShadowMaterial({ opacity: 0.22 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const grid = new THREE.PolarGridHelper(2.4, 12, 6, 96, 0x8a9a92, 0x8a9a92);
+grid.material.transparent = true; grid.material.opacity = 0.22; grid.position.y = 0.001; scene.add(grid);
+
+// Materialien
+const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0.1, ...o });
+const MAT = {
+  body: M(0xc8c1b6, { roughness: 0.9, transparent: true, opacity: 1 }),
+  alu: M(0x77838a, { metalness: 0.8, roughness: 0.3 }),
+  aluDark: M(0x5f696f, { metalness: 0.7, roughness: 0.38 }),
+  steel: M(0xb7bec2, { metalness: 0.9, roughness: 0.25 }),
+  capsule: M(0x2a2f33, { metalness: 0.45, roughness: 0.42 }),
+  pins: M(0x1d2124, { metalness: 0.6, roughness: 0.5 }),
+  ring: M(0xC24A0C, { roughness: 0.45, emissive: 0x3a1203 }),
+  cuff: M(0x2f6fb3, { roughness: 0.5 }),
+  pad: M(0xe6ecef, { roughness: 0.9 }),
+  batt: M(0xe07a1f, { roughness: 0.5 }),
+  battTop: M(0x26292b, { roughness: 0.6 }),
+  ebox: M(0x3b4449, { roughness: 0.5, metalness: 0.3 }),
+  strap: M(0x30363a, { roughness: 0.95 }),
+  cfk: M(0x1c1f21, { roughness: 0.3, metalness: 0.3 }),
+  loop: M(0xc2c9cc, { metalness: 0.85, roughness: 0.3 }),
+  bark: M(0x6b4a30, { roughness: 0.95 }),
+  needle: M(0x3f7a4e, { roughness: 0.9, transparent: true, opacity: 0.32, depthWrite: false }),
+  ghost: new THREE.MeshStandardMaterial({ color: 0x9aa7a0, transparent: true, opacity: 0.13, depthWrite: false, roughness: 1 }),
+};
+const parts = [];      // { mesh, sys, part }
+const anchors = {};
+function add(parent, geo, mat, sys, part, pos, rot) {
+  const m = new THREE.Mesh(geo, mat);
+  if (pos) m.position.set(...pos); if (rot) m.rotation.set(...rot);
+  m.castShadow = true; m.receiveShadow = true; parent.add(m);
+  if (sys) { m.userData.base = mat; parts.push({ mesh: m, sys, part }); }
+  return m;
+}
+const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+const cyl = (r, h, s = 24) => new THREE.CylinderGeometry(r, r, h, s);
+const limb = (r, len) => { const g = new THREE.CapsuleGeometry(r, len, 6, 16); g.translate(0, -len / 2, 0); return g; };
+function tube(parent, pts, r, mat, sys, part) {
+  const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
+  return add(parent, new THREE.TubeGeometry(curve, 40, r, 10), mat, sys, part);
+}
+function rail(parent, a, b, s, mat, sys, part) {   // Vierkantrohr zwischen zwei Punkten (lokal)
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), len = A.distanceTo(B);
+  const m = add(parent, box(s, len, s), mat, sys, part);
+  m.position.copy(A).add(B).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), B.clone().sub(A).normalize());
+  return m;
+}
+// Gelenkkapsel: Motor, Stiftkühlkörper außen, oranger Ring. axis 'x' oder 'y'; side +1 = Kühlkörper zeigt nach +x
+const capsules = [];
+function capsule(parent, pos, r, len, side, joint, anchorName, axis = 'x') {
+  const g = new THREE.Group(); g.position.set(...pos);
+  if (axis === 'x') g.rotation.z = -side * Math.PI / 2; // Zylinderachse (y) → ±x
+  parent.add(g);
+  const bodyMat = MAT.capsule.clone();
+  const body = add(g, cyl(r, len, 40), bodyMat, 'antrieb', r > 0.055 ? 'rs04' : 'rs03');
+  add(g, new THREE.TorusGeometry(r * 0.98, 0.006, 8, 48), MAT.ring, 'antrieb', r > 0.055 ? 'rs04' : 'rs03', [0, -len / 2 + 0.008, 0], [Math.PI / 2, 0, 0]);
+  const base = add(g, cyl(r * 1.04, 0.008, 40), MAT.pins, 'kuehlung', 'kapsel', [0, len / 2 + 0.004, 0]);
+  // Stifte des Kühlkörpers
+  const pinGeo = cyl(0.0032, 0.03, 6); pinGeo.translate(0, 0.015, 0);
+  const pts = []; const step = 0.0115;
+  for (let x = -r; x <= r; x += step) for (let z = -r; z <= r; z += step) if (x * x + z * z < (r * 0.96) ** 2) pts.push([x, z]);
+  const pinMat = MAT.pins.clone();
+  const inst = new THREE.InstancedMesh(pinGeo, pinMat, pts.length);
+  const mm = new THREE.Matrix4();
+  pts.forEach(([x, z], i) => { mm.makeTranslation(x, len / 2 + 0.008, z); inst.setMatrixAt(i, mm); });
+  inst.castShadow = true; g.add(inst); inst.userData.base = pinMat; parts.push({ mesh: inst, sys: 'kuehlung', part: 'kapsel' });
+  capsules.push({ joint, bodyMat, pinMat, type: r > 0.055 ? 'RS04' : 'RS03' });
+  if (anchorName) anchors[anchorName] = body;
+  return g;
+}
+
+// Körper (Mannequin) und Exo, kinematische Kette
+const root = new THREE.Group(); scene.add(root);
+const bodyMeshes = [];
+const bodyPart = (parent, geo, pos, scale) => { const m = add(parent, geo, MAT.body, null, null, pos); if (scale) m.scale.set(...scale); bodyMeshes.push(m); return m; };
+// Becken
+bodyPart(root, new THREE.SphereGeometry(0.15, 32, 20), [0, 0.05, 0], [1, 0.72, 0.68]);
+// Hüftgurt
+anchors.belt = add(root, new THREE.TorusGeometry(0.165, 0.028, 10, 48), MAT.strap, 'tragwerk', 'gurte', [0, 0.09, -0.005], [Math.PI / 2, 0, 0]);
+anchors.belt.scale.set(1, 0.72, 1.3);
+// Rumpfkapseln hinter dem Kreuzbein
+capsule(root, [-0.075, 0.0, -0.2], 0.06, 0.052, -1, 'Rumpf beugen', 'capTrunk');
+capsule(root, [0.075, 0.0, -0.2], 0.053, 0.056, 1, 'Rumpf drehen', null, 'y').rotation.set(0, 0, 0);
+rail(root, [-0.12, 0.05, -0.17], [0.12, 0.05, -0.17], 0.03, MAT.aluDark, 'tragwerk', 'rahmen');
+
+const trunk = new THREE.Group(); trunk.position.set(0, 0.13, 0); root.add(trunk);
+bodyPart(trunk, new THREE.CapsuleGeometry(0.135, 0.3, 8, 24), [0, 0.27, 0], [1.22, 1, 0.7]);
+bodyPart(trunk, cyl(0.05, 0.1), [0, 0.55, 0.0]);
+bodyPart(trunk, new THREE.SphereGeometry(0.105, 32, 24), [0, 0.68, 0.015], [0.9, 1.08, 1]);
+// Rahmen
+for (const s of [-1, 1]) rail(trunk, [s * 0.07, -0.08, -0.155], [s * 0.07, 0.5, -0.155], 0.03, MAT.alu, 'tragwerk', 'rahmen');
+for (const y of [0.02, 0.24]) rail(trunk, [-0.1, y, -0.155], [0.1, y, -0.155], 0.02, MAT.alu, 'tragwerk', 'rahmen');
+anchors.frameTop = rail(trunk, [-0.1, 0.49, -0.155], [0.1, 0.49, -0.155], 0.02, MAT.alu, 'tragwerk', 'rahmen');
+// Schultergurte (S-Form) und Brustgurt
+for (const s of [-1, 1]) tube(trunk, [[s * 0.07, 0.47, -0.13], [s * 0.1, 0.52, -0.04], [s * 0.1, 0.46, 0.08], [s * 0.085, 0.3, 0.1], [s * 0.11, 0.08, 0.085], [s * 0.15, -0.03, 0.06]], 0.011, MAT.strap, 'tragwerk', 'gurte');
+rail(trunk, [-0.09, 0.32, 0.105], [0.09, 0.32, 0.105], 0.012, MAT.strap, 'tragwerk', 'gurte');
+// Elektronikbox und Akkus
+anchors.ebox = add(trunk, box(0.22, 0.14, 0.06), MAT.ebox, 'energie', 'ebox', [0, 0.1, -0.205]);
+for (const s of [-1, 1]) {
+  const b = add(trunk, box(0.07, 0.164, 0.116), MAT.batt, 'energie', 'akku', [s * 0.045, 0.34, -0.245]);
+  add(trunk, box(0.072, 0.03, 0.118), MAT.battTop, 'energie', 'akku', [s * 0.045, 0.437, -0.245]);
+  if (s > 0) anchors.battR = b;
+}
+// Schutzbügel CFK
+tube(trunk, [[-0.13, 0.18, -0.18], [-0.135, 0.42, -0.27], [-0.1, 0.56, -0.29], [0, 0.585, -0.29], [0.1, 0.56, -0.29], [0.135, 0.42, -0.27], [0.13, 0.18, -0.18]], 0.011, MAT.cfk, 'tragwerk', 'rahmen');
+// Schulterschwingen über die Schulter zur Schulterkapsel
+for (const s of [-1, 1]) tube(trunk, [[s * 0.07, 0.49, -0.155], [s * 0.16, 0.56, -0.12], [s * 0.27, 0.55, -0.04], [s * 0.29, 0.47, 0]], 0.014, MAT.alu, 'tragwerk', 'rahmen');
+
+const SH = { x: 0.2, y: 0.42 };
+const arms = {}, legs = {};
+for (const [side, s] of [['L', 1], ['R', -1]]) {   // +x = linke Körperseite
+  // Schulterkapsel am Rahmen, Achse quer
+  capsule(trunk, [s * (SH.x + 0.115), SH.y, 0], 0.06, 0.052, s, 'Schulter', side === 'L' ? 'capShL' : 'capShR');
+  const arm = new THREE.Group(); arm.position.set(s * SH.x, SH.y, 0); trunk.add(arm);
+  bodyPart(arm, limb(0.047, 0.27), [0, -0.01, 0]);
+  rail(arm, [s * 0.068, 0.0, 0], [s * 0.068, -0.29, 0], 0.025, MAT.alu, 'tragwerk', 'rahmen');
+  const cuffA = add(arm, new THREE.CylinderGeometry(0.06, 0.06, 0.09, 24, 1, true, -1.2, 2.6), MAT.cuff, 'sensorik', 'manschette', [0, -0.16, 0]);
+  cuffA.material = MAT.cuff; cuffA.userData.base = MAT.cuff; cuffA.material.side = THREE.DoubleSide;
+  if (side === 'R') anchors.cuffArmR = cuffA;
+  // Ellbogenkapsel RS03 oben am Oberarm
+  capsule(arm, [s * 0.108, -0.1, 0], 0.053, 0.056, s, 'Ellbogen', side === 'L' ? 'capElbL' : null);
+  const elbow = new THREE.Group(); elbow.position.set(0, -0.3, 0); arm.add(elbow);
+  bodyPart(elbow, limb(0.04, 0.24), [0, -0.01, 0]);
+  bodyPart(elbow, new THREE.SphereGeometry(0.045, 16, 12), [0, -0.29, 0.0], [0.7, 1.25, 1]);
+  rail(elbow, [s * 0.062, 0.02, 0], [s * 0.062, -0.24, 0], 0.025, MAT.alu, 'tragwerk', 'rahmen');
+  add(elbow, cyl(0.022, 0.02), MAT.steel, 'tragwerk', 'rahmen', [s * 0.075, 0, 0], [0, 0, Math.PI / 2]);
+  add(elbow, new THREE.CylinderGeometry(0.052, 0.052, 0.08, 24, 1, true, -1.2, 2.6), MAT.cuff, 'sensorik', 'manschette', [0, -0.13, 0]).material.side = THREE.DoubleSide;
+  // Schlaufenträger und Schlaufen am Handgelenk
+  rail(elbow, [s * 0.062, -0.22, 0], [s * 0.01, -0.25, 0.06], 0.012, MAT.alu, 'greifer', 'schlaufe');
+  const loop = add(elbow, new THREE.TorusGeometry(0.06, 0.007, 10, 40), MAT.loop, 'greifer', 'schlaufe', [0, -0.24, 0.11], [Math.PI / 2, 0, 0]);
+  add(elbow, box(0.04, 0.03, 0.03), MAT.aluDark, 'greifer', 'schlaufe', [0, -0.24, 0.045]);
+  if (side === 'R') add(elbow, new THREE.TorusGeometry(0.055, 0.006, 10, 40), MAT.loop, 'greifer', 'schlaufe', [-s * 0.055, -0.2, 0.09], [Math.PI / 2, 0, 0]);
+  anchors[side === 'L' ? 'loopL' : 'loopR'] = loop;
+  // Schubstange Ellbogen
+  const rodE = add(arm, cyl(0.005, 1, 8), MAT.steel, 'antrieb', 'stange');
+  const crankE = add(arm, box(0.012, 0.012, 0.07), MAT.aluDark, 'antrieb', 'stange');
+  const leverE = add(arm, box(0.012, 0.012, 0.07), MAT.aluDark, 'antrieb', 'stange');
+  arms[side] = { arm, elbow, s, rod: rodE, crank: crankE, lever: leverE, c1: new THREE.Vector3(s * 0.088, -0.1, 0), c2: new THREE.Vector3(s * 0.088, -0.3, 0), r: 0.05, loop };
+
+  // Bein
+  const hipX = 0.095;
+  capsule(root, [s * (hipX + 0.135), 0, 0], 0.06, 0.052, s, 'Hüfte', side === 'L' ? 'capHipL' : 'capHipR');
+  tube(root, [[s * 0.06, 0.03, -0.17], [s * 0.16, 0.02, -0.15], [s * 0.225, 0.0, -0.07], [s * 0.225, 0, -0.02]], 0.015, MAT.alu, 'tragwerk', 'beine');
+  const leg = new THREE.Group(); leg.position.set(s * hipX, 0, 0); root.add(leg);
+  bodyPart(leg, limb(0.072, 0.36), [0, -0.02, 0], [1, 1, 1]);
+  rail(leg, [s * 0.11, 0, 0], [s * 0.075, -0.44, 0], 0.028, MAT.alu, 'tragwerk', 'beine');
+  const cuffT = add(leg, new THREE.CylinderGeometry(0.088, 0.085, 0.11, 28, 1, true, -1.15, 2.5), MAT.cuff, 'sensorik', 'manschette', [0, -0.2, 0]);
+  cuffT.material.side = THREE.DoubleSide; if (side === 'L') anchors.cuffThighL = cuffT;
+  capsule(leg, [s * 0.15, -0.13, 0], 0.06, 0.052, s, 'Knie', side === 'L' ? 'capKneeL' : 'capKneeR');
+  const knee = new THREE.Group(); knee.position.set(0, -0.44, 0); leg.add(knee);
+  bodyPart(knee, limb(0.054, 0.36), [0, -0.01, 0]);
+  add(knee, cyl(0.026, 0.024), MAT.steel, 'tragwerk', 'beine', [s * 0.088, 0, 0], [0, 0, Math.PI / 2]);
+  const shank = rail(knee, [s * 0.075, 0, 0], [s * 0.07, -0.42, 0], 0.028, MAT.alu, 'tragwerk', 'beine');
+  if (side === 'R') anchors.railShankR = shank;
+  add(knee, new THREE.CylinderGeometry(0.066, 0.06, 0.1, 24, 1, true, -1.15, 2.5), MAT.cuff, 'sensorik', 'manschette', [0, -0.16, 0]).material.side = THREE.DoubleSide;
+  const ankle = new THREE.Group(); ankle.position.set(0, -0.43, 0); knee.add(ankle);
+  bodyPart(ankle, box(0.1, 0.075, 0.26), [0, -0.045, 0.06]);
+  add(ankle, box(0.12, 0.012, 0.13), MAT.steel, 'tragwerk', 'beine', [0, -0.088, 0.05]);
+  add(ankle, box(0.008, 0.07, 0.05), MAT.steel, 'tragwerk', 'beine', [s * 0.07, -0.05, 0.0]);
+  const st = add(ankle, box(0.1, 0.008, 0.08), MAT.cuff, 'sensorik', 'fuss', [0, -0.098, 0.05]);
+  if (side === 'L') anchors.stirrupL = st;
+  // Schubstange Knie
+  const rodK = add(leg, cyl(0.006, 1, 8), MAT.steel, 'antrieb', 'stange');
+  const crankK = add(leg, box(0.014, 0.014, 0.08), MAT.aluDark, 'antrieb', 'stange');
+  const leverK = add(leg, box(0.014, 0.014, 0.08), MAT.aluDark, 'antrieb', 'stange');
+  if (side === 'R') anchors.rodKneeR = rodK;
+  legs[side] = { leg, knee, ankle, s, rod: rodK, crank: crankK, lever: leverK, c1: new THREE.Vector3(s * 0.125, -0.13, 0), c2: new THREE.Vector3(s * 0.098, -0.44, 0), r: 0.06 };
+}
+
+// Baum (Nordmanntanne, 3 m): Stamm und Astetagen entlang +y, Ursprung = Schnittende
+function makeTree(len = 3) {
+  const g = new THREE.Group();
+  const trunkMesh = add(g, new THREE.CylinderGeometry(0.025, 0.05, len, 12), MAT.bark, null, null, [0, len / 2, 0]);
+  for (let i = 0; i < 6; i++) {
+    const y0 = 0.55 + i * (len - 0.55) / 6, rr = 0.46 * (1 - i / 6.5);
+    add(g, new THREE.ConeGeometry(rr, (len - 0.55) / 6 * 1.5, 18), MAT.needle, null, null, [0, y0 + 0.25, 0]).castShadow = false;
+  }
+  g.visible = false; scene.add(g); return g;
+}
+const trees = [makeTree(), makeTree()];
+
+/* Pose anwenden */
+const cur = JSON.parse(JSON.stringify(POSES.stehen)); let target = POSES.stehen, poseKey = 'stehen';
+const lerp = (a, b, t) => a + (b - a) * t;
+function setRodPair(o, theta) {
+  // Kurbel und Hebel stehen gleich (Parallelogramm): Zapfen = Drehpunkt + R(theta)·(0,0,r)
+  const p1 = o.c1.clone().add(new THREE.Vector3(0, Math.sin(theta) * o.r, Math.cos(theta) * o.r));
+  const p2 = o.c2.clone().add(new THREE.Vector3(0, Math.sin(theta) * o.r, Math.cos(theta) * o.r));
+  const len = p1.distanceTo(p2);
+  o.rod.position.copy(p1).add(p2).multiplyScalar(0.5); o.rod.scale.set(1, len, 1);
+  o.rod.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.clone().sub(p1).normalize());
+  for (const [m, c] of [[o.crank, o.c1], [o.lever, o.c2]]) {
+    m.position.copy(c).add(new THREE.Vector3(0, Math.sin(theta) * o.r / 2, Math.cos(theta) * o.r / 2)); m.rotation.set(theta, 0, 0);
+  }
+}
+const tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
+function applyPose() {
+  trunk.rotation.x = cur.trunk * D;
+  let hmax = 0;
+  for (const side of ['L', 'R']) {
+    const p = cur[side], a = arms[side], l = legs[side];
+    a.arm.rotation.set(-p.sh * D, 0, a.s * p.ab * D, 'ZXY');
+    a.elbow.rotation.x = -p.el * D;
+    setRodPair(a, -p.el * D);
+    l.leg.rotation.x = -p.hip * D; l.knee.rotation.x = p.knee * D; l.ankle.rotation.x = (p.hip - p.knee) * D;
+    setRodPair(l, p.knee * D);
+    hmax = Math.max(hmax, 0.44 * Math.cos(p.hip * D) + 0.43 * Math.cos((p.knee - p.hip) * D));
+  }
+  root.position.y = hmax + 0.112;
+  root.updateMatrixWorld(true);
+  // Bäume
+  trees.forEach(t => t.visible = false);
+  const W = side => arms[side].loop.getWorldPosition(new THREE.Vector3());
+  const place = (t, base, dir) => { t.visible = true; t.position.copy(base); t.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize()); };
+  if (poseKey === 'tragen') {
+    const w = W('R'); const base = new THREE.Vector3(w.x, 0.02, w.z + 0.18);
+    place(trees[0], base, w.clone().sub(base));
+  } else if (poseKey === 'schleifen') {
+    for (const [i, side] of [[0, 'R'], [1, 'L']]) { const w = W(side); place(trees[i], w, new THREE.Vector3(w.x * 2.4, 0.35, -2.6).sub(w)); }
+  } else if (poseKey === 'hocke') {
+    const w = W('R').add(W('L')).multiplyScalar(0.5); place(trees[0], w, new THREE.Vector3(0, 0.32, 2.9).sub(w));
+  }
+}
+
+/* Darstellung: Baugruppe hervorheben, Körper, Wärme */
+let sysSel = 'alle', partSel = 'rs04', showBody = true, showHeat = false, spin = false;
+function heatColor(ratio) {  // 0 kalt → 1 Dauergrenze → 3+ heiß
+  const c = new THREE.Color(0x2a2f33);
+  if (ratio <= 0.2) return c;
+  const cool = new THREE.Color(0x3b78b8), warm = new THREE.Color(0xe3b04f), hot = new THREE.Color(0xd2321e);
+  if (ratio < 1) return cool.lerp(warm, (ratio - 0.2) / 0.8);
+  return warm.lerp(hot, Math.min(1, (ratio - 1) / 2));
+}
+function refreshLook() {
+  for (const p of parts) {
+    const inSys = sysSel === 'alle' || p.sys === sysSel;
+    p.mesh.material = inSys ? p.mesh.userData.base : MAT.ghost;
+    p.mesh.castShadow = inSys;
+  }
+  for (const m of bodyMeshes) m.visible = showBody;
+  MAT.body.opacity = sysSel === 'alle' ? 1 : 0.55;
+  MAT.body.depthWrite = sysSel === 'alle';
+  const tq = target.tq;
+  for (const c of capsules) {
+    const T = tq[c.joint] ?? 0, ratio = T / CONT[c.type];
+    const col = showHeat ? heatColor(ratio) : new THREE.Color(0x2a2f33);
+    c.bodyMat.color.copy(col); c.pinMat.color.copy(showHeat ? col.clone().multiplyScalar(0.85) : new THREE.Color(0x1d2124));
+    c.bodyMat.emissive.copy(showHeat && ratio > 1 ? col.clone().multiplyScalar(0.25) : new THREE.Color(0));
+  }
+}
+
+/* Beschriftungen wie auf einer Zeichnung: zwei Spalten, Führungslinien */
+const overlay = $('overlay'), lines = $('lines');
+let labelEls = [];
+function buildLabels() {
+  labelEls.forEach(e => e.el.remove()); labelEls = [];
+  for (const [pid, an] of LABELS[sysSel]) {
+    const el = document.createElement('button'); el.type = 'button'; el.className = 'lbl' + (pid === partSel ? ' on' : '');
+    const P = PARTS[pid];
+    el.innerHTML = `${P.name.replace('Gelenkmotor ', '').replace('RobStride ', '')}<small>${an.startsWith('cap') && P.sys === 'antrieb' ? jointName(an) : P.short}</small>`;
+    el.addEventListener('click', () => { partSel = pid; showSheet(); buildLabels(); });
+    overlay.appendChild(el); labelEls.push({ el, an, pid });
+  }
+}
+function jointName(an) {
+  return { capHipR: 'Hüfte rechts', capKneeL: 'Knie links', capShR: 'Schulter rechts', capElbL: 'Ellbogen links', capTrunk: 'Rumpf beugen, am Becken' }[an] || '';
+}
+function layoutLabels() {
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const items = labelEls.map(o => {
+    const v = anchors[o.an].getWorldPosition(tmp).project(camera);
+    return { o, x: (v.x + 1) / 2 * W, y: (1 - v.y) / 2 * H };
+  });
+  const narrow = W < 560;
+  const cx = items.reduce((a, b) => a + b.x, 0) / Math.max(1, items.length);
+  const sides = { l: [], r: [] };
+  items.forEach(it => (it.x < cx ? sides.l : sides.r).push(it));
+  // Ausgleich, damit keine Spalte überläuft
+  while (sides.l.length - sides.r.length > 1) { sides.l.sort((a, b) => b.x - a.x); sides.r.push(sides.l.shift()); }
+  while (sides.r.length - sides.l.length > 1) { sides.r.sort((a, b) => a.x - b.x); sides.l.push(sides.r.shift()); }
+  let svg = '';
+  const top = document.querySelector('.tb.top').offsetHeight + 34, bottom = H - document.querySelector('.tb.bot').offsetHeight - 26, gap = narrow ? 30 : 42;
+  for (const [k, arr] of Object.entries(sides)) {
+    arr.sort((a, b) => a.y - b.y);
+    let y = top;
+    arr.forEach(it => { it.ly = Math.max(y, Math.min(it.y, bottom)); y = it.ly + gap; });
+    for (let i = arr.length - 1; i >= 0; i--) { const lim = (i === arr.length - 1 ? bottom : arr[i + 1].ly - gap); if (arr[i].ly > lim) arr[i].ly = lim; }
+    for (const it of arr) {
+      const el = it.o.el, w = el.offsetWidth;
+      const colX = k === 'l' ? (narrow ? 8 : Math.max(12, W * 0.06)) : W - w - (narrow ? 8 : Math.max(12, W * 0.06));
+      el.style.left = colX + 'px'; el.style.top = it.ly + 'px';
+      const ex = k === 'l' ? colX + w : colX;
+      const on = it.o.pid === partSel;
+      svg += `<polyline points="${ex},${it.ly} ${ex + (k === 'l' ? 14 : -14)},${it.ly} ${it.x},${it.y}" fill="none" stroke="${on ? css('--accent') : css('--muted')}" stroke-width="${on ? 1.6 : 1}" opacity="${on ? 1 : 0.75}"/>`
+        + `<circle cx="${it.x}" cy="${it.y}" r="3.2" fill="${on ? css('--accent') : css('--fg')}" stroke="${css('--surface')}" stroke-width="1.2"/>`;
+    }
+  }
+  lines.innerHTML = svg;
+}
+
+/* Datenblatt */
+function showSheet() {
+  const P = PARTS[partSel], S = SYS[P.sys];
+  const [st, text] = P.verdict;
+  const stName = { ok: 'Realistisch', warn: 'Knapp oder noch geschätzt', bad: 'Nicht realistisch' }[st];
+  $('sheet').innerHTML = `<div class="sys"><i style="background:${S.col}"></i>${S.name}</div>
+    <h3>${P.name}</h3><p class="ref">${P.ref}</p>
+    <dl class="kv">${P.kv.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+    <div class="note ${st}"><b>${stName}</b>${text}</div>
+    <p class="src">Quelle: ${P.src[1] ? `<a href="${P.src[1]}" target="_blank" rel="noopener">${P.src[0]}</a>` : P.src[0]}</p>`;
+}
+function showLive() {
+  const tq = target.tq;
+  const rows = Object.entries(tq).map(([j, T]) => {
+    const type = JOINT_TYPE[j], ratio = T / CONT[type], t = holdTime(type, T);
+    const col = ratio <= 1 ? css('--ok') : t >= 30 ? css('--warn') : css('--bad');
+    return `<div class="r"><span><span class="dot" style="background:${col}"></span>${j}</span><span>${fmt(T)} Nm</span><span>${fmtHold(t)}</span></div>`;
+  }).join('');
+  $('live').innerHTML = `<b>${target.note}</b><div class="r" style="color:var(--muted)"><span>Gelenk (je Seite)</span><span>Exo</span><span>hält so</span></div>${rows}`;
+}
+
+/* Bedienung */
+const sysWrap = $('systems');
+for (const [k, n] of [['alle', 'Alles'], ...Object.entries(SYS).map(([k, v]) => [k, v.name])]) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.sys = k; b.setAttribute('aria-pressed', k === sysSel);
+  b.innerHTML = (k !== 'alle' ? `<i style="background:${SYS[k].col}"></i>` : '') + n;
+  b.addEventListener('click', () => {
+    sysSel = k; sysWrap.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.sys === k));
+    partSel = LABELS[k][0][0]; refreshLook(); buildLabels(); showSheet();
+  });
+  sysWrap.appendChild(b);
+}
+$('poses').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  poseKey = b.dataset.pose; target = POSES[poseKey];
+  $('poses').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); refreshLook(); showLive();
+});
+const tog = (id, fn) => $(id).addEventListener('click', e => { const on = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', on); fn(on); });
+tog('tBody', v => { showBody = v; refreshLook(); });
+tog('tHeat', v => { showHeat = v; refreshLook(); });
+tog('tSpin', v => { spin = v; controls.autoRotate = v; });
+controls.autoRotateSpeed = 1.2;
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px';
+  camera.aspect = w / h;
+  camera.fov = w < 560 ? 40 : 30;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tick() {
+  const k = reduce ? 1 : 0.09;
+  cur.trunk = lerp(cur.trunk, target.trunk, k);
+  for (const s of ['L', 'R']) for (const j of Object.keys(cur[s])) cur[s][j] = lerp(cur[s][j], target[s][j], k);
+  applyPose(); controls.update(); renderer.render(scene, camera); layoutLabels();
+  requestAnimationFrame(tick);
+}
+refreshLook(); buildLabels(); showSheet(); showLive(); tick();
+
+/* ───────────── Kapitel 1: Wie viel stärker ───────────── */
+// Mensch: isometrische Maximalkraft (Richtwerte trainierter Mann ≈ 75 kg); Ausdauer nach Rohmert: Anteil der Maximalkraft, der so lange gehalten wird
+const HUMAN = [
+  { j: 'Schulter', what: 'Arm nach vorn heben', max: 65, type: 'RS04', lim: 100, self: 7, selfTxt: 'Exo-Arm 2,3 kg' },
+  { j: 'Ellbogen', what: 'Unterarm beugen', max: 65, type: 'RS03', lim: 56, self: 1.5, selfTxt: 'Unterarmschiene, Schlaufen' },
+  { j: 'Rumpf', what: 'aus dem Bücken aufrichten', max: 250, type: 'RS04', lim: 80, self: 0, selfTxt: 'Gasfedern tragen das Oberteil' },
+  { j: 'Hüfte', what: 'strecken, 30° vorgebeugt', max: 250, type: 'RS04', lim: 110, self: 25, selfTxt: 'Exo-Oberteil 29,5 kg' },
+  { j: 'Knie', what: 'strecken, halbe Hocke', max: 250, type: 'RS04', lim: 110, self: 17, selfTxt: 'Exo über dem Knie ≈ 18 kg je Seite' },
+];
+const ROHMERT = { 2: 0.95, 10: 0.8, 30: 0.6, 120: 0.4, inf: 0.15 };
+let durKey = '10';
+function exoAt(h, key) { const sec = key === 'inf' ? Infinity : +key; return Math.min(h.lim, torqueFor(h.type, sec)); }
+function renderBars() {
+  const frac = ROHMERT[durKey];
+  const rows = HUMAN.map(h => ({ h, you: h.max * frac, exoRaw: exoAt(h, durKey) }));
+  const scaleMax = Math.max(...rows.map(r => r.you + Math.max(0, r.exoRaw - r.h.self))) * 1.02;
+  $('bars').innerHTML = rows.map(({ h, you, exoRaw }) => {
+    const net = Math.max(0, exoRaw - h.self), used = Math.min(exoRaw, h.self);
+    const pc = v => (v / scaleMax * 100).toFixed(2) + '%';
+    const f = (you + net) / you;
+    return `<div class="brow">
+      <div class="nm">${h.j}<small>${h.what}</small></div>
+      <div class="track">
+        <div class="b" style="left:0;width:${pc(you)};background:var(--you)"></div>
+        <div class="b" style="left:${pc(you)};width:${pc(net)};background:var(--exo)"></div>
+        <div class="b b2" style="left:0;width:${pc(exoRaw)};background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px);border:1px solid var(--line);box-sizing:border-box"></div>
+        <div class="ylab" style="left:calc(${pc(exoRaw)} + 6px);top:16px">Motor ${fmt(exoRaw)} Nm, davon ${fmt(used)} fürs Exo (${h.selfTxt})</div>
+      </div>
+      <div class="fac">× ${fmt(f, 1)}<small>${fmt(you)} + ${fmt(net)} Nm</small></div></div>`;
+  }).join('');
+  renderAlltag();
+}
+$('dur').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return; durKey = b.dataset.d;
+  $('dur').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderBars();
+});
+function renderAlltag() {
+  const frac = ROHMERT[durKey], label = { 2: '2 s', 10: '10 s', 30: '30 s', 120: '2 min', inf: 'dauerhaft' }[durKey];
+  const sh = HUMAN[0], lever = 9.81 * 0.55;
+  const youKg = sh.max * frac / lever, exoKg = Math.max(0, exoAt(sh, durKey) - sh.self) / lever;
+  // Baum 3 m wie eine Fackel: 101 Nm an der rechten Schulter + Exo-Arm
+  const need = 101 + sh.self, youT = sh.max * frac, exoT = exoAt(sh, durKey);
+  const ok = youT + exoT >= need;
+  const tHold = holdTime('RS04', Math.max(CONT.RS04, need - sh.max * 0.6));
+  // Hocke: Knie trägt Exo selbst
+  const kneeSelf = 30, kneeCont = CONT.RS04;
+  $('alltag').innerHTML = `
+  <div class="card"><p class="kicker">Hantel mit gestrecktem Arm vor dir · ${label}</p>
+    <div class="big">${fmt(youKg)} → ${fmt(youKg + exoKg)} <span>kg je Arm</span></div>
+    <p>Ohne Exo hältst du etwa ${fmt(youKg)} kg so lange, mit Exo ${fmt(youKg + exoKg)} kg. An den Armen wirkt das Exo am stärksten, weil deine Schulter im Vergleich zum Motor schwach ist.</p></div>
+  <div class="card"><p class="kicker">Baum 3 m (41 kg) wie eine Fackel tragen</p>
+    <div class="big">${ok ? 'geht' : 'zu schwer'} <span>bei ${label}</span></div>
+    <p>Die rechte Schulter braucht ≈ ${fmt(need)} Nm. Du schaffst ${fmt(youT)} Nm, das Exo ${fmt(exoT)} Nm. Wenn du mit 60 % deiner Kraft mithältst, trägt der Motor seinen Teil ${fmtHold(tHold)}.</p>
+    <p class="muted">Ohne Exo geht das einarmig gar nicht. Besser: Stamm näher an den Körper, linke Hand stützt.</p></div>
+  <div class="card"><p class="kicker">Tiefe Hocke halten</p>
+    <div class="big">≈ ${kneeSelf} Nm <span>je Knie nur fürs Exo</span></div>
+    <p>Das Knie kann in der Kapsel dauerhaft ≈ ${kneeCont} Nm. In der tiefen Hocke trägt das Exo also vor allem sich selbst. Kurz (10 s) kommen noch ≈ ${fmt(torqueFor('RS04', 10) - kneeSelf)} Nm Hilfe dazu.</p>
+    <p class="muted">Der echte Gewinn der Beine liegt im Stand: Schienen leiten Exo und Baum ohne Motorkraft in den Boden.</p></div>`;
+}
+renderBars();
+
+/* ───────────── Kapitel 2: Realismus ───────────── */
+const CHECKS = [
+  { st: 'bad', t: 'Spitzenmoment beim Halten', p: 'Hält ein Motor still, erwärmt sich eine Wicklung allein. Der Hersteller gibt dann 100 Nm nur für 1,5 s frei, 60 Nm für 33 s.',
+    vs: [['Plan', '100 Nm Schulter ≈ 13–15 s'], ['Hersteller', '100 Nm 1,5 s · 80 Nm 6 s · 60 Nm 33 s']],
+    todo: 'Wärmemodell der Firmware auf die Herstellertabelle umstellen (schnelle Wicklung + langsames Gehäuse) und für Halten mit 60–70 Nm planen. Sonst schaltet der Motor-eigene Schutz ab, bevor die Firmware weich zurücknimmt.' },
+  { st: 'warn', t: 'Dauermoment in der Kapsel', p: 'Der Hersteller misst mit einer Alu-Platte 345 × 345 mm. Der Stiftkühlkörper Ø 140 ist kleiner, kalte Winterluft hilft.',
+    vs: [['Plan', '28 Nm (RS04) · 16 Nm (RS03)'], ['realistisch', '≈ 20 Nm · ≈ 11 Nm im Stillstand']], todo: '`motorRatedNm` vorläufig auf 20 / 11 setzen, am Prüfstand messen (P33).' },
+  { st: 'warn', t: 'Spitzenstrom am Akku', p: 'Beim Aufrichten ziehen vier Beinmotoren und zwei Schultern gleichzeitig. Das ergibt ≈ 2,5–3,5 kW für 1–2 s.',
+    vs: [['Exo-Spitze', '≈ 60–95 A'], ['Vergleich', 'Stihl MSA 300 am selben Akku 2,5–3 kW']], todo: 'Der Akku kann das. Stromsensor einbauen (offene Entscheidung 4) und die Leistung auf ≈ 2,5 kW begrenzen.' },
+  { st: 'warn', t: 'Gewicht 44 kg', p: 'Ein gutes Drittel sind die zehn Gelenkkapseln. Zum Vergleich: Sarcos Guardian XO wiegt ≈ 68 kg bei 24 Gelenken.',
+    vs: [['Exo', '44 kg + 2 kg zweiter Akku'], ['Knie in tiefer Hocke', '≈ 30 Nm nur fürs Exo']], todo: 'Rumpfmotoren zuerst weglassen (offene Entscheidung 3) spart ≈ 3 kg und zwei Kapseln.' },
+  { st: 'ok', t: 'Spannung 36 statt 48 V', p: 'RS04 und RS03 sind 48-V-Motoren, laufen aber ab 24 V. Am Stihl-Akku drehen sie langsamer.',
+    vs: [['am Akku', '≈ 150 U/min ≈ 900 °/s'], ['nötig', 'Gehen ≈ 300–400 °/s am Knie']], todo: 'Passt mit Reserve. Spitzenleistung bei Tempo sinkt um etwa ein Viertel.' },
+  { st: 'ok', t: 'Laufzeit', p: 'Grundlast, Heizung bei Frost, Gehen und kurze Spitzen ergeben im Mittel ≈ 110–150 W.',
+    vs: [['ein Akku', '≈ 2 h Mischbetrieb'], ['Vergleich', 'Sarcos XO ≈ 500 W, ≈ 2 h mit 1 kWh']], todo: 'Zweiten Akku mitnehmen. Langes Halten in der Hocke kostet am meisten.' },
+  { st: 'ok', t: 'Stromlos: Knie sackt gedämpft', p: 'Neu aus dem Handbuch: Der Motor bremst schnelles Rückdrehen nach dem Ausschalten (Funktion „damper“).',
+    vs: [['wirkt', 'wie eine Dämpfung, nicht wie eine Sperre'], ['betrifft', 'offene Entscheidung 1']], todo: 'Am Prüfstand messen, wie schnell ein stromloses Knie unter 30 kg nachgibt.' },
+  { st: 'ok', t: 'Schubstangen und Struktur', p: 'Knicklast 16 kN gegen 3,7 kN größte Stangenkraft. Kurbelzapfen als Passschrauben 12.9 aus der Durchsicht.',
+    vs: [['Sicherheit', '> 4 gegen Knicken'], ['Rahmen', 'Alu geschraubt, Doppelplatten']], todo: 'Nichts zu tun.' },
+  { st: 'ok', t: 'Dichtheit', p: 'Händler geben für RS03 und RS04 IP52 an; die Doku sagt bisher „keine Schutzart“. Gegen Schnee und Schlamm reicht IP52 nicht.',
+    vs: [['Motor', 'IP52 (Händler)'], ['Ziel Kapsel', 'IP65']], todo: 'Kapsel bleibt nötig, Prüfpunkte P35 und P36.' },
+];
+const stCol = { ok: 'var(--ok)', warn: 'var(--warn)', bad: 'var(--bad)' }, stTxt = { ok: 'passt', warn: 'knapp', bad: 'nicht realistisch' };
+$('checks').innerHTML = CHECKS.map(c => `<div class="check" style="--c:${stCol[c.st]}"><span class="st">${stTxt[c.st]}</span><h3>${c.t}</h3><p>${c.p}</p>
+  <dl class="vs">${c.vs.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl><p class="todo">${c.todo.replace(/`([^`]+)`/g, '<code>$1</code>')}</p></div>`).join('');
+
+/* ───────────── Kapitel 3: Diagramme ───────────── */
+function chartHeat() {
+  const W = 560, H = 330, L = 52, R = 18, T = 18, B = 46;
+  const xs = t => L + (Math.log10(t) - 0) / (Math.log10(600) - 0) * (W - L - R);   // 1 s … 10 min
+  const ys = T_ => T + (1 - (T_ - 0) / 130) * (H - T - B);
+  let s = '';
+  for (const t of [1, 3, 10, 30, 60, 180, 600]) s += `<line x1="${xs(t)}" x2="${xs(t)}" y1="${T}" y2="${H - B}" stroke="${css('--line')}"/><text x="${xs(t)}" y="${H - B + 16}" text-anchor="middle">${t < 60 ? t + ' s' : t / 60 + ' min'}</text>`;
+  for (const v of [0, 20, 40, 60, 80, 100, 120]) s += `<line x1="${L}" x2="${W - R}" y1="${ys(v)}" y2="${ys(v)}" stroke="${css('--line')}"/><text x="${L - 8}" y="${ys(v) + 4}" text-anchor="end">${v}</text>`;
+  s += `<text x="${L}" y="${H - 8}">Haltezeit (logarithmisch)</text><text x="12" y="${T + 4}" transform="rotate(-90 12 ${T + 4})" text-anchor="end">Nm</text>`;
+  const path = (pts, col, dash = '', w = 2.4) => `<polyline points="${pts.map(([T_, t]) => `${xs(t).toFixed(1)},${ys(T_).toFixed(1)}`).join(' ')}" fill="none" stroke="${col}" stroke-width="${w}" ${dash ? `stroke-dasharray="${dash}"` : ''} stroke-linejoin="round"/>`;
+  const fw = []; for (let T_ = 100; T_ >= 30; T_ -= 2) { const r2 = (T_ / 28) ** 2; fw.push([T_, Math.min(600, -180 * Math.log(1 - 1 / r2))]); }
+  const rot = ROTATE04.filter(([, t]) => t <= 600);
+  const stall = [...STALL.RS04.filter(([T_]) => T_ <= 100), [CONT.RS04 + 0.5, 600]].map(([T_, t]) => [T_, Math.max(1, Math.min(600, T_ < 40 ? holdTime('RS04', T_) : t))]);
+  const st2 = []; for (let T_ = 100; T_ >= 21; T_ -= 1) st2.push([T_, Math.min(600, holdTime('RS04', T_))]);
+  s += `<line x1="${L}" x2="${W - R}" y1="${ys(100)}" y2="${ys(100)}" stroke="${css('--accent')}" stroke-dasharray="2 4"/>`;
+  s += path(fw, css('--muted'), '6 5', 2) + path(rot, css('--cool')) + path(st2, css('--bad'), '', 3);
+  const lab = (x, y, txt, col, anchor = 'start') => `<text class="lab" x="${x}" y="${y}" fill="${col}" text-anchor="${anchor}">${txt}</text>`;
+  const leg = [['Hersteller, Stillstand (Halten)', css('--bad'), ''], ['Hersteller, drehend', css('--cool'), ''], ['bisheriges Wärmemodell der Firmware', css('--muted'), '6 5']];
+  leg.forEach(([t, c, d], i) => { const y = ys(127) + i * 17, x = xs(28); s += `<line x1="${x}" x2="${x + 22}" y1="${y - 4}" y2="${y - 4}" stroke="${c}" stroke-width="2.6" ${d ? `stroke-dasharray="${d}"` : ''}/>` + lab(x + 28, y, t, c); });
+  s += lab(W - R, ys(22) - 6, `Dauer in der Kapsel ≈ ${CONT.RS04} Nm`, css('--bad'), 'end');
+  s += lab(W - R, ys(100) - 6, 'Grenze Schulter 100 Nm', css('--accent'), 'end');
+  $('cHeat').innerHTML = s;
+}
+function chartRun() {
+  const W = 560, H = 330, L = 196, R = 40, T = 14, B = 40;
+  const usable = 337 * 0.9 * 0.85;
+  const acts = [
+    ['Bereit stehen, Frost', 45], ['Mischbetrieb Christbaum', 120], ['Schleifen 100 m am Stück', 170], ['Gehen ohne Last', 150], ['Baum halten (4 × 40 Nm)', 420],
+  ];
+  const xmax = 6, xs = h => L + h / xmax * (W - L - R), rowH = (H - T - B) / acts.length;
+  let s = '';
+  for (let h = 0; h <= xmax; h++) s += `<line x1="${xs(h)}" x2="${xs(h)}" y1="${T}" y2="${H - B}" stroke="${css('--line')}"/><text x="${xs(h)}" y="${H - B + 16}" text-anchor="middle">${h} h</text>`;
+  acts.forEach(([n, w], i) => {
+    const y = T + i * rowH + rowH * 0.18, h1 = usable / w, h2 = Math.min(xmax, 2 * usable / w), bh = rowH * 0.3;
+    s += `<text class="lab" x="${L - 10}" y="${y + bh}" text-anchor="end" fill="${css('--fg')}">${n}</text><text x="${L - 10}" y="${y + bh + 15}" text-anchor="end">≈ ${w} W</text>`;
+    s += `<rect x="${L}" y="${y}" width="${xs(h2) - L}" height="${bh}" rx="2" fill="${css('--accent-soft')}"/><rect x="${L}" y="${y + bh + 3}" width="${Math.max(1.5, xs(h1) - L)}" height="${bh}" rx="2" fill="${css('--exo')}"/>`;
+    s += `<text x="${xs(h1) + 6}" y="${y + bh * 2}">${h1 < 1 ? fmt(h1 * 60) + ' min' : fmt(h1, 1) + ' h'}</text>`;
+  });
+  s += `<text x="${L}" y="${H - 6}">dunkel: 1 Akku (≈ ${fmt(usable)} Wh bei 0 °C) · hell: 2 Akkus</text>`;
+  $('cRun').innerHTML = s;
+}
+function mass() {
+  const g = [['Gelenkkapseln (10 Motoren, Kühlkörper)', 17.2, '#C24A0C'], ['Rahmen und Schutzbügel', 5.6, '#6E7B83'], ['Energie (2 Akkus, Schacht)', 4.8, '#D9921C'],
+    ['Beine, Knie, Fuß', 4.4, '#8E9A94'], ['Hüfte und Schulter', 5.3, '#A6B1AB'], ['Sensoren und Manschetten', 2.7, '#2F8F83'], ['Elektronik, Kabel, Anzeige', 2.6, '#3B78B8'],
+    ['Arm, Greifer', 3.1, '#8A5A9E'], ['Gurte', 1.3, '#30363a']];
+  const tot = g.reduce((a, b) => a + b[1], 0);
+  $('massbar').innerHTML = g.map(([n, kg, c]) => `<div title="${n}: ${fmt(kg, 1)} kg" style="width:${kg / tot * 100}%;background:${c}"></div>`).join('');
+  $('mlist').innerHTML = g.map(([n, kg, c]) => `<span><i style="background:${c}"></i>${n}<b>${fmt(kg, 1)} kg</b></span>`).join('') + `<span><b style="margin-left:0">Summe ${fmt(tot, 1)} kg mit zweitem Akku</b></span>`;
+}
+const redraw = () => { chartHeat(); chartRun(); mass(); renderBars(); };
+redraw();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redraw);
+new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>
+
+</body>
+</html>
