@@ -157,3 +157,22 @@ Mit Stufe 1 und 2 sind die größten offenen Fragen messbar: Bleibt die Kapsel d
 | SG-04 | Spannband | Edelstahl-Lochband 20 × 0,3 mm, Gummi 2 mm innen | 3 | 0.18 kg | Händler nach Ausführung |
 
 Hinweis: Viele Quellen sind Händlerseiten, keine Herstellerdatenblätter. Maße und Lochbilder vor der Bestellung am Datenblatt prüfen.
+
+## Nachtrag 14. Nov 2026: Teile aus der Durchflug-Zeichnung
+
+Neu in der Stückliste der technischen Zeichnung (je Motor, 10 Motoren mit Rumpf):
+
+| ID | Teil | Kaufteil / Halbzeug | Stück |
+|---|---|---|---|
+| AS-01 | Abtriebsadapter | EN AW-7075 T6 Ø 52 × 4 (RS03 Ø 44), Lochbild des Abtriebs | 10 |
+| AS-02 | Abtriebsschrauben | ISO 4762 M5 × 12 – 12.9 (RS03: M4 × 10), Loctite 243 | 9 bzw. 6 je Motor |
+| AS-03 | Gehäuseschrauben | ISO 4762 M4 × 14 A2-70 | 10 bzw. 8 je Motor |
+| AS-04 | Passstifte | ISO 8734 Ø 5 m6 × 10 | 2 je Motor |
+| AS-07 | Trennstelle Plus/Minus | AMASS XT30U-M / XT30U-F | 10 Paare |
+| AS-08 | Trennstelle CAN | JST GH 1,25 mm 2-polig, vorkonfektioniert | 10 Paare |
+| AS-10 | Kabelverschraubung | Lapp SKINTOP ST-M 16 × 1,5 mit Mehrfach-Dichteinsatz | 10 |
+| KB-05 | Kabelbaum Armkapseln | 2 × 2,5 mm² Silikonlitze + CAN-Paar, Gewebeschlauch 10 mm | 2 |
+| KB-07 | Kabelkanäle | PA6 U-Profil 16 × 12 mit Rastdeckel | 4 je Seite |
+| VK-01 … VK-06 | Verkleidung | PE-HD 2 mm signalorange (tiefgezogen), PA6-GF-Gitter, PETG-Kappen | 1 Satz (≈ 1,05 kg) |
+
+Gewindetiefe im Abtriebsflansch und Lochbilder am gelieferten Motor nachmessen, bevor Schrauben bestellt werden.

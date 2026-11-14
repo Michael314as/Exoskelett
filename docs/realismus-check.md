@@ -91,3 +91,43 @@ Sekunden, auf Dauer trägt das Exo dort vor allem sich selbst.**
 Wärme beim Halten wächst mit dem Quadrat des Moments. Der Wicklungswiderstand steht nicht im Handbuch; aus T-N-Kurve und
 üblichem Wirkungsgrad geschätzt ≈ 0,5–0,8 kW Wärme je RS04 bei 100 Nm, ≈ 100 W bei 40 Nm, ≈ 25–40 W bei 20 Nm.
 Der Stromsensor (Entscheidung 4) würde diese Zahlen am Prüfstand messbar machen.
+
+## 6. Technische Zeichnung zum Durchfliegen (Stand 14. Nov 2026)
+
+[visualisierung/exo-technik.html](../visualisierung/exo-technik.html), Knopf „Fliegen“ (Taste F): Ego-Perspektive wie im
+Kreativmodus, W A S D, Leertaste hoch, Umschalt runter, Strg schneller, Mausrad Tempo, Klick wählt das Teil im Fadenkreuz.
+
+Neu gezeichnet und anklickbar (je Gelenk und Seite eine eigene ID):
+
+- **Motoren aus den STEP-Dateien des Herstellers** (`visualisierung/cad/robstride.js`): RS04 Ø 120 × 56 mm, RS03 Ø 98 × 57 mm.
+  Der Abtrieb ist ein Flansch am Planetenträger, es gibt keine vorstehende Welle. Darauf: Abtriebsadapter (AS-01) mit
+  9 × M5 (AS-02) und 2 Passstiften Ø 5 (AS-04), darauf Kurbel oder Gelenkflansch. Hinten 10 × M4 durch Motorträger und
+  Kühlkörper (AS-03).
+- **Anschlüsse laut Handbuch Kap. 2.3–2.5:** auf der Treiberplatine hinten, Ausgang oben am Rand: XT30APW-M mit Pin 1 Plus
+  (VBAT+, rot) und Pin 2 Minus (GND, schwarz), GH1.25-2PWT mit CAN_L (braun) und CAN_H (blau). Werkskabel 310 mm in einen
+  Anschlussdom auf dem Kapselmantel, dort Trennstelle XT30U / GH1.25 und Kabelverschraubung M16 (AS-05 … AS-10). Jeder Motor
+  ist so gedreht, dass der Dom zum ankommenden Kabelbaum zeigt.
+- **Kabel:** Leistung und CAN zu Schulter und Ellbogen fehlten in der alten Zeichnung (neu KB-05), ebenso zu den Rumpfkapseln
+  (KB-06). Kabelkanäle mit Rastdeckel auf Ober-/Unterschenkel und Ober-/Unterarm (KB-07).
+- **Verkleidung gegen Äste (VK):** Gitter über den Kühlstiften, PE-HD-Schalen über Kurbel und Schubstange an Knie und
+  Ellbogen, Gelenkkappen über den Hebeln, Rückenschale, Kanaldeckel. Zusammen ≈ 1,05 kg.
+
+Beim Zeichnen gefunden:
+
+| Befund | Folge | Geändert |
+|---|---|---|
+| Hüft- und Kniekapsel saßen 120 mm auseinander, die Kühlkörper haben Ø 140 mm: Sie überlappten um ≈ 25 mm. Ebenso Schulter- und Ellbogenkapsel. | wäre beim Bau aufgefallen | Kniemotor 160 mm, Ellbogenmotor 145 mm unter der Gelenkachse (Parallelogramm bleibt 1:1) |
+| Motorlänge war mit 52 mm (RS04) bzw. 54 mm (RS03) angesetzt, die STEP-Dateien haben 56 bzw. 57 mm | Kurbel saß im Abtrieb | Kapseln 4 mm breiter |
+| Anschlussdom am Kniemotor hinten wäre mit der hinteren Wange des Motorträgers kollidiert | | Kabelausgang hinten unten (225°) an Hüfte, Knie, Ellbogen |
+
+Gewicht laut Stückliste jetzt **46,9 kg** (vorher ≈ 44 kg): + 1,05 kg Verkleidung, + 1,6 kg Schrauben, Adapter, Stecker,
+Kanäle und die fehlenden Kabel. Sparvorschläge (Reiter „Gewicht“, Schätzungen):
+
+| Vorschlag | spart | Bewertung |
+|---|---|---|
+| Rumpfmotoren weglassen (offene Entscheidung 3) | ≈ 3,8 kg | ändert die Funktion, Michael entscheidet |
+| Feste Schienenlängen statt Teleskop (nur für eine Person) | ≈ 0,7 kg | ohne Funktionsverlust |
+| Rahmen und Schienen aus CFK-Rohr | ≈ 1,9 kg | teurer, Klebung bei Kälte prüfen |
+| Taschen in den Laserteilen | ≈ 0,5 kg | ohne Funktionsverlust |
+| Schubstangen Alu 7075 Ø 14 × 2 statt Stahl Ø 12 × 2 | ≈ 0,25 kg | Knicklast 9 kN bei 3,7 kN Last |
+| Kühlstifte kürzen | – | nicht empfohlen, Halten ist schon knapp (Abschnitt 2) |
