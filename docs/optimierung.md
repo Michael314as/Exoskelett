@@ -122,3 +122,41 @@ Ehrlich gelesen:
   nicht (das geht über die Schienen in den Boden, solange die Knie nicht tief gebeugt sind). In der tiefen Hocke hängt am
   Knie ≈ 9 Nm Exo statt bisher 17 Nm (die vorher der Motor trug). Halten in der Hocke übernimmt die Kniesperre.
 
+## Schritt 3: Herstellkosten
+
+| Maßnahme | Masse | Kosten |
+|---|---|---|
+| C1 Motoren direkt im Hersteller-Shop statt beim Händler | 0 | −153 € |
+| C2 Elektronik auf 2 Motoren zugeschnitten: ein Messwandler, kleineres Schütz, weniger Stecker | 0 | −65 € |
+| C3 Beinmanschetten messen nichts mehr: Klettgurt statt BOA, kein Längsschlitten | −0,20 kg | −85 € |
+| C4 Fertigung: Pulver statt Eloxal, Akku-Adapter gedruckt, weniger Lagerplatten, keine Cordura-Hauben | 0 | −115 € |
+
+**Stand: 29,4 kg (× 1,61), 3.148 € (× 1,87), Kraft × 2,24.**
+
+C1: RobStride verkauft den RS04 in China für ¥ 1.199 (stueckliste.md). Mit Versand, Einfuhrumsatzsteuer 19 % und Zoll
+2,7 % ≈ 220 € statt ≈ 296 € beim Händler. Lieferzeit und Gewährleistung sind schlechter; für 2 Motoren vertretbar.
+
+## Schritt 4: Optionen für den Rest bis Faktor 2
+
+Jede Option ändert etwas, das du im Einsatz merkst. Deshalb einzeln:
+
+| Option | Masse | Kosten | was du merkst |
+|---|---|---|---|
+| O1 Rumpfdrehung weglassen | −0,96 kg | −70 € | Rahmen dreht nur noch im Gurt mit (≈ ±5° statt ±15°) |
+| O2 Schlaufen mit Handratsche statt Motor spannen | −0,54 kg | −176 € | Schlaufe mit der anderen Hand zuziehen, öffnen per Hebel |
+| O3 Arbeitslicht weg | −0,24 kg | −30 € | Stirnlampe nehmen |
+| O4 Rahmen, Schulter, Außenrohre aus CFK (Teleskop bleibt Alu) | −1,80 kg | +240 € | nichts, aber teurer; Klebung bei Frost prüfen ([R&G](https://www.r-g.de/en/art/600053): 20 × 20 ≈ 30 €/m) |
+
+- **O1–O3:** 27,7 kg (× 1,70), **2.872 € (× 2,05)**. Kosten-Ziel erreicht.
+- **O1–O4:** **25,9 kg (× 1,83)**, 3.112 € (× 1,89). Leichter, aber das Kosten-Ziel ist dann wieder knapp verfehlt.
+
+**Warum nicht 23,6 kg:** Danach bleiben vor allem Teile, die die Funktion ausmachen: 2 Schultermotoren mit Kapsel
+(3,4 kg), Akku (2 kg), Gurte (1,3 kg), Manschetten (1,0 kg), Sperren (2,1 kg), Schienen und Gelenke. Ein kleinerer Akku
+(Stihl AP 300 S, 1,8 kg, 281 Wh, [Stihl](https://stihl.co.uk/en/ap/battery-ap-300-s-2023-version-164012)) bringt nur
+0,2 kg. Die letzten 2,3 kg gehen nur mit dem Wegfall der Schultermotoren:
+
+**Variante ganz passiv** (Schritte 1–3, dann auch ohne Schultermotoren, Akku und Elektronik): **19,2 kg (× 2,5),
+1.838 € (× 3,2), Kraft × 1,95.** Halten und Tragen bleiben gleich gut (Sperren, Schulterfeder), aber **Aufladen fällt
+auf × 0,4**: Den Baum auf die Ladefläche heben musst du dann mit deiner Schulter allein. Zum Vergleich: der passive
+Chairless Chair von noonee (nur Kniesperre) wiegt 3,6 kg und kostet 2.290 € ([noonee](https://noonee.com/en/products/chairless-chair)).
+
