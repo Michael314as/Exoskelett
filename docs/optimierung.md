@@ -160,3 +160,37 @@ Jede Option ändert etwas, das du im Einsatz merkst. Deshalb einzeln:
 auf × 0,4**: Den Baum auf die Ladefläche heben musst du dann mit deiner Schulter allein. Zum Vergleich: der passive
 Chairless Chair von noonee (nur Kniesperre) wiegt 3,6 kg und kostet 2.290 € ([noonee](https://noonee.com/en/products/chairless-chair)).
 
+## Was das für die offenen Entscheidungen heißt
+
+| offene Entscheidung (durchsicht-2026-11.md) | mit Entwurf 6 |
+|---|---|
+| 1 Kniestütze bei hartem Abschalten | erledigt: Knie hat keinen Motor mehr, der wegfallen kann; Kniesperre ist mechanisch |
+| 2 Lendensperre umdrehen | bleibt offen, unabhängig von Entwurf 6 |
+| 3 Rumpfmotoren zurückstellen | ja, Teil von Schritt 1 (G2) |
+| 4 Stromsensor | weiter empfohlen, mit 2 Motoren weniger dringend |
+| 5 Seitliches Kippen | bleibt, wird aber leichter: deine Hüfte hält 15–18 kg weniger Exo |
+| 6 Gewicht 44 kg | 26–29 kg |
+
+Nebenwirkungen, die sich lohnen: **Laufzeit** mit 2 statt 10 Motoren grob verdoppelt (Schätzung ≈ 50–70 W im Mittel,
+also ≈ 4 h je AP 500 S statt ≈ 2 h); **Sicherheit** besser, weil kein Motor mehr ein Bein bewegen kann; **Firmware**
+deutlich einfacher (2 Gelenke an einem CAN-Strang).
+
+## Was noch nicht geändert ist (bewusst)
+
+Entwurf 6 ist geplant und gerechnet, aber noch nicht in Firmware, Laserteile und technische Zeichnung übernommen.
+Das ist ein großer Umbau und soll erst passieren, wenn du die Richtung bestätigst:
+
+- Firmware: Gelenke auf Schulter links/rechts reduzieren, Sperren-Schalter einlesen, Wärmemodell nach Stillstand-Tabelle
+  (Realismus-Check), Bein- und Rumpfregelung abschalten (Simulation und Tests anpassen).
+- Laserteile: Federhebel Schulter 60 mm, Federhalter Ellbogen und Knie; Motorträger, Kurbeln, Hebel an Knie, Ellbogen
+  und Rumpf entfallen.
+- Technische Zeichnung (`exo-technik.html`): Kapseln an Hüfte, Knie, Ellbogen, Rumpf entfernen, Gasfedern einzeichnen.
+
+## Neue Prüfpunkte
+
+| Nr. | Was | Wie | Bestanden wenn |
+|---|---|---|---|
+| P47 | Sperre hält | Prüfstand: Schulterfeder mit Hebel 60 mm gesperrt, 1,5 × 180 Nm (270 Nm) 1 min; dasselbe bei −15 °C (Gefrierschrank über Nacht) | kein Nachgeben > 2°, kein Ölaustritt; Auslösen mit Handschuh möglich |
+| P48 | Aufrichten mit gesperrten Armen | Sandsack 20 kg, dann 40 kg am Holzstamm, Arme sperren, aus der Hocke hochdrücken | Arme bleiben steif, kein Kippen nach vorn mit Ausfallschritt, keine Druckstelle an den Manschetten |
+| P49 | Passive Beine | 30 min gehen, Treppe, Hocke mit und ohne Kniesperre | Exo-Bein folgt ohne Scheuern; gesperrtes Knie lässt sich jederzeit am Hüftgurt lösen; Warnton bei gesperrtem Knie im Gehen |
+| P50 | Gewicht und Preis | Exo wiegen; Rechnungen summieren | ≤ 30 kg (ohne Optionen), Material ≤ 3.200 € |
