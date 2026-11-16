@@ -42,3 +42,25 @@ Lockheed FORTIS ist ganz passiv und leitet 16 kg Werkzeug über die Beine in den
 ([New Atlas](https://newatlas.com/fortis-exoskeleton-us-navy/33403)), Ekso EVO hebt die Arme mit Federn
 (4,1 kg, 2,4–7,1 kg Hilfe je Arm, [Datenblatt](https://eksobionics.com/static/46a879fd6bdb04b7442754362c4e5e8d/Ekso-EVO-Technical-Sheet.pdf)).
 
+## Schritt 1: Gewicht
+
+| Maßnahme | Masse | Kosten |
+|---|---|---|
+| G1 Beine ohne Motoren: Hüfte und Knie laufen frei mit, Exo-Gewicht und Last gehen über die Schienen in den Steigbügel | −10,65 kg | −1.638 € |
+| G2 Rumpfmotoren weg: Aufrichten tragen Gasfedern und Lendensperre, Drehen bleibt passiv (offene Entscheidung 3) | −4,00 kg | −588 € |
+| G3 Ellbogenmotoren weg: den Ellbogen bewegst du selbst, halten übernimmt in Schritt 2 eine Sperre | −3,72 kg | −588 € |
+| G4 Leichtbau ohne Funktionsverlust: Taschen in Laserteilen, ein Akkuschacht, kleinere Box und Schütz | −1,32 kg | 0 € |
+
+**Stand: 27,5 kg (× 1,72), 3.070 € (× 1,92), Kraft × 0,74.** Ohne Ausgleich wäre das Exo jetzt schwächer: Ellbogen
+und Halten fehlen. Das holt Schritt 2.
+
+Was dabei bleibt: Teleskopschienen (Größe verstellbar), Steigbügel, Hüft-Abspreizgelenk, Lendengelenk mit Sperre und
+Gasfedern, Rumpfdrehung, Manschetten, Schlaufengreifer, Kapseln mit Kühlkörper für die zwei Schultermotoren,
+Dichtheit und Verkleidung. Was wegfällt: 8 von 10 Motoren mit Kapseln, Kurbeln, Schubstangen, Kabeln; Fußkontakt-
+und Rumpf-Wägezellen; Wägezellen in den Beinmanschetten.
+
+Geprüft: Die Hüftschwinge trägt ohne Motormoment nur noch Last × Hebel (824 N × 0,2 m ≈ 165 Nm) und reicht als
+35 × 35 × 2 (≈ 62 MPa, Grenze 125 MPa). Eine leichtere RobStride am Ellbogen (RS06: 621 g, 36 / 11 Nm, ≈ 199 €,
+[OpenELAB](https://openelab.io/fi/products/robstride06-qdd-joint-motor-module)) habe ich verworfen: Sperre plus dein
+Arm hält mehr und wiegt weniger.
+
