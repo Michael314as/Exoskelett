@@ -64,3 +64,61 @@ Geprüft: Die Hüftschwinge trägt ohne Motormoment nur noch Last × Hebel (824 
 [OpenELAB](https://openelab.io/fi/products/robstride06-qdd-joint-motor-module)) habe ich verworfen: Sperre plus dein
 Arm hält mehr und wiegt weniger.
 
+## Schritt 2: Kraft
+
+| Maßnahme | Masse | Kosten |
+|---|---|---|
+| K1 Sperren an Schulter, Ellbogen und Knie (blockierbare Gasfedern): halten ohne Wärme; beim Aufrichten Arme sperren und aus den Beinen heben | +1,98 kg | +475 € |
+| K2 Schulter auf 180 Nm gesperrtes Haltemoment (Federhebel 60 mm); Gerüst nachgerechnet | +0,12 kg | +20 € |
+
+**Stand: 29,6 kg (× 1,59), 3.565 € (× 1,65), Kraft × 2,24.**
+
+**Warum Sperren:** Der Realismus-Check hat gezeigt, dass ein stehender Motor nach Herstellerangabe 100 Nm nur 1,5 s
+hält, 40 Nm gut 2 min, dauerhaft ≈ 20 Nm. Ein Baum wird aber meistens *gehalten*. Eine gesperrte Gasfeder hält
+dagegen beliebig lange, ohne Strom und ohne Wärme. Der Motor ist dann nur noch zum Bewegen da.
+
+**Referenzbauteile** (Herstellerangaben):
+
+| Gelenk | Bauteil | Datenblatt | ausgelegt auf | Haltemoment |
+|---|---|---|---|---|
+| Schulter | blockierbare Gasfeder, starr auf Druck (SUSPA HY4 / Bansbach Typ P), Rohr 28 mm, F1 400 N | starr bis 10 kN, F1 80–1.000 N, Auslösekraft 0,25 × F1, Weg 2,5–3,5 mm, −20 bis +60 °C ([SUSPA](https://suspa.com/uk/products/locking-gas-struts/rigid-locking), [Bansbach](https://www.albertjagger.co.uk/contentfiles/redirects/Lockable_Gas_Springs.pdf)) | 3 kN × Hebel 60 mm | **180 Nm** |
+| Ellbogen | blockierbare Gasfeder, starr auf Zug (SUSPA HY1), Rohr 22 mm, F1 80 N | starr auf Zug bis 3,5 kN | 2,5 kN × 32 mm | **80 Nm** |
+| Knie | wie Ellbogen | | 2,5 kN × 40 mm | **100 Nm** |
+
+- **Bedienung:** Daumenhebel an jedem Griff über Bowdenzug: drücken = Arm frei, loslassen = Arm hält; mit Raste für
+  „immer frei“. Knie: Rasthebel am Hüftgurt „Gehen / Halten“. Alles mechanisch, funktioniert ohne Strom. Ein Mikroschalter
+  je Hebel meldet der Firmware den Zustand (Motor arbeitet nicht gegen die Sperre, Warnton bei gesperrtem Knie im Gehen).
+- **Federwirkung:** Die Schulterfeder (F1 400 N) hebt den Arm wie eine passive Armstütze mit ≈ 12 Nm, ohne Strom. Ellbogen-
+  und Kniefeder sind auf die schwächste Füllung gesetzt und drücken nur ≈ 3 Nm gegen.
+- **Aufrichten mit gesperrten Armen:** Arme sperren, aus den Beinen hochdrücken. Die Arme wirken dann als starrer Hebel,
+  deine Beine (250 Nm je Seite) heben. So hebt man ohnehin richtig.
+- **Gerüst bei 180 Nm an der Schulter** (nach [festigkeit.md](festigkeit.md)): Schulterbügel 30 × 30 × 3 ≈ 68 MPa,
+  Oberarmschiene 25 × 25 × 3 ≈ 103 MPa (Grenze mit Sicherheit 2: 125 MPa). Die Federkraft (3 kN) läuft über Schultergabel
+  und Hebel, nicht über das Motorlager. Am Ellbogen bleibt es bei 80 Nm, weil die Oberarmschiene sonst zu knapp wird.
+- **Geschätzt, nicht aus dem Datenblatt:** Masse der Federn (0,20–0,33 kg) und Preis (≈ 60 € je Stück in Einzelmengen).
+  Anfrage an SUSPA oder Bansbach mit Hub, F1, Einbaulänge stellen, bevor bestellt wird.
+
+**Kraft je Arbeitsschritt** (schwerster Baum in kg, in Klammern was zuerst an die Grenze kommt):
+
+| Arbeitsschritt | Dauer | ohne Exo | Entwurf 5 | nach Schritt 1 | nach Schritt 2 | Faktor |
+|---|---|---|---|---|---|---|
+| Aufrichten (Stamm steht am Boden) | 10 s | 17 | 41 (Ellbogen) | 19 (Ellbogen) | 45 (Gleichgewicht) | 1,1 |
+| Aufladen (Arm hebt den Baum auf die Ladefläche) | 10 s | 15 | 43 (Ellbogen) | 24 (Ellbogen) | 49 (Schulter) | 1,1 |
+| Hochheben und halten (Brusthöhe) | 10 s | 15 | 35 (Schulter) | 24 (Ellbogen) | 62 (Ellbogen) | 1,8 |
+| Hochheben und halten (Brusthöhe) | 2 min | 6 | 17 (Schulter) | 11 (Ellbogen) | 50 (Ellbogen) | 2,9 |
+| Tragen wie eine Fackel | 10 s | 19 | 44 (Schulter) | 45 (Schulter) | 90 (Schulter) | 2,0 |
+| Tragen wie eine Fackel | 2 min | 8 | 22 (Schulter) | 23 (Ellbogen) | 79 (Schulter) | 3,6 |
+| Tragen wie eine Fackel | dauerhaft | 2 | 7 (Schulter) | 7 (Ellbogen) | 42 (Hüfte) | 6,2 |
+
+Ehrlich gelesen:
+- **Halten und Tragen: × 2 bis × 6.** Das ist der eigentliche Gewinn. Einen 3-m-Baum (41 kg) wie eine Fackel tragen
+  geht jetzt dauerhaft; vorher 10 Sekunden.
+- **Aufrichten: × 1,1.** Hier begrenzt nicht die Kraft, sondern das **Gleichgewicht**: Ab ≈ 45 kg liegt der Schwerpunkt
+  mehr als 20 cm vor dem Knöchel, man kippt nach vorn ([kraftverteilung.md](kraftverteilung.md)). Mehr Kraft nützt dort nichts.
+- **Aufladen: × 1,1.** Hier dreht die Schulter unter Last, die Sperre hilft nicht, es zählt nur der Motor (RS04 drehend
+  100 Nm für 15 s). Doppelt ginge nur mit einer Untersetzung 1 : 2 (Zahnriemen) an der Schulter, also mehr Gewicht und
+  Kosten. Nicht gemacht.
+- **Beine:** Sie haben keinen Motor mehr. Beim Aufrichten arbeiten deine Beine wie ohne Exo, tragen aber das Exo-Oberteil
+  nicht (das geht über die Schienen in den Boden, solange die Knie nicht tief gebeugt sind). In der tiefen Hocke hängt am
+  Knie ≈ 9 Nm Exo statt bisher 17 Nm (die vorher der Motor trug). Halten in der Hocke übernimmt die Kniesperre.
+
