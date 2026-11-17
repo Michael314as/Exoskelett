@@ -395,6 +395,10 @@ def schritt1_gewicht(d):
             d.qty(i, 2)
         d.kg('KB-05', 0.08)
         d.joint['E'] = dict(motor=None, lock=0, spring=0)
+        # Ohne Ellbogenmotor fehlt sein Encoder: Die Schulter-Vorsteuerung braucht den Ellbogenwinkel weiterhin.
+        # Hall-Winkelsensor AS5600 (Analogausgang, 3 × 3 mm Magnet auf der Achse), je ≈ 4 € + Leitung.
+        d.add('SE-16', 'Winkelsensor Ellbogen (AS5600, Analogausgang) mit Magnet und Leitung', 2, 0.015)
+        d.eur('ellbogenwinkel', 12, 'Winkelsensor Ellbogen × 2 (AS5600, Magnet, Leitung)')
         d.eur('rs03', 0); d.eur('kuehl', 2 * 28.75); d.eur('pads', 6.25); d.eur('wangen', 10); d.eur('maentel', 3.75)
         d.eur('dicht', 10); d.eur('druckausgl', 12.5); d.eur('heiz', 12.5); d.eur('kurbeln', 0); d.eur('stangen', 0)
         d.eur('gelenkkoepfe', 0); d.eur('anschluss', 35); d.eur('verkleidung', 50); d.eur('kurbelschutz', 0)
@@ -495,13 +499,13 @@ def variante_passiv(d):
     """Vergleich: auch die Schultermotoren weg, keine Elektronik mehr (nur Sperren und Federn)."""
     def p1():
         for i in ('AN-S', 'AN-02', 'AN-03', 'AN-04', 'AN-05', 'KB-05', 'KB-03', 'KB-04', 'SC-09', 'VK-01', 'EN-01', 'EN-02', 'AN-01',
-                  'SE-02', 'SE-03', 'SE-04', 'SE-07', 'SE-12', 'SE-13', 'SE-14', 'BD-01', 'BD-02', 'BD-03', 'RA-04', 'RA-08', 'VK-07') + \
+                  'SE-02', 'SE-03', 'SE-04', 'SE-07', 'SE-12', 'SE-13', 'SE-14', 'SE-16', 'BD-01', 'BD-02', 'BD-03', 'RA-04', 'RA-08', 'VK-07') + \
                  tuple(k for k in d.bom if k.startswith(('EL-', 'AS-'))):
             d.qty(i, 0)
         d.joint['S'].update(motor=None)
         for k in ('rs04', 'kuehl', 'pads', 'wangen', 'abtriebsflansch', 'maentel', 'dicht', 'druckausgl', 'heiz', 'bremswid', 'teensy',
                   'messplatine', 'esp', 'imu', 'zellen50', 'uhr', 'dcdc', 'schuetz', 'akkuadapter', 'stecker', 'platine', 'led', 'anzeige',
-                  'zellen20', 'zellhalter', 'anschluss', 'kanaele', 'schutzbuegel', 'haube', 'licht', 'winden', 'windentreiber'):
+                  'zellen20', 'zellhalter', 'ellbogenwinkel', 'anschluss', 'kanaele', 'schutzbuegel', 'haube', 'licht', 'winden', 'windentreiber'):
             d.eur(k, 0)
         d.qty('SG-06', 0)
         d.add('SG-08', 'Ratschenspanner 25 mm (Hand), Edelstahl', 3, 0.10)

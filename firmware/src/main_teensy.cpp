@@ -1,11 +1,13 @@
 // Teensy 4.1: liest die Hardware, ruft App::step() 500-mal pro Sekunde auf und schreibt die Ausgänge.
 // Bauen: pio run (siehe platformio.ini). Pinbelegung: docs/verdrahtung.md (muss mit PIN_* unten übereinstimmen).
 //
-// Motoren (Entwurf 5): 10 × RobStride RS04/RS03 im „Operation Control“-Modus (Typ 1, 29-Bit-CAN-ID), 1 Mbit/s, auf zwei Bussen:
-// CAN1 Beine + Rumpf beugen (5), CAN3 Arme + Rumpf drehen (5). 500 Hz × 5 Motoren × (Befehl + Antwort) ≈ 70 % Buslast je Bus.
-// Mitgehen (Rev. M2): je Takt t_ff, v_soll und Kd an den Motor; die Dämpfung auf v_soll rechnet der Motor selbst (ohne Busverzug).
-// Manschetten (8 Glieder + 4 Rumpf): 3 × ADS131M04 an SPI0, 1000 Messungen/s, gemeinsamer Takt (8,192-MHz-Oszillator) und SYNC.
-// Schlaufenköpfe (3) und Steigbügel (2): HX711 (langsam genügt).
+// Motoren (Entwurf 6): 2 × RobStride RS04 an den Schultern im „Operation Control“-Modus (Typ 1, 29-Bit-CAN-ID), 1 Mbit/s, an CAN3
+// (≈ 30 % Buslast). Die Tabellen unten kennen weiter alle 10 Gelenke (Ausbaustufe, Konsole „alle“); angesprochen wird nur, was
+// cfg.jointMask freigibt. Mitgehen (Rev. M2): je Takt t_ff, v_soll und Kd an den Motor; die Dämpfung rechnet der Motor selbst.
+// Manschetten (Oberarm und Unterarm je Seite): 1 × ADS131M04 an SPI0, 1000 Messungen/s. Schlaufenköpfe (3): HX711 (langsam genügt).
+// Sperren (blockierbare Gasfedern, mechanisch über Bowdenzug): je Hebel ein Mikroschalter an einem Eingang mit Pullup.
+// Schalter geschlossen (LOW) = Hebel losgelassen = Sperre hält. Kabel ab = offen = „frei“: der Motor hilft dann weiter.
+// Ellbogenwinkel ohne Motor: AS5600 (Hall, Magnet auf der Achse) mit Analogausgang 0–3,3 V über 360°.
 // Lagesensor: BNO085 (I2C), liefert Kippgeschwindigkeit (Sturz) und Vorneigung des Rumpfs. Uhr: RTC des Teensy mit Knopfzelle. LED-Ring: 12 × WS2812. Watchdog: WDOG1 des i.MX RT1062 (direkt über Register, 0,5 s).
 // Anzeige und Handy-Funk macht ein ESP32-C3 an Serial1: Der Teensy schickt ihm jede Sekunde eine Statuszeile.
 // (Ein E-Paper-Update blockiert mehrere 100 ms und darf deshalb nicht im Regeltakt laufen.)
@@ -30,15 +32,19 @@ constexpr int PIN_LOOP_PWM[NL] = {6, 7, 8}, PIN_LUMB_LOCK = 9;               // 
 constexpr int PIN_LOOP_CUR[NL] = {14, 15, 16}, PIN_VBAT = 17;                  // analog A0–A3; I2C: 18 SDA, 19 SCL
 constexpr int PIN_LED_RING = 20, PIN_VIBE = 21;                                // CAN1: 22 TX, 23 RX
 constexpr int PIN_LOOP_DIR[NL] = {24, 25, 26}, PIN_LOOP_END[NL] = {27, 28, 29};
-constexpr int PIN_HEAT_LEGS = 42, PIN_HEAT_ARMS = 43;                          // Heizfolien der Gelenkkapseln (MOSFET; Lötpunkte unten, SD-Karte nicht benutzt)
+constexpr int PIN_HEAT_ARMS = 43;                                              // Heizfolie der Schulterkapseln (MOSFET; Lötpunkt unten, SD-Karte nicht benutzt)
+constexpr int PIN_LOCK_ARM[2] = {35, 41}, PIN_LOCK_KNEE = 42;                  // Entwurf 6: Mikroschalter der Sperr-Hebel (frei gewordene Pins von ADS 2/3 und Bein-Heizung)
+constexpr int PIN_ELBOW_ANGLE[2] = {38, 39};                                   // A14/A15: Winkelsensor Ellbogen links/rechts (frei gewordene Steigbügel-HX711)
 constexpr int PIN_ESTOP_SENSE = 46, PIN_CONTACTOR = 47, PIN_STAND = 32, PIN_LIGHT = 33, PIN_HX_SCK = 34;   // 46/47: Lötpunkte unten; CAN3: 30 RX, 31 TX
 // Zellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufe R1, R2, L1, 9/10 Fuß L/R, 11/12 Gurt L/R, 13/14 Rückenpolster L/R, 15/16 Unterschenkel L/R
-// HX711 nur noch für Schlaufen und Steigbügel (−1 = Zelle hängt am ADS131M04)
-constexpr int PIN_HX_DOUT[kCells] = {-1, -1, -1, -1, -1, -1, 36, 37, 40, 38, 39, -1, -1, -1, -1, -1, -1};
-// ADS131M04: SPI0 (11 MOSI, 12 MISO, 13 SCK), Chipselect je Wandler, DRDY des ersten (alle laufen synchron), SYNC/RESET gemeinsam
-constexpr int PIN_ADS_CS[3] = {10, 35, 41}, PIN_ADS_DRDY = 44, PIN_ADS_SYNC = 45;
-constexpr int kAdsCell[3][4] = {{0, 1, 2, 3}, {4, 5, 11, 12}, {13, 14, 15, 16}};    // Zelle je Wandler-Kanal
-constexpr float kFootContactN = 49.f;                                          // ≈ 5 kg auf dem Steigbügel = Standbein (am Prüfstand einstellen)
+// Entwurf 6 hat nur noch die Zellen 2–5 (Arm-Manschetten, am ADS131M04) und 6–8 (Schlaufen, HX711). Die Nummern der übrigen
+// bleiben frei, damit Kalibrierung und Konsole gleich bleiben; eine Zelle ohne Wandler gilt als nicht angeschlossen.
+constexpr int PIN_HX_DOUT[kCells] = {-1, -1, -1, -1, -1, -1, 36, 37, 40, -1, -1, -1, -1, -1, -1, -1, -1};
+// ADS131M04: SPI0 (11 MOSI, 12 MISO, 13 SCK), Chipselect, DRDY, SYNC/RESET
+constexpr int kAds = 1;
+constexpr int PIN_ADS_CS[kAds] = {10}, PIN_ADS_DRDY = 44, PIN_ADS_SYNC = 45;
+constexpr int kAdsCell[kAds][4] = {{2, 3, 4, 5}};                              // Zelle je Wandler-Kanal: Oberarm L/R, Unterarm L/R
+static bool cellOnAds(int c) { for (int a = 0; a < kAds; a++) for (int k = 0; k < 4; k++) if (kAdsCell[a][k] == c) return true; return false; }
 
 static App app;
 static Inputs in;
@@ -52,7 +58,7 @@ static const char* sensorDetail = "";                                           
 // ---------- Motoren ----------
 static FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
 static FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> can3;
-static const uint8_t kBus[NJ] = {1, 1, 1, 1, 3, 3, 3, 3, 1, 3};                  // Beine + Rumpf beugen an CAN1, Arme + Rumpf drehen an CAN3
+static const uint8_t kBus[NJ] = {1, 1, 1, 1, 3, 3, 3, 3, 1, 3};                  // Entwurf 6: Schultern an CAN3; Ausbaustufe: Beine + Rumpf beugen an CAN1
 static void canWrite(int i, const CAN_message_t& m) { if (kBus[i] == 1) can1.write(m); else can3.write(m); }
 static const MotorLimits kLim[NJ] = {kRS04, kRS04, kRS04, kRS04, kRS04, kRS04, kRS03, kRS03, kRS04, kRS03};   // Hüfte, Knie, Schulter, Rumpf beugen: RS04; Ellbogen, Rumpf drehen: RS03
 static const uint8_t kCanId[NJ] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};             // HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, Rumpf beugen, Rumpf drehen
@@ -118,22 +124,22 @@ static void adsTransfer(int a, uint8_t* buf) {
 static void adsConfigure(int a);
 static void adsBegin() {
   SPI.begin();
-  for (int a = 0; a < 3; a++) { pinMode(PIN_ADS_CS[a], OUTPUT); digitalWrite(PIN_ADS_CS[a], HIGH); }
+  for (int a = 0; a < kAds; a++) { pinMode(PIN_ADS_CS[a], OUTPUT); digitalWrite(PIN_ADS_CS[a], HIGH); }
   pinMode(PIN_ADS_DRDY, INPUT); pinMode(PIN_ADS_SYNC, OUTPUT); digitalWrite(PIN_ADS_SYNC, HIGH);
-  for (int a = 0; a < 3; a++) adsConfigure(a);
-  digitalWrite(PIN_ADS_SYNC, LOW); delayMicroseconds(2); digitalWrite(PIN_ADS_SYNC, HIGH);   // alle drei gleichzeitig starten
+  for (int a = 0; a < kAds; a++) adsConfigure(a);
+  digitalWrite(PIN_ADS_SYNC, LOW); delayMicroseconds(2); digitalWrite(PIN_ADS_SYNC, HIGH);   // Wandler starten
   uint8_t b[18];
-  for (int a = 0; a < 3; a++) { for (int i = 0; i < 18; i++) b[i] = 0; adsTransfer(a, b); }   // einmal lesen: löscht die Neustart-Meldung im STATUS
+  for (int a = 0; a < kAds; a++) { for (int i = 0; i < 18; i++) b[i] = 0; adsTransfer(a, b); }   // einmal lesen: löscht die Neustart-Meldung im STATUS
 }
 static uint32_t lastAdsMs = 0, lastHxMs[kCells] = {}, adsCrcErrors = 0, adsResets = 0;
 static void adsConfigure(int a) { uint8_t b[18]; adsWregFrame(kAdsRegClock, kAdsClock1k, b); adsTransfer(a, b); adsWregFrame(kAdsRegGain1, kAdsGain128, b); adsTransfer(a, b); }
 // Liest alle drei Wandler. Jeder Rahmen wird mit seiner Prüfsumme geprüft. Je Wandler zwei Rahmen: Der Baustein puffert zwei Messungen,
 // und weil der Regeltakt (500/s) nur jede zweite abholt, käme sonst immer die ältere (1 ms mehr Verzug). Meldet ein Wandler einen
 // Neustart (z. B. nach einem Spannungseinbruch), wird er neu eingestellt; sonst liefe er mit Verstärkung 1 statt 128 weiter.
-static bool adsRead() {                                                         // true = neuer, gültiger Satz von allen drei Wandlern
+static bool adsRead() {                                                         // true = neuer, gültiger Satz von allen Wandlern
   if (digitalRead(PIN_ADS_DRDY) == HIGH) return false;                          // DRDY aktiv tief
   bool all = true;
-  for (int a = 0; a < 3; a++) {
+  for (int a = 0; a < kAds; a++) {
     int32_t ch[4] = {}; bool got = false;
     for (int pass = 0; pass < 2; pass++) {
       uint8_t b[18] = {}; int32_t c2[4];
@@ -160,22 +166,22 @@ static bool readCuffs(JointInput* j) {
   adsRead();
   const uint32_t now = millis();
   for (int c = 0; c < kCells; c++) {
-    if (!((cfg.cellMask >> c) & 1u)) { cellN[c] = 0.f; lastHxMs[c] = now; continue; }   // nicht angeschlossen (Prüfstand)
+    if (!((cfg.cellMask >> c) & 1u) || (PIN_HX_DOUT[c] < 0 && !cellOnAds(c))) { cellN[c] = 0.f; lastHxMs[c] = now; continue; }   // nicht angeschlossen
     if (PIN_HX_DOUT[c] < 0) {                                                   // ADS131M04-Zelle: Wert liegt schon in cellRaw
       if (now - lastAdsMs > kAdsStaleMs) { ok = false; sensorDetail = "Manschetten-Messwandler liefert nichts (Kabel, Prüfsumme)"; continue; }
       if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; sensorDetail = "Manschetten-Zelle am Anschlag"; continue; }
       cellN[c] = cfg.cell[c].toNewton(cellRaw[c]); continue;
     }
     if (digitalRead(PIN_HX_DOUT[c]) == HIGH) {                                  // noch kein neuer Wert (HX711)
-      if (now - lastHxMs[c] > kHxStaleMs) { ok = false; sensorDetail = "HX711 (Schlaufe/Steigbügel) liefert nichts"; }
+      if (now - lastHxMs[c] > kHxStaleMs) { ok = false; sensorDetail = "HX711 (Schlaufe) liefert nichts"; }
       continue;
     }
     cellRaw[c] = readCellRaw(c); lastHxMs[c] = now;
-    if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; sensorDetail = "Schlaufen-/Fußzelle am Anschlag"; continue; }
+    if (!cfg.cell[c].plausible(cellRaw[c])) { ok = false; sensorDetail = "Schlaufenzelle am Anschlag"; continue; }
     cellN[c] = cfg.cell[c].toNewton(cellRaw[c]);
   }
-  j[HipL].cuffN = cellN[0]; j[HipR].cuffN = cellN[1];
-  j[KneeL].cuffN = cellN[15]; j[KneeR].cuffN = cellN[16];                       // Schienbein-Manschetten (M2); dazu die Kopplung vom Oberschenkel
+  j[HipL].cuffN = cellN[0]; j[HipR].cuffN = cellN[1];                           // (Ausbaustufe; in Entwurf 6 nicht angeschlossen = 0)
+  j[KneeL].cuffN = cellN[15]; j[KneeR].cuffN = cellN[16];
   j[ShL].cuffN = cellN[2]; j[ShR].cuffN = cellN[3]; j[ElL].cuffN = cellN[4]; j[ElR].cuffN = cellN[5];
   for (int i = 0; i < NL; i++) in.loopN[i] = fmaxf(0.f, cellN[6 + i]);
   // Rumpf: Gurte ziehen (11/12) = vorbeugen, ins Rückenpolster drücken (13/14) = aufrichten; Drehen aus dem Unterschied rechts/links
@@ -184,17 +190,51 @@ static bool readCuffs(JointInput* j) {
   return ok;
 }
 
+// ---------- Winkelsensor Ellbogen (Entwurf 6) ----------
+// AS5600 im Analogbetrieb: 0…3,3 V = 0…360°. Nullpunkt wie bei den Motoren über „gelenk0“ (cfg.joint0). Geschwindigkeit aus der
+// Winkeländerung, 20 Hz geglättet (nur für Log und Plausibilität; die Schulter braucht vom Ellbogen nur den Winkel).
+static float elbowRaw[2] = {};
+static void readElbows(JointInput* j, float dt) {
+  static float last[2] = {}, vel[2] = {};
+  for (int k = 0; k < 2; k++) {
+    const int el = k ? ElR : ElL;
+    elbowRaw[k] = analogRead(PIN_ELBOW_ANGLE[k]) * (6.2831853f / 1023.f);
+    if ((cfg.jointMask >> el) & 1u) continue;                                   // Ausbaustufe: Ellbogen mit Motor, Winkel kommt vom Encoder
+    float q = elbowRaw[k] - cfg.joint0[el];
+    q = q > 3.14159265f ? q - 6.2831853f : q < -3.14159265f ? q + 6.2831853f : q;
+    if (((zeroArm >> el) & 1u)) q = 0.f;
+    const float d = q - last[k]; last[k] = q;
+    vel[k] += (d / dt - vel[k]) * fminf(1.f, dt * 2.f * 3.14159265f * 20.f);
+    j[el].q = q; j[el].qd = vel[k]; j[el].motorTempC = 0.f;
+  }
+}
+
 // ---------- Lagesensor, LED-Ring, Anzeige, Watchdog ----------
 #ifndef EXO_HOST_TEST
 static Adafruit_BNO08x imu(-1);
 static Adafruit_NeoPixel ring(12, PIN_LED_RING, NEO_GRB + NEO_KHZ800);
 static bool imuOk = false;
 static uint32_t imuLastMs = 0;
-static void imuReports() { imuOk = imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000) && imu.enableReport(SH2_GAME_ROTATION_VECTOR, 10000); }
+static void imuReports() { imuOk = imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000) && imu.enableReport(SH2_GAME_ROTATION_VECTOR, 10000) && imu.enableReport(SH2_LINEAR_ACCELERATION, 10000); }
 // Lagesensor lebt: Er liefert 200 Werte/s. Bleibt er stumm, stünden Vorneigung (Hüft-Vorsteuerung) und Sturzerkennung auf altem Stand.
 static bool imuAlive() { return imuOk && millis() - imuLastMs < 100; }
 
 static float trunkPitch = 0.f;                                                  // Vorneigung aus dem Rotationsvektor
+// Gehen erkennen (Entwurf 6, Warnung „Knie gesperrt“): jeder Schritt gibt einen Stoß in der Beschleunigung am Rücken.
+// Gehen = mindestens 2 Stöße über 2 m/s² im Abstand von 0,3–1,5 s. Ruhiges Stehen, Bücken und Baumhalten geben das nicht.
+static bool walkingNow = false;
+static void stepDetector(float accMag) {
+  static uint32_t lastStepMs = 0; static int steps = 0; static bool above = false;
+  const uint32_t now = millis();
+  if (accMag > 2.f && !above) {
+    above = true;
+    const uint32_t gap = now - lastStepMs;
+    steps = (gap >= 300 && gap <= 1500) ? steps + 1 : (gap > 1500 ? 1 : steps);
+    lastStepMs = now;
+  } else if (accMag < 1.f) above = false;
+  if (now - lastStepMs > 1500) steps = 0;
+  walkingNow = steps >= 2;
+}
 static float readTrunkTiltRate(bool* still) {
   static float rate = 0.f, quiet = 0.f;
   sh2_SensorValue_t v;
@@ -204,6 +244,11 @@ static float readTrunkTiltRate(bool* still) {
     if (v.sensorId == SH2_GAME_ROTATION_VECTOR) {
       const float qr = v.un.gameRotationVector.real, qi = v.un.gameRotationVector.i, qj = v.un.gameRotationVector.j, qk = v.un.gameRotationVector.k;
       trunkPitch = atan2f(2.f * (qr * qk + qi * qj), 1.f - 2.f * (qj * qj + qk * qk));   // Drehung um die Querachse (z), wie bei der Kippgeschwindigkeit
+      continue;
+    }
+    if (v.sensorId == SH2_LINEAR_ACCELERATION) {
+      const float ax = v.un.linearAcceleration.x, ay = v.un.linearAcceleration.y, az = v.un.linearAcceleration.z;
+      stepDetector(sqrtf(ax * ax + ay * ay + az * az));
       continue;
     }
     if (v.sensorId != SH2_GYROSCOPE_CALIBRATED) continue;
@@ -241,6 +286,7 @@ static void watchdogFeed() { WDOG1_WSR = 0x5555; WDOG1_WSR = 0xAAAA; }
 #else
 float readTrunkTiltRate(bool* still);
 static bool imuAlive() { return true; }
+static bool walkingNow = false;
 static float trunkPitch = 0.f;
 static unsigned long rtcNow = 14 * 3600 + 32 * 60;
 static unsigned long rtc_get() { return rtcNow; }
@@ -267,7 +313,7 @@ static void sendStatus(const Outputs&, float batteryV) {
 // Spalten: t_us,q,qd,kraft_N,moment_Nm (t_ff),v_soll,kd,gesamt_Nm (t_ff + Kd·(v_soll − v)),motor_Nm (Rückmeldung, aufs Gelenk
 // umgerechnet),waechter (1 = volles Mitgehen),schwing_N (Anteil > 6 Hz). Die ersten 5 Spalten wie bis Rev. T2.
 static bool logOn = false;
-static int logJoint = ElR;
+static int logJoint = ShR;
 static void setLog(bool on, int joint) { logOn = on; logJoint = joint; }
 static void logLine(const Outputs& o) {
   const int i = logJoint;
@@ -297,7 +343,7 @@ static void pollConsole() {
   while (Serial.available()) {
     const char ch = char(Serial.read());
     if (ch == '\n' || ch == '\r') {
-      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; io.armJointZero = armJointZero; io.setLog = setLog; io.setClock = setClock; runCommand(line, cfg, io); app.setLevel(cfg.level); app.jointMask = cfg.jointMask; }
+      if (n) { line[n] = 0; if (app.sup.mode == Mode::Off) { ConsoleIO io; io.rawCell = consoleRaw; io.print = consolePrint; io.save = saveSettings; io.armJointZero = armJointZero; io.setLog = setLog; io.setClock = setClock; runCommand(line, cfg, io); app.setLevel(cfg.level); app.jointMask = cfg.jointMask; app.elbowSensors = elbowSensorsOf(cfg); }
                else Serial.print("Konsole nur, wenn das Exo aus ist\n"); }
       n = 0;
     } else if (n < sizeof line - 1) line[n++] = ch;
@@ -307,14 +353,16 @@ static void pollConsole() {
 void setup() {
   pinMode(PIN_BTN_POWER, INPUT_PULLUP);
   for (int i = 0; i < NL; i++) { pinMode(PIN_BTN_LOOP[i], INPUT_PULLUP); pinMode(PIN_LOOP_PWM[i], OUTPUT); pinMode(PIN_LOOP_DIR[i], OUTPUT); pinMode(PIN_LOOP_END[i], INPUT_PULLUP); }
-  pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_LUMB_LOCK, OUTPUT); pinMode(PIN_HEAT_LEGS, OUTPUT); pinMode(PIN_HEAT_ARMS, OUTPUT); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
+  pinMode(PIN_ESTOP_SENSE, INPUT_PULLUP); pinMode(PIN_CONTACTOR, OUTPUT); pinMode(PIN_LIGHT, OUTPUT); pinMode(PIN_LUMB_LOCK, OUTPUT); pinMode(PIN_HEAT_ARMS, OUTPUT);
+  for (int k = 0; k < 2; k++) pinMode(PIN_LOCK_ARM[k], INPUT_PULLUP);
+  pinMode(PIN_LOCK_KNEE, INPUT_PULLUP); pinMode(PIN_VIBE, OUTPUT); pinMode(PIN_STAND, INPUT_PULLUP);
   digitalWrite(PIN_CONTACTOR, LOW);                                             // Schütz erst mit dem Einschalten
   pinMode(PIN_HX_SCK, OUTPUT); for (int c = 0; c < kCells; c++) if (PIN_HX_DOUT[c] >= 0) pinMode(PIN_HX_DOUT[c], INPUT);
   adsBegin();
   Serial.begin(115200); Serial1.begin(115200);
   EEPROM.get(0, cfg);
   if (!valid(cfg)) cfg = Settings();                                            // ungültig oder neu: Werkseinstellungen
-  app.setLevel(cfg.level); app.jointMask = cfg.jointMask;
+  app.setLevel(cfg.level); app.jointMask = cfg.jointMask; app.elbowSensors = elbowSensorsOf(cfg);
   can1.begin(); can1.setBaudRate(1000000); can3.begin(); can3.setBaudRate(1000000);
   peripheralsBegin();
   ctlTimer.begin([] { tick = true; tickCount++; }, 2000);                                    // 500 Hz (Mitgehen braucht ≤ 2 ms Takt, Studie tools/transparenz.cpp)
@@ -343,6 +391,10 @@ void loop() {
   }
   in.safety.sensorsOk = readCuffs(in.joint);
   in.safety.canOk = readMotors(in.joint);
+  readElbows(in.joint, dt);
+  for (int k = 0; k < 2; k++) in.armLocked[k] = digitalRead(PIN_LOCK_ARM[k]) == LOW;
+  in.kneeLocked = digitalRead(PIN_LOCK_KNEE) == LOW;
+  in.walking = walkingNow;
   in.safety.estopOk = digitalRead(PIN_ESTOP_SENSE) == LOW;
   in.safety.parkStandDown = !digitalRead(PIN_STAND);
   in.safety.batteryV = analogRead(PIN_VBAT) * (3.3f / 1023.f) * 15.f;          // Spannungsteiler 1:15
@@ -350,7 +402,6 @@ void loop() {
   in.safety.imuOk = imuAlive();
   in.safety.timingOk = timingOk;
   in.trunkPitch = trunkPitch;
-  for (int k = 0; k < 2; k++) in.footContact[k] = cellN[9 + k] > kFootContactN;   // 4 Halbbrücken-Zellen je Steigbügel als Vollbrücke an einem HX711
 
   const Mode before = app.sup.mode;
   const Outputs o = app.step(in, dt);
@@ -363,7 +414,10 @@ void loop() {
   static bool dirty = false;
   // Gelenk-Nullpunkte einmessen (Konsole gelenk0): beim Wechsel NULLEN → AKTIV den Motorwinkel übernehmen, dann gleich wieder aus
   if (zeroArm && before == Mode::Zeroing && app.sup.mode == Mode::Active) {
-    for (int i = 0; i < NJ; i++) if ((zeroArm >> i) & 1u) cfg.joint0[i] = motorState[i].pos;
+    for (int i = 0; i < NJ; i++) if ((zeroArm >> i) & 1u) {
+      const bool sensorOnly = (i == ElL || i == ElR) && !((cfg.jointMask >> i) & 1u);   // Ellbogen ohne Motor: Winkelsensor
+      cfg.joint0[i] = sensorOnly ? elbowRaw[i == ElR] : motorState[i].pos;
+    }
     zeroArm = 0; dirty = true; app.sup.powerButton(Press::Long);
     Serial.print("Gelenk-Nullpunkte übernommen; das Exo schaltet aus und speichert\n");
   }
@@ -387,7 +441,7 @@ void loop() {
   if (logOn) logLine(o);
   for (int i = 0; i < NL; i++) { digitalWrite(PIN_LOOP_DIR[i], o.winch[i] >= 0.f); analogWrite(PIN_LOOP_PWM[i], int(fabsf(o.winch[i]) * 255)); }
   digitalWrite(PIN_LIGHT, o.workLight); digitalWrite(PIN_VIBE, o.vibrate); analogWrite(PIN_LUMB_LOCK, (int)(o.lumbarDuty * 255.f + 0.5f));
-  digitalWrite(PIN_HEAT_LEGS, o.heaterLegs); digitalWrite(PIN_HEAT_ARMS, o.heaterArms);
+  digitalWrite(PIN_HEAT_ARMS, o.heaterArms);                                    // Entwurf 6: keine Kapseln an den Beinen
 
   // Betriebsstunden: gespeichert wird nur, wenn das Exo aus ist (Flash-Schreiben kann den Regeltakt stören)
   if (app.sup.mode == Mode::Active) { cfg.hours += dt / 3600.f; dirty = true; }

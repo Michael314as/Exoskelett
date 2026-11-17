@@ -310,24 +310,25 @@ int main() {
     check(!parseStatus("S,AKTIV,82").valid && !parseStatus("Unsinn").valid && !parseStatus("S,X,150,9,0,0,0,").valid, "kaputte Zeilen werden verworfen");
   }
 
-  std::printf("12) Prüfstand-Modus: nur Ellbogen rechts aktiv\n");
+  std::printf("12) Prüfstand-Modus: nur Schulter rechts aktiv; voll = Entwurf 6, alle = Ausbaustufe\n");
   {
     Settings c; static char out[96]; ConsoleIO io; io.print = [](const char* t) { std::snprintf(out, sizeof out, "%s", t); };
     static bool logState = false; static int logJ = -1; io.setLog = [](bool on, int j) { logState = on; logJ = j; };
-    check(runCommand("pruefstand", c, io) && c.jointMask == (1u << ElR), "Konsole: pruefstand setzt nur Ellbogen rechts");
-    check(runCommand("log 1", c, io) && logState && logJ == 7, "Konsole: Messdaten-Log an (ohne Angabe Ellbogen rechts)");
+    check(runCommand("pruefstand", c, io) && c.jointMask == (1u << ShR), "Konsole: pruefstand setzt nur Schulter rechts");
+    check(runCommand("log 1", c, io) && logState && logJ == ShR, "Konsole: Messdaten-Log an (ohne Angabe Schulter rechts)");
     check(runCommand("log 1 3", c, io) && logJ == 3 && !runCommand("log 1 12", c, io), "Konsole: Log für ein gewähltes Gelenk (Knie rechts), ungültiges Gelenk abgewiesen");
-    check(runCommand("pruefstand 5", c, io) && c.jointMask == (1u << 5) && !runCommand("pruefstand 10", c, io), "Konsole: Prüfstand mit gewähltem Gelenk (Schulter rechts)");
+    check(runCommand("pruefstand 7", c, io) && c.jointMask == (1u << 7) && !runCommand("pruefstand 10", c, io), "Konsole: Prüfstand mit gewähltem Gelenk (Ellbogen rechts, Ausbaustufe)");
     runCommand("pruefstand", c, io);
     App app; app.jointMask = c.jointMask; Inputs in; Outputs o; const float dt = 0.005f;
     auto run = [&](float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
     in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);
     in.joint[ShR].cuffN = 40.f; in.joint[ShR].q = 0.8f; in.joint[ElR].cuffN = 40.f; in.joint[ElR].q = 1.0f; run(1.f);
-    check(o.tauTotal[ShR] == 0.f && std::fabs(o.tauTotal[ElR]) > 3.f, "nur das Prüfstand-Gelenk bekommt Moment, die anderen bleiben stromlos");
-    check(runCommand("voll", c, io) && c.jointMask == 0x3FF, "Konsole: voll schaltet alle 10 Gelenke frei");
+    check(std::fabs(o.tauTotal[ShR]) > 3.f && o.tauTotal[ShL] == 0.f && o.tauTotal[ElR] == 0.f && o.tauTotal[HipR] == 0.f, "nur das Prüfstand-Gelenk bekommt Moment, die anderen bleiben stromlos");
+    check(runCommand("voll", c, io) && c.jointMask == kMaskE6 && c.cellMask == kCellsE6 && Settings().jointMask == kMaskE6, "Konsole: voll = Entwurf 6 (beide Schultern, Arm- und Schlaufenzellen), so auch ab Werk");
+    check(runCommand("alle", c, io) && c.jointMask == kMaskAll && c.cellMask == kAllCells, "Konsole: alle = Ausbaustufe mit 10 Motoren");
   }
 
-  std::printf("13) Kopplung der Manschetten, Baumlast, Standbein/Schwungbein\n");
+  std::printf("13) Kopplung der Manschetten, Baumlast, Standbein/Schwungbein (Beine und Ellbogen: Ausbaustufe mit Motoren)\n");
   {
     const float dt = 0.005f;
     auto ready = [&](App& app, Inputs& in, Outputs& o) { in.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o = app.step(in, dt); in.btnPower = false; for (float t = 0; t < 6.f; t += dt) o = app.step(in, dt); };
@@ -340,7 +341,7 @@ int main() {
       check(o.tauTotal[ShR] - base > 4.f, "Druck am Unterarm hilft auch der Schulter (Hebel über den Oberarm)");
     }
     {
-      App app; Inputs in; Outputs o; ready(app, in, o);
+      App app; app.jointMask = kMaskAll; Inputs in; Outputs o; ready(app, in, o);   // Ausbaustufe: Ellbogen mit Motor
       in.joint[ShR].q = 0.8f; in.joint[ElR].q = 1.2f; run(app, in, o, 1.f); const float sh0 = o.tauTotal[ShR], el0 = o.tauTotal[ElR];
       in.loopN[LoopR1] = 100.f; in.loopN[LoopR2] = 100.f; run(app, in, o, 1.f);
       const float expEl = 0.67f * 200.f * 0.26f * std::sin(2.0f);
@@ -350,7 +351,7 @@ int main() {
       check(o.tauTotal[ElR] <= 58.f + 1e-3f, "sehr schwerer Baum: Ellbogen bleibt in seiner Momentgrenze");
     }
     {
-      App app; Inputs in; Outputs o; ready(app, in, o);
+      App app; app.jointMask = kMaskAll; app.body.exoUpperKg = 29.5f; Inputs in; Outputs o; ready(app, in, o);   // Ausbaustufe: Beine mit Motor (Oberteil wie Entwurf 5)
       in.trunkPitch = 0.5f; in.joint[HipR].q = 1.0f; in.joint[KneeR].q = 1.2f; in.joint[HipL].q = 1.0f; in.joint[KneeL].q = 1.2f; run(app, in, o, 1.f);
       const float hip0 = o.tauTotal[HipR], knee0 = o.tauTotal[KneeR];
       in.loopN[LoopR1] = 300.f; run(app, in, o, 1.f);
@@ -377,7 +378,7 @@ int main() {
       in.joint[KneeR].cuffN = 0.f;
     }
     {
-      App app; Inputs in; Outputs o; ready(app, in, o);
+      App app; app.jointMask = kMaskAll; app.body.exoUpperKg = 29.5f; Inputs in; Outputs o; ready(app, in, o);   // Ausbaustufe (Oberteil wie Entwurf 5)
       in.trunkPitch = 0.f; run(app, in, o, 1.f);
       const float exp = 0.5f * 29.5f * 9.81f * 0.04f;
       std::printf("     aufrecht im Stand: Hüfte %+.1f Nm je Seite (erwartet %+.1f: Rucksack hinter der Hüftachse)\n", o.ff[HipR], exp);
@@ -405,7 +406,7 @@ int main() {
   std::printf("15) Sicherheit und Komfort: Sturzdämpfung, Lendensperre, Rücklage, Wärme\n");
   {
     const float dt = 0.005f;
-    App app; Inputs in; Outputs o;
+    App app; app.jointMask = kMaskAll; Inputs in; Outputs o;   // Sturzdämpfung: Ausbaustufe mit Beinmotoren
     auto run = [&](float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
     in.btnPower = true; run(0.15f); in.btnPower = false; run(6.f);
     in.loopN[LoopR1] = 150.f; run(0.5f);
@@ -428,12 +429,38 @@ int main() {
     in.joint[KneeR].qd = in.joint[HipR].qd = 0.f;
     in.safety.trunkTiltRate = 0.f;
     App hot; Inputs hi; Outputs ho; hi.btnPower = true; for (float t = 0; t < 0.15f; t += dt) ho = hot.step(hi, dt); hi.btnPower = false; for (float t = 0; t < 6.f; t += dt) ho = hot.step(hi, dt);
-    hi.joint[ShR].cuffN = 700.f; hi.joint[ShR].q = 0.8f; for (float t = 0; t < 2.f; t += dt) ho = hot.step(hi, dt); const float t0 = ho.tauTotal[ShR];
-    float tFull = 0.f; for (float t = 0; t < 600.f; t += dt) { ho = hot.step(hi, dt); if (ho.tauTotal[ShR] >= 0.95f * t0) tFull = t; }
-    std::printf("     Schulter hält %.0f Nm mit voller Kraft für %.0f s (Kühlkörper-Kapsel)\n", t0, tFull);
-    check(tFull >= 12.f, "Kühlkörper-Kapsel: Schulter hält 100 Nm mindestens 12 s mit voller Kraft");
-    std::printf("     Schulter Dauerlast: anfangs %.0f Nm, nach 10 min %.0f Nm (Wärme %.2f)\n", t0, ho.tauTotal[ShR], ho.heat[ShR]);
-    check(ho.heat[ShR] > 1.f && ho.tauTotal[ShR] < t0 * 0.95f && ho.tauTotal[ShR] >= 0.4f * 100.f - 1.f, "warmer Motor: Moment wird zurückgenommen, nicht abgeschaltet");
+    // Wärmemodell nach der Stillstandskurve des Herstellers (RS04 in der Kapsel): 100 Nm 1,5 s, 60 Nm 33 s, 40 Nm 130 s, dauerhaft 20 Nm.
+    // Gefordert wird dauernd mehr, als der Motor kann (700 N an der Manschette, Gelenk steht): was liefert die Schulter wann?
+    hi.joint[ShR].cuffN = 700.f; hi.joint[ShR].q = 0.8f;
+    float tFull = 0.f, t30 = 0.f, t120 = 0.f, maxHeat = 0.f, minLate = 1e9f, t0 = 0.f;
+    for (float t = 0; t < 600.f; t += dt) {
+      ho = hot.step(hi, dt); const float m = ho.tauTotal[ShR];
+      t0 = std::fmax(t0, m); if (m >= 95.f) tFull = t; if (t <= 30.f) t30 = m; if (t <= 120.f) t120 = m;
+      maxHeat = std::fmax(maxHeat, ho.heat[ShR]); if (t > 2.f) minLate = std::fmin(minLate, m);
+    }
+    std::printf("     Schulter steht unter Volllast: %.0f Nm für %.1f s, nach 30 s %.0f Nm, nach 2 min %.0f Nm, nach 10 min %.0f Nm (Wärme höchstens %.2f)\n",
+                t0, tFull, t30, t120, ho.tauTotal[ShR], maxHeat);
+    check(t0 > 99.f && tFull >= 0.8f && tFull <= 2.5f, "100 Nm im Stillstand nur kurz (Hersteller: 1,5 s), nicht mehr 12 s wie in Entwurf 5 angenommen");
+    check(t30 >= 45.f && t120 >= 20.f, "danach weniger, aber nie weniger als dauerhaft möglich");
+    // Gleichbleibende Last aus kaltem Zustand: wie lange hält die Schulter 60 bzw. 40 Nm, bevor sie zurücknimmt?
+    for (float want : {60.f, 40.f}) {
+      auto fresh = [&](App& a, Inputs& x, Outputs& y) { x.btnPower = true; for (float t = 0; t < 0.15f; t += dt) y = a.step(x, dt); x.btnPower = false; for (float t = 0; t < 6.f; t += dt) y = a.step(x, dt); };
+      float lo = 0.f, hi = 700.f;
+      for (int it = 0; it < 16; it++) {   // Manschettenkraft suchen, die nach dem Einschwingen (12 s) genau „want“ ergibt
+        App a; Inputs x; Outputs y; fresh(a, x, y); x.joint[ShR].q = 0.8f; x.joint[ShR].cuffN = 0.5f * (lo + hi);
+        for (float t = 0; t < 12.f; t += dt) y = a.step(x, dt);
+        (y.tauTotal[ShR] > want ? hi : lo) = 0.5f * (lo + hi);
+      }
+      App a; Inputs x; Outputs y; fresh(a, x, y); x.joint[ShR].q = 0.8f; x.joint[ShR].cuffN = lo;
+      float held = 0.f; for (float t = 0; t < 400.f; t += dt) { y = a.step(x, dt); if (t < 12.f || y.tauTotal[ShR] >= 0.97f * want) held = t; else break; }
+      std::printf("     gleichbleibend %.0f Nm aus kaltem Zustand: gehalten %.0f s (Hersteller: %s)\n", want, held, want > 50.f ? "33 s" : "130 s");
+      check(held >= (want > 50.f ? 25.f : 100.f) && held <= (want > 50.f ? 45.f : 170.f), "Haltezeit passt zur Herstellerkurve (± 25 %)");
+    }
+    check(ho.tauTotal[ShR] >= 19.f && minLate >= 19.f && maxHeat < 1.15f, "dauerhaft nie unter das Dauermoment in der Kapsel (≈ 19 Nm am Gelenk), nie abgeschaltet; Wicklung bleibt an der Grenze");
+    check(!std::strcmp(ho.notice, "Motor warm: Arm sperren"), "Hinweis in der Anzeige: Arm sperren (die Gasfeder hält ohne Wärme)");
+    hi.armLocked[R] = true; for (float t = 0; t < 120.f; t += dt) ho = hot.step(hi, dt);
+    std::printf("     Arm gesperrt: Schulter %.1f Nm, Wärme nach 2 min %.2f\n", ho.tauTotal[ShR], ho.heat[ShR]);
+    check(ho.tauTotal[ShR] == 0.f && ho.heat[ShR] < 0.85f && std::strcmp(ho.notice, "Motor warm: Arm sperren") != 0, "Arm gesperrt: Motor stromlos, kühlt ab, Hinweis verschwindet");
     App hot2; Inputs h2; Outputs o2; h2.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o2 = hot2.step(h2, dt); h2.btnPower = false; for (float t = 0; t < 6.f; t += dt) o2 = hot2.step(h2, dt);
     h2.joint[ShR].cuffN = 700.f; h2.joint[ShR].q = 0.8f; h2.joint[ShR].motorTempC = 124.f; for (float t = 0; t < 2.f; t += dt) o2 = hot2.step(h2, dt);
     std::printf("     Wicklung 124 °C gemessen: Schulter %.0f Nm statt %.0f Nm\n", o2.tau[ShR], t0);
@@ -441,18 +468,18 @@ int main() {
     App cold; Inputs ci; Outputs co; ci.btnPower = true; for (float t = 0; t < 0.15f; t += dt) co = cold.step(ci, dt); ci.btnPower = false; for (float t = 0; t < 6.f; t += dt) co = cold.step(ci, dt);
     for (int i = 0; i < NJ; i++) ci.joint[i].motorTempC = -8.f;
     for (float t = 0; t < 0.5f; t += dt) co = cold.step(ci, dt);
-    check(co.heaterLegs && co.heaterArms, "Frost (−8 °C) in Ruhe: Heizfolien der Gelenkkapseln an");
+    check(!co.heaterLegs && co.heaterArms, "Frost (−8 °C) in Ruhe: Heizfolie der Schulterkapseln an (Entwurf 6: an den Beinen gibt es keine Kapsel)");
     for (int i = 0; i < NJ; i++) ci.joint[i].motorTempC = 10.f;
     for (float t = 0; t < 0.5f; t += dt) co = cold.step(ci, dt);
     check(!co.heaterLegs && !co.heaterArms, "Kapseln warm (+10 °C): Heizung aus");
   }
 
-  std::printf("16) Rumpf: beugen (RS04) und drehen (RS03) nach den Rumpf-Wägezellen\n");
+  std::printf("16) Rumpf (Ausbaustufe): beugen (RS04) und drehen (RS03) nach den Rumpf-Wägezellen\n");
   {
     const float dt = 0.005f;
     auto ready = [&](App& app, Inputs& in, Outputs& o) { in.btnPower = true; for (float t = 0; t < 0.15f; t += dt) o = app.step(in, dt); in.btnPower = false; for (float t = 0; t < 6.f; t += dt) o = app.step(in, dt); };
     auto run = [&](App& app, Inputs& in, Outputs& o, float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
-    App app; Inputs in; Outputs o; ready(app, in, o);
+    App app; app.jointMask = kMaskAll; Inputs in; Outputs o; ready(app, in, o);   // Ausbaustufe: Rumpf mit Motoren
     in.joint[Lumb].q = 0.1f; run(app, in, o, 0.5f); const float l0 = o.tauTotal[Lumb];
     in.joint[Lumb].cuffN = 60.f; run(app, in, o, 1.f); const float fwd = o.tauTotal[Lumb];
     in.joint[Lumb].cuffN = -60.f; run(app, in, o, 1.f); const float back = o.tauTotal[Lumb];
@@ -553,7 +580,7 @@ int main() {
       check(a2.sup.mode == Mode::Active, "entlastet: startet von selbst");
     }
     {
-      App app; Inputs in; Outputs o; on(app, in, o);
+      App app; app.jointMask = kMaskAll; Inputs in; Outputs o; on(app, in, o);   // Ausbaustufe: Knie mit Motor
       in.joint[KneeL].q = 2.6f; in.joint[KneeL].qd = 1.0f; run(app, in, o, 0.01f);
       check(app.sup.mode == Mode::SoftOff && !std::strcmp(app.sup.reason, "Gelenkwinkel unplausibel") && o.tauTotal[KneeL] < 0.f, "Gelenkwinkel weit außerhalb des Bereichs (Nullpunkt falsch): Unterstützung aus, Beine gedämpft");
       run(app, in, o, 1.6f);
@@ -562,7 +589,7 @@ int main() {
       i2.joint[ShL].cuffN = std::nanf(""); run(a2, i2, o2, 0.01f);
       bool finite = true; for (int i = 0; i < NJ; i++) finite &= std::isfinite(o2.tau[i]) && std::isfinite(o2.vDes[i]);
       check(a2.sup.mode == Mode::SoftOff && finite, "ungültiger Messwert (keine Zahl): Sensorfehler, kein ungültiger Motorbefehl");
-      App a3; Inputs i3; Outputs o3; on(a3, i3, o3);
+      App a3; a3.jointMask = kMaskAll; Inputs i3; Outputs o3; on(a3, i3, o3);
       i3.joint[ShR].cuffN = 30.f; i3.joint[ShR].q = 0.8f; i3.joint[KneeR].qd = 1.5f; run(a3, i3, o3, 1.f);
       i3.safety.sensorsOk = false; run(a3, i3, o3, 0.005f);
       std::printf("     Sensorfehler in der Bewegung: Schulter %+.1f Nm, Knie %+.1f Nm\n", o3.tauTotal[ShR], o3.tauTotal[KneeR]);
@@ -606,8 +633,9 @@ int main() {
       Settings c;
       check(runCommand("pruefstand 3", c, io) && c.cellMask == (1u << 16), "Prüfstand Knie rechts: nur die Schienbein-Zelle rechts ist angemeldet");
       check(runCommand("zelle 6 1", c, io) && c.cellMask == ((1u << 16) | (1u << 6)) && runCommand("zelle 6 0", c, io) && c.cellMask == (1u << 16) && !runCommand("zelle 17 1", c, io), "Konsole: einzelne Zelle an- und abmelden");
-      check(runCommand("voll", c, io) && c.cellMask == kAllCells, "voll: alle 17 Zellen angemeldet");
+      check(runCommand("alle", c, io) && c.cellMask == kAllCells, "alle: alle 17 Zellen angemeldet");
       check(runCommand("gelenk0 4", c, io) && armed == (1u << 4) && runCommand("gelenk0 alle", c, io) && armed == 0x3FF && !runCommand("gelenk0 11", c, io), "Konsole: Gelenk-Nullpunkt einmessen vormerken");
+      check(runCommand("voll", c, io) && runCommand("gelenk0 alle", c, io) && armed == ((1u << ShL) | (1u << ShR) | (1u << ElL) | (1u << ElR)), "Entwurf 6: gelenk0 alle misst Schultern und die Winkelsensoren an den Ellbogen ein");
     }
     {
       check(std::fabs(wrapPi(6.2832f - 0.2f) + 0.2f) < 1e-3f && std::fabs(wrapPi(-6.0f) - 0.2832f) < 1e-3f && std::fabs(wrapPi(1.f) - 1.f) < 1e-6f, "Winkel werden auf ±π gefaltet");
@@ -625,6 +653,62 @@ int main() {
       const bool good = adsFrameCrcOk(f); f[7] ^= 0x01; const uint8_t zero[18] = {};
       check(good && !adsFrameCrcOk(f) && !adsFrameCrcOk(zero), "ADS131M04: Rahmen mit gekipptem Bit und ein stummer Wandler (alles 0) fallen durch die Prüfsumme");
       check(adsStatusReset(0x050F) && !adsStatusReset(0x010F), "ADS131M04: Neustart des Wandlers am STATUS erkannt");
+    }
+  }
+
+  std::printf("19) Entwurf 6: nur Schultermotoren, Sperren an Schulter, Ellbogen und Knie\n");
+  {
+    const float dt = 0.005f;
+    auto run = [&](App& app, Inputs& in, Outputs& o, float sec) { for (float t = 0; t < sec; t += dt) o = app.step(in, dt); };
+    auto on = [&](App& app, Inputs& in, Outputs& o) { in.btnPower = true; run(app, in, o, 0.15f); in.btnPower = false; run(app, in, o, 6.f); };
+    {
+      App app; Inputs in; Outputs o; on(app, in, o);
+      check(app.jointMask == kMaskE6, "ab Werk: nur die beiden Schultern haben einen Motor");
+      for (int i = 0; i < NJ; i++) { in.joint[i].cuffN = 40.f; in.joint[i].q = 0.8f; }
+      in.joint[KneeR].q = in.joint[KneeL].q = 0.5f; in.trunkPitch = 0.4f; in.loopN[LoopR1] = 200.f; run(app, in, o, 1.f);
+      bool others = true; for (int i = 0; i < NJ; i++) if (i != ShL && i != ShR) others &= o.tau[i] == 0.f && o.tauTotal[i] == 0.f && o.vDes[i] == 0.f;
+      std::printf("     Druck überall, Baum 200 N: Schulter L %+.1f / R %+.1f Nm, alle anderen Gelenke 0\n", o.tauTotal[ShL], o.tauTotal[ShR]);
+      check(o.tauTotal[ShL] > 5.f && o.tauTotal[ShR] > 30.f && others, "nur die Schultern bekommen Moment; Hüfte, Knie, Ellbogen, Rumpf bleiben ohne Befehl");
+    }
+    {
+      // Ohne Ellbogenmotor misst ein Winkelsensor den Ellbogen; Unterarm-Manschette und Winkel wirken weiter auf die Schulter
+      App app; Inputs in; Outputs o; on(app, in, o);
+      in.joint[ShR].q = 0.6f; in.joint[ElR].q = 0.8f; run(app, in, o, 1.f); const float base = o.tauTotal[ShR];
+      in.joint[ElR].cuffN = 40.f; run(app, in, o, 1.f);
+      check(o.tauTotal[ShR] - base > 4.f && o.tauTotal[ElR] == 0.f, "Druck am Unterarm hilft der Schulter, der Ellbogen selbst bleibt ohne Motor");
+      in.joint[ElR].cuffN = 0.f; in.joint[ShR].q = 0.3f; in.joint[ElR].q = 0.2f; in.loopN[LoopR1] = 200.f; run(app, in, o, 1.f); const float bent = o.ff[ShR];
+      in.joint[ElR].q = 1.2f; run(app, in, o, 1.f);
+      std::printf("     Baum 200 N, Oberarm 0,3 rad vor: Schulter-Vorsteuerung bei Ellbogen 0,2 rad %+.1f Nm, bei 1,2 rad %+.1f Nm\n", bent, o.ff[ShR]);
+      check(o.ff[ShR] > bent + 5.f, "Schulter-Vorsteuerung folgt dem gemessenen Ellbogenwinkel (Unterarm waagrecht = längerer Hebel)");
+      in.joint[ElR].q = 3.2f; run(app, in, o, 0.02f);
+      check(app.sup.mode != Mode::Active && !std::strcmp(app.sup.reason, "Gelenkwinkel unplausibel"), "Winkelsensor am Ellbogen unplausibel (Magnet verrutscht, Kabel): Unterstützung aus");
+    }
+    {
+      App app; Inputs in; Outputs o; on(app, in, o);
+      in.joint[ShR].q = in.joint[ShL].q = 0.8f; in.joint[ShR].cuffN = in.joint[ShL].cuffN = 60.f; in.loopN[LoopR1] = 200.f; run(app, in, o, 2.f);
+      const float free = o.tauTotal[ShR];
+      in.armLocked[R] = true; run(app, in, o, 0.5f);
+      std::printf("     Arm rechts gesperrt: Schulter R %+.1f Nm (vorher %+.1f), Schulter L %+.1f Nm\n", o.tauTotal[ShR], free, o.tauTotal[ShL]);
+      check(free > 30.f && o.tauTotal[ShR] == 0.f && o.tauTotal[ShL] > 10.f, "Sperre hält: Schultermotor dieses Arms stromlos (kein Kampf gegen die Feder), der andere Arm hilft weiter");
+      in.armLocked[R] = false; float maxStep = 0.f, last = o.tauTotal[ShR];
+      for (float t = 0; t < 1.f; t += dt) { o = app.step(in, dt); maxStep = std::fmax(maxStep, std::fabs(o.tauTotal[ShR] - last)); last = o.tauTotal[ShR]; }
+      std::printf("     Sperre gelöst: Schulter R %+.1f Nm nach 1 s, größter Sprung je Takt %.1f Nm\n", o.tauTotal[ShR], maxStep);
+      check(o.tauTotal[ShR] > 0.8f * free && maxStep <= 4.f, "Sperre gelöst: der Motor blendet in 0,3 s wieder ein, ohne Ruck (höchstens 4 Nm je Takt)");
+    }
+    {
+      App app; Inputs in; Outputs o; on(app, in, o);
+      in.kneeLocked = true; in.walking = false; run(app, in, o, 2.f);
+      check(!o.warnKneeLocked && std::strcmp(o.notice, "Knie gesperrt") != 0, "Knie gesperrt im Stand (Baum halten): keine Warnung");
+      in.walking = true; bool vib = false; for (float t = 0; t < 2.f; t += dt) { o = app.step(in, dt); vib |= o.vibrate; }
+      check(o.warnKneeLocked && vib && !std::strcmp(o.notice, "Knie gesperrt"), "Knie gesperrt und du gehst: Vibration und Hinweis „Knie gesperrt“");
+      in.kneeLocked = false; run(app, in, o, 0.5f);
+      check(!o.warnKneeLocked && std::strcmp(o.notice, "Knie gesperrt") != 0, "Hebel auf „Gehen“: Warnung weg");
+    }
+    {
+      App app; Inputs in; Outputs o; on(app, in, o);
+      for (int i = 0; i < NJ; i++) in.joint[i].motorTempC = (i == ShL || i == ShR) ? 20.f : 0.f;   // Gelenke ohne Motor melden nichts (0)
+      run(app, in, o, 1.f);
+      check(!o.heaterLegs && !o.heaterArms, "Gelenke ohne Motor schalten keine Heizung ein");
     }
   }
 

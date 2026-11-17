@@ -1,4 +1,4 @@
-// Steuerungskern des Christbaum-Exos (Entwurf 5, Rev. S1: Sicherheits-Durchsicht).
+// Steuerungskern des Christbaum-Exos (Entwurf 6; Rev. S1: Sicherheits-Durchsicht).
 //
 // Hardwareunabhängig: keine Arduino-Abhängigkeit, kein dynamischer Speicher. Läuft auf dem Teensy 4.1
 // (siehe main_teensy.cpp) und auf dem PC in der Simulation (siehe ../test/sim_test.cpp).

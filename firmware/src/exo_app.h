@@ -1,5 +1,11 @@
-// Gesamtsteuerung (Entwurf 5): 10 Gelenke, 3 Schlaufenwinden, Taster, Sicherheit, LED-Ring.
-// Eingänge und Ausgänge sind reine Daten; die Hardware liest/schreibt main_teensy.cpp.
+// Gesamtsteuerung (Entwurf 6): 2 Schultermotoren, Sperren (blockierbare Gasfedern) an Schulter, Ellbogen und Knie,
+// 3 Schlaufenwinden, Taster, Sicherheit, LED-Ring. Eingänge und Ausgänge sind reine Daten; die Hardware liest/schreibt main_teensy.cpp.
+//
+// Entwurf 6 (docs/optimierung.md): Motoren nur noch an den Schultern. Hüfte, Knie, Ellbogen und Rumpf haben keinen Motor mehr;
+// gehalten wird mit Sperren, die mechanisch über Bowdenzug-Hebel bedient werden. Ein Mikroschalter je Hebel meldet der Steuerung,
+// ob die Sperre hält: Dann arbeitet der Schultermotor nicht gegen die gesperrte Feder (er wird stromlos und kühlt ab), und ein
+// gesperrtes Knie im Gehen löst eine Warnung aus. Die Regelung für alle 10 Gelenke bleibt erhalten (JointId, Prüfstand, spätere
+// Nachrüstung); welche Gelenke einen Motor haben, sagt jointMask (Vorgabe kMaskE6).
 //
 // Moment je Gelenk = Schwerkraft der Exo-Schiene + Vorsteuerung (Baumlast, Körpergewicht im Stand)
 //                    + K · (Manschettenkräfte, über die Hebel auf alle Gelenke umgerechnet) + Reibungsausgleich − Dämpfung
@@ -13,13 +19,15 @@ namespace exo {
 enum JointId : uint8_t { HipL, HipR, KneeL, KneeR, ShL, ShR, ElL, ElR, Lumb, Twist, NJ };   // Lumb: Rumpf beugen, Twist: Rumpf drehen
 enum LoopId : uint8_t { LoopR1, LoopR2, LoopL1, NL };   // R1 rechts unten, R2 rechts außen, L1 links unten
 enum Side : uint8_t { L, R };
+constexpr uint16_t kMaskE6 = (1u << ShL) | (1u << ShR);   // Entwurf 6: nur die Schultern haben einen Motor
+constexpr uint16_t kMaskAll = 0x3FF;                      // alle 10 Gelenke mit Motor (Ausbaustufe wie Entwurf 5)
 
 // Körper- und Exo-Maße für die Vorsteuerung (aus docs/kraftverteilung.md; am Prüfstand abgleichen)
 struct BodyModel {
   float upperArm = 0.33f, foreArm = 0.26f;    // Schulter → Ellbogen, Ellbogen → Schlaufenkopf [m]
   float trunkCom = 0.30f;                     // Hüftachse → Schwerpunkt Oberkörper + Rahmen [m]
   float thigh = 0.43f;                        // Hüfte → Knie [m]
-  float exoUpperKg = 29.5f;                   // Exo-Oberteil (Entwurf 5, Manschetten M2): Rahmen, Elektronikbox, Akku, Arme mit Schulter- und Ellbogenkapseln, Gurte
+  float exoUpperKg = 17.5f;                   // Exo-Oberteil (Entwurf 6, tools/optimierung.py): Rahmen, Elektronikbox, Akku, Arme mit Schulterkapseln und Sperren, Gurte
   float exoComUp = 0.34f, exoComBack = 0.04f; // Schwerpunkt Exo-Oberteil über / hinter der Hüftachse [m]; ohne Motorbox fast senkrecht über der Hüfte
   float bodyUpperKg = 45.f;                   // Oberkörper, Kopf, Arme des Menschen
 };
@@ -35,6 +43,11 @@ struct Inputs {
   float trunkPitch = 0.f;              // Rumpf vorgeneigt [rad] (Lagesensor)
   SafetyInput safety;
   bool standingStill = true;           // Lagesensor: ruhig (zum Nullen)
+  // Entwurf 6: Mikroschalter an den Sperr-Hebeln (true = Sperre hält, Hebel losgelassen). Kabel ab meldet „frei“: der Motor hilft
+  // dann weiter wie ohne Sperre, statt plötzlich stromlos zu werden.
+  bool armLocked[2] = {false, false};  // Daumenhebel links/rechts: Schulter- und Ellbogenfeder des Arms
+  bool kneeLocked = false;             // Rasthebel am Hüftgurt: beide Kniefedern („Halten“)
+  bool walking = false;                // Lagesensor erkennt Schritte (main_teensy.cpp)
 };
 
 struct Outputs {
@@ -53,7 +66,8 @@ struct Outputs {
   bool lumbarLock = false;             // Lendengelenk sperren (Hubmagnet): Baum in den Schlaufen
   float lumbarDuty = 0.f;              // PWM für den Hubmagneten: 0,2 s voll anziehen, dann 35 % halten (0,54 → 0,19 A am 24-V-Wandler)
   bool warnBackward = false;           // Rücklage: Rumpf zu weit nach hinten
-  float heat[NJ] = {};                 // Wärmeschätzung je Motor (1 = Dauerbetrieb mit Nennmoment)
+  bool warnKneeLocked = false;         // Knie gesperrt, aber du gehst (Treppe, Stolpern): Vibration und Hinweis
+  float heat[NJ] = {};                 // Wärmeschätzung je Motor (1 = Wicklung an der Grenze, siehe App::step)
   bool heaterLegs = false, heaterArms = false;   // Heizfolien der Gelenkkapseln (Beine: Hüfte + Knie, Arme: Schulter + Ellbogen)
   const char* notice = "";             // Hinweis im Klartext für die Anzeige, solange kein Fehler ansteht („Akku schwach“, „Motor warm“ …)
   float powerLimit = 1.f;              // Abregelung bei Spannungseinbruch (1 = volle Kraft)
@@ -63,26 +77,28 @@ struct Outputs {
 inline JointConfig defaultJoint(JointId id) {
   JointConfig c;
   switch (id) {
-    // Entwurf 5: Gelenkkapseln. Hüfte und Schulter: RobStride RS04 direkt auf der Gelenkachse. Knie: RS04 oben am Oberschenkel,
-    // Schubstange 1:1 (Parallelogramm). Ellbogen: RS03 oben am Oberarm, Schubstange 1:1. Keine Seile, keine Bowdenzüge.
+    // Entwurf 6: nur die Schultern haben einen Motor (RobStride RS04 direkt auf der Gelenkachse, in der Kühlkörper-Kapsel).
+    // Die anderen Einträge beschreiben die Ausbaustufe mit Motoren wie in Entwurf 5 (Hüfte RS04 direkt, Knie RS04 über
+    // Schubstange, Ellbogen RS03 über Schubstange, Rumpf RS04/RS03); sie sind nur aktiv, wenn jointMask sie freigibt.
+    // motorRatedNm = Dauermoment in der geschlossenen Kapsel: RS04 20 Nm, RS03 11 Nm (docs/realismus.md).
     case HipL: case HipR:   // stark strecken, schwach beugen; RS04 120 Nm Spitze · 0,97
       c.name = "Hüfte"; c.rCuff = 0.15f; c.tauMin = -110.f; c.tauMax = 35.f; c.qMin = -0.35f; c.qMax = 2.0f;
-      c.gravCoef = 2.0f; c.slew = 600.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 28.f; break;
+      c.gravCoef = 2.0f; c.slew = 600.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 20.f; break;
     case KneeL: case KneeR: // Beugen zusätzlich mechanisch begrenzt: Federpaket in der Schubstange gibt ab ≈ 11 Nm nach
       c.name = "Knie"; c.rCuff = 0.2f; c.tauMin = -110.f; c.tauMax = 10.f; c.qMin = 0.05f; c.qMax = 2.0f;
-      c.gravCoef = 0.f; c.frictionComp = 0.2f; c.slew = 600.f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 28.f; break;
+      c.gravCoef = 0.f; c.frictionComp = 0.2f; c.slew = 600.f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 20.f; break;
     case ShL: case ShR:     // RS04 direkt
       c.name = "Schulter"; c.rCuff = 0.17f; c.tauMax = 100.f; c.tauMin = -100.f; c.frictionComp = 0.15f;
-      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 2.4f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 28.f; break;   // Exo-Arm ~2,3 kg mit Ellbogenmotor
+      c.qMin = -0.4f; c.qMax = 2.6f; c.gravCoef = 1.6f; c.motorPerJoint = 1.f / 0.97f; c.motorRatedNm = 20.f; break;   // Exo-Arm ≈ 1,6 kg ohne Ellbogenmotor (mit Sperren); die Schulterfeder hebt zusätzlich ≈ 12 Nm
     case Lumb:              // Rumpf beugen: RS04 am Becken, Schubstange 1:1 zum Hebel am Lendengelenk; Gasfedern tragen das Exo-Oberteil
       c.name = "Rumpf beugen"; c.rCuff = 0.3f; c.tauMin = -80.f; c.tauMax = 20.f; c.qMin = -0.15f; c.qMax = 0.45f; c.wallWidth = 0.08f;
-      c.gravCoef = 0.f; c.slew = 400.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 28.f; break;
+      c.gravCoef = 0.f; c.slew = 400.f; c.frictionComp = 0.15f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 20.f; break;
     case Twist:             // Rumpf drehen: RS03 am Becken, Kurbel 40 mm → Stange → Wagen der Bogenführung (≈ 1 : 1,8); Federn zentrieren
       c.name = "Rumpf drehen"; c.rCuff = 0.15f; c.tauMin = -30.f; c.tauMax = 30.f; c.qMin = -0.26f; c.qMax = 0.26f; c.wallWidth = 0.06f;
-      c.gravCoef = 0.f; c.slew = 300.f; c.frictionComp = 0.1f; c.motorPerJoint = 1.f / (1.8f * 0.93f); c.motorRatedNm = 16.f; break;
+      c.gravCoef = 0.f; c.slew = 300.f; c.frictionComp = 0.1f; c.motorPerJoint = 1.f / (1.8f * 0.93f); c.motorRatedNm = 11.f; break;
     case ElL: case ElR: default:   // RS03 über Schubstange, 60 Nm Spitze · 0,95
       c.name = "Ellbogen"; c.rCuff = 0.15f; c.tauMax = 56.f; c.tauMin = -56.f; c.frictionComp = 0.15f;
-      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 16.f; break;
+      c.qMin = 0.1f; c.qMax = 2.3f; c.gravCoef = 0.9f; c.motorPerJoint = 1.f / 0.95f; c.motorRatedNm = 11.f; break;
   }
   // Mitgehen (Rev. M2, Studie tools/transparenz.cpp): schnelle Manschetten (ADS131M04, 1 kHz), 40-Hz-Filter, kleines Totband.
   // vSoll = admit · Kraft; Kd im Motor ≈ 0,75 · Segmentträgheit / 0,065 (Trägheit Exo-Segment geschätzt, am Prüfstand P39 einstellen).
@@ -114,7 +130,8 @@ class App {
   float bodyShare[3] = {0.1f, 0.2f, 0.3f};   // so viel vom Oberkörpergewicht tragen die Exo-Beine im Stand
   float kneeSynergy = 0.6f;                  // Oberschenkel-Druck hilft auch dem Knie (Aufstehen = Hüfte und Knie)
   int level = 1;
-  uint16_t jointMask = 0x3FF;                // nicht aktive Gelenke bleiben stromlos (Prüfstand)
+  uint16_t jointMask = kMaskE6;              // Gelenke mit Motor; die anderen bleiben stromlos (Entwurf 6: nur Schultern; Prüfstand: eins)
+  uint16_t elbowSensors = (1u << ElL) | (1u << ElR);   // Ellbogen mit Winkelsensor und Unterarm-Manschette (Prüfstand ohne Arm: 0)
   float loadedLoopN = 49.f;                  // ab hier gilt eine Schlaufe als belastet (≈ 5 kg): Lendensperre, Öffnen nur mit Warnung
 
   App() { for (int i = 0; i < NJ; i++) joint[i] = Joint(defaultJoint(JointId(i))); setLevel(1); }
@@ -155,8 +172,9 @@ class App {
     // Ein Winkel weit außerhalb heißt: Nullpunkt falsch (Motor getauscht, nie eingemessen) oder Encoder gestört. Dann stimmen
     // weder die weichen Wände noch Schwerkraft und Vorsteuerung.
     bool tareOk = true;
+    const uint16_t meas = measuredMask();
     for (int i = 0; i < NJ; i++) {
-      if (!((jointMask >> i) & 1u)) continue;
+      if (!((meas >> i) & 1u)) continue;
       const JointInput& x = in.joint[i]; const JointConfig& c = joint[i].cfg;
       if (!std::isfinite(x.q) || !std::isfinite(x.qd) || !std::isfinite(x.cuffN)) { s.sensorsOk = false; continue; }
       if (x.q < c.qMin - c.angleMargin || x.q > c.qMax + c.angleMargin) s.anglesOk = false;
@@ -169,7 +187,7 @@ class App {
     if (!std::isfinite(in.trunkPitch) || !std::isfinite(s.trunkTiltRate) || !std::isfinite(s.batteryV)) s.imuOk = false;
     wasZeroing_ = sup.mode == Mode::Zeroing;
     sup.step(s, in.standingStill, dt, tareOk);
-    if (wasZeroing_ && sup.mode == Mode::Active) for (int i = 0; i < NJ; i++) tare_[i] = ((jointMask >> i) & 1u) ? tareLp_[i] : 0.f;
+    if (wasZeroing_ && sup.mode == Mode::Active) for (int i = 0; i < NJ; i++) tare_[i] = ((meas >> i) & 1u) ? tareLp_[i] : 0.f;
     zeroBlocked_ = sup.mode == Mode::Zeroing && !tareOk;
 
     // Standbein erkennen (geglättet, damit beim Aufsetzen nichts springt)
@@ -179,18 +197,31 @@ class App {
     for (int i = 0; i < NJ; i++) { ji[i] = in.joint[i]; ji[i].cuffN -= tare_[i]; o.tare[i] = tare_[i]; }
     computeCoupling(in, ji);
 
-    // Wärmeschutz je Motor, zweifach: Schätzung (Motormoment / Dauermoment in der Kapsel)² mit 3 min Zeitkonstante, und die gemessene
-    // Wicklungstemperatur aus der Motor-Rückmeldung (ab 100 °C zurücknehmen, der Motor selbst schaltet bei 135–145 °C ab).
+    // Wärmeschutz je Motor, zweifach. Schätzung mit zwei Zeitkonstanten, angepasst an die Stillstandskurve des Herstellers
+    // (RS04: 100 Nm 1,5 s, 60 Nm 33 s, 40 Nm 130 s; dauerhaft in der Kapsel 20 Nm): Wicklung (6 %, 1,5 s) + Motor und Kapsel
+    // (94 %, 10 min), beide angetrieben von (Motormoment / Dauermoment)². Wärme 1 = Wicklung an der Grenze. Ab 0,9 wird die
+    // Grenze bis auf das Dauermoment zurückgenommen, nie ganz abgeschaltet. Dazu die gemessene Wicklungstemperatur aus der
+    // Motor-Rückmeldung (ab 100 °C zurücknehmen, der Motor selbst schaltet bei 135–145 °C ab).
     o.powerLimit = sup.powerLimit();
-    bool motorWarm = false;
+    bool motorWarm = false, shoulderWarm = false;
     for (int i = 0; i < NJ; i++) {
-      const float r = joint[i].lastTotal * joint[i].cfg.motorPerJoint / joint[i].cfg.motorRatedNm;
-      heat_[i] += (r * r - heat_[i]) * clampf(dt / 180.f, 0.f, 1.f); o.heat[i] = heat_[i];
-      const float byModel = clampf(1.f - 0.6f * (heat_[i] - 1.f), 0.4f, 1.f), byTemp = clampf(1.f - (in.joint[i].motorTempC - 100.f) / 40.f, 0.4f, 1.f);
-      motorWarm |= ji[i].limitScale < 0.999f && ((jointMask >> i) & 1u);
+      const JointConfig& c = joint[i].cfg;
+      const float r = joint[i].lastTotal * c.motorPerJoint / c.motorRatedNm, r2 = r * r;
+      heatFast_[i] += (kHeatFastShare * r2 - heatFast_[i]) * clampf(dt / kHeatFastS, 0.f, 1.f);
+      heatSlow_[i] += ((1.f - kHeatFastShare) * r2 - heatSlow_[i]) * clampf(dt / kHeatSlowS, 0.f, 1.f);
+      const float h = heatFast_[i] + heatSlow_[i]; o.heat[i] = h;
+      const float floor = clampf(c.motorRatedNm / (c.motorPerJoint * std::fmax(std::fabs(c.tauMax), std::fabs(c.tauMin))), 0.05f, 1.f);
+      const float byModel = clampf(1.f - (h - 0.9f) / 0.1f * (1.f - floor), floor, 1.f);
+      const float byTemp = clampf(1.f - (in.joint[i].motorTempC - 100.f) / 40.f, 0.4f, 1.f);
+      const bool warm = std::fmin(byModel, byTemp) < 0.999f && ((jointMask >> i) & 1u);   // (bis Rev. E5 fragte das den Wert vor der Zuweisung ab: Hinweis kam nie)
+      motorWarm |= warm; shoulderWarm |= warm && (i == ShL || i == ShR);
       // Spannungseinbruch: alle Momentgrenzen gemeinsam zurücknehmen, bevor der Akku unter die Abschaltgrenze fällt
       ji[i].limitScale = std::fmin(byModel, byTemp) * o.powerLimit;
     }
+    // Sperren (Entwurf 6): Hält die Sperre eines Arms, trägt die gesperrte Gasfeder; der Schultermotor arbeitet nicht dagegen
+    // (er wird sofort stromlos und kühlt ab). Beim Lösen bremst das Öl in der Feder, und der Motor blendet in 0,3 s wieder ein
+    // (Moment, Mitgehen und Dämpfung zusammen), damit nichts ruckt.
+    for (int k = 0; k < 2; k++) armScale_[k] = in.armLocked[k] ? 0.f : std::fmin(1.f, armScale_[k] + dt / 0.3f);
     // Schutz bei Sturz und bei weichen Fehlern (Sensor, Lagesensor, Gelenkwinkel): Beine nicht schlaff, sondern 1,5 s gedämpft
     // (bremst das Einsinken), dann aus. Die Dämpfung braucht nur die Gelenkgeschwindigkeit aus dem Motor, keine Manschette.
     const float damp = sup.legDamp();
@@ -199,8 +230,12 @@ class App {
       if (damp > 0.f && sup.scale <= 0.f && joint[i].cfg.fallDamp > 0.f && ((jointMask >> i) & 1u)) {
         joint[i].off(); o.tau[i] = o.tauTotal[i] = clampf(-joint[i].cfg.fallDamp * in.joint[i].qd, -80.f, 80.f) * damp; continue;
       }
+      if (sup.scale > 0.f && !((jointMask >> i) & 1u) && ((meas >> i) & 1u)) {   // nur gemessen (Ellbogen in Entwurf 6): Kraft filtern, kein Moment
+        joint[i].step(ji[i], dt, 0.f); o.tau[i] = o.tauTotal[i] = 0.f; continue;
+      }
       if (sup.scale <= 0.f || !((jointMask >> i) & 1u)) { joint[i].off(); o.tau[i] = 0.f; continue; }
-      o.tau[i] = joint[i].step(ji[i], dt, sup.scale);
+      const float sc = sup.scale * (i == ShL ? armScale_[L] : i == ShR ? armScale_[R] : 1.f);
+      o.tau[i] = joint[i].step(ji[i], dt, sc);
       o.vDes[i] = joint[i].lastVDes; o.kd[i] = joint[i].lastKd; o.guard[i] = joint[i].guard; o.tauTotal[i] = joint[i].lastTotal;
       o.ff[i] = ji[i].ffNm;
     }
@@ -219,11 +254,12 @@ class App {
     // (unter Last heizt der Motor selbst); aus über +8 °C. Kälteste Wicklungstemperatur aus der Motor-Rückmeldung.
     for (int gidx = 0; gidx < 2; gidx++) {
       float tMin = 1e9f, load = 0.f;
-      for (int i = 0; i < NJ; i++) {   // Gruppe Beine + Rumpf (Kapseln am Becken) bzw. Arme
-        const bool arm = i >= ShL && i <= ElR; if (arm != (gidx == 1)) continue;
-        tMin = std::fmin(tMin, in.joint[i].motorTempC); load = std::fmax(load, heat_[i]);
+      for (int i = 0; i < NJ; i++) {   // Gruppe Beine + Rumpf (Kapseln am Becken) bzw. Arme; nur Gelenke mit Motor
+        const bool arm = i >= ShL && i <= ElR; if (arm != (gidx == 1) || !((jointMask >> i) & 1u)) continue;
+        tMin = std::fmin(tMin, in.joint[i].motorTempC); load = std::fmax(load, heatFast_[i] + heatSlow_[i]);
       }
       bool& h = gidx ? heatArms_ : heatLegs_;
+      if (tMin > 1e8f) { h = false; continue; }   // keine Kapsel in dieser Gruppe
       if (tMin < 3.f && load < 0.3f) h = true;
       if (tMin > 8.f || load > 0.5f) h = false;
     }
@@ -231,11 +267,15 @@ class App {
     lockOn_ = o.lumbarLock ? lockOn_ + dt : 0.f; o.lumbarDuty = !o.lumbarLock ? 0.f : lockOn_ < 0.2f ? 1.f : 0.35f;
     o.warnBackward = sup.mode == Mode::Active && in.trunkPitch < -0.15f;
     if (o.warnBackward) { warnT_ += dt; if (std::fmod(warnT_, 0.6f) < 0.15f) vibe_ = std::fmax(vibe_, 0.05f); } else warnT_ = 0.f;
+    // Knie gesperrt und du gehst: kurze Vibration jede Sekunde und Hinweis, bis der Hebel am Hüftgurt auf „Gehen“ steht
+    o.warnKneeLocked = sup.mode == Mode::Active && in.kneeLocked && in.walking;
+    if (o.warnKneeLocked) { kneeT_ += dt; if (std::fmod(kneeT_, 1.f) < 0.25f) vibe_ = std::fmax(vibe_, 0.05f); } else kneeT_ = 0.f;
     // Akku schwach: alle 20 s ein langer Vibrationspuls, solange das Exo arbeitet
     if (sup.lowBattery && sup.mode == Mode::Active) { lowT_ += dt; if (lowT_ > 20.f) lowT_ = 0.f; if (lowT_ < 0.4f) vibe_ = std::fmax(vibe_, 0.05f); } else lowT_ = 0.f;
     // Hinweis für die Anzeige (ein Fehlergrund aus der Zustandsmaschine hat Vorrang, siehe main_teensy.cpp)
     o.notice = zeroBlocked_ ? "Nullen: Manschetten entlasten" : sup.mode != Mode::Active ? "" : sup.lowBattery ? "Akku schwach"
-             : o.powerLimit < 0.999f ? "Akku unter Last: weniger Kraft" : motorWarm ? "Motor warm" : in.safety.parkStandDown ? "Parkstütze unten"
+             : o.powerLimit < 0.999f ? "Akku unter Last: weniger Kraft" : o.warnKneeLocked ? "Knie gesperrt"
+             : shoulderWarm ? "Motor warm: Arm sperren" : motorWarm ? "Motor warm" : in.safety.parkStandDown ? "Parkstütze unten"
              : o.warnBackward ? "Rücklage" : "";
     o.led = sup.led(s);
     o.ledCount = int(std::round(12.f * exo::clampf((in.safety.batteryV - 30.f) / (41.f - 30.f), 0.f, 1.f)));
@@ -245,13 +285,23 @@ class App {
   }
 
  private:
-  float both_ = 0.f, vibe_ = 0.f, stance_[2] = {1.f, 1.f};
+  float both_ = 0.f, vibe_ = 0.f, stance_[2] = {1.f, 1.f}, armScale_[2] = {1.f, 1.f};
   int activeWinch_ = -1;
-  float heat_[NJ] = {}, lockT_ = 0.f, lockOn_ = 0.f, warnT_ = 0.f, lowT_ = 0.f;
+  static constexpr float kHeatFastShare = 0.06f, kHeatFastS = 1.5f, kHeatSlowS = 600.f;   // angepasst an die RS04-Stillstandskurve
+  float heatFast_[NJ] = {}, heatSlow_[NJ] = {}, lockT_ = 0.f, lockOn_ = 0.f, warnT_ = 0.f, lowT_ = 0.f, kneeT_ = 0.f;
   float tare_[NJ] = {}, tareLp_[NJ] = {}, openWarn_[NL] = {};
   bool wasZeroing_ = false, zeroBlocked_ = false;
   bool heatLegs_ = false, heatArms_ = false;
   bool levelSent_ = false, comboActive_ = false, comboRelease_ = false;
+
+  // Gelenke, deren Manschette und Winkel gemessen werden: alle mit Motor, dazu der Ellbogen eines Arms mit Schultermotor
+  // (Entwurf 6: Unterarm-Manschette und Winkelsensor am Ellbogen; die Schulter braucht beides für Kopplung und Vorsteuerung)
+  uint16_t measuredMask() const {
+    uint16_t m = jointMask;
+    if (jointMask & (1u << ShL)) m |= elbowSensors & (1u << ElL);
+    if (jointMask & (1u << ShR)) m |= elbowSensors & (1u << ElR);
+    return m;
+  }
 
   // Gefilterte Manschettenkraft eines Gelenks (aus dem letzten Takt) ohne Totband-Anteil
   float cuffForce(int i) const { return deadband(joint[i].lastForce, joint[i].cfg.deadbandN); }
