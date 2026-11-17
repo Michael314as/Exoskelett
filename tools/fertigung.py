@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fertigungsdateien für das Christbaum-Exo (Entwurf 5: Gelenkkapseln).
+"""Fertigungsdateien für das Christbaum-Exo (Entwurf 6: 2 Schultermotoren, Sperren mit blockierbaren Gasfedern).
 
 Erzeugt aus Parametern:
   fertigung/laser/*.dxf   Laserteile (Alu/Edelstahl), nur Schnittkonturen in mm, eine Datei je Teil
@@ -122,41 +122,50 @@ laser('abspreizgabel_steg', P(rrect(82, 60, 6)) - circ(M6 / 2, -30, -18) - circ(
 laser('zentrierfeder_halter', P(rrect(28, 30, 4)) - circ(M4 / 2, 0, 7) - circ(6.2 / 2, 0, -6),
       'Edelstahl 1.4301', 3, 4, 'Halter Zentrierfeder HU-03 (2 je Seite), Ø 6 Zapfen für die Feder')
 
-# ---------- Gelenkkapseln (Entwurf 5) ----------
-# Motorträger: Der gekaufte Stiftkühlkörper ist zugleich der Deckel (Lochbild nach Bohrschablone); die Wangen verbinden ihn mit Schiene bzw. Schwinge
+# ---------- Gelenkkapseln (Entwurf 6: nur Schultern) ----------
+# Motorträger: Der gekaufte Stiftkühlkörper ist zugleich der Deckel (Lochbild nach Bohrschablone); eine Wange verbindet ihn mit der Schultergabel
 laser('motortraeger_wange', P(rrect(40, 120, 6)) - circ(M6 / 2, 0, 50) - circ(M6 / 2, 0, -50) - slot(24, M6, 0, 0, 90) - circ(M6 / 2, -10, -30) - circ(M6 / 2, 10, -30),
-      'Alu 6082 T6', 8, 12, 'Wangen zwischen Schiene bzw. Schwinge und Motorträger (2 je Kapsel an Knie und Ellbogen, 1 je Kapsel an Hüfte und Schulter); Langloch zum Ausrichten')
-# Abtriebsflansche: Oberschenkel (Hüfte) und Oberarm (Schulter) am Abtrieb des RS04; Stiftlöcher Ø 6 nach dem Motor bohren (Steg)
+      'Alu 6082 T6', 8, 2, 'Wange zwischen Schultergabel und Motorträger (1 je Schulterkapsel); Langloch zum Ausrichten')
+# Abtriebsflansch: Oberarmschiene am Abtrieb des RS04; Stiftlöcher Ø 6 nach dem Motor bohren (Steg)
 def abtriebsflansch(m, w, h):
     p = lochkreis(P(rrect(w, h, 8)) - circ(9), m['ab_lk'], m['ab_n'], m['ab_loch'])
     for x in (-w / 2 + 10, w / 2 - 10):
         for y in (-h / 2 + 10, h / 2 - 10):
             p = p - circ(M6 / 2, x, y)
     return p
-laser('abtriebsflansch_rs04', abtriebsflansch(RS04, 90, 90), 'Alu 6082 T6', 8, 4, 'Flansch Abtrieb RS04 → Oberschenkelplatte (Hüfte) bzw. Oberarmschiene (Schulter); 9 × M5 auf Ø 36')
-# Kurbeln und Hebel (Parallelogramm 1:1): Kurbel am Motorabtrieb, Hebel am Gelenk, Zapfen für die Gelenkköpfe
-# Zapfen: einschnittig, deshalb als Passschraube ISO 7379 (12.9) mit glattem Schaft Ø 8 bzw. Ø 6 im Biegequerschnitt, nie als
-# normale Schraube mit Gewinde in der Kurbel (tools/festigkeit.py: M8 8.8 läge im Gewindegrund über der Streckgrenze).
-# Bohrung 0,2 mm kleiner lasern und auf H7 reiben (Parameter `zapfen` bleibt das Nennmaß + 0,2 für die Armbreite).
+laser('abtriebsflansch_rs04', abtriebsflansch(RS04, 90, 90), 'Alu 6082 T6', 8, 2, 'Flansch Abtrieb RS04 → Oberarmschiene (Schulter); 9 × M5 auf Ø 36')
+
+# ---------- Sperren (Entwurf 6): Hebel und Federböcke der blockierbaren Gasfedern ----------
+# Die Gasfeder sitzt zwischen einem Federbock am festen Glied und einem Federhebel am bewegten Glied. Gesperrt hält sie
+# starr: Schulter auf Druck (SUSPA HY4, bis 10 kN), Ellbogen und Knie auf Zug (SUSPA HY1, bis 3,5 kN). Ausgelegt auf
+# 3 kN × 60 mm = 180 Nm (Schulter), 2,5 kN × 32 mm = 80 Nm (Ellbogen), 2,5 kN × 40 mm = 100 Nm (Knie).
+# Zapfen: Passschraube ISO 7379 (12.9) durch den Gabelkopf der Feder, Loch 0,2 kleiner lasern und auf H7 reiben.
 REIB = 0.4                   # Aufmaß zum Reiben: Laserloch = Nennmaß − 0,2 (zapfen − REIB)
-def kurbel(m, r, zapfen, nabe):
-    p = P(circ(nabe) + rrect(r, 2 * zapfen + 8, zapfen + 4, r / 2, 0) + circ(zapfen + 4, r, 0)) - circ(6)
-    p = lochkreis(p, m['ab_lk'], m['ab_n'], m['ab_loch'], dreh=20)
-    return p - circ((zapfen - REIB) / 2, r, 0)
-laser('kurbel_knie', kurbel(RS04, 60.0, 8.2, 27.0), 'Alu 6082 T6', 10, 2, 'Kurbel BA-01: auf dem Abtrieb des Kniemotors (9 × M5 + 2 Stifte Ø 6), Zapfen bei 60 mm: Passschraube Ø 8 (ISO 7379, 12.9), Loch Ø 7,8 auf 8 H7 reiben')
-laser('kurbel_ellbogen', kurbel(RS03, 50.0, 6.2, 23.0), 'Alu 6082 T6', 8, 2, 'Kurbel AR-04: auf dem Abtrieb des Ellbogenmotors (6 × M4 + 2 Stifte Ø 5 nach dem Motor bohren), Zapfen bei 50 mm: Passschraube Ø 6 (12.9), Loch Ø 5,8 auf 6 H7 reiben')
 def hebel(r, zapfen, bohrung, lk, n, d, nabe):
     p = P(circ(nabe) + rrect(r, 2 * zapfen + 8, zapfen + 4, r / 2, 0) + circ(zapfen + 4, r, 0)) - circ(bohrung / 2)
     p = lochkreis(p, lk, n, d, dreh=30)
     return p - circ((zapfen - REIB) / 2, r, 0)
-laser('kniehebel', hebel(60.0, 8.2, 12.5, 32.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 2, 'Kniehebel BA-04: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte, Zapfen bei 60 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben')
-laser('ellbogenhebel', hebel(50.0, 6.2, 8.5, 26.0, 3, M4, 20.0), 'Alu 6082 T6', 8, 2, 'Ellbogenhebel AR-08: auf dem Ellbogenbolzen, 3 × M4, Zapfen bei 50 mm: Passschraube Ø 6 (12.9), Loch auf 6 H7 reiben')
-# Rumpfantrieb (RA-13): Kurbeln an den Rumpfkapseln, Hebel am Lendengelenk, Träger am unteren Rahmen
-laser('kurbel_rumpf_beugen', kurbel(RS04, 50.0, 8.2, 27.0), 'Alu 6082 T6', 10, 1, 'Kurbel am RS04 des Rumpfs (Beugen), Zapfen bei 50 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben')
-laser('hebel_lendengelenk', hebel(50.0, 8.2, 10.5, 30.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 1, 'Hebel am Lendengelenk (oberer Rahmen), Bolzen Ø 10, Zapfen bei 50 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben')
-laser('kurbel_rumpf_drehen', kurbel(RS03, 40.0, 6.2, 23.0), 'Alu 6082 T6', 8, 1, 'Kurbel am RS03 des Rumpfs (Drehen), Zapfen bei 40 mm: Passschraube Ø 6 (12.9), Loch auf 6 H7 reiben')
-laser('traeger_rumpfkapsel', P(rrect(40, 120, 6)) - circ(M6 / 2, 0, 50) - circ(M6 / 2, 0, -50) - circ(M6 / 2, -10, 20) - circ(M6 / 2, 10, 20) - slot(20, M6, 0, -15, 90),
-      'Alu 6082 T6', 8, 3, 'Träger der Rumpfkapseln am unteren Rahmen (2 für Beugen, 1 Konsole für Drehen)')
+def federhebel_schulter():
+    """Schulter: Platte auf den 4 × M6 des Abtriebsflanschs (dreht mit dem Oberarm), Auge Ø 10 bei 60 mm für den Gabelkopf M10.
+    180 Nm über 4 × M6 auf r ≈ 49 mm: 0,9 kN je Schraube (Scherfestigkeit M6 8.8 ≈ 6 kN); Steg am Auge 7,6 mm × 10 mm."""
+    p = P(rrect(90, 90, 8) + rrect(30, 34, 6, 0, -50) + circ(13, 0, -60)) - circ(9)
+    for x in (-35, 35):
+        for y in (-35, 35):
+            p = p - circ(M6 / 2, x, y)
+    return p - circ((10.2 - REIB) / 2, 0, -60)
+laser('federhebel_schulter', federhebel_schulter(), 'Alu 6082 T6', 10, 2,
+      'LK-06 Federhebel Schulter: auf dem Abtriebsflansch (4 × M6, gleiche Löcher), Auge bei 60 mm: Passschraube Ø 10 (12.9) durch den Gabelkopf M10 der Gasfeder, Loch auf 10 H7 reiben')
+laser('federhebel_ellbogen', hebel(32.0, 8.2, 8.5, 30.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 2,
+      'Federhebel Ellbogen: auf dem Ellbogenbolzen, 3 × M5 in die Unterarmplatte (80 Nm: 1,8 kN je Schraube), Auge bei 32 mm: Passschraube Ø 8 (12.9) durch den Gabelkopf M8, Loch auf 8 H7 reiben')
+laser('federhebel_knie', hebel(40.0, 8.2, 12.5, 32.0, 3, M5_GEWINDE + 0.3, 24.0), 'Alu 6082 T6', 10, 2,
+      'Federhebel Knie: auf dem Kniebolzen, 3 × M5 in die Unterschenkelplatte (100 Nm: 2,1 kN je Schraube), Auge bei 40 mm: Passschraube Ø 8 (12.9), Loch auf 8 H7 reiben')
+def federbock(auge, w, h):
+    """Federbock am festen Glied: zwei Wangen je Federende (zweischnittig), 2 × M6 durch das Vierkantrohr, Auge für den Gabelkopf."""
+    return P(rrect(w, h, 6)) - circ((auge - REIB) / 2, 0, h / 2 - 13) - circ(M6 / 2, -w / 2 + 10, -h / 2 + 10) - circ(M6 / 2, w / 2 - 10, -h / 2 + 10)
+laser('federbock_m10', federbock(10.2, 50, 60), 'Alu 6082 T6', 8, 4,
+      'LK-04 Federbock Schulter: 2 Wangen je Seite an der Schultergabel (Fußende der Gasfeder HY4), Passschraube Ø 10; 1,5 kN je Wange')
+laser('federbock_m8', federbock(8.2, 40, 50), 'Alu 6082 T6', 6, 8,
+      'LK-04 Federbock Ellbogen (Oberarmschiene) und Knie (Oberschenkelschiene): 2 Wangen je Federende, Passschraube Ø 8; 1,25 kN je Wange')
 
 # Steigbügel (BE-11) unter der Sohlenmitte: Abwicklung, die beiden Laschen werden 90° hochgekantet (Biegelinie ±67,5 mm)
 def steigbuegel():
@@ -233,7 +242,7 @@ def ring_sector(r_in, r_out, a0, a1):
     pts = polar(lambda a: r_out, a0, a1, 120) + polar(lambda a: r_in, a1, a0, 120)
     return CS([pts])
 
-def manschette(r, h, name, n):
+def manschette(r, h, name, n, klett=False):
     """Manschette M2: Halbschale 210°, 4 mm PETG-CF, 45 % breiter als Rev. T2. Seitlich ein Boss mit 2 × M3 für den
     Schlitten des Längsschlittens, an den Schalenenden je 2 Ösen für die BOA-Seilbänder, an einem Ende 2 Löcher für die
     BOA-Drehrad-Basis (Nieten / M3)."""
@@ -242,6 +251,14 @@ def manschette(r, h, name, n):
     shell = Manifold.extrude(ring_sector(r, r + t, -105, 105), H)
     boss = Manifold.cube((16, 22, 26), True).translate((0, r + t + 7, H / 2))
     m = shell + boss
+    if klett:   # Entwurf 6, Beine: misst nichts mehr. Boss mit 2 × M3 direkt an den Winkel der Schiene, Schlitze für Klettgurt 40 mm
+        for z in (H / 2 - 7, H / 2 + 7):
+            m = m - Manifold.cylinder(30, 1.6, 1.6, 24).rotate((90, 0, 0)).translate((0, r + t + 20, z))
+        for a in (-95, 95):
+            x, y = (r + t / 2) * math.cos(math.radians(a)), (r + t / 2) * math.sin(math.radians(a))
+            m = m - Manifold.cube((t * 3, 4.0, 42.0), True).rotate((0, 0, a)).translate((x, y, H / 2))
+        druck(name, m, 'PETG-CF', n, f'Beinmanschette r = {r:.0f} mm, Breite {H:.0f} mm (Entwurf 6: ohne Messung): Viskopolster 4 mm mit Wechselbezug, Klettgurt 40 mm mit Leiterschnalle (SE-15), Boss direkt an die Schiene')
+        return
     for z in (H / 2 - 7, H / 2 + 7):                                             # 2 × M3 in den Boss (Schlitten)
         m = m - Manifold.cylinder(30, 1.6, 1.6, 24).rotate((90, 0, 0)).translate((0, r + t + 20, z))
     for a in (-100, 100):                                                        # BOA-Seilösen: 2 Bänder je Ende
@@ -253,17 +270,17 @@ def manschette(r, h, name, n):
         m = m - Manifold.cylinder(t * 3, 1.6, 1.6, 16).rotate((0, 90, 0)).rotate((0, 0, -90)).translate((x, y, z))
     druck(name, m, 'PETG-CF', n, f'Manschette M2 r = {r:.0f} mm, Breite {H:.0f} mm; Viskopolster 4 mm mit Wechselbezug innen (Klett am Bezug), BOA-Drehrad + 2 Seilbänder, Schlitten an den Boss')
 
-manschette(72, 70, 'manschette_oberschenkel', 2)
-manschette(55, 60, 'manschette_schienbein', 2)
+manschette(72, 70, 'manschette_oberschenkel', 2, klett=True)
+manschette(55, 60, 'manschette_schienbein', 2, klett=True)
 manschette(50, 60, 'manschette_oberarm', 2)
 manschette(42, 50, 'manschette_unterarm', 2)
 
 # Längsschlitten M2: Schlitten (Alu 4) mit 2 Gleitbuchsen iglidur JSM-0506 (Ø 6 H7 gerieben) und 2 × M3 zur Schale,
 # Stangenhalter (Alu 5) an beiden Enden: 2 × Ø 5 für die Edelstahlstangen (Loctite), 2 × M4 an den Wägezellen-Halter.
 laser('manschette_schlitten', P(rrect(40, 34, 4)) - circ(5.9 / 2, -11, 0) - circ(5.9 / 2, 11, 0) - circ(3.2 / 2, 0, -9) - circ(3.2 / 2, 0, 9),
-      'Alu 6082 T6', 4, 8, 'Längsschlitten der Manschette M2: Gleitbuchsen einpressen (Bohrung auf 6 H7 reiben), M3 zum Boss der Schale')
+      'Alu 6082 T6', 4, 4, 'Längsschlitten der Armmanschetten M2: Gleitbuchsen einpressen (Bohrung auf 6 H7 reiben), M3 zum Boss der Schale')
 laser('manschette_stangenhalter', P(rrect(36, 14, 3)) - circ(4.9 / 2, -11, 0) - circ(4.9 / 2, 11, 0) - circ(M4 / 2, 0, 0),
-      'Alu 6082 T6', 5, 16, 'Stangenhalter des Längsschlittens, 2 je Manschette: Stangen Ø 5 eingeklebt, M4 am Wägezellen-Halter; Federn zwischen Halter und Schlitten')
+      'Alu 6082 T6', 5, 8, 'Stangenhalter des Längsschlittens, 2 je Armmanschette: Stangen Ø 5 eingeklebt, M4 am Wägezellen-Halter; Federn zwischen Halter und Schlitten')
 
 def bohrschablone(profil, n_loecher=7, pitch=20.0, loch=6.6):
     """U-Schablone zum Aufschieben auf das Vierkantrohr, Bohrbuchsen-Löcher im 20-mm-Raster."""
@@ -288,11 +305,11 @@ def zellenhalter():
     for x in (-10, 10):
         m = m - Manifold.cylinder(30, 3.3, 3.3, 24).rotate((90, 0, 0)).translate((x, 0, -3))   # M6 zur Schiene
     return m
-druck('waegezellen_halter', zellenhalter(), 'PETG', 8, 'Halter je Wägezelle (an der Schiene)')
+druck('waegezellen_halter', zellenhalter(), 'PETG', 4, 'Halter je Wägezelle der Armmanschetten (an der Schiene)')
 
 def puffer():
     return Manifold.cylinder(6, 5, 4.5, 32) - Manifold.cylinder(8, 1.7, 1.7, 16).translate((0, 0, -1))
-druck('ueberlastpuffer', puffer(), 'TPU 95A', 16, 'Überlastpuffer (2 je Wägezelle), 1 mm Spalt einstellen')
+druck('ueberlastpuffer', puffer(), 'TPU 95A', 8, 'Überlastpuffer (2 je Wägezelle), 1 mm Spalt einstellen')
 
 def tastergriff(n_taster):
     body = Manifold.cube((60, 38, 34), True)
@@ -301,9 +318,13 @@ def tastergriff(n_taster):
         y = 0 if n_taster == 1 else (-9 + 18 * i)
         body = body - Manifold.cylinder(20, 8.1, 8.1, 48).translate((14, y, 8))                # IP67-Taster Ø16
     body = body - Manifold.cube((50, 26, 18), True).translate((0, 0, 4))                         # Kabelraum
+    # Entwurf 6: Sperrhebel für den Daumen an der Innenseite (Achse M4), Bowdenzug Ø 5 nach hinten, Tasche für den Mikroschalter
+    body = body - Manifold.cube((22, 12, 10), True).translate((-12, 13, 12))                     # Hebeltasche (Hebel aus Alu 3 mm)
+    body = body - Manifold.cylinder(40, M4 / 2, M4 / 2, 24).rotate((90, 0, 0)).translate((-20, 20, 12))   # Hebelachse M4
+    body = body - Manifold.cylinder(40, 2.6, 2.6, 24).rotate((0, 90, 0)).translate((-45, 13, 12))         # Bowdenzug-Hülle Ø 5
     return body
-druck('tastergriff_rechts', tastergriff(2), 'PETG', 1, 'Daumentaster rechts (2 Schlaufen) mit Heizfolie innen')
-druck('tastergriff_links', tastergriff(1), 'PETG', 1, 'Daumentaster links (1 Schlaufe)')
+druck('tastergriff_rechts', tastergriff(2), 'PETG', 1, 'Griff rechts: 2 Daumentaster (Schlaufen), Sperrhebel des Arms mit Bowdenzug und Mikroschalter, Heizfolie innen')
+druck('tastergriff_links', tastergriff(1), 'PETG', 1, 'Griff links: 1 Daumentaster (Schlaufe), Sperrhebel des Arms mit Bowdenzug und Mikroschalter')
 
 def haube(seite):
     """Haube über der Antriebsbox, in zwei Hälften (je ≤ 180 mm), Lüftungsschlitze, Verschraubung in der Mitte."""
@@ -332,8 +353,7 @@ def fingerschutz(R, breite, name, n, bogen=200):
         lug = Manifold.cube((14, 14, t * 2), True).translate((x, y, t))
         m = m + lug - Manifold.cylinder(10, M4 / 2, M4 / 2, 24).translate((x, y, -1))
     druck(name, m, 'PETG transparent', n, f'Fingerschutz RA-11 über Scheibe Ø {2 * R:.0f}: nichts kann zwischen Seil und Scheibe geraten')
-fingerschutz(78, 18, 'kurbelschutz_knie', 2, bogen=200)
-fingerschutz(66, 16, 'kurbelschutz_ellbogen', 2, bogen=200)
+# Entwurf 6: keine Schubstangen mehr, also auch keine Kurbelschutze (fingerschutz bleibt für eine Ausbaustufe als Funktion)
 
 def kapselmantel(r_motor, laenge, name, n):
     """Mantel der Gelenkkapsel (AN-02): offener Ring aus PETG-CF, Wand 2 mm, an beiden Enden eine O-Ring-Nut (gegen Kühlkörper
@@ -346,8 +366,7 @@ def kapselmantel(r_motor, laenge, name, n):
     m = m - Manifold.cylinder(t * 4, 8.1, 8.1, 32).rotate((90, 0, 0)).translate((0, -(ri - t), h / 2))   # M16 Kabel (unten)
     m = m - Manifold.cylinder(t * 4, 6.1, 6.1, 32).rotate((90, 0, 0)).rotate((0, 0, 40)).translate(((ri - t) * math.sin(math.radians(40)), -(ri - t) * math.cos(math.radians(40)), h / 2))   # M12 Druckausgleich
     druck(name, m, 'PETG-CF', n, f'Kapselmantel AN-02 für Motor Ø {2 * r_motor:.0f}: O-Ring-Nuten beidseitig, M16 Kabel, M12 Druckausgleich nach unten')
-kapselmantel(60.0, 52.0, 'kapselmantel_rs04', 7)
-kapselmantel(49.0, 54.0, 'kapselmantel_rs03', 3)
+kapselmantel(60.0, 52.0, 'kapselmantel_rs04', 2)
 
 def bohrschablone_kuehlkoerper(m, r_kk, name):
     """Aufsteckschablone für den gekauften Stiftkühlkörper: Lochbild des Motorgehäuses + 2 Löcher für die Wangen, mit Bohrbuchsen."""
@@ -362,7 +381,6 @@ def bohrschablone_kuehlkoerper(m, r_kk, name):
         s0 = s0 - Manifold.cylinder(t + 2, 2.5, 2.5, 24).translate((x, 0, -1))                                                     # Ø 5 für M6-Kernloch der Wangen
     druck(name, s0, 'PETG', 1, f'Bohrschablone für den Stiftkühlkörper (Lochkreis Ø {m["lk"]:.0f}, Motorgehäuse); Pad zwischen Motor und Kühlkörper')
 bohrschablone_kuehlkoerper(RS04, 70.0, 'bohrschablone_kuehlkoerper_rs04')
-bohrschablone_kuehlkoerper(RS03, 60.0, 'bohrschablone_kuehlkoerper_rs03')
 
 def akkuschacht_wand():
     """Seitenwand Akkuschacht EN-02 (Stihl AP 500 S 70 × 116 × 164): Einschub von hinten, Nut für Alu-Führungsschiene 4 × 4."""
@@ -376,7 +394,7 @@ def akkuschacht_wand():
     for y in (-30, 0, 30):                                                 # Wasserablauf / Lüftung
         m = m - Manifold.cube((60, 4, 20), True).translate((0, y, 0))
     return m
-druck('akkuschacht_wand', akkuschacht_wand(), 'PETG-CF', 4, 'Akkuschacht EN-02 stehend oben am Rücken: Rück- und Außenwand je Seite, Einstecken von oben (zweiter Schacht nur bei Bedarf bestücken)')
+druck('akkuschacht_wand', akkuschacht_wand(), 'PETG-CF', 2, 'Akkuschacht EN-02 stehend oben am Rücken: Rück- und Außenwand, Einstecken von oben (Entwurf 6: ein Schacht, der Ersatzakku bleibt im Fahrzeug)')
 
 def akkuschacht_stirn():
     """Stirnwand mit Kontaktträger: Fenster für die Stihl-Kontaktleiste, Dichtlippe aus TPU separat."""
@@ -389,7 +407,7 @@ def akkuschacht_stirn():
         for y in (-80, 80):
             m = m - Manifold.cylinder(20, M4 / 2, M4 / 2, 24).translate((x, y, -1))
     return m
-druck('akkuschacht_stirn', akkuschacht_stirn(), 'PETG-CF', 2, 'Boden des Akkuschachts mit Fenster für den Kontaktträger (Kontakte unten, Wasser läuft ab)')
+druck('akkuschacht_stirn', akkuschacht_stirn(), 'PETG-CF', 1, 'Boden des Akkuschachts mit Fenster für den Kontaktträger (Kontakte unten, Wasser läuft ab)')
 
 def fersenschale():
     t, r, h = 4.0, 56.0, 50.0
@@ -471,7 +489,7 @@ def main():
     # Teileliste
     md = ['# Teileliste Fertigung (erzeugt mit tools/fertigung.py)', '',
           'Alle Maße in mm. DXF: nur Schnittkonturen (Ebene SCHNITT), Maßstab 1:1. STL: Druckteile, Einheit mm.', '',
-          '**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochbilder der Motoren (RobStride RS04: 10 × M4 auf Ø 106, Abtrieb 9 × M5 auf Ø 36; RS03: 8 × M4 auf Ø 98, Abtrieb 6 × M4 auf Ø 30,36) mit den Datenblättern der gekauften Teile.', '',
+          '**Vor der Bestellung prüfen:** Lochabstände der Flanschlager (Tabelle `KFL`: KFL08 37 mm, KFL001 48 mm, KFL002 53 mm) und Lochbilder der Schultermotoren (RobStride RS04: 10 × M4 auf Ø 106, Abtrieb 9 × M5 auf Ø 36) mit den Datenblättern der gekauften Teile. Gasfedern (Entwurf 6): Gabelköpfe M10 (Schulter, SUSPA HY4) bzw. M8 (Ellbogen, Knie, SUSPA HY1) und Einbaulänge mit dem Angebot von SUSPA/Bansbach abgleichen, bevor die Federhebel und Federböcke gelasert werden.', '',
           '## Laserteile', '', '| Datei | Material | Dicke | Stück | Größe | Löcher | kleinster Steg | Zweck |', '|---|---|---|---|---|---|---|---|']
     md += [f'| `laser/{r[0]}.dxf` | {r[1]} | {r[2]} mm | {r[3]} | {r[4]} | {r[5]} | {r[6]} mm | {r[7]} |' for r in rows_l]
     md += ['', '## Druckteile (Bambu Lab A1 mini, 180 × 180 × 180 mm)', '', '| Datei | Material | Stück | Größe | Volumen cm³ | passt | Genus | Zweck |', '|---|---|---|---|---|---|---|---|']
