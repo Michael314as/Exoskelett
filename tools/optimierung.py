@@ -453,6 +453,7 @@ def schritt3_kosten(d):
 
     def c2():
         d.eur('messplatine', 35, 'Messplatine mit 1 × ADS131M04 (4 Armmanschetten)')
+        d.qty('SE-03', 1)
         d.eur('schuetz', 70, 'Sicherung, Schütz 50 A, Not-Aus'); d.eur('stecker', 45); d.eur('bremswid', 25)
     step(d, 'C2', 'Elektronik auf 2 Motoren zugeschnitten: ein Messwandler, kleineres Schütz, weniger Stecker', c2)
 

@@ -3,20 +3,22 @@
 Aktives Exoskelett aus Metall, das beim Aufladen und Schleifen frisch geschnittener Christbäume entlastet.
 
 > **Zum Anschauen zuerst:** `visualisierung/exo-gesamtbild.html` (Gesamtbild mit Datenblättern, Wie viel stärker, Realismus-Ampel; Rechenweg in `docs/realismus-check.md`).
-> **Optimierung (Entwurf 6, geplant):** `visualisierung/exo-entwurf6.html` und `docs/optimierung.md`: 2 statt 10 Motoren, Sperren mit blockierbaren Gasfedern, Kraft × 2,2, Kosten ≈ 3.150 € (× 1,9, mit Optionen × 2), Gewicht 29,4 kg (× 1,6); gerechnet mit `tools/optimierung.py`.
+> **Vergleich Entwurf 5 / 6:** `visualisierung/exo-entwurf6.html` und `docs/optimierung.md`, gerechnet mit `tools/optimierung.py`.
 > **3D:** `visualisierung/exo-konstruktion.html` (Konzeptzeichnung) und `visualisierung/exo-technik.html` (technische Zeichnung zum Durchfliegen: Knopf „Fliegen“ / Taste F, Motoren aus den Hersteller-STEP-Dateien mit Anschlüssen und Verschraubung, Kabelkanäle, Verkleidung gegen Äste, jedes Teil mit ID und realem Kaufteil, Gewicht-Sparvorschläge, Sensoren und Manschetten, Schutz und Wartung; Text dazu in `docs/sensoren-manschetten.md`).
 
-> **Stand: Entwurf 5 – Gelenkkapseln.** Die Motoren (RobStride RS04 an Hüfte, Knie, Schulter; RS03 am Ellbogen) sitzen direkt an den Gelenken in dichten, beheizten Kapseln; Knie und Ellbogen werden über starre Schubstangen angetrieben. Keine Seile, Bowdenzüge oder Umlenkrollen mehr, die vereisen oder reißen können. Rumpf beugt und dreht mit Motor (±25° / ±15°), Akkus stehen geschützt oben im Rucksack. Manschetten M2: Das Exo **geht mit** (Mitgeh-Regelung, 1000 Messungen/s, Dämpfung im Motor, Schwingungswächter), straffe breite Schalen mit BOA-Verschluss und Längsschlitten, neu auch am Schienbein: in der Simulation 1,3–3 N an jeder Manschette statt bis 12 N, bei schnellem Schwung ≈ 5 N statt 20–24 N ([docs/steuerung.md](docs/steuerung.md)). Gewicht laut Bauteilliste 44,3 kg, Material ≈ 6.000–7.100 €. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md).
+> **Stand: Entwurf 6 – 2 Schultermotoren + Sperren (17. Nov 2026).** Nur die Schultern haben einen Motor (RobStride RS04 in dichter, beheizter Kapsel), denn nur dort muss das Exo heben. Hüfte, Knie und Ellbogen bewegst du selbst; zum Halten sperren blockierbare Gasfedern (SUSPA HY4 an der Schulter, 180 Nm; HY1 an Ellbogen und Knie, 80 / 100 Nm) per Hebel am Griff bzw. am Hüftgurt, ohne Strom und ohne Wärme. Ergebnis gegenüber Entwurf 5: **Kraft × 2,2, Material ≈ 3.160 € (× 1,9; mit Optionen ≈ 2.880 €, × 2), Gewicht 29,4 kg (× 1,6)**. Firmware, Laserteile und technische Zeichnung sind umgebaut; die Teile für Entwurf 5 bleiben als Ausbaustufe erhalten.
+>
+> **Vorher: Entwurf 5 – Gelenkkapseln.** Die Motoren (RobStride RS04 an Hüfte, Knie, Schulter; RS03 am Ellbogen) sitzen direkt an den Gelenken in dichten, beheizten Kapseln; Knie und Ellbogen werden über starre Schubstangen angetrieben. Keine Seile, Bowdenzüge oder Umlenkrollen mehr, die vereisen oder reißen können. Rumpf beugt und dreht mit Motor (±25° / ±15°), Akkus stehen geschützt oben im Rucksack. Manschetten M2: Das Exo **geht mit** (Mitgeh-Regelung, 1000 Messungen/s, Dämpfung im Motor, Schwingungswächter), straffe breite Schalen mit BOA-Verschluss und Längsschlitten, neu auch am Schienbein: in der Simulation 1,3–3 N an jeder Manschette statt bis 12 N, bei schnellem Schwung ≈ 5 N statt 20–24 N ([docs/steuerung.md](docs/steuerung.md)). Gewicht laut Bauteilliste 44,3 kg, Material ≈ 6.000–7.100 €. Weg zur Serie: [docs/produktionsreife.md](docs/produktionsreife.md).
 > Gebaut ist noch nichts.
 
 ## Kurz gesagt
 
 - Stihl-Akku und Elektronik sitzen hinten im Rückenrahmen, die **Motoren direkt an den Gelenken** in dichten, beheizten Kapseln.
-- **Beine:** Hüftmotor direkt auf der Hüftachse, Kniemotor oben am Oberschenkel mit Schubstange zum Knie; beide Richtungen, im Stand trägt das Exo sich selbst und einen Teil von dir.
+- **Beine:** ohne Motor; die Schienen tragen Exo und Last in den Steigbügel. Eine Gasfeder sperrt das Knie in jeder Stellung (Rasthebel am Hüftgurt), beim Gehen warnt die Steuerung, wenn es noch gesperrt ist.
 - **Hüfte:** Beine lassen sich frei seitlich abspreizen (Zentrierfedern); angetrieben wird vor/zurück.
-- **Arme:** Schultermotor direkt auf der Schulterachse, Ellbogenmotor oben am Oberarm mit Schubstange, **beide Richtungen**.
+- **Arme:** Schultermotor direkt auf der Schulterachse hebt; Gasfedern sperren Schulter und Ellbogen zum Halten. Den Ellbogen bewegst du selbst, ein Winkelsensor meldet ihn der Steuerung.
 - **Greifen:** Schlaufen kommen am Handgelenk nach unten heraus, rechts zwei, links eine; der Stamm liegt längs als Verlängerung des Unterarms. Jede Schlaufe hat eine eigene kleine Winde.
-- **Steuerung:** Die blauen Manschetten sitzen auf Kraftsensoren. Drückst du gegen eine Manschette, bewegt das Exo das Gelenk mit.
+- **Steuerung:** Die blauen Manschetten an den Armen sitzen auf Kraftsensoren. Drückst du gegen eine Manschette, bewegt das Exo die Schulter mit.
 - **Füße:** Steigbügel mit Spikes nach dem Prinzip eines Steigeisens, für Schlamm, Schnee und unebenes Gelände.
 
 - **Bedienung und Komfort:** Parkstütze zum Einsteigen in unter 90 s, Arbeitslicht, LED-Ring, Anzeige am rechten Oberarm (Uhrzeit, Akku, Stufe, Fehler), Handy-Anzeige, Heizgriffe, Magnet-Schnallen, in 3 Teile zerlegbar, eloxierte Oberfläche. Alles baubar ohne eigene Maschinen (Laserteile bestellen, 3D-Druck, Bohrständer).

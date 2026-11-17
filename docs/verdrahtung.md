@@ -1,4 +1,8 @@
-# Verdrahtung (Entwurf 5)
+# Verdrahtung (Entwurf 6)
+
+> **Entwurf 6 (17. Nov 2026):** nur die Schultermotoren (IDs 5/6) sind bestückt, ein ADS131M04 für die vier
+> Armmanschetten, HX711 nur für die Schlaufen. Frei gewordene Pins tragen die Sperrschalter und die Ellbogen-Winkelsensoren.
+> Die übrigen Motoren, Wandler und Fußsensoren unten bleiben als Ausbaustufe beschrieben (Konsole `alle`).
 
 Muss mit den `PIN_*`-Konstanten in [`firmware/src/main_teensy.cpp`](../firmware/src/main_teensy.cpp) übereinstimmen.
 
@@ -57,23 +61,24 @@ Pulldown 10 kΩ hält das Schütz dann sicher offen.
 | Pin | Funktion | Pin | Funktion |
 |---|---|---|---|
 | 0 / 1 | Serial1 RX / TX zum ESP32-C3 (Display, Handy) | 21 | Vibrationsmotor (MOSFET) |
-| 2 | Ein/Aus-Taster (gegen Masse) | 22 / 23 | CAN1 TX / RX → Transceiver 1 (Hüften, Knie, Rumpf beugen) |
+| 2 | Ein/Aus-Taster (gegen Masse) | 22 / 23 | CAN1 TX / RX → Transceiver 1 (Ausbaustufe: Hüften, Knie, Rumpf beugen; in Entwurf 6 unbelegt) |
 | 3 / 4 / 5 | Daumentaster Schlaufe R1 / R2 / L1 | 24 / 25 / 26 | Winde R1 / R2 / L1 Richtung |
 | 6 / 7 / 8 | Winde R1 / R2 / L1 PWM | 27 / 28 / 29 | Winde R1 / R2 / L1 Endschalter offen |
-| 9 | Hubmagnet Lendensperre ITS-LZ-3263-D-24VDC (Logic-MOSFET, Freilaufdiode; PWM: 0,2 s voll, dann 35 % halten; stromlos = frei) | 30 / 31 | CAN3 RX / TX → Transceiver 2 (Schultern, Ellbogen, Rumpf drehen) |
-| 10 / 35 / 41 | Chipselect ADS131M04 A / B / C | 32 | Parkstütze unten (Endschalter) |
-| 11 / 12 / 13 | SPI0 MOSI / MISO / SCK → 3 × ADS131M04 | 33 | Arbeitslicht (MOSFET) |
-| 14 / 15 / 16 | Windenstrom R1 / R2 / L1 (0,5 V/A) | 34 | HX711 Takt (alle 5) |
+| 9 | Hubmagnet Lendensperre ITS-LZ-3263-D-24VDC (Logic-MOSFET, Freilaufdiode; PWM: 0,2 s voll, dann 35 % halten; stromlos = frei) | 30 / 31 | CAN3 RX / TX → Transceiver 2 (Schultern; Ausbaustufe auch Ellbogen, Rumpf drehen) |
+| 10 | Chipselect ADS131M04 (Armmanschetten) | 32 | Parkstütze unten (Endschalter) |
+| 35 / 41 | **Entwurf 6:** Sperrschalter Arm links / rechts (Mikroschalter am Griffhebel gegen Masse, Pull-up; geschlossen = gesperrt) | 42 | **Entwurf 6:** Sperrschalter Knie (Rasthebel am Hüftgurt sperrt beide Knie über einen geteilten Bowdenzug; geschlossen = gesperrt) |
+| 11 / 12 / 13 | SPI0 MOSI / MISO / SCK → ADS131M04 | 33 | Arbeitslicht (MOSFET) |
+| 14 / 15 / 16 | Windenstrom R1 / R2 / L1 (0,5 V/A) | 34 | HX711 Takt (alle 3) |
 | 17 | Akkuspannung (Teiler 1:15) | 36 / 37 / 40 | HX711 Daten Zellen 6 / 7 / 8 (Schlaufen R1 / R2 / L1) |
-| 18 / 19 | I2C SDA / SCL → BNO085 | 38 / 39 | HX711 Fußkontakt links / rechts (Zellen 9 / 10), je 4 Halbbrücken-Zellen 50 kg |
-| 20 | LED-Ring Daten (WS2812, 330 Ω) | 42 / 43 | Heizbänder Beinkapseln / Armkapseln (MOSFET) |
-| 44 | ADS131M04 DRDY (Wandler A, alle laufen synchron) | 45 | ADS131M04 SYNC/RESET (alle drei) |
+| 18 / 19 | I2C SDA / SCL → BNO085 (auch Schritterkennung für die Warnung „Knie gesperrt“) | 38 / 39 | **Entwurf 6:** Winkelsensor Ellbogen links / rechts, AS5600 Analogausgang 0–3,3 V (A14 / A15); Nullen mit `gelenk0 alle` |
+| 20 | LED-Ring Daten (WS2812, 330 Ω) | 43 | Heizbänder Schulterkapseln (MOSFET) |
+| 44 | ADS131M04 DRDY | 45 | ADS131M04 SYNC/RESET |
 | 46 | Not-Aus-Rückmeldung | 47 | Schütz |
 | VBAT | Knopfzelle CR2032 für die Uhr | | |
 
 Pins 42–47 sind die Lötpunkte der SD-Karte auf der Unterseite (die SD-Karte wird nicht benutzt).
 
-**Manschetten-Messwandler (Rev. M2):** 3 × TI ADS131M04 auf einer Platine in der Elektronikbox, gemeinsamer
+**Manschetten-Messwandler (Entwurf 6: einer, Kanäle 0–3 = Zellen 2–5 Oberarm L/R, Unterarm L/R; Ausbaustufe: drei):** TI ADS131M04 auf einer Platine in der Elektronikbox, gemeinsamer
 8,192-MHz-Quarzoszillator an CLKIN, OSR 4096 → 1000 Messungen/s, PGA 128, Referenz intern 1,2 V. Brückenspeisung 3,3 V
 (geregelt, getrennt von der Digitalversorgung), je Zelle 4-adrig geschirmt bis zur Box, Schirm nur an der Box auf Masse.
 
@@ -101,6 +106,6 @@ IDs vor dem Einbau einzeln mit dem Hersteller-Tool setzen (CAN-USB-Adapter, RobS
 
 **Rumpf-Wägezellen:** ab Rev. M2 am ADS131M04 (Wandler B Kanal 2/3, Wandler C Kanal 0/1), siehe oben.
 **CAN-Busse (Rev. M2):** zwei Stränge mit je 5 Motoren und je 120 Ω an beiden Enden: CAN1 (IDs 1–4, 9), CAN3 (IDs 5–8, 10).
-**Zusätzliche Ausgänge (Entwurf 5):** Pin 42 Heizfolien der Beinkapseln, Pin 43 Heizfolien der Armkapseln, je über einen Logic-MOSFET aus dem 12-V-Wandler (Lötpunkte auf der Unterseite des Teensy 4.1; die SD-Karte wird nicht benutzt).
+**Zusätzliche Ausgänge:** Pin 43 Heizfolien der Schulterkapseln (Entwurf 5 hatte auf Pin 42 die Beinkapseln; Pin 42 ist jetzt der Kniesperrschalter), je über einen Logic-MOSFET aus dem 12-V-Wandler (Lötpunkte auf der Unterseite des Teensy 4.1; die SD-Karte wird nicht benutzt).
 **Bremswiderstand:** zwischen Akku-Plus und Minus hinter dem Schütz, eigene Schaltung (Komparator + MOSFET, ein ab 46 V, aus ab 44 V), am Rahmen gekühlt; arbeitet unabhängig von der Software. Mit 10 Ω nimmt er bei 46 V nur etwa 210 W auf. Senkt man 20 kg mit einem Arm schnell ab, können kurz 300–400 W zurückkommen. Deshalb **4,7 Ω / 300 W** einplanen (450 W bei 46 V) und in P37 messen.
 **Motor-Wächter:** Die Firmware schreibt jedem Motor beim Einschalten den Parameter `canTimeout` (0x7028, 0,1 s). Fällt der Teensy oder das Kabel aus, geht der Motor von selbst in den Leerlauf.

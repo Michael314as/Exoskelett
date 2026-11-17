@@ -1,4 +1,4 @@
-# Optimierung: Kraft, Gewicht, Herstellkosten (Entwurf 5 → Entwurf 6, Stand 16. Nov 2026)
+# Optimierung: Kraft, Gewicht, Herstellkosten (Entwurf 5 → Entwurf 6, Stand 17. Nov 2026)
 
 Ziel von Michael: in allen drei Disziplinen **doppelt so gut** wie Entwurf 5, in einzelnen Schritten. Jede Zahl hier
 rechnet [`tools/optimierung.py`](../tools/optimierung.py) aus der Stückliste der technischen Zeichnung, den Preisen aus
@@ -15,7 +15,7 @@ nur, wenn auch die Schultermotoren wegfallen; dann kann das Exo den Baum nicht m
 | | Entwurf 5 | nach Schritt 1–3 | mit Optionen (Schritt 4) | Ziel | erreicht? |
 |---|---|---|---|---|---|
 | Masse getragen | 47,2 kg | **29,4 kg** (× 1,61) | **25,9 kg** (× 1,83) | ≤ 23,6 kg | **nein**, siehe unten |
-| Material ein Exo | 5.885 € | **3.148 €** (× 1,87) | 2.872 € ohne CFK (× 2,05), 3.112 € mit CFK | ≤ 2.943 € | **ja**, ohne CFK-Rohre |
+| Material ein Exo | 5.885 € | **3.160 €** (× 1,86) | 2.884 € ohne CFK (× 2,04), 3.124 € mit CFK | ≤ 2.943 € | **ja**, ohne CFK-Rohre |
 | Kraft (schwerster Baum, Mittel über 7 Arbeitsschritte) | 1,0 | **× 2,24** | × 2,25 | × 2 | **ja**, aber nicht bei jedem Schritt |
 
 Der Kostenwert 5.885 € ist die Summe der Einzelzeilen der Stückliste (Mitte der Spannen); die Kopfzeile dort nennt
@@ -131,7 +131,7 @@ Ehrlich gelesen:
 | C3 Beinmanschetten messen nichts mehr: Klettgurt statt BOA, kein Längsschlitten | −0,20 kg | −85 € |
 | C4 Fertigung: Pulver statt Eloxal, Akku-Adapter gedruckt, weniger Lagerplatten, keine Cordura-Hauben | 0 | −115 € |
 
-**Stand: 29,4 kg (× 1,61), 3.148 € (× 1,87), Kraft × 2,24.**
+**Stand: 29,4 kg (× 1,60), 3.160 € (× 1,86), Kraft × 2,24.** (Darin der Winkelsensor am Ellbogen, SE-16, 12 €, der beim Umbau der Firmware dazukam.)
 
 C1: RobStride verkauft den RS04 in China für ¥ 1.199 (stueckliste.md). Mit Versand, Einfuhrumsatzsteuer 19 % und Zoll
 2,7 % ≈ 220 € statt ≈ 296 € beim Händler. Lieferzeit und Gewährleistung sind schlechter; für 2 Motoren vertretbar.
@@ -147,8 +147,8 @@ Jede Option ändert etwas, das du im Einsatz merkst. Deshalb einzeln:
 | O3 Arbeitslicht weg | −0,24 kg | −30 € | Stirnlampe nehmen |
 | O4 Rahmen, Schulter, Außenrohre aus CFK (Teleskop bleibt Alu) | −1,80 kg | +240 € | nichts, aber teurer; Klebung bei Frost prüfen ([R&G](https://www.r-g.de/en/art/600053): 20 × 20 ≈ 30 €/m) |
 
-- **O1–O3:** 27,7 kg (× 1,70), **2.872 € (× 2,05)**. Kosten-Ziel erreicht.
-- **O1–O4:** **25,9 kg (× 1,83)**, 3.112 € (× 1,89). Leichter, aber das Kosten-Ziel ist dann wieder knapp verfehlt.
+- **O1–O3:** 27,7 kg (× 1,70), **2.884 € (× 2,04)**. Kosten-Ziel erreicht.
+- **O1–O4:** **25,9 kg (× 1,82)**, 3.124 € (× 1,88). Leichter, aber das Kosten-Ziel ist dann wieder knapp verfehlt.
 
 **Warum nicht 23,6 kg:** Danach bleiben vor allem Teile, die die Funktion ausmachen: 2 Schultermotoren mit Kapsel
 (3,4 kg), Akku (2 kg), Gurte (1,3 kg), Manschetten (1,0 kg), Sperren (2,1 kg), Schienen und Gelenke. Ein kleinerer Akku
@@ -175,16 +175,24 @@ Nebenwirkungen, die sich lohnen: **Laufzeit** mit 2 statt 10 Motoren grob verdop
 also ≈ 4 h je AP 500 S statt ≈ 2 h); **Sicherheit** besser, weil kein Motor mehr ein Bein bewegen kann; **Firmware**
 deutlich einfacher (2 Gelenke an einem CAN-Strang).
 
-## Was noch nicht geändert ist (bewusst)
+## Umgesetzt (17. Nov 2026)
 
-Entwurf 6 ist geplant und gerechnet, aber noch nicht in Firmware, Laserteile und technische Zeichnung übernommen.
-Das ist ein großer Umbau und soll erst passieren, wenn du die Richtung bestätigst:
+Michael hat die Richtung bestätigt (2 Schultermotoren + Sperren). Umgebaut, je ein Commit:
 
-- Firmware: Gelenke auf Schulter links/rechts reduzieren, Sperren-Schalter einlesen, Wärmemodell nach Stillstand-Tabelle
-  (Realismus-Check), Bein- und Rumpfregelung abschalten (Simulation und Tests anpassen).
-- Laserteile: Federhebel Schulter 60 mm, Federhalter Ellbogen und Knie; Motorträger, Kurbeln, Hebel an Knie, Ellbogen
-  und Rumpf entfallen.
-- Technische Zeichnung (`exo-technik.html`): Kapseln an Hüfte, Knie, Ellbogen, Rumpf entfernen, Gasfedern einzeichnen.
+- **Firmware** (`firmware/src`): Standard-Gelenke nur Schulter links/rechts (`kMaskE6`), alle 10 bleiben als Ausbaustufe
+  (`voll` = Entwurf 6, `alle` = 10 Gelenke). Sperrschalter an den Griffhebeln (Pins 35, 41, 42): gesperrter Arm nimmt
+  den Schultermotor in 0,3 s weich auf null und wieder hoch. Winkelsensor AS5600 am Ellbogen (Pins 38, 39), damit das
+  Armgewicht an der Schulter stimmt. Wärmemodell mit zwei Zeitkonstanten an die Stillstandskurve des RS04 angepasst
+  (Test: 60 Nm halten 28 s, 40 Nm 122 s, Hersteller 33 s / 130 s). Warnung „Knie gesperrt“, wenn der Lagesensor Schritte
+  erkennt. Ein ADS131M04, HX711 nur noch für die Schlaufen. `make test`: alle Tests grün (sim_test 198 Prüfungen).
+- **Laserteile** (`tools/fertigung.py`, `fertigung/`): neu Federhebel Schulter (60 mm), Ellbogen (32 mm), Knie (40 mm),
+  Federböcke M10/M8; Kurbeln, Knie-/Ellbogenhebel, Rumpfträger, Kurbelschutz, RS03-Teile entfallen; Stückzahlen auf
+  2 Kapseln und 4 Manschetten.
+- **Technische Zeichnung** (`visualisierung/exo-technik.html`): Gasfedern an Schulter, Ellbogen und Knie eingezeichnet,
+  Kapseln an Hüfte, Knie, Ellbogen, Rumpf ausgeblendet; Stückliste und Gewicht (29,4 kg) aus diesem Werkzeug
+  (`--stueckliste-json`).
+
+Offen bleibt: Gasfedern bei SUSPA oder Bansbach anfragen (Masse und Preis sind geschätzt), dann P47–P50.
 
 ## Neue Prüfpunkte
 

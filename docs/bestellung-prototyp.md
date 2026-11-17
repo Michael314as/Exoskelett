@@ -1,4 +1,32 @@
-# Bestellliste Prototyp (Entwurf 5: Gelenkkapseln)
+# Bestellliste Prototyp (Entwurf 6: 2 Schultermotoren + Sperren)
+
+## Entwurf 6 (17. Nov 2026): was sich an der Bestellung ändert
+
+Entwurf 6 braucht **2 RobStride RS04** (nur Schultern) statt 7 RS04 und 3 RS03. Dazu kommen **6 blockierbare Gasfedern**,
+die vor der Bestellung angefragt werden müssen, weil Hub, Kraft und Preis vom Hersteller kommen. Material ein Exo
+≈ **3.160 €** statt ≈ 5.900 € (Rechnung: `python3 tools/optimierung.py --schritt 3 --stueckliste`).
+
+| Stufe | Bestellen | Damit prüfst du |
+|---|---|---|
+| 0 Anfrage | SUSPA (Blocklift HY4 / HY1) oder Bansbach (blockierbare Gasfedern): Schulter Rohr 28, starr auf Druck, F1 ≈ 400 N, Hub ≈ 80 mm; Ellbogen und Knie Rohr 22, starr auf Zug bis ≥ 2,5 kN, F1 80 N, Hub ≈ 60 mm; Auslösung per Bowdenzug; Frost bis −15 °C | Masse und Preis (bisher geschätzt: zusammen ≈ 1,5 kg, ≈ 360 €) |
+| 1 Prüfstand | 1 × RS04 + CAN-USB-Adapter, Kapselteile, Federhebel Schulter (Laser), 1 Gasfeder HY4 mit Bowdenzug und Mikroschalter, Teensy 4.1 + CAN, Messplatine (1 × ADS131M04) + 1 Wägezelle, 1 Manschette M2, Not-Aus, Bremswiderstand | Kapsel dicht und eisfrei (P35, P36), Mitgehen (P39), Sperre hält 270 Nm, auch gefroren (P47) |
+| 2 Schlaufe | wie unten | Haltekraft mit 20-kg-Sandsack (P20) |
+| 3 Rahmen und Beine passiv | Halbzeug, Laserteile, Lager, Gurte, 2 Gasfedern HY1 Knie mit Rasthebel am Hüftgurt, Klett-Manschetten | Passform, Gehen ohne Scheuern, Kniesperre (P1–P4, P49) |
+| 4 Arme | zweiter RS04, 2 Gasfedern HY1 Ellbogen, zweite HY4, Winkelsensoren AS5600, restliche Armmanschetten, Schlaufen | Aufrichten mit gesperrten Armen, Bäume (P22, P27, P28, P48) |
+
+Neue Kaufteile gegenüber Entwurf 5: LK-01 Gasfeder Schulter × 2, LK-02 Gasfeder Ellbogen × 2, LK-03 Gasfeder Knie × 2,
+LK-04 Federböcke und Gabelköpfe M8 × 6, LK-05 Bowdenzug mit Hebel und Mikroschalter × 3, SE-15 Klettgurte × 4,
+SE-16 Winkelsensor AS5600 mit Magnet × 2 (≈ 12 €). Laserteile: siehe [fertigung/README.md](../fertigung/README.md).
+Entfallen: Motoren an Hüfte, Knie, Ellbogen und Rumpf mit Kapseln, Kurbeln, Schubstangen und Kurbelschutz, zwei der drei
+ADS131M04, Fuß- und Rumpf-Wägezellen, Beinmanschetten-Sensoren.
+
+Die Listen unten sind die vollständige Bestellung für **Entwurf 5** (Ausbaustufe mit 10 Motoren); für Entwurf 6 gelten
+die Stückzahlen aus der Stückliste der technischen Zeichnung ([exo-technik.html](../visualisierung/exo-technik.html),
+Reiter „Stückliste“), die schon auf Entwurf 6 steht.
+
+---
+
+# Bestellliste Entwurf 5 (Ausbaustufe)
 
 Erzeugt aus der Bauteilliste der technischen Ansicht ([exo-technik.html](../visualisierung/exo-technik.html), Reiter „Stückliste“). Stückzahlen für ein komplettes Exo mit einem Akku (zweiter Akku und Parkstütze nicht mitgezählt). Teile mit mehreren Herstellwegen stehen beim ersten Weg.
 
