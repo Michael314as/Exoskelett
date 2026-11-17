@@ -13,8 +13,12 @@ namespace exo {
 
 constexpr int kCells = 17;
 
-constexpr uint16_t kSettingsVersion = 7;
+constexpr uint16_t kSettingsVersion = 8;
 constexpr uint32_t kAllCells = (1u << kCells) - 1u;
+// Entwurf 6: Arm-Manschetten (2/3 Oberarm, 4/5 Unterarm) und Schlaufenköpfe (6/7/8). Bein-, Fuß- und Rumpfzellen gibt es nicht mehr.
+constexpr uint32_t kCellsE6 = 0x1FCu;
+constexpr uint16_t kJointsE6 = 0x30u;   // Schulter links/rechts (wie exo::kMaskE6)
+constexpr int kTestJoint = 5;           // Prüfstand und Log ohne Angabe: Schulter rechts (der einzige Motortyp in Entwurf 6)
 // Messbereich je Zelle [N]: darüber gilt der Sensor als gestört. Manschetten und Rumpf: Biegebalken 20 kg, Puffer liegen bei ≈ 150 N an.
 // Schlaufenköpfe: 50-kg-Zelle, ein schwerer Baum zieht 300–500 N. Steigbügel: 4 × 50 kg zwischen Bügel und Sohle, darauf steht der
 // Mensch mit 750–1400 N. Mit einheitlich 150 N (bis Version 6) hätte schon das Stehen auf einem Bein einen Sensorfehler ausgelöst.
@@ -27,16 +31,20 @@ inline uint32_t cuffCellsOfJoint(int g) {
 
 struct Settings {
   uint32_t magic = 0x45584F33;   // "EXO3"
-  uint16_t version = kSettingsVersion;   // 7: Messbereich je Zelle, Zellenmaske; 6: Manschetten M2 (17 Wägezellen); 5: Rumpf
+  uint16_t version = kSettingsVersion;   // 8: Entwurf 6 (2 Schultermotoren); 7: Messbereich je Zelle, Zellenmaske; 6: Manschetten M2 (17 Wägezellen); 5: Rumpf
   uint8_t level = 1;             // Unterstützungsstufe 0/1/2
-  uint16_t jointMask = 0x3FF;    // aktive Gelenke (Bit = JointId, 10 Gelenke); Prüfstand: nur Ellbogen rechts
-  uint32_t cellMask = kAllCells; // angeschlossene Wägezellen (Bit = Zelle); nicht angeschlossene zählen als 0 N und werden nicht überwacht
+  uint16_t jointMask = kJointsE6;   // Gelenke mit Motor (Bit = JointId, 10 Gelenke); Entwurf 6: Schultern; Prüfstand: eins
+  uint32_t cellMask = kCellsE6;     // angeschlossene Wägezellen (Bit = Zelle); nicht angeschlossene zählen als 0 N und werden nicht überwacht
   Settings() { for (int c = 0; c < kCells; c++) cell[c].limitN = defaultCellLimitN(c); }
   CellCal cell[kCells];          // Wägezellen: 0/1 Oberschenkel L/R, 2/3 Oberarm, 4/5 Unterarm, 6/7/8 Schlaufen R1, R2, L1, 9/10 Fuß L/R, 11/12 Schultergurt L/R, 13/14 Rückenpolster L/R, 15/16 Unterschenkel L/R
   float joint0[10] = {};         // Motorwinkel bei gestreckter Grundstellung (Nullpunkt), je Gelenk
   float hours = 0.f;             // Betriebsstunden (für Wartungshinweise)
   uint32_t crc = 0;
 };
+
+// Ellbogen ohne Motor, die gemessen werden (Entwurf 6): wenn ihre Unterarm-Zelle (4 links, 5 rechts) angeschlossen ist.
+// Auf dem Prüfstand mit nur einer Schulter hängt kein Arm dran; dann wird auch kein Winkelsensor erwartet.
+inline uint16_t elbowSensorsOf(const Settings& s) { return uint16_t((((s.cellMask >> 4) & 1u) << 6) | (((s.cellMask >> 5) & 1u) << 7)); }
 
 inline uint32_t crc32(const uint8_t* d, size_t n) {
   uint32_t c = 0xFFFFFFFFu;
@@ -63,12 +71,14 @@ inline const char* maintenanceDue(float hours) {
 //   null <zelle>                aktuellen Rohwert als Nullpunkt übernehmen (Manschette unbelastet)
 //   kal <zelle> <gramm>         mit angehängtem Gewicht kalibrieren
 //   stufe <0|1|2>               Unterstützungsstufe
-//   pruefstand [gelenk] / voll  nur ein Gelenk und seine Manschetten-Zelle aktiv (ohne Angabe 7 = Ellbogen rechts) / alles aktiv
+//   pruefstand [gelenk]         nur ein Gelenk und seine Manschetten-Zelle aktiv (ohne Angabe 5 = Schulter rechts)
+//   voll / alle                 Entwurf 6 (beide Schultermotoren, Arm- und Schlaufenzellen) / Ausbaustufe mit allen 10 Motoren
 //   zelle <zelle> <0|1>         Wägezelle ab-/anmelden (Prüfstand: z. B. Schlaufenkopf dazunehmen); abgemeldet = 0 N, nicht überwacht
 //   gelenk0 <gelenk|alle>       Gelenk-Nullpunkt einmessen: Befehl geben, Exo in gestreckter Grundstellung einschalten, 2 s ruhig
-//                               stehen; der Motorwinkel wird beim Wechsel auf AKTIV übernommen und beim Ausschalten gespeichert
+//                               stehen; der Motorwinkel (Ellbogen ohne Motor: Winkelsensor) wird beim Wechsel auf AKTIV
+//                               übernommen und beim Ausschalten gespeichert
 //   log <0|1> [gelenk]          Messdaten über USB, 500/s: t, q, qd, Kraft, t_ff, v_soll, Kd, Gesamtmoment,
-//                               Motormoment (Rückmeldung), Wächter, Schwinganteil – Gelenk 0–9, ohne Angabe 7 (Ellbogen rechts)
+//                               Motormoment (Rückmeldung), Wächter, Schwinganteil – Gelenk 0–9, ohne Angabe 5 (Schulter rechts)
 //   uhr <hh> <mm>               Uhrzeit für die Anzeige stellen (läuft mit Knopfzelle weiter)
 //   speichern                   ins EEPROM schreiben
 //   werks                       Werkseinstellungen
@@ -96,12 +106,13 @@ inline bool runCommand(const char* line, Settings& s, const ConsoleIO& io) {
     std::snprintf(out, sizeof out, "Zelle %d: %.6f N/Schritt\n", a, double(s.cell[a].nPerCount)); say(out); return true;
   }
   if (!std::strcmp(cmd, "pruefstand")) {
-    const int g = n >= 2 ? a : 7;
+    const int g = n >= 2 ? a : kTestJoint;
     if (g < 0 || g > 9) { say("Fehler: Gelenk 0–9\n"); return false; }
     s.jointMask = uint16_t(1u << g); s.cellMask = cuffCellsOfJoint(g);
     std::snprintf(out, sizeof out, "Prüfstand: nur Gelenk %d aktiv (Motor-ID %d), Zellenmaske 0x%05lX\n", g, g + 1, (unsigned long)s.cellMask); say(out); return true;
   }
-  if (!std::strcmp(cmd, "voll")) { s.jointMask = 0x3FF; s.cellMask = kAllCells; say("alle 10 Gelenke und 17 Zellen aktiv\n"); return true; }
+  if (!std::strcmp(cmd, "voll")) { s.jointMask = kJointsE6; s.cellMask = kCellsE6; say("Entwurf 6: beide Schultermotoren, Arm-Manschetten und Schlaufen aktiv\n"); return true; }
+  if (!std::strcmp(cmd, "alle")) { s.jointMask = 0x3FF; s.cellMask = kAllCells; say("Ausbaustufe: alle 10 Gelenke und 17 Zellen aktiv\n"); return true; }
   if (!std::strcmp(cmd, "zelle") && n >= 3 && a >= 0 && a < kCells && (b == 0.f || b == 1.f)) {
     if (b == 1.f) s.cellMask |= (1u << a); else s.cellMask &= ~(1u << a);
     std::snprintf(out, sizeof out, "Zelle %d %s, Zellenmaske 0x%05lX\n", a, b == 1.f ? "angemeldet" : "abgemeldet", (unsigned long)s.cellMask); say(out); return true;
@@ -110,12 +121,13 @@ inline bool runCommand(const char* line, Settings& s, const ConsoleIO& io) {
     char what[8] = {}; std::sscanf(line, "%*s %7s", what);
     const bool all = !std::strcmp(what, "alle");
     if (!all && (n < 2 || a < 0 || a > 9)) { say("Fehler: gelenk0 <0–9|alle>\n"); return false; }
-    const uint16_t m = all ? s.jointMask : uint16_t(1u << a);
+    // alle: Gelenke mit Motor, dazu der Winkelsensor am Ellbogen jedes Arms mit Schultermotor (Entwurf 6)
+    const uint16_t m = all ? uint16_t(s.jointMask | ((s.jointMask & 0x10u) << 2) | ((s.jointMask & 0x20u) << 2)) : uint16_t(1u << a);
     if (io.armJointZero) io.armJointZero(m);
     say("Nullpunkt vorgemerkt: Gelenk in gestreckte Grundstellung, Exo einschalten, 2 s ruhig stehen, ausschalten\n"); return true;
   }
   if (!std::strcmp(cmd, "log") && n >= 2 && (a == 0 || a == 1)) {
-    const int g = n >= 3 ? int(b) : 7;
+    const int g = n >= 3 ? int(b) : kTestJoint;
     if (g < 0 || g > 9) { say("Fehler: Gelenk 0–9\n"); return false; }
     if (io.setLog) io.setLog(a == 1, g);
     say(a ? "Log an: t_us,q,qd,kraft_N,moment_Nm,v_soll,kd,gesamt_Nm,motor_Nm,waechter,schwing_N\n" : "Log aus\n"); return true;

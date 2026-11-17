@@ -60,5 +60,9 @@ Die Punkte F1, F2 und F4 laufen automatisch im GitHub-Workflow (`make -C firmwar
 | P44 | Regeltakt | 10 min Betrieb mit allen Motoren und Sensoren, Konsole `status` | kein „Regeltakt überlastet“; Zähler für Übertragungsfehler der Messwandler bleibt bei 0 (höchstens einzelne) | ☐ |
 | P45 | Kurbelzapfen und Kurbelsitz | nach 5 h und nach 40 h: Farbmarkierung an Passschrauben, Kurbeln und Kontermuttern ansehen, an der Stange wackeln | nichts hat sich gedreht, kein Spiel, keine Risse | ☐ |
 | P46 | Belastungsprobe Rahmen | Exo am Ständer, Gelenke blockiert: 1,5-fache Spitzenlast (60 kg) 1 min an jede Unterarmschiene, 150 kg auf jeden Steigbügel | keine bleibende Verformung, keine Risse an Schweißnähten (Farbeindringprüfung) | ☐ |
+| P47 | Sperre hält (Entwurf 6) | Prüfstand: Schulterfeder mit Hebel 60 mm gesperrt, 1,5 × 180 Nm (270 Nm) 1 min; dasselbe nach einer Nacht bei −15 °C | kein Nachgeben > 2°, kein Ölaustritt; Auslösen mit Handschuh möglich | ☐ |
+| P48 | Aufrichten mit gesperrten Armen (Entwurf 6) | Sandsack 20 kg, dann 40 kg am Holzstamm, Arme sperren, aus der Hocke hochdrücken | Arme bleiben steif, kein Kippen nach vorn mit Ausfallschritt, keine Druckstelle an den Manschetten | ☐ |
+| P49 | Passive Beine (Entwurf 6) | 30 min gehen, Treppe, Hocke mit und ohne Kniesperre | Exo-Bein folgt ohne Scheuern; gesperrtes Knie lässt sich jederzeit am Hüftgurt lösen; Warnton bei gesperrtem Knie im Gehen | ☐ |
+| P50 | Gewicht und Preis (Entwurf 6) | Exo wiegen, Rechnungen summieren | ≤ 30 kg ohne Optionen, Material ≤ 3.200 € | ☐ |
 
 Datum, Firmware-Version (Git-Commit), Prüfer: ____________________

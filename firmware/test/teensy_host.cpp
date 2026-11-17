@@ -1,5 +1,6 @@
 // Baut main_teensy.cpp mit Platzhaltern für die Arduino-Bibliotheken (test/stubs) und spielt die Hardware nach:
-// 10 Motoren am CAN (antworten wie ein RobStride), 3 × ADS131M04 an SPI (Rahmen mit Prüfsumme), Taster, Not-Aus, Akku.
+// Entwurf 6: 2 Schultermotoren am CAN (antworten wie ein RobStride; die anderen 8 Plätze bleiben stumm), 1 × ADS131M04 an SPI
+// (Rahmen mit Prüfsumme), Winkelsensoren am Ellbogen, Sperr-Schalter, Taster, Not-Aus, Akku.
 // Geprüft wird der Teil der Sicherheit, der nur in main_teensy.cpp steckt: Einschaltfolge der Motoren, Bus-Wächter,
 // eingefrorene und stumme Sensoren, stumme oder ausgeschaltete Motoren, Winkel nach dem Einschalten (0…2π).
 #include "main_teensy.cpp"
@@ -47,7 +48,7 @@ static void check(bool ok, const char* what) { std::printf("  [%s] %s\n", ok ? "
 static void run(float sec) { for (int i = 0; i < int(sec / 0.002f + 0.5f); i++) { stubMillis += 2; tick = true; loop(); } }
 static void powerOn() { stubPin[PIN_BTN_POWER] = 0; run(0.15f); stubPin[PIN_BTN_POWER] = 1; run(6.f); }
 static void reset() {   // Fehler quittieren: lang drücken → AUS; alles wieder heil
-  for (auto& m : fm) { m.alive = true; m.refuseEnable = false; }
+  for (int i = 0; i < NJ; i++) { fm[i].alive = (cfg.jointMask >> i) & 1u; fm[i].refuseEnable = false; }
   adsCorrupt = false; stubPin[PIN_ADS_DRDY] = 0; stubPin[PIN_ESTOP_SENSE] = 0; imuRate = 0.f;
   stubPin[PIN_BTN_POWER] = 0; run(1.2f); stubPin[PIN_BTN_POWER] = 1; run(2.f);
 }
@@ -58,8 +59,9 @@ int main() {
   stubPin[PIN_ESTOP_SENSE] = 0; stubPin[PIN_ADS_DRDY] = 0;                      // Not-Aus-Kreis zu, Wandler hat Daten
   for (int c = 0; c < kCells; c++) if (PIN_HX_DOUT[c] >= 0) stubPin[PIN_HX_DOUT[c]] = 0;   // HX711 bereit, liefert 0
   stubAnalog[PIN_VBAT] = 744;                                                   // 36 V
+  for (int k = 0; k < 2; k++) stubAnalog[PIN_ELBOW_ANGLE[k]] = 163;             // Ellbogen 1,0 rad (Nullpunkt 0)
   setup();
-  cfg = Settings(); app.jointMask = cfg.jointMask;
+  cfg = Settings(); app.jointMask = cfg.jointMask; app.elbowSensors = elbowSensorsOf(cfg);
   std::printf("Teensy-Code mit nachgespielter Hardware\n");
   run(2.f);
   const char* st = Serial1.lastLine;
@@ -67,12 +69,22 @@ int main() {
   std::printf("     %s", st);
 
   // Motor steht knapp unter seinem Nullpunkt: nach dem Einschalten meldet er 2π − 0,2 statt −0,2
-  fm[HipL].pos = 6.2832f - 0.2f;
+  check(cfg.jointMask == kMaskE6, "ab Werk Entwurf 6: nur die Schultermotoren");
+  for (int i = 0; i < NJ; i++) fm[i].alive = (kMaskE6 >> i) & 1u;              // die anderen Plätze sind nicht bestückt
+  fm[ShL].pos = 6.2832f - 0.2f;
   powerOn();
   check(app.sup.mode == Mode::Active && stubOut[PIN_CONTACTOR] == HIGH, "Einschalten: Schütz zu, nach dem Nullen aktiv");
-  bool allRun = true, allTimeout = true; for (auto& m : fm) { allRun &= m.run; allTimeout &= m.timeoutSet; }
-  check(allRun && allTimeout, "jeder Motor ist eingeschaltet und hat seinen Bus-Wächter (0,1 s) bekommen");
-  check(std::fabs(in.joint[HipL].q + 0.2f) < 0.01f, "Motorwinkel 2π − 0,2 wird als −0,2 rad gelesen (kein Sprung um eine Umdrehung)");
+  bool allRun = true, allTimeout = true; for (int i : {int(ShL), int(ShR)}) { allRun &= fm[i].run; allTimeout &= fm[i].timeoutSet; }
+  check(allRun && allTimeout, "beide Schultermotoren sind eingeschaltet und haben ihren Bus-Wächter (0,1 s) bekommen; fehlende Gelenke stören nicht");
+  check(std::fabs(in.joint[ShL].q + 0.2f) < 0.01f, "Motorwinkel 2π − 0,2 wird als −0,2 rad gelesen (kein Sprung um eine Umdrehung)");
+  check(std::fabs(in.joint[ElR].q - 1.0f) < 0.02f && std::fabs(in.joint[ElL].q - 1.0f) < 0.02f, "Ellbogenwinkel kommt vom Winkelsensor (AS5600, analog)");
+  stubPin[PIN_LOCK_ARM[1]] = 0; run(0.1f);
+  check(in.armLocked[1] && !in.armLocked[0] && app.jointMask == kMaskE6, "Sperr-Schalter rechts geschlossen: Arm rechts gesperrt gemeldet");
+  stubPin[PIN_LOCK_ARM[1]] = 1; run(0.5f);
+  check(!in.armLocked[1], "Schalter offen (oder Kabel ab): frei, der Motor hilft weiter");
+  stubPin[PIN_LOCK_KNEE] = 0; run(0.05f);
+  check(in.kneeLocked, "Rasthebel Knie auf „Halten“: gemeldet");
+  stubPin[PIN_LOCK_KNEE] = 1; run(0.05f);
 
   // Messwandler friert ein (DRDY kommt nicht mehr): Unterstützung sofort aus, Beine gedämpft, dann Schütz auf
   stubPin[PIN_ADS_DRDY] = 1; run(0.05f);
@@ -90,7 +102,7 @@ int main() {
   run(1.6f); reset(); powerOn();
 
   // Ein Motor verstummt (Kabel ab): hart aus
-  fm[KneeR].alive = false; run(0.1f);
+  fm[ShR].alive = false; run(0.1f);
   check(app.sup.mode == Mode::Fault && stubOut[PIN_CONTACTOR] == LOW && !std::strcmp(app.sup.reason, "Motor meldet sich nicht"), "Motor antwortet 50 ms nicht: sofort stromlos, Schütz offen");
   reset(); powerOn();
 
@@ -98,8 +110,8 @@ int main() {
   fm[ShL].run = false; run(0.02f);
   check(app.sup.mode == Mode::Fault, "Motor im Zustand „Reset“ trotz Befehlen: Fehler statt stiller Ausfall eines Gelenks");
   reset();
-  fm[ElR].refuseEnable = true; const int e0 = fm[ElR].enables; powerOn();
-  check(fm[ElR].enables - e0 >= 3 && app.sup.mode == Mode::Fault, "Motor nimmt das Einschalten nicht an: mehrere Versuche, dann Fehler");
+  fm[ShR].refuseEnable = true; const int e0 = fm[ShR].enables; powerOn();
+  check(fm[ShR].enables - e0 >= 3 && app.sup.mode == Mode::Fault, "Motor nimmt das Einschalten nicht an: mehrere Versuche, dann Fehler");
   reset(); powerOn();
 
   // Not-Aus: hart, Schütz offen
@@ -116,11 +128,12 @@ int main() {
 
   // Prüfstand: ein Gelenk, eine Zelle; die anderen Wandler und Motoren fehlen
   ConsoleIO io; io.print = [](const char*) {};
-  runCommand("pruefstand 7", cfg, io); app.jointMask = cfg.jointMask;
-  for (int i = 0; i < NJ; i++) fm[i].alive = i == ElR;
+  runCommand("pruefstand 5", cfg, io); app.jointMask = cfg.jointMask; app.elbowSensors = elbowSensorsOf(cfg);
+  for (int i = 0; i < NJ; i++) fm[i].alive = i == ShR;
   for (int c = 0; c < kCells; c++) if (PIN_HX_DOUT[c] >= 0) stubPin[PIN_HX_DOUT[c]] = 1;   // keine HX711 angeschlossen
+  for (int k = 0; k < 2; k++) stubAnalog[PIN_ELBOW_ANGLE[k]] = 900;             // kein Arm dran: Sensoreingang liefert irgendwas
   powerOn();
-  check(app.sup.mode == Mode::Active, "Prüfstand mit einem Motor und einer Manschette: läuft, fehlende Zellen stören nicht");
+  check(app.sup.mode == Mode::Active && app.elbowSensors == 0, "Prüfstand mit einem Motor und einer Manschette: läuft, fehlende Zellen und Winkelsensoren stören nicht");
   runCommand("voll", cfg, io);
 
   std::printf("\n%s (%d Fehler)\n", fails ? "Teensy-Code: NICHT BESTANDEN" : "Teensy-Code: kompiliert und verhält sich richtig (mit nachgespielter Hardware)", fails);

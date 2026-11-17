@@ -1,4 +1,9 @@
-# Steuerung: so merkt das Exo, was du willst (Entwurf 5, Manschetten M2)
+# Steuerung: so merkt das Exo, was du willst (Entwurf 6, Manschetten M2)
+
+> **Entwurf 6 (17. Nov 2026):** Bestückt sind nur die zwei Schultermotoren. Die Firmware regelt standardmäßig nur
+> diese beiden Gelenke (`kMaskE6`); Hüfte, Knie, Ellbogen und Rumpf laufen mit deiner Kraft und werden mit Gasfedern
+> gesperrt. Was in den Abschnitten unten für Beine, Ellbogen und Rumpf steht, gilt für die Ausbaustufe (Konsole `alle`)
+> und bleibt getestet. Was neu ist, steht in Abschnitt 6c.
 
 Das wichtigste Gefühl beim Tragen: **Du bewegst dich, das Exo folgt, und schwere Lasten werden leichter.** Kein
 Joystick, keine Knöpfe zum Bewegen. Dafür braucht das Exo drei Arten von Information:
@@ -249,15 +254,26 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 | **Rückneigung** | Rumpf mehr als 9° nach hinten | Vibrationspulse: „lehn dich nach vorne“, bevor der Baum dich umzieht |
 | **Winden nacheinander** | mehrere Schlaufen gleichzeitig gedrückt | eine Winde nach der anderen (24-V-Wandler 2,5 A), Zeitgrenze 12 s je Bewegung |
 
-## 6b. Gelenkkapseln (Entwurf 5)
+## 6b. Gelenkkapseln (Entwurf 5, Ausbaustufe)
 
 | Funktion | Wie |
 |---|---|
 | Motoren | RobStride RS04 (Hüfte, Knie, Schulter), RS03 (Ellbogen), Übersetzung 1:1 (direkt bzw. Schubstange); Wertebereiche des CAN-Protokolls je Modell |
-| Wärmeschutz | wie 6a, mit dem Dauermoment in der Kühlkörper-Kapsel (RS04 28 Nm, RS03 16 Nm) statt dem Datenblattwert; Schulter hält 100 Nm ≈ 13 s mit voller Kraft, dann weich weniger |
+| Wärmeschutz | wie 6a, mit dem Dauermoment in der Kühlkörper-Kapsel (RS04 20 Nm, RS03 11 Nm) statt dem Datenblattwert; Modell und Haltezeiten siehe 6c |
 | Frostschutz | Heizbänder an der Abtriebsseite je Gruppe (Pin 42 Beine, Pin 43 Arme): an, wenn die kälteste gemessene Wicklung unter +3 °C fällt und die Gruppe kaum arbeitet; aus über +8 °C |
 | Rumpf beugen / drehen | Absicht aus 4 Rumpf-Wägezellen (Gurtanker ziehen = vor, Polster drücken = auf, Unterschied = drehen); Vorsteuerung beim Beugen wie an der Hüfte; Grenzen 80/20 Nm bzw. ±30 Nm; bei aktiver Lendensperre ist der Beugemotor stromlos |
 | Knie beugen | Software begrenzt auf 10 Nm, zusätzlich gibt das Federpaket in der Schubstange ab ≈ 11 Nm mechanisch nach |
+
+## 6c. Entwurf 6: Schultermotoren und Sperren
+
+| Funktion | Wie |
+|---|---|
+| Gelenke | Standard nur Schulter links/rechts (`voll` = Entwurf 6, `alle` = 10 Gelenke als Ausbaustufe); `pruefstand` und `log` nehmen Gelenk 5 (Schulter rechts) |
+| Ellbogenwinkel | Winkelsensor AS5600 je Seite (Pins 38/39). Die Firmware rechnet den Ellbogen als Gelenk ohne Motor mit (Plausibilität, Nullen, Kopplung), damit Armgewicht und Last an der Schulter stimmen |
+| Sperren | Mikroschalter an den Griffhebeln (Pins 35/41 Arme, 42 Knie). Arm gesperrt: Schultermoment geht in 0,3 s auf null, beim Lösen in 0,3 s wieder hoch (Test: ≤ 4 Nm Sprung je Takt). Die Gasfeder hält dann ohne Strom |
+| Knie gesperrt beim Gehen | Der Lagesensor erkennt Schritte (Beschleunigungsspitzen > 2 m/s², 0,3–1,5 s Abstand): Vibration jede Sekunde, Anzeige „Knie gesperrt“ |
+| Wärmeschutz | Zwei Zeitkonstanten (6 % schnell, 1,5 s; 94 % langsam, 600 s), angepasst an die Stillstandskurve des RS04 in der Kapsel (Dauermoment 20 Nm). Test: 60 Nm 28 s, 40 Nm 122 s (Hersteller 33 s / 130 s). Wird es warm, Hinweis „Motor warm: Arm sperren“ |
+| Frostschutz | nur noch die Heizbänder der Schulterkapseln (Pin 43); Gruppen ohne Motor bleiben aus |
 
 ## 7. Was schiefgehen kann, und was dagegen hilft
 
@@ -273,7 +289,8 @@ Pinplan: [verdrahtung.md](verdrahtung.md).
 | Bein streckt beim Gehen | Fußsensor meldet falsch | Schwelle am Prüfstand einstellen, Sensor prüfen |
 | Bein knickt beim Aufsetzen | Standbein zu spät erkannt | Glättung verkürzen; Federpatrone begrenzt ohnehin |
 | Schulter hilft beim Hebeln zu viel | Kopplung vom Unterarm | Hebel im Abgleich prüfen (Oberarmlänge) |
-| Unterstützung wird nach langem Halten schwächer | Wärmeschutz | gewollt: Last kurz absetzen, Motoren kühlen in wenigen Minuten ab |
+| Unterstützung wird nach langem Halten schwächer | Wärmeschutz | gewollt: Arm sperren (Hebel am Griff), dann hält die Gasfeder und der Motor kühlt |
+| Vibration jede Sekunde beim Gehen, „Knie gesperrt“ | Kniesperre zu | Kniehebel lösen |
 | Rumpf lässt sich nicht beugen | Lendensperre aktiv (Last in den Schlaufen) | Baum absetzen; Hebel prüfen |
 
 ## 8. So baut man es auf

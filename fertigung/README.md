@@ -33,7 +33,12 @@ Ist etwas nicht in Ordnung, bricht es mit einer Fehlermeldung ab.
 3. **Entgraten** bestellen oder selbst mit Entgrater und Feile; das macht viel vom hochwertigen Gefühl aus.
 4. Gewinde (Spikes M5 im Edelstahl) selbst schneiden: Kernloch ist schon passend gelasert.
 
-**Seilscheiben ohne Drehbank:** Sie bestehen aus Lagen, die mit M4 verschraubt werden: außen je eine Bordscheibe, innen
+**Entwurf 6 (Sperren):** Neu sind die Federhebel (Schulter 60 mm, Ellbogen 32 mm, Knie 40 mm) und die Federböcke der
+blockierbaren Gasfedern. Ihre Augen werden auf H7 gerieben (Passschrauben Ø 10 bzw. Ø 8). Die Kurbeln, Kurbelschutze und
+Motorhalter von Knie, Ellbogen und Rumpf entfallen; Gelenkkapseln gibt es nur noch an den Schultern. Die Beinmanschetten
+haben Schlitze für einen Klettgurt statt der BOA-Ösen, weil sie nichts mehr messen.
+
+**Seilscheiben ohne Drehbank** (nur Entwurf 1–3): Sie bestehen aus Lagen, die mit M4 verschraubt werden: außen je eine Bordscheibe, innen
 die kleinere Rillenlage. Bei zwei Seilen (Schulter, Ellbogen) kommt dazwischen eine Trennlage. Die Rille entsteht aus dem
 Durchmesserunterschied von 8 mm. Kanten der Rille vor dem Zusammenbau leicht anfasen.
 

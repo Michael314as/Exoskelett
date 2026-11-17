@@ -1,4 +1,23 @@
-# Stückliste und Herstellweg (Entwurf 5: Gelenkkapseln)
+# Stückliste und Herstellweg
+
+> **Entwurf 6 (17. Nov 2026):** 2 Schultermotoren + 6 blockierbare Gasfedern. Material ein Exo **≈ 3.160 €**,
+> Masse **29,4 kg**. Die vollständige Teileliste mit Stückzahl und Masse rechnet `python3 tools/optimierung.py --schritt 3
+> --stueckliste`; dieselbe Liste zeigt die technische Zeichnung im Reiter „Stückliste“. Die Abschnitte unten beschreiben
+> Herstellweg und Preise je Teil für Entwurf 5; für Entwurf 6 gilt:
+>
+> | Bereich | Entwurf 6 | etwa |
+> |---|---|---|
+> | Motoren | 2 × RobStride RS04 (Schultern), Hersteller-Shop | 440 € |
+> | Kapseln | 2 Sätze (Kühlkörper, Mantel, Dichtungen, Heizband) | ≈ 120 € |
+> | Sperren | Gasfedern SUSPA HY4 × 2 (Schulter), HY1 × 4 (Ellbogen, Knie), Bowdenzüge mit Hebel und Mikroschalter × 3, Federböcke, Federhebel (Laser) | ≈ 495 € (Angebot ausstehend) |
+> | Sensoren | 4 Armmanschetten mit Wägezelle, 1 × ADS131M04, 3 Schlaufen-Wägezellen, 2 Winkelsensoren AS5600; Beine mit Klettgurt ohne Sensor | ≈ 290 € |
+> | Elektronik | Teensy 4.1, ESP32-C3 mit Anzeige, Lagesensor, ein CAN-Strang, Schütz 50 A, Wandler, Windentreiber, Bremswiderstand, Stecker, LED-Ring | ≈ 455 € |
+> | Rest | Rahmen, Hüfte, Beine, Füße, Gurte, Schlaufen, Komfort, Verkleidung | ≈ 1.360 € |
+>
+> Entfallen gegenüber Entwurf 5: 5 RS04 und 3 RS03 mit Kapseln, Kurbeln, Schubstangen, Federpaket, Kurbelschutz,
+> zwei ADS131M04, Fuß- und Rumpf-Wägezellen, BOA und Schlitten an den Beinen.
+
+# Entwurf 5: Gelenkkapseln (Ausbaustufe)
 
 Jedes Teil des Exos mit Menge, Material, **wie es entsteht** und welches Werkzeug dafür nötig ist.
 Damit ist geprüft, dass nichts eine Drehbank, Fräse oder Schweißanlage braucht.
