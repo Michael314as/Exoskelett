@@ -609,6 +609,13 @@ if __name__ == '__main__':
     if '--json' in sys.argv:
         print(as_json())
         sys.exit()
+    if '--stueckliste-json' in sys.argv:   # Stückliste Entwurf 6 (Schritte 1–3) für visualisierung/exo-technik.html (E6BOM)
+        import json
+        v = Design()
+        for _, fn in STEPS[:3]:
+            fn(v)
+        print(json.dumps({i: [n, q, kg] for i, (n, q, kg) in v.bom.items() if q}, ensure_ascii=False, separators=(',', ':')))
+        sys.exit()
     upto = int(sys.argv[sys.argv.index('--schritt') + 1]) if '--schritt' in sys.argv else 4
     ref, d = report(upto)
     if '--stueckliste' in sys.argv:
